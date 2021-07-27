@@ -26,7 +26,7 @@ const SecondPage = () => {
   return (
     <Layout pageName="lakes">
       <Helmet>
-        <title>Swiss Canoe Map Prototype - Lakes</title>
+        <title>Swiss Paddel Buch - Lakes</title>
       </Helmet>
 
       <Container className="lakes-list">
@@ -44,7 +44,7 @@ const SecondPage = () => {
 
               return <tr>
                       <td>
-                        <Link to={`/lakes/${slug}`}>
+                        <Link to={`/waterways/${slug}`}>
                           {name}
                         </Link>
                       </td>

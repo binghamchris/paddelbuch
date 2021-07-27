@@ -53,8 +53,8 @@ function IndexPage () {
       <Helmet>
         <title>Swiss Paddel Buch</title>
       </Helmet>
-      <Container fluid noGutters>
-        <Row noGutters className="justify-content-center">
+      <Container fluid className="g-0">
+        <Row className="justify-content-center g-0">
           <Col id="map" xl="9" lg="9" md="12" sm="12" xs="12">
             <Map {...mapSettings}>
             { spots.nodes.map(spot => {
@@ -70,14 +70,7 @@ function IndexPage () {
                       document.getElementById('spot-details').hidden = false;
                       document.getElementById('spot-name').textContent = name;
                       document.getElementById('spot-desc').innerHTML = description.html;
-                      
-                      if (waterways.paddlingEnvironments.slug == "see") {
-                        document.getElementById('spot-waterway').innerHTML = `<a href="./lakes/${waterways.slug}">${waterways.name}</a>`;
-                      } else if (waterways.paddlingEnvironments.slug == "fluss")  {
-                        document.getElementById('spot-waterway').innerHTML = `<a href="./rivers/${waterways.slug}">${waterways.name}</a>`;
-                      } else {
-                        document.getElementById('spot-waterway').innerHTML = `<a href="./whitewater/${waterways.slug}">${waterways.name}</a>`;
-                      }
+                      document.getElementById('spot-waterway').innerHTML = `<a href="./waterways/${waterways.slug}">${waterways.name}</a>`;
 
                       if (description.html !== "<p>None</p>") {
                         document.getElementById('spot-desc').innerHTML = description.html;

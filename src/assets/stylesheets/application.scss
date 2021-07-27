@@ -23,14 +23,9 @@ main {
   padding: 0;
 }
 
-.container-fluid {
-  padding: 0;
-  margin: 0;
-}
-
 @media screen and (min-width: 992px) {
   .map {
-    height: 96vh;
+    height: 94vh;
   }
 }
 @media screen and (max-width: 992px) {
