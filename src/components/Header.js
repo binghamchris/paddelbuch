@@ -28,7 +28,7 @@ const Header = () => {
       <Navbar variant="dark" expand="lg" id="site-navbar">
         {/* <Container> */}
         <Link to="/" className="link-no-style">
-          <Navbar.Brand as="span">Swiss Canoe Prototype</Navbar.Brand>
+          <Navbar.Brand as="span">Swiss Paddel Buch</Navbar.Brand>
         </Link>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav" className="justify-content-end">

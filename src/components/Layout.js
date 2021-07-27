@@ -18,7 +18,7 @@ const Layout = ({ children, pageName }) => {
   return (
     <>
       <Helmet bodyAttributes={{ class: className }}>
-        <title>Swiss Canoe Prototype</title>
+        <title>Swiss Paddel Buch</title>
       </Helmet>
       <Container fluid className="px-0 main">
           <Row noGutters className="justify-content-center">

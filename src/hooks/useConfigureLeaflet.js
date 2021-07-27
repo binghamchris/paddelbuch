@@ -12,8 +12,8 @@ export default function useConfigureLeaflet() {
     L.Icon.Default.mergeOptions({
       /* iconRetinaUrl: require("leaflet/dist/images/marker-icon-2x.png").default, 
       iconUrl: require("leaflet/dist/images/marker-icon.png").default, */
-      iconRetinaUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png",
-      iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",  
+      iconRetinaUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png",
+      iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png",  
       shadowUrl: require("leaflet/dist/images/marker-shadow.png").default,
     });
   }, []);

@@ -1,4 +1,4 @@
-.page-tour-details {
+.page-lake-details {
 
 
   main {
@@ -12,6 +12,17 @@
 
   th {
     padding-right: 1.5em;
+  }
+
+  @media screen and (min-width: 992px) {
+    .map {
+      height: 82vh;
+    }
+  }
+  @media screen and (max-width: 992px) {
+    .map {
+      height: 60vh;
+    }
   }
 
 }
