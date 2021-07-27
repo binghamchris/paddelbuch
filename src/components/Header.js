@@ -47,7 +47,7 @@ const Header = () => {
             
                   return (
                     <NavDropdown.Item>
-                      <Link to={`/lakes/${slug}`} className="link-no-style">
+                      <Link to={`/waterways/${slug}`} className="link-no-style">
                         <Nav.Link as="span">
                           {name}
                         </Nav.Link>
@@ -72,7 +72,7 @@ const Header = () => {
                 const{name, slug} = waterway;
                 return (
                   <NavDropdown.Item>
-                    <Link to={`/rivers/${slug}`} className="link-no-style">
+                    <Link to={`/waterways/${slug}`} className="link-no-style">
                       <Nav.Link as="span">
                         {name}
                       </Nav.Link>
@@ -81,6 +81,13 @@ const Header = () => {
                 )
             })
             }
+            <NavDropdown.Item>
+              <Link to={`/rivers`} className="link-no-style">
+                <Nav.Link as="span">
+                  More rivers...
+                </Nav.Link>
+              </Link>
+            </NavDropdown.Item>
           </NavDropdown>
 
           <NavDropdown title="Whitewater" id="nav-dropdown-whitewater" className="link-no-style">
@@ -90,7 +97,7 @@ const Header = () => {
                 const{name, slug} = waterway;
                 return (
                   <NavDropdown.Item>
-                    <Link to={`/whitewater/${slug}`} className="link-no-style">
+                    <Link to={`/waterways/${slug}`} className="link-no-style">
                       <Nav.Link as="span">
                         {name}
                       </Nav.Link>
@@ -99,6 +106,13 @@ const Header = () => {
                 )
             })
             }
+            <NavDropdown.Item>
+              <Link to={`/whitewater`} className="link-no-style">
+                <Nav.Link as="span">
+                  More whitewater...
+                </Nav.Link>
+              </Link>
+            </NavDropdown.Item>
           </NavDropdown>
 
           <Nav className="mr-auto">

@@ -20,14 +20,14 @@ const Layout = ({ children, pageName }) => {
       <Helmet bodyAttributes={{ class: className }}>
         <title>Swiss Paddel Buch</title>
       </Helmet>
-      <Container fluid className="px-0 main">
-          <Row noGutters className="justify-content-center">
+      <Container fluid="true" className="px-0 main g-0">
+          <Row className="justify-content-center g-0">
             <Col>
               <Header />
             </Col>
           </Row>
           
-          <Row noGutters>
+          <Row className="g-0">
             <Col>
               
               <main>{children}</main>
