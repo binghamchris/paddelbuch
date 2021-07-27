@@ -1,0 +1,69 @@
+@import "settings/__settings";
+@import "util/__util";
+@import "components/__components";
+@import "pages/__pages";
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: $font-default;
+  padding: 0;
+  margin: 0;
+}
+
+.wrapper {
+  min-height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+
+main {
+  padding: 0;
+}
+
+.container-fluid {
+  padding: 0;
+  margin: 0;
+}
+
+@media screen and (min-width: 992px) {
+  .map {
+    height: 96vh;
+  }
+}
+@media screen and (max-width: 992px) {
+  .map {
+    height: 60vh;
+  }
+}
+
+#map {
+  padding: 0;
+}
+
+.info-pane {
+  padding-top: 2em;
+  margin-right: 1em;
+  margin-left: 1em;
+}
+
+h1 { 
+  font-size: 1.8em;
+  color: $swisscanoe-blue;
+  padding-top: 0.4em;
+  padding-bottom: 0.2em;
+}
+
+h2 {
+  font-size: 1.5em;
+  color: $swisscanoe-blue;
+  padding-top: 0.8em;
+}
+
+h3 {
+  font-size: 1.3em;
+  color: $swisscanoe-blue;
+  padding-top: 0.4em;
+}
