@@ -5,6 +5,9 @@ import Layout from "components/Layout";
 import Map from "components/Map";
 import { graphql, useStaticQuery } from "gatsby"
 import { Container, Row, Col } from "react-bootstrap";
+import * as markerStyle from '../hooks/useMarkerStyles';
+//import { icon } from "leaflet";
+//import L from "leaflet";
 
 const CH_CENTRE = {
   lat: 46.801111,
@@ -37,6 +40,9 @@ function IndexPage () {
               slug
             }
           }
+          spotType {
+            slug
+          }
           slug
         }
       }
@@ -57,31 +63,125 @@ function IndexPage () {
         <Row className="justify-content-center g-0">
           <Col id="map" xl="9" lg="9" md="12" sm="12" xs="12">
             <Map {...mapSettings}>
-            { spots.nodes.map(spot => {
-              const { name, location, description, waterways, slug } = spot;
-              const position = [location.latitude, location.longitude];
-              return (
-                <Marker
-                  key={slug}
-                  position={position}
-                  eventHandlers={{
-                    click: () => {
-                      document.getElementById('welcome-message').hidden = true;
-                      document.getElementById('spot-details').hidden = false;
-                      document.getElementById('spot-name').textContent = name;
-                      document.getElementById('spot-desc').innerHTML = description.html;
-                      document.getElementById('spot-waterway').innerHTML = `<a href="./waterways/${waterways.slug}">${waterways.name}</a>`;
-
-                      if (description.html !== "<p>None</p>") {
+            { spots.nodes
+              .filter(spot => spot.spotType.slug === "einsteig-aufsteig")
+              .map(spot => {
+                const { name, location, description, waterways, slug } = spot;
+                const position = [location.latitude, location.longitude];
+                return (
+                  <Marker
+                    key={slug}
+                    position={position}
+                    icon={markerStyle.spotEinsteigAufsteigIcon}
+                    eventHandlers={{
+                      click: () => {
+                        document.getElementById('welcome-message').hidden = true;
+                        document.getElementById('spot-details').hidden = false;
+                        document.getElementById('spot-name').textContent = name;
                         document.getElementById('spot-desc').innerHTML = description.html;
-                      } else {
-                        document.getElementById('spot-desc').innerHTML = "";
-                      }
-                    }
-                  }}
-                >
-                </Marker>
-              );
+                        document.getElementById('spot-waterway').innerHTML = `<a href="./waterways/${waterways.slug}">${waterways.name}</a>`;
+
+                        if (description.html !== "<p>None</p>") {
+                          document.getElementById('spot-desc').innerHTML = description.html;
+                        } else {
+                          document.getElementById('spot-desc').innerHTML = "";
+                        }
+                      },
+                      
+                    }}
+                  >
+                  </Marker>
+                );
+            })}
+            { spots.nodes
+              .filter(spot => spot.spotType.slug === "nur-einsteig")
+              .map(spot => {
+                const { name, location, description, waterways, slug } = spot;
+                const position = [location.latitude, location.longitude];
+                return (
+                  <Marker
+                    key={slug}
+                    position={position}
+                    icon={markerStyle.spotNurEinsteigIcon}
+                    eventHandlers={{
+                      click: () => {
+                        document.getElementById('welcome-message').hidden = true;
+                        document.getElementById('spot-details').hidden = false;
+                        document.getElementById('spot-name').textContent = name;
+                        document.getElementById('spot-desc').innerHTML = description.html;
+                        document.getElementById('spot-waterway').innerHTML = `<a href="./waterways/${waterways.slug}">${waterways.name}</a>`;
+
+                        if (description.html !== "<p>None</p>") {
+                          document.getElementById('spot-desc').innerHTML = description.html;
+                        } else {
+                          document.getElementById('spot-desc').innerHTML = "";
+                        }
+                      },
+                      
+                    }}
+                  >
+                  </Marker>
+                );
+            })}
+            { spots.nodes
+              .filter(spot => spot.spotType.slug === "nur-aufsteig")
+              .map(spot => {
+                const { name, location, description, waterways, slug } = spot;
+                const position = [location.latitude, location.longitude];
+                return (
+                  <Marker
+                    key={slug}
+                    position={position}
+                    icon={markerStyle.spotNurAufsteigIcon}
+                    eventHandlers={{
+                      click: () => {
+                        document.getElementById('welcome-message').hidden = true;
+                        document.getElementById('spot-details').hidden = false;
+                        document.getElementById('spot-name').textContent = name;
+                        document.getElementById('spot-desc').innerHTML = description.html;
+                        document.getElementById('spot-waterway').innerHTML = `<a href="./waterways/${waterways.slug}">${waterways.name}</a>`;
+
+                        if (description.html !== "<p>None</p>") {
+                          document.getElementById('spot-desc').innerHTML = description.html;
+                        } else {
+                          document.getElementById('spot-desc').innerHTML = "";
+                        }
+                      },
+                      
+                    }}
+                  >
+                  </Marker>
+                );
+            })}
+            { spots.nodes
+              .filter(spot => spot.spotType.slug === "raststatte")
+              .map(spot => {
+                const { name, location, description, waterways, slug } = spot;
+                const position = [location.latitude, location.longitude];
+                return (
+                  <Marker
+                    key={slug}
+                    position={position}
+                    icon={markerStyle.spotRaststatteIcon}
+                    eventHandlers={{
+                      click: () => {
+                        document.getElementById('welcome-message').hidden = true;
+                        document.getElementById('spot-details').hidden = false;
+                        document.getElementById('spot-name').textContent = name;
+                        document.getElementById('spot-desc').innerHTML = description.html;
+                        document.getElementById('spot-waterway').innerHTML = `<a href="./waterways/${waterways.slug}">${waterways.name}</a>`;
+
+                        if (description.html !== "<p>None</p>") {
+                          document.getElementById('spot-desc').innerHTML = description.html;
+                        } else {
+                          document.getElementById('spot-desc').innerHTML = "";
+                        }
+                      },
+                      
+                    }}
+                  >
+                  </Marker>
+                );
             })}
             </Map>
           </Col>

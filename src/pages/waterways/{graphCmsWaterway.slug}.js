@@ -6,6 +6,7 @@ import { graphql } from "gatsby";
 import { Marker, Popup, GeoJSON } from "react-leaflet";
 import { Container, Row, Col } from "react-bootstrap";
 import L from "leaflet";
+import * as markerStyle from '../../hooks/useMarkerStyles';
 
 export const pageQuery = graphql`
   query LakePageQuery($slug: String!) {
@@ -20,6 +21,9 @@ export const pageQuery = graphql`
         location {
           latitude
           longitude
+        }
+        spotType {
+          slug
         }
       }
       protectedAreas {
@@ -116,11 +120,46 @@ export default function LakeDetailsPage({ data: { graphCmsWaterway } }) {
               
               })}
 
-              { graphCmsWaterway.spots.map(spot => {
+              { graphCmsWaterway.spots
+              .filter(spot => spot.spotType.slug === "einsteig-aufsteig")
+              .map(spot => {
               const { name, location, description, slug } = spot;
               const position = [location.latitude, location.longitude];
               return (
-                <Marker key={slug} position={position}>
+                <Marker key={slug} position={position} icon={markerStyle.spotEinsteigAufsteigIcon}>
+                  {<Popup><b>{name}</b><br />{description.html}</Popup>}
+                </Marker>
+                );
+              })}
+              { graphCmsWaterway.spots
+              .filter(spot => spot.spotType.slug === "nur-einsteig")
+              .map(spot => {
+              const { name, location, description, slug } = spot;
+              const position = [location.latitude, location.longitude];
+              return (
+                <Marker key={slug} position={position} icon={markerStyle.spotNurEinsteigIcon}>
+                  {<Popup><b>{name}</b><br />{description.html}</Popup>}
+                </Marker>
+                );
+              })}
+              { graphCmsWaterway.spots
+              .filter(spot => spot.spotType.slug === "nur-aufsteig")
+              .map(spot => {
+              const { name, location, description, slug } = spot;
+              const position = [location.latitude, location.longitude];
+              return (
+                <Marker key={slug} position={position} icon={markerStyle.spotNurAufsteigIcon}>
+                  {<Popup><b>{name}</b><br />{description.html}</Popup>}
+                </Marker>
+                );
+              })}
+              { graphCmsWaterway.spots
+              .filter(spot => spot.spotType.slug === "raststatte")
+              .map(spot => {
+              const { name, location, description, slug } = spot;
+              const position = [location.latitude, location.longitude];
+              return (
+                <Marker key={slug} position={position} icon={markerStyle.spotRaststatteIcon}>
                   {<Popup><b>{name}</b><br />{description.html}</Popup>}
                 </Marker>
                 );
