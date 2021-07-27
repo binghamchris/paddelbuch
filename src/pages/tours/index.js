@@ -37,7 +37,7 @@ const SecondPage = () => {
   return (
     <Layout pageName="tours">
       <Helmet>
-        <title>Swiss Canoe Map Prototype - Tours</title>
+        <title>Swiss Paddel Buch - Tours</title>
       </Helmet>
 
       <Container className="tour-list">

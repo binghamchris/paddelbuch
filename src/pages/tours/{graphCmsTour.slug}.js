@@ -69,7 +69,7 @@ export default function TourDetailsPage({ data: { graphCmsTour } }) {
     
     <Layout pageName="tour-details">
       <Helmet>
-        <title>Swiss Canoe Map Prototype - Tour - {graphCmsTour.name}</title>
+        <title>Swiss Paddel Buch - Tour - {graphCmsTour.name}</title>
       </Helmet>
 
       <Container fluid noGutters>

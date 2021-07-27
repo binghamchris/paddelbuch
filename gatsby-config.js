@@ -4,7 +4,7 @@ const envMetadata = require("./env-metadata.json");
 const { title, description, author, repository, homepage } = config;
 
 const siteMetadata = {
-  companyName: "Swiss Canoe Prototype",
+  companyName: "Swiss Paddel Buch",
   authorName: "Chris Bingham",
   siteUrl: homepage,
   siteDescription: description,

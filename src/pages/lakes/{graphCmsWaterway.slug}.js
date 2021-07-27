@@ -10,7 +10,6 @@ import L from "leaflet";
 export const pageQuery = graphql`
   query LakePageQuery($slug: String!) {
     graphCmsWaterway(locale: {eq: en}, slug: {eq: $slug}) {
-      id
       name
       geometry
       spots {
@@ -21,7 +20,17 @@ export const pageQuery = graphql`
         location {
           latitude
           longitude
+        }
       }
+      protectedAreas {
+        name
+        geometry
+        slug
+        protectedAreaType {
+          name
+          slug
+        }
+        isAreaMarked
       }
       tours {
         name
@@ -39,6 +48,12 @@ const lakeLayerOptions = {
   fill: false
 }
 
+const protectedAreaLayerOptions = {
+  color: '#f2c136',
+  weight: 2,
+  fill: true
+}
+
 export default function LakeDetailsPage({ data: { graphCmsWaterway } }) {
 
   const geometryL = L.geoJSON(graphCmsWaterway.geometry)
@@ -51,33 +66,42 @@ export default function LakeDetailsPage({ data: { graphCmsWaterway } }) {
     
     <Layout pageName="lake-details">
       <Helmet>
-        <title>Swiss Canoe Map Prototype - Lake - {graphCmsWaterway.name}</title>
+        <title>Swiss Paddel Buch - Lakes - {graphCmsWaterway.name}</title>
       </Helmet>
-
       <Container fluid noGutters>
-        <Row noGutters className="justify-content-center">
-          <Col>
-            <h1>Lake {graphCmsWaterway.name}</h1>
-          </Col>
-        </Row>
         <Row noGutters className="justify-content-center">
           <Col id="map" xl="12" lg="12" md="12" sm="12" xs="12">
             <Map {...mapSettings}>
               <GeoJSON data={graphCmsWaterway.geometry} style={lakeLayerOptions}/>
+
+              { graphCmsWaterway.protectedAreas.map(protectedArea => {
+                const { name, geometry, slug, protectedAreaType, isAreaMarked } = protectedArea;
+                return (
+                  <GeoJSON data={geometry} style={protectedAreaLayerOptions}>
+                    <Popup><b>{name}</b><br />{protectedAreaType.name}<br/>{isAreaMarked}</Popup>
+                  </GeoJSON>
+                )
               
+              })}
+
               { graphCmsWaterway.spots.map(spot => {
-              const { id, name, location, description } = spot;
+              const { name, location, description, slug } = spot;
               const position = [location.latitude, location.longitude];
               return (
                 <Marker
-                  key={id}
+                  key={slug}
                   position={position}
                 >
-                {<Popup><b>{ name }</b>  <br />  { description }</Popup>}
+                  <Popup><b>{name}</b><br />{description.html}</Popup>
                 </Marker>
                 );
               })}
             </Map>
+          </Col>
+        </Row>
+        <Row noGutters className="justify-content-center">
+          <Col>
+            <h1>Lake {graphCmsWaterway.name}</h1>
           </Col>
         </Row>
       </Container>
