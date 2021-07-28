@@ -6,6 +6,7 @@ import { graphql, Link } from "gatsby";
 import { Marker, Popup, GeoJSON } from "react-leaflet";
 import { Container, Row, Col } from "react-bootstrap";
 import * as markerStyle from '../../hooks/useMarkerStyles';
+import * as layerStyle from '../../hooks/useLayerStyles';
 
 export const pageQuery = graphql`
   query SpotPageQuery($slug: String!) {
@@ -75,26 +76,6 @@ export const pageQuery = graphql`
   }
 `;
 
-const lakeLayerOptions = {
-  color: '#3b89a5',
-  weight: 2,
-  fill: false
-}
-
-const protectedAreaLayerOptions = {
-  color: '#f2c136',
-  weight: 2,
-  fill: true,
-  fillOpacity: 0.5,
-}
-
-const obstacleLayerOptions = {
-  color: '#AE3450',
-  weight: 2,
-  fill: true,
-  fillOpacity: 1,
-}
-
 export default function SpotDetailsPage({ data: { graphCmsSpot } }) {
 
   const mapSettings = {
@@ -116,7 +97,7 @@ export default function SpotDetailsPage({ data: { graphCmsSpot } }) {
               { graphCmsSpot.waterways.protectedAreas.map(protectedArea => {
                 const { name, geometry, slug, protectedAreaType, isAreaMarked } = protectedArea;
                 return (
-                  <GeoJSON data={geometry} style={protectedAreaLayerOptions}>
+                  <GeoJSON data={geometry} style={layerStyle.protectedAreaStyle}>
                     <Popup><b>{name}</b><br />{protectedAreaType.name}<br/>{isAreaMarked}</Popup>
                   </GeoJSON>
                 )
@@ -126,7 +107,7 @@ export default function SpotDetailsPage({ data: { graphCmsSpot } }) {
               { graphCmsSpot.waterways.obstacles.map(obstacle => {
                 const { name, geometry, slug, obstacleType, portageRoute, isPortageNecessary, isPortagePossible } = obstacle;
                 return (
-                  <GeoJSON data={geometry} style={obstacleLayerOptions}>
+                  <GeoJSON data={geometry} style={layerStyle.obstacleStyle}>
                     <Popup><b>{name}</b><br />{obstacleType.name}<br/>{isPortageNecessary}</Popup>
                   </GeoJSON>
                   
