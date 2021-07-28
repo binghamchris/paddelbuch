@@ -7,6 +7,7 @@ import { Marker, Popup, GeoJSON } from "react-leaflet";
 import { Container, Row, Col } from "react-bootstrap";
 import L from "leaflet";
 import * as markerStyle from '../../hooks/useMarkerStyles';
+import * as layerStyle from '../../hooks/useLayerStyles';
 
 export const pageQuery = graphql`
   query LakePageQuery($slug: String!) {
@@ -60,26 +61,6 @@ export const pageQuery = graphql`
   }
 `;
 
-const lakeLayerOptions = {
-  color: '#3b89a5',
-  weight: 2,
-  fill: false
-}
-
-const protectedAreaLayerOptions = {
-  color: '#f2c136',
-  weight: 2,
-  fill: true,
-  fillOpacity: 0.5,
-}
-
-const obstacleLayerOptions = {
-  color: '#AE3450',
-  weight: 2,
-  fill: true,
-  fillOpacity: 1,
-}
-
 export default function LakeDetailsPage({ data: { graphCmsWaterway } }) {
 
   const geometryL = L.geoJSON(graphCmsWaterway.geometry)
@@ -98,12 +79,12 @@ export default function LakeDetailsPage({ data: { graphCmsWaterway } }) {
         <Row className="justify-content-center g-0">
           <Col id="map" xl="12" lg="12" md="12" sm="12" xs="12">
             <Map {...mapSettings}>
-              <GeoJSON data={graphCmsWaterway.geometry} style={lakeLayerOptions}/>
+              <GeoJSON data={graphCmsWaterway.geometry} style={layerStyle.lakeStyle}/>
 
               { graphCmsWaterway.protectedAreas.map(protectedArea => {
                 const { name, geometry, slug, protectedAreaType, isAreaMarked } = protectedArea;
                 return (
-                  <GeoJSON data={geometry} style={protectedAreaLayerOptions}>
+                  <GeoJSON data={geometry} style={layerStyle.protectedAreaStyle}>
                     <Popup><b>{name}</b><br />{protectedAreaType.name}<br/>{isAreaMarked}</Popup>
                   </GeoJSON>
                 )
@@ -113,7 +94,7 @@ export default function LakeDetailsPage({ data: { graphCmsWaterway } }) {
               { graphCmsWaterway.obstacles.map(obstacle => {
                 const { name, geometry, slug, obstacleType, portageRoute, isPortageNecessary, isPortagePossible } = obstacle;
                 return (
-                  <GeoJSON data={geometry} style={obstacleLayerOptions}>
+                  <GeoJSON data={geometry} style={layerStyle.obstacleStyle}>
                     <Popup><b>{name}</b><br />{obstacleType.name}<br/>{isPortageNecessary}</Popup>
                   </GeoJSON>
                   
