@@ -26,6 +26,7 @@ function IndexPage () {
       spots: allGraphCmsSpot(filter: {locale: {eq: en}}) {
         nodes {
           name
+          approximateAddress
           description {
             html
           }
@@ -41,6 +42,7 @@ function IndexPage () {
             }
           }
           spotType {
+            name
             slug
           }
           slug
@@ -66,7 +68,7 @@ function IndexPage () {
             { spots.nodes
               .filter(spot => spot.spotType.slug === "einsteig-aufsteig")
               .map(spot => {
-                const { name, location, description, waterways, slug } = spot;
+                const { name, location, description, waterways, slug, approximateAddress, spotType } = spot;
                 const position = [location.latitude, location.longitude];
                 return (
                   <Marker
@@ -80,6 +82,10 @@ function IndexPage () {
                         document.getElementById('spot-name').textContent = name;
                         document.getElementById('spot-desc').innerHTML = description.html;
                         document.getElementById('spot-waterway').innerHTML = `<a href="./waterways/${waterways.slug}">${waterways.name}</a>`;
+                        document.getElementById('spot-gps').textContent = location.latitude + ", " + location.longitude;
+                        document.getElementById('spot-address').textContent = approximateAddress;
+                        document.getElementById('spot-link').innerHTML = `<a href="./spots/${slug}">More details</a>`;
+                        document.getElementById('spot-type').textContent = spotType.name;
 
                         if (description.html !== "<p>None</p>") {
                           document.getElementById('spot-desc').innerHTML = description.html;
@@ -96,7 +102,7 @@ function IndexPage () {
             { spots.nodes
               .filter(spot => spot.spotType.slug === "nur-einsteig")
               .map(spot => {
-                const { name, location, description, waterways, slug } = spot;
+                const { name, location, description, waterways, slug, approximateAddress, spotType } = spot;
                 const position = [location.latitude, location.longitude];
                 return (
                   <Marker
@@ -110,6 +116,10 @@ function IndexPage () {
                         document.getElementById('spot-name').textContent = name;
                         document.getElementById('spot-desc').innerHTML = description.html;
                         document.getElementById('spot-waterway').innerHTML = `<a href="./waterways/${waterways.slug}">${waterways.name}</a>`;
+                        document.getElementById('spot-gps').textContent = location.latitude + ", " + location.longitude;
+                        document.getElementById('spot-address').textContent = approximateAddress;
+                        document.getElementById('spot-link').innerHTML = `<a href="./spots/${slug}">More details</a>`;
+                        document.getElementById('spot-type').textContent = spotType.name;
 
                         if (description.html !== "<p>None</p>") {
                           document.getElementById('spot-desc').innerHTML = description.html;
@@ -126,7 +136,7 @@ function IndexPage () {
             { spots.nodes
               .filter(spot => spot.spotType.slug === "nur-aufsteig")
               .map(spot => {
-                const { name, location, description, waterways, slug } = spot;
+                const { name, location, description, waterways, slug, approximateAddress, spotType } = spot;
                 const position = [location.latitude, location.longitude];
                 return (
                   <Marker
@@ -140,6 +150,10 @@ function IndexPage () {
                         document.getElementById('spot-name').textContent = name;
                         document.getElementById('spot-desc').innerHTML = description.html;
                         document.getElementById('spot-waterway').innerHTML = `<a href="./waterways/${waterways.slug}">${waterways.name}</a>`;
+                        document.getElementById('spot-gps').textContent = location.latitude + ", " + location.longitude;
+                        document.getElementById('spot-address').textContent = approximateAddress;
+                        document.getElementById('spot-link').innerHTML = `<a href="./spots/${slug}">More details</a>`;
+                        document.getElementById('spot-type').textContent = spotType.name;
 
                         if (description.html !== "<p>None</p>") {
                           document.getElementById('spot-desc').innerHTML = description.html;
@@ -156,7 +170,7 @@ function IndexPage () {
             { spots.nodes
               .filter(spot => spot.spotType.slug === "raststatte")
               .map(spot => {
-                const { name, location, description, waterways, slug } = spot;
+                const { name, location, description, waterways, slug, approximateAddress, spotType } = spot;
                 const position = [location.latitude, location.longitude];
                 return (
                   <Marker
@@ -170,6 +184,10 @@ function IndexPage () {
                         document.getElementById('spot-name').textContent = name;
                         document.getElementById('spot-desc').innerHTML = description.html;
                         document.getElementById('spot-waterway').innerHTML = `<a href="./waterways/${waterways.slug}">${waterways.name}</a>`;
+                        document.getElementById('spot-gps').textContent = location.latitude + ", " + location.longitude;
+                        document.getElementById('spot-address').textContent = approximateAddress;
+                        document.getElementById('spot-link').innerHTML = `<a href="./spots/${slug}">More details</a>`;
+                        document.getElementById('spot-type').textContent = spotType.name;
 
                         if (description.html !== "<p>None</p>") {
                           document.getElementById('spot-desc').innerHTML = description.html;
@@ -193,8 +211,11 @@ function IndexPage () {
               <div id="spot-details" hidden="true">
                 <h1 id="spot-name"> </h1>
                 <span id="spot-desc"></span>
-                <h2>Waterway</h2>
-                <span id="spot-waterway"></span>
+                <p><b>Type:</b> <span id="spot-type"></span></p>
+                <p><b>GPS:</b> <span id="spot-gps"></span></p>
+                <p><b>Approx. Address:</b> <span id="spot-address"></span></p>
+                <p><b>Waterway: </b><span id="spot-waterway"></span></p>
+                <p><span id="spot-link"></span></p>
               </div>
             </div>
           </Col>

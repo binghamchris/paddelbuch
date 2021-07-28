@@ -5,57 +5,72 @@ import Map from "components/Map";
 import { graphql, Link } from "gatsby";
 import { Marker, Popup, GeoJSON } from "react-leaflet";
 import { Container, Row, Col } from "react-bootstrap";
-import L from "leaflet";
 import * as markerStyle from '../../hooks/useMarkerStyles';
 
 export const pageQuery = graphql`
-  query LakePageQuery($slug: String!) {
-    graphCmsWaterway(locale: {eq: en}, slug: {eq: $slug}) {
+  query SpotPageQuery($slug: String!) {
+    graphCmsSpot(locale: {eq: en}, slug: {eq: $slug}) {
       name
-      geometry
-      spots {
-        name
-        description {
-          html
-        }
-        location {
-          latitude
-          longitude
-        }
-        spotType {
-          slug
-        }
-        slug
+      approximateAddress
+      description {
+        html
       }
-      protectedAreas {
+      location {
+        latitude
+        longitude
+      }
+      waterways {
         name
-        geometry
         slug
-        protectedAreaType {
+        paddlingEnvironments {
           name
           slug
         }
-        isAreaMarked
-      }
-      tours {
-        name
-        slug
-        geometry
-      }
-      obstacles {
-        slug
-        portageRoute
-        geometry
-        name
-        description {
-          html
-        }
-        isPortageNecessary
-        isPortagePossible
-        obstacleType {
+        protectedAreas {
           name
+          geometry
+          slug
+          protectedAreaType {
+            name
+            slug
+          }
+          isAreaMarked
+        }
+        obstacles {
+          slug
+          portageRoute
+          geometry
+          name
+          description {
+            html
+          }
+          isPortageNecessary
+          isPortagePossible
+          obstacleType {
+            name
+          }
+        }
+        spots {
+          name
+          description {
+            html
+          }
+          location {
+            latitude
+            longitude
+          }
+          slug
+          spotType {
+            name
+            slug
+          }
         }
       }
+      spotType {
+        name
+        slug
+      }
+      slug    
     }
   }
 `;
@@ -80,27 +95,25 @@ const obstacleLayerOptions = {
   fillOpacity: 1,
 }
 
-export default function LakeDetailsPage({ data: { graphCmsWaterway } }) {
+export default function SpotDetailsPage({ data: { graphCmsSpot } }) {
 
-  const geometryL = L.geoJSON(graphCmsWaterway.geometry)
-  const mapBounds = geometryL.getBounds()
   const mapSettings = {
-    bounds: mapBounds
+    center: [graphCmsSpot.location.latitude, graphCmsSpot.location.longitude],
+    zoom: 16,
   };
 
   return(
     
-    <Layout pageName="waterway-details">
+    <Layout pageName="spot-details">
       <Helmet>
-        <title>Swiss Paddel Buch - Lakes - {graphCmsWaterway.name}</title>
+        <title>Swiss Paddel Buch - Spots - {graphCmsSpot.name}</title>
       </Helmet>
       <Container fluid >
         <Row className="justify-content-center g-0">
           <Col id="map" xl="12" lg="12" md="12" sm="12" xs="12">
             <Map {...mapSettings}>
-              <GeoJSON data={graphCmsWaterway.geometry} style={lakeLayerOptions}/>
 
-              { graphCmsWaterway.protectedAreas.map(protectedArea => {
+              { graphCmsSpot.waterways.protectedAreas.map(protectedArea => {
                 const { name, geometry, slug, protectedAreaType, isAreaMarked } = protectedArea;
                 return (
                   <GeoJSON data={geometry} style={protectedAreaLayerOptions}>
@@ -110,7 +123,7 @@ export default function LakeDetailsPage({ data: { graphCmsWaterway } }) {
               
               })}
 
-              { graphCmsWaterway.obstacles.map(obstacle => {
+              { graphCmsSpot.waterways.obstacles.map(obstacle => {
                 const { name, geometry, slug, obstacleType, portageRoute, isPortageNecessary, isPortagePossible } = obstacle;
                 return (
                   <GeoJSON data={geometry} style={obstacleLayerOptions}>
@@ -121,7 +134,7 @@ export default function LakeDetailsPage({ data: { graphCmsWaterway } }) {
               
               })}
 
-              { graphCmsWaterway.spots
+              { graphCmsSpot.waterways.spots
               .filter(spot => spot.spotType.slug === "einsteig-aufsteig")
               .map(spot => {
               const { name, location, description, slug } = spot;
@@ -136,7 +149,7 @@ export default function LakeDetailsPage({ data: { graphCmsWaterway } }) {
                 </Marker>
                 );
               })}
-              { graphCmsWaterway.spots
+              { graphCmsSpot.waterways.spots
               .filter(spot => spot.spotType.slug === "nur-einsteig")
               .map(spot => {
               const { name, location, description, slug } = spot;
@@ -151,7 +164,7 @@ export default function LakeDetailsPage({ data: { graphCmsWaterway } }) {
                 </Marker>
                 );
               })}
-              { graphCmsWaterway.spots
+              { graphCmsSpot.waterways.spots
               .filter(spot => spot.spotType.slug === "nur-aufsteig")
               .map(spot => {
               const { name, location, description, slug } = spot;
@@ -166,7 +179,7 @@ export default function LakeDetailsPage({ data: { graphCmsWaterway } }) {
                 </Marker>
                 );
               })}
-              { graphCmsWaterway.spots
+              { graphCmsSpot.waterways.spots
               .filter(spot => spot.spotType.slug === "raststatte")
               .map(spot => {
               const { name, location, description, slug } = spot;
@@ -184,9 +197,19 @@ export default function LakeDetailsPage({ data: { graphCmsWaterway } }) {
             </Map>
           </Col>
         </Row>
-        <Row className="justify-content-center g-0 waterway-description">
+        <Row className="justify-content-center g-0 spot-description">
           <Col>
-            <h1>{graphCmsWaterway.name}</h1>
+            <h1>{graphCmsSpot.name}</h1>
+          </Col>
+        </Row>
+        <Row className="justify-content-center g-0 spot-description">
+          <Col xl="12" lg="12" md="12" sm="12" xs="12">
+            <h2>Spot Details</h2>
+            <p>{graphCmsSpot.description.html}</p>
+            <p><b>Type:</b> {graphCmsSpot.spotType.name}</p>
+            <p><b>GPS:</b> {graphCmsSpot.location.latitude}, {graphCmsSpot.location.longitude}</p>
+            <p><b>Approx. Address:</b> {graphCmsSpot.approximateAddress}</p>
+            <p><b>Waterway:</b> <Link to={`/waterways/${graphCmsSpot.waterways.slug}`}>{graphCmsSpot.waterways.name}</Link></p>
           </Col>
         </Row>
       </Container>

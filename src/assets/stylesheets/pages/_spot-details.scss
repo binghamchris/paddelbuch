@@ -1,4 +1,4 @@
-.page-waterway-details {
+.page-spot-details {
 
   main {
     padding: 0;
@@ -24,8 +24,12 @@
     }
   }
 
-  .waterway-description {
+  .spot-description {
     padding-right: 1.5em;
     padding-left: 1.5em;
+  }
+
+  .spot-description > div {
+    padding-right: 1em;
   }
 }
