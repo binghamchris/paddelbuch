@@ -36,7 +36,7 @@ export const spotRaststatteIcon = L.icon({
   iconSize: [25, 41],
 })
 
-export const spotObstacleIcon = L.icon({
+export const obstacleIcon = L.icon({
   iconRetinaUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png",
   iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",  
   shadowUrl: require("leaflet/dist/images/marker-shadow.png").default,
