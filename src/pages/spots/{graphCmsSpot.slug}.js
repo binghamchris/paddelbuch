@@ -5,9 +5,11 @@ import Map from "components/Map";
 import { graphql, Link } from "gatsby";
 import { Marker, Popup, GeoJSON } from "react-leaflet";
 import { Container, Row, Col } from "react-bootstrap";
-import * as markerStyle from '../../hooks/useMarkerStyles';
+//import * as markerStyle from '../../hooks/useMarkerStyles';
 import * as layerStyle from '../../hooks/useLayerStyles';
 import { RichText } from '@graphcms/rich-text-react-renderer';
+import { isDomAvailable } from 'lib/util';
+import L from "leaflet";
 
 export const pageQuery = graphql`
   query SpotPageQuery($slug: String!) {
@@ -78,6 +80,48 @@ export const pageQuery = graphql`
 `;
 
 export default function SpotDetailsPage({ data: { graphCmsSpot } }) {
+  var spotEinsteigAufsteigIcon
+  var spotNurEinsteigIcon
+  var spotNurAufsteigIcon
+  var spotRaststatteIcon
+
+  if (isDomAvailable()) {
+    spotEinsteigAufsteigIcon = new L.icon({
+      iconRetinaUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png",
+      iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png",  
+      shadowUrl: require("leaflet/dist/images/marker-shadow.png").default,
+      iconAnchor: [12, 41],
+      popupAnchor: [0, -41],
+      iconSize: [25, 41],
+    })
+    
+    spotNurEinsteigIcon = new L.icon({
+      iconRetinaUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png",
+      iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png",  
+      shadowUrl: require("leaflet/dist/images/marker-shadow.png").default,
+      iconAnchor: [12, 41],
+      popupAnchor: [0, -41],
+      iconSize: [25, 41],
+    })
+        
+    spotNurAufsteigIcon = new L.icon({
+      iconRetinaUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-gold.png",
+      iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-gold.png",  
+      shadowUrl: require("leaflet/dist/images/marker-shadow.png").default,
+      iconAnchor: [12, 41],
+      popupAnchor: [0, -41],
+      iconSize: [25, 41],
+    })
+
+    spotRaststatteIcon = new L.icon({
+      iconRetinaUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png",
+      iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-orange.png",  
+      shadowUrl: require("leaflet/dist/images/marker-shadow.png").default,
+      iconAnchor: [12, 41],
+      popupAnchor: [0, -41],
+      iconSize: [25, 41],
+    })
+  }
 
   const mapSettings = {
     center: [graphCmsSpot.location.latitude, graphCmsSpot.location.longitude],
@@ -126,7 +170,7 @@ export default function SpotDetailsPage({ data: { graphCmsSpot } }) {
               const { name, location, description, slug } = spot;
               const position = [location.latitude, location.longitude];
               return (
-                <Marker key={slug} position={position} icon={markerStyle.spotEinsteigAufsteigIcon}>
+                <Marker key={slug} position={position} icon={(!!spotEinsteigAufsteigIcon) ? spotEinsteigAufsteigIcon : null}>
                   {<Popup>
                     <b>{name}</b>
                     <RichText content={description.raw} />
@@ -141,7 +185,7 @@ export default function SpotDetailsPage({ data: { graphCmsSpot } }) {
               const { name, location, description, slug } = spot;
               const position = [location.latitude, location.longitude];
               return (
-                <Marker key={slug} position={position} icon={markerStyle.spotNurEinsteigIcon}>
+                <Marker key={slug} position={position} icon={(!!spotNurEinsteigIcon) ? spotNurEinsteigIcon : null}>
                   {<Popup>
                     <b>{name}</b>
                     <RichText content={description.raw} />
@@ -156,7 +200,7 @@ export default function SpotDetailsPage({ data: { graphCmsSpot } }) {
               const { name, location, description, slug } = spot;
               const position = [location.latitude, location.longitude];
               return (
-                <Marker key={slug} position={position} icon={markerStyle.spotNurAufsteigIcon}>
+                <Marker key={slug} position={position} icon={(!!spotNurAufsteigIcon) ? spotNurAufsteigIcon : null}>
                   {<Popup>
                     <b>{name}</b>
                     <RichText content={description.raw} />
@@ -171,7 +215,7 @@ export default function SpotDetailsPage({ data: { graphCmsSpot } }) {
               const { name, location, description, slug } = spot;
               const position = [location.latitude, location.longitude];
               return (
-                <Marker key={slug} position={position} icon={markerStyle.spotRaststatteIcon}>
+                <Marker key={slug} position={position} icon={(!!spotRaststatteIcon) ? spotRaststatteIcon : null}>
                   {<Popup>
                     <b>{name}</b>
                     <RichText content={description.raw} />
@@ -183,7 +227,7 @@ export default function SpotDetailsPage({ data: { graphCmsSpot } }) {
             </Map>
           </Col>
         </Row>
-        <Row className="justify-content-center g-0 spot-description">
+        <Row className="justify-content-center g-0 spot-description spot-title">
           <Col>
             <h1>{graphCmsSpot.name}</h1>
           </Col>
