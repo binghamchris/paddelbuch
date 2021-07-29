@@ -7,6 +7,7 @@ import { Marker, Popup, GeoJSON } from "react-leaflet";
 import { Container, Row, Col } from "react-bootstrap";
 import * as markerStyle from '../../hooks/useMarkerStyles';
 import * as layerStyle from '../../hooks/useLayerStyles';
+import { RichText } from '@graphcms/rich-text-react-renderer';
 
 export const pageQuery = graphql`
   query SpotPageQuery($slug: String!) {
@@ -14,7 +15,7 @@ export const pageQuery = graphql`
       name
       approximateAddress
       description {
-        html
+        raw
       }
       location {
         latitude
@@ -43,7 +44,7 @@ export const pageQuery = graphql`
           geometry
           name
           description {
-            html
+            raw
           }
           isPortageNecessary
           isPortagePossible
@@ -54,7 +55,7 @@ export const pageQuery = graphql`
         spots {
           name
           description {
-            html
+            raw
           }
           location {
             latitude
@@ -95,22 +96,26 @@ export default function SpotDetailsPage({ data: { graphCmsSpot } }) {
             <Map {...mapSettings}>
 
               { graphCmsSpot.waterways.protectedAreas.map(protectedArea => {
-                const { name, geometry, slug, protectedAreaType, isAreaMarked } = protectedArea;
+                const { name, geometry, protectedAreaType } = protectedArea;
                 return (
                   <GeoJSON data={geometry} style={layerStyle.protectedAreaStyle}>
-                    <Popup><b>{name}</b><br />{protectedAreaType.name}<br/>{isAreaMarked}</Popup>
+                    <Popup><b>{name}</b><br />{protectedAreaType.name}</Popup>
                   </GeoJSON>
                 )
               
               })}
 
               { graphCmsSpot.waterways.obstacles.map(obstacle => {
-                const { name, geometry, slug, obstacleType, portageRoute, isPortageNecessary, isPortagePossible } = obstacle;
+                const { name, geometry, obstacleType, portageRoute } = obstacle;
                 return (
-                  <GeoJSON data={geometry} style={layerStyle.obstacleStyle}>
-                    <Popup><b>{name}</b><br />{obstacleType.name}<br/>{isPortageNecessary}</Popup>
-                  </GeoJSON>
-                  
+                  <div>
+                    <GeoJSON data={geometry} style={layerStyle.obstacleStyle}>
+                      <Popup><b>{name}</b><br />{obstacleType.name}</Popup>
+                    </GeoJSON>
+                    <GeoJSON data={portageRoute} style={layerStyle.portageStyle}>
+                      <Popup><b>Portage route for {name}</b></Popup>
+                    </GeoJSON>
+                  </div>
                 )
               
               })}
@@ -124,7 +129,7 @@ export default function SpotDetailsPage({ data: { graphCmsSpot } }) {
                 <Marker key={slug} position={position} icon={markerStyle.spotEinsteigAufsteigIcon}>
                   {<Popup>
                     <b>{name}</b>
-                    <p>{description.html}</p>
+                    <RichText content={description.raw} />
                     <p><Link to={`/spots/${slug}`}>More details</Link></p>
                   </Popup>}
                 </Marker>
@@ -139,7 +144,7 @@ export default function SpotDetailsPage({ data: { graphCmsSpot } }) {
                 <Marker key={slug} position={position} icon={markerStyle.spotNurEinsteigIcon}>
                   {<Popup>
                     <b>{name}</b>
-                    <p>{description.html}</p>
+                    <RichText content={description.raw} />
                     <p><Link to={`/spots/${slug}`}>More details</Link></p>
                   </Popup>}
                 </Marker>
@@ -154,7 +159,7 @@ export default function SpotDetailsPage({ data: { graphCmsSpot } }) {
                 <Marker key={slug} position={position} icon={markerStyle.spotNurAufsteigIcon}>
                   {<Popup>
                     <b>{name}</b>
-                    <p>{description.html}</p>
+                    <RichText content={description.raw} />
                     <p><Link to={`/spots/${slug}`}>More details</Link></p>
                   </Popup>}
                 </Marker>
@@ -169,7 +174,7 @@ export default function SpotDetailsPage({ data: { graphCmsSpot } }) {
                 <Marker key={slug} position={position} icon={markerStyle.spotRaststatteIcon}>
                   {<Popup>
                     <b>{name}</b>
-                    <p>{description.html}</p>
+                    <RichText content={description.raw} />
                     <p><Link to={`/spots/${slug}`}>More details</Link></p>
                   </Popup>}
                 </Marker>
@@ -186,7 +191,7 @@ export default function SpotDetailsPage({ data: { graphCmsSpot } }) {
         <Row className="justify-content-center g-0 spot-description">
           <Col xl="12" lg="12" md="12" sm="12" xs="12">
             <h2>Spot Details</h2>
-            <p>{graphCmsSpot.description.html}</p>
+            <RichText content={graphCmsSpot.description.raw} />
             <p><b>Type:</b> {graphCmsSpot.spotType.name}</p>
             <p><b>GPS:</b> {graphCmsSpot.location.latitude}, {graphCmsSpot.location.longitude}</p>
             <p><b>Approx. Address:</b> {graphCmsSpot.approximateAddress}</p>

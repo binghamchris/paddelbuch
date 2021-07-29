@@ -8,6 +8,7 @@ import { Container, Row, Col } from "react-bootstrap";
 import L from "leaflet";
 import * as markerStyle from '../../hooks/useMarkerStyles';
 import * as layerStyle from '../../hooks/useLayerStyles';
+import { RichText } from '@graphcms/rich-text-react-renderer';
 
 export const pageQuery = graphql`
   query LakePageQuery($slug: String!) {
@@ -17,7 +18,7 @@ export const pageQuery = graphql`
       spots {
         name
         description {
-          html
+          raw
         }
         location {
           latitude
@@ -49,7 +50,7 @@ export const pageQuery = graphql`
         geometry
         name
         description {
-          html
+          raw
         }
         isPortageNecessary
         isPortagePossible
@@ -82,22 +83,26 @@ export default function LakeDetailsPage({ data: { graphCmsWaterway } }) {
               <GeoJSON data={graphCmsWaterway.geometry} style={layerStyle.lakeStyle}/>
 
               { graphCmsWaterway.protectedAreas.map(protectedArea => {
-                const { name, geometry, slug, protectedAreaType, isAreaMarked } = protectedArea;
+                const { name, geometry, protectedAreaType } = protectedArea;
                 return (
                   <GeoJSON data={geometry} style={layerStyle.protectedAreaStyle}>
-                    <Popup><b>{name}</b><br />{protectedAreaType.name}<br/>{isAreaMarked}</Popup>
+                    <Popup><b>{name}</b><br />{protectedAreaType.name}</Popup>
                   </GeoJSON>
                 )
               
               })}
 
               { graphCmsWaterway.obstacles.map(obstacle => {
-                const { name, geometry, slug, obstacleType, portageRoute, isPortageNecessary, isPortagePossible } = obstacle;
+                const { name, geometry, obstacleType, portageRoute } = obstacle;
                 return (
-                  <GeoJSON data={geometry} style={layerStyle.obstacleStyle}>
-                    <Popup><b>{name}</b><br />{obstacleType.name}<br/>{isPortageNecessary}</Popup>
-                  </GeoJSON>
-                  
+                  <div>
+                    <GeoJSON data={geometry} style={layerStyle.obstacleStyle}>
+                      <Popup><b>{name}</b><br />{obstacleType.name}</Popup>
+                    </GeoJSON>
+                    <GeoJSON data={portageRoute} style={layerStyle.portageStyle}>
+                      <Popup><b>Portage route for {name}</b></Popup>
+                    </GeoJSON>
+                  </div>
                 )
               
               })}
@@ -111,7 +116,7 @@ export default function LakeDetailsPage({ data: { graphCmsWaterway } }) {
                 <Marker key={slug} position={position} icon={markerStyle.spotEinsteigAufsteigIcon}>
                   {<Popup>
                     <b>{name}</b>
-                    <p>{description.html}</p>
+                    <RichText content={description.raw} />
                     <p><Link to={`/spots/${slug}`}>More details</Link></p>
                   </Popup>}
                 </Marker>
@@ -126,7 +131,7 @@ export default function LakeDetailsPage({ data: { graphCmsWaterway } }) {
                 <Marker key={slug} position={position} icon={markerStyle.spotNurEinsteigIcon}>
                   {<Popup>
                     <b>{name}</b>
-                    <p>{description.html}</p>
+                    <RichText content={description.raw} />
                     <p><Link to={`/spots/${slug}`}>More details</Link></p>
                   </Popup>}
                 </Marker>
@@ -141,7 +146,7 @@ export default function LakeDetailsPage({ data: { graphCmsWaterway } }) {
                 <Marker key={slug} position={position} icon={markerStyle.spotNurAufsteigIcon}>
                   {<Popup>
                     <b>{name}</b>
-                    <p>{description.html}</p>
+                    <RichText content={description.raw} />
                     <p><Link to={`/spots/${slug}`}>More details</Link></p>
                   </Popup>}
                 </Marker>
@@ -156,7 +161,7 @@ export default function LakeDetailsPage({ data: { graphCmsWaterway } }) {
                 <Marker key={slug} position={position} icon={markerStyle.spotRaststatteIcon}>
                   {<Popup>
                     <b>{name}</b>
-                    <p>{description.html}</p>
+                    <RichText content={description.raw} />
                     <p><Link to={`/spots/${slug}`}>More details</Link></p>
                   </Popup>}
                 </Marker>

@@ -1,7 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { MapContainer, TileLayer, ZoomControl } from "react-leaflet";
-
 import { useConfigureLeaflet } from "hooks";
 import { isDomAvailable } from "lib/util";
 
@@ -37,6 +36,7 @@ const Map = (props) => {
   const mapSettings = {
     className: "map-base",
     zoomControl: false,
+    
     ...rest,
   };
 
@@ -47,6 +47,7 @@ const Map = (props) => {
         {/* {basemap && <TileLayer {...basemap} />} */}
         <TileLayer
           url = {envMetadata.mapBoxUrl}
+          attribution="© <a href='https://www.mapbox.com/about/maps/'>Mapbox</a> © <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> <strong><a href='https://www.mapbox.com/map-feedback/' target='_blank'>Improve this map</a></strong>"
         />
         <ZoomControl position="bottomright" />
       </MapContainer>
@@ -59,5 +60,6 @@ Map.propTypes = {
   className: PropTypes.string,
   defaultBaseMap: PropTypes.string,
 };
+
 
 export default Map;
