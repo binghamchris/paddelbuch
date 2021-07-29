@@ -4,12 +4,8 @@ import { MapContainer, TileLayer, ZoomControl } from "react-leaflet";
 import { useConfigureLeaflet } from "hooks";
 import { isDomAvailable } from "lib/util";
 
-//const DEFAULT_MAP_SERVICE = "OpenStreetMap";
-//const DEFAULT_MAP_SERVICE = "MapBox";
-
 const Map = (props) => {
-  const envMetadata = require("../../env-metadata.json"); 
-
+  
   const {
     children,
     className,
@@ -46,7 +42,7 @@ const Map = (props) => {
         {children}
         {/* {basemap && <TileLayer {...basemap} />} */}
         <TileLayer
-          url = {envMetadata.mapBoxUrl}
+          url = {process.env.MAPBOX_URL}
           attribution="© <a href='https://www.mapbox.com/about/maps/'>Mapbox</a> © <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> <strong><a href='https://www.mapbox.com/map-feedback/' target='_blank'>Improve this map</a></strong>"
         />
         <ZoomControl position="bottomright" />

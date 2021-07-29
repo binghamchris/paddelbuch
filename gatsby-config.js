@@ -1,5 +1,8 @@
+require("dotenv").config({
+  path: `.env.${process.env.NODE_ENV}`,
+})
+
 const config = require("./package.json"); 
-const envMetadata = require("./env-metadata.json"); 
 
 const { title, description, author, repository, homepage } = config;
 
@@ -8,6 +11,7 @@ const siteMetadata = {
   authorName: "Chris Bingham",
   siteUrl: homepage,
   siteDescription: description,
+  mapboxUrl: process.env.MAPBOX_URL,
 };
 
 module.exports = {
@@ -50,7 +54,7 @@ module.exports = {
       options: {
         endpoint: "https://api-eu-central-1.graphcms.com/v2/ckq3v9412ku0401w70mgs10qp/master",
         locales: ['en', 'de'],
-        token: envMetadata.gcmsToken,
+        token: process.env.GCMS_TOKEN,
       }
     }
   ],
