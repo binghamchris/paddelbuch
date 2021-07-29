@@ -9,9 +9,10 @@ const Map = (props) => {
   const {
     children,
     className,
-//    defaultBaseMap = DEFAULT_MAP_SERVICE,
     ...rest
   } = props;
+
+
 
   useConfigureLeaflet();
 
