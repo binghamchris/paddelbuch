@@ -170,7 +170,7 @@ export default function LakeDetailsPage({ data: { graphCmsWaterway } }) {
             </Map>
           </Col>
         </Row>
-        <Row className="justify-content-center g-0 waterway-description">
+        <Row className="justify-content-center g-0 waterway-description waterway-title">
           <Col>
             <h1>{graphCmsWaterway.name}</h1>
           </Col>
