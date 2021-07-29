@@ -5,9 +5,9 @@ import Layout from "components/Layout";
 import Map from "components/Map";
 import { graphql, useStaticQuery } from "gatsby"
 import { Container, Row, Col } from "react-bootstrap";
-import * as markerStyle from '../../hooks/useMarkerStyles';
-//import { icon } from "leaflet";
-//import L from "leaflet";
+//import * as markerStyle from '../../hooks/useMarkerStyles';
+import { isDomAvailable } from 'lib/util';
+import L from "leaflet";
 
 const CH_CENTRE = {
   lat: 46.801111,
@@ -33,6 +33,19 @@ function IndexPage () {
     }
   `)
 
+  var obstacleIcon
+
+  if (isDomAvailable()) {
+    obstacleIcon = new L.icon({
+      iconRetinaUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png",
+      iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",  
+      shadowUrl: require("leaflet/dist/images/marker-shadow.png").default,
+      iconAnchor: [12, 41],
+      popupAnchor: [0, -41],
+      iconSize: [25, 41],
+    })
+  }
+
   const mapSettings = {
     center: CENTER,
     bounds: MAP_BOUNDS,
@@ -52,7 +65,7 @@ function IndexPage () {
               .map(obstacle => {
                 const { name, geometry, slug } = obstacle;
                 return (
-                  <GeoJSON data={geometry} style={markerStyle.obstacleIcon}>
+                  <GeoJSON data={geometry} style={(!!obstacleIcon) ? obstacleIcon : null}>
                     <Popup><b>{name}</b><br />{slug}</Popup>
                   </GeoJSON>
                 );
