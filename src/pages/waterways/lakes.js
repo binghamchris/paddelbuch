@@ -21,8 +21,6 @@ const SecondPage = () => {
     }
   `)
 
-  console.log(lakes.nodes)
-
   return (
     <Layout pageName="lakes">
       <Helmet>

@@ -1,0 +1,28 @@
+.page-rivers {
+  main {
+    padding: 0;
+  }
+
+  table {
+    text-align: left;
+    vertical-align: top;
+  }
+
+  td {
+    vertical-align: top;
+    padding: 0.5em 0;
+    border-bottom-style: solid;
+    border-bottom-color: $swisscanoe-blue;
+    border-bottom-width: 1px;
+  }
+
+  th {
+    vertical-align: top;
+    background-color: $swisscanoe-blue;
+    color: white;
+  }
+
+  .lakes-list {
+    padding: 0 1em;
+  }
+}  
