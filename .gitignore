@@ -78,6 +78,8 @@ graphcms-fragments
 
 # Environment Metadata
 env-metadata.json
+develop_setup.sh
+.env*
 
 # Test data
 src/pages/test/*
