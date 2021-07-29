@@ -70,3 +70,16 @@ h3 {
 .nav-item {
   padding-left: 0.5em;
 }
+
+.leaflet-popup-content-wrapper {
+  border-radius: 0px;
+  color: $white;
+  background-color: $swisscanoe-blue;
+}
+.leaflet-popup-content-wrapper a, .leaflet-popup a.leaflet-popup-close-button {
+  color: $white;
+}
+
+.leaflet-popup-tip {
+  background-color: $swisscanoe-blue;
+}
