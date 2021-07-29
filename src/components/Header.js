@@ -117,7 +117,7 @@ const Header = () => {
               </NavDropdown.Item>
             </NavDropdown>
 
-            <NavDropdown title="About" id="nav-dropdown-about" className="link-no-style">
+            <NavDropdown title="About" id="nav-dropdown-about" className="link-no-style" align="end">
               <NavDropdown.Item>
                 <Link to="/about" className="link-no-style">
                   <Nav.Link as="span" eventKey="about">
