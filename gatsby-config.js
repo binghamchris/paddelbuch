@@ -56,7 +56,8 @@ module.exports = {
         locales: ['en', 'de'],
         token: process.env.GCMS_TOKEN,
       }
-    }
+    },
+    "gatsby-plugin-gatsby-cloud"
   ],
 };
 
