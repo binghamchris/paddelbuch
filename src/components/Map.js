@@ -35,7 +35,7 @@ const Map = (props) => {
     ...rest,
   };
 
-const mapboxUrl = process.env.MAPBOX_URL
+const mapboxUrl = process.env.GATSBY_MAPBOX_URL
 
 console.log(mapboxUrl)
 
