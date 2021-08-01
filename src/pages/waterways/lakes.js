@@ -5,7 +5,7 @@ import Layout from "components/Layout";
 import Container from "components/Container";
 import { graphql, useStaticQuery } from "gatsby"
 
-const SecondPage = () => {
+const LakesListPage = () => {
 
   const { lakes } = useStaticQuery(graphql`
     query {
@@ -55,4 +55,4 @@ const SecondPage = () => {
   );
 };
 
-export default SecondPage;
+export default LakesListPage;
