@@ -37,6 +37,8 @@ const Map = (props) => {
 
 const mapboxUrl = process.env.MAPBOX_URL
 
+console.log(mapboxUrl)
+
   return (
     <div className={mapClassName}>
       <MapContainer {...mapSettings}>
