@@ -72,14 +72,14 @@ h3 {
 }
 
 .leaflet-popup-content-wrapper {
-  border-radius: 0px;
-  color: $white;
-  background-color: $swisscanoe-blue;
+  border-radius: 0px !important;
+  color: $white !important;
+  background-color: $swisscanoe-blue !important;
 }
 .leaflet-popup-content-wrapper a, .leaflet-popup a.leaflet-popup-close-button {
-  color: $white;
+  color: $white !important;
 }
 
 .leaflet-popup-tip {
-  background-color: $swisscanoe-blue;
+  background-color: $swisscanoe-blue !important;
 }
