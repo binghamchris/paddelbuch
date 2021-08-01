@@ -37,11 +37,9 @@ const Map = (props) => {
 
 const mapboxUrl = process.env.GATSBY_MAPBOX_URL
 
-console.log(mapboxUrl)
-
   return (
     <div className={mapClassName}>
-      <MapContainer {...mapSettings}>
+      <MapContainer tap={false} {...mapSettings}>
         {children}
         {/* {basemap && <TileLayer {...basemap} />} */}
         <TileLayer
