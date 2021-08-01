@@ -11,7 +11,6 @@ const siteMetadata = {
   authorName: "Chris Bingham",
   siteUrl: homepage,
   siteDescription: description,
-  mapboxUrl: process.env.MAPBOX_URL,
 };
 
 module.exports = {

@@ -19,7 +19,7 @@ const MAP_BOUNDS = [
 ]
 const CENTER = [CH_CENTRE.lat, CH_CENTRE.lng];
 
-function IndexPage () {
+function ObstaclesPage () {
 
   const { obstacles } = useStaticQuery(graphql`
     query {
@@ -92,4 +92,4 @@ function IndexPage () {
   );
 };
 
-export default IndexPage;
+export default ObstaclesPage;

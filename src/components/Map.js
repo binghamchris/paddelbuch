@@ -12,8 +12,6 @@ const Map = (props) => {
     ...rest
   } = props;
 
-
-
   useConfigureLeaflet();
 
   let mapClassName = `map`;
@@ -37,13 +35,15 @@ const Map = (props) => {
     ...rest,
   };
 
+const mapboxUrl = process.env.GATSBY_MAPBOX_URL
+
   return (
     <div className={mapClassName}>
-      <MapContainer {...mapSettings}>
+      <MapContainer tap={false} {...mapSettings}>
         {children}
         {/* {basemap && <TileLayer {...basemap} />} */}
         <TileLayer
-          url = {process.env.MAPBOX_URL}
+          url = {mapboxUrl}
           attribution="© <a href='https://www.mapbox.com/about/maps/'>Mapbox</a> © <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> <strong><a href='https://www.mapbox.com/map-feedback/' target='_blank'>Improve this map</a></strong>"
         />
         <ZoomControl position="bottomright" />
