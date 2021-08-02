@@ -119,11 +119,15 @@ export default function SpotDetailsPage({ data: { graphCmsSpot } }) {
               })}
 
               { graphCmsSpot.waterways.obstacles.map(obstacle => {
-                const { name, geometry, obstacleType, portageRoute } = obstacle;
+                const { name, geometry, obstacleType, portageRoute, slug } = obstacle;
                 return (
                   <div>
                     <GeoJSON data={geometry} style={layerStyle.obstacleStyle}>
-                      <Popup><b>{name}</b><br />{obstacleType.name}</Popup>
+                      <Popup>
+                        <b>{name}</b>
+                        <br />{obstacleType.name}
+                        <p><Link to={`/obstacles/${slug}`}>More details</Link></p>
+                      </Popup>
                     </GeoJSON>
                     <GeoJSON data={portageRoute} style={layerStyle.portageStyle}>
                       <Popup><b>Portage route for {name}</b></Popup>
