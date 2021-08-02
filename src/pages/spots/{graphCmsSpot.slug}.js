@@ -5,11 +5,11 @@ import Map from "components/Map";
 import { graphql, Link } from "gatsby";
 import { Marker, Popup, GeoJSON } from "react-leaflet";
 import { Container, Row, Col } from "react-bootstrap";
-//import * as markerStyle from '../../hooks/useMarkerStyles';
 import * as layerStyle from '../../hooks/useLayerStyles';
 import { RichText } from '@graphcms/rich-text-react-renderer';
 import { isDomAvailable } from 'lib/util';
 import L from "leaflet";
+import  { markerStyles } from 'lib/marker-styles';
 
 export const pageQuery = graphql`
   query SpotPageQuery($slug: String!) {
@@ -86,41 +86,10 @@ export default function SpotDetailsPage({ data: { graphCmsSpot } }) {
   var spotRaststatteIcon
 
   if (isDomAvailable()) {
-    spotEinsteigAufsteigIcon = new L.icon({
-      iconRetinaUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png",
-      iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png",  
-      shadowUrl: require("leaflet/dist/images/marker-shadow.png").default,
-      iconAnchor: [12, 41],
-      popupAnchor: [0, -41],
-      iconSize: [25, 41],
-    })
-    
-    spotNurEinsteigIcon = new L.icon({
-      iconRetinaUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png",
-      iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png",  
-      shadowUrl: require("leaflet/dist/images/marker-shadow.png").default,
-      iconAnchor: [12, 41],
-      popupAnchor: [0, -41],
-      iconSize: [25, 41],
-    })
-        
-    spotNurAufsteigIcon = new L.icon({
-      iconRetinaUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-gold.png",
-      iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-gold.png",  
-      shadowUrl: require("leaflet/dist/images/marker-shadow.png").default,
-      iconAnchor: [12, 41],
-      popupAnchor: [0, -41],
-      iconSize: [25, 41],
-    })
-
-    spotRaststatteIcon = new L.icon({
-      iconRetinaUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png",
-      iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-orange.png",  
-      shadowUrl: require("leaflet/dist/images/marker-shadow.png").default,
-      iconAnchor: [12, 41],
-      popupAnchor: [0, -41],
-      iconSize: [25, 41],
-    })
+    spotEinsteigAufsteigIcon = new L.icon(markerStyles.spotEinsteigAufsteigIcon)
+    spotNurEinsteigIcon = new L.icon(markerStyles.spotNurEinsteigIcon)
+    spotNurAufsteigIcon = new L.icon(markerStyles.spotNurAufsteigIcon)
+    spotRaststatteIcon = new L.icon(markerStyles.spotRaststatteIcon)
   }
 
   const mapSettings = {
@@ -150,11 +119,15 @@ export default function SpotDetailsPage({ data: { graphCmsSpot } }) {
               })}
 
               { graphCmsSpot.waterways.obstacles.map(obstacle => {
-                const { name, geometry, obstacleType, portageRoute } = obstacle;
+                const { name, geometry, obstacleType, portageRoute, slug } = obstacle;
                 return (
                   <div>
                     <GeoJSON data={geometry} style={layerStyle.obstacleStyle}>
-                      <Popup><b>{name}</b><br />{obstacleType.name}</Popup>
+                      <Popup>
+                        <b>{name}</b>
+                        <br />{obstacleType.name}
+                        <p><Link to={`/obstacles/${slug}`}>More details</Link></p>
+                      </Popup>
                     </GeoJSON>
                     <GeoJSON data={portageRoute} style={layerStyle.portageStyle}>
                       <Popup><b>Portage route for {name}</b></Popup>

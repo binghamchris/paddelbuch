@@ -5,9 +5,9 @@ import Layout from "components/Layout";
 import Map from "components/Map";
 import { graphql, useStaticQuery } from "gatsby"
 import { Container, Row, Col } from "react-bootstrap";
-//import * as markerStyle from '../hooks/useMarkerStyles';
 import { isDomAvailable } from 'lib/util';
 import L from "leaflet";
+import  { markerStyles } from 'lib/marker-styles';
 
 const CH_CENTRE = {
   lat: 46.801111,
@@ -57,41 +57,10 @@ function IndexPage () {
   var spotRaststatteIcon
 
   if (isDomAvailable()) {
-    spotEinsteigAufsteigIcon = new L.icon({
-      iconRetinaUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png",
-      iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png",  
-      shadowUrl: require("leaflet/dist/images/marker-shadow.png").default,
-      iconAnchor: [12, 41],
-      popupAnchor: [0, -41],
-      iconSize: [25, 41],
-    })
-    
-    spotNurEinsteigIcon = new L.icon({
-      iconRetinaUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png",
-      iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png",  
-      shadowUrl: require("leaflet/dist/images/marker-shadow.png").default,
-      iconAnchor: [12, 41],
-      popupAnchor: [0, -41],
-      iconSize: [25, 41],
-    })
-        
-    spotNurAufsteigIcon = new L.icon({
-      iconRetinaUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-gold.png",
-      iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-gold.png",  
-      shadowUrl: require("leaflet/dist/images/marker-shadow.png").default,
-      iconAnchor: [12, 41],
-      popupAnchor: [0, -41],
-      iconSize: [25, 41],
-    })
-
-    spotRaststatteIcon = new L.icon({
-      iconRetinaUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png",
-      iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-orange.png",  
-      shadowUrl: require("leaflet/dist/images/marker-shadow.png").default,
-      iconAnchor: [12, 41],
-      popupAnchor: [0, -41],
-      iconSize: [25, 41],
-    })
+    spotEinsteigAufsteigIcon = new L.icon(markerStyles.spotEinsteigAufsteigIcon)
+    spotNurEinsteigIcon = new L.icon(markerStyles.spotNurEinsteigIcon)
+    spotNurAufsteigIcon = new L.icon(markerStyles.spotNurAufsteigIcon)
+    spotRaststatteIcon = new L.icon(markerStyles.spotRaststatteIcon)
   }
 
   const mapSettings = {
