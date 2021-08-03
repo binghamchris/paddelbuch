@@ -37,9 +37,6 @@ function IndexPage () {
           waterways {
             name
             slug
-            paddlingEnvironments {
-              slug
-            }
           }
           spotType {
             name
