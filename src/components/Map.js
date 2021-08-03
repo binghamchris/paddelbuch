@@ -44,7 +44,7 @@ const mapboxUrl = process.env.GATSBY_MAPBOX_URL
         {/* {basemap && <TileLayer {...basemap} />} */}
         <TileLayer
           url = {mapboxUrl}
-          attribution="© <a href='https://www.mapbox.com/about/maps/'>Mapbox</a> © <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> <strong><a href='https://www.mapbox.com/map-feedback/' target='_blank'>Improve this map</a></strong>"
+          attribution="© <a href='https://www.mapbox.com/about/maps/' target='_blank' rel='noopener'>Mapbox</a> © <a href='http://www.openstreetmap.org/copyright' target='_blank' rel='noopener'>OpenStreetMap</a> <strong><a href='https://www.mapbox.com/map-feedback/' target='_blank' rel='noopener'>Improve this map</a></strong>"
         />
         <ZoomControl position="bottomright" />
       </MapContainer>

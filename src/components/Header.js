@@ -126,7 +126,7 @@ const Header = () => {
                 </Link>
               </NavDropdown.Item>
               <NavDropdown.Item>
-                <Link to="/api" className="link-no-style">
+                <Link to="/about/api" className="link-no-style">
                   <Nav.Link as="span" eventKey="api">
                     Public Database/API
                   </Nav.Link>
