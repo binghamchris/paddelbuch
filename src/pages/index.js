@@ -213,11 +213,11 @@ function IndexPage () {
             </Map>
           </Col>
           <Col xl="3" lg="3" md="12" sm="12" xs="12">
-            <div class="info-pane">
+            <div className="info-pane">
               <div id="welcome-message">
                 <p>Please click a spot for information</p>
               </div>
-              <div id="spot-details" hidden="true">
+              <div id="spot-details" hidden={true}>
                 <h1 id="spot-name"> </h1>
                 <span id="spot-desc"></span>
                 <p><b>Type:</b> <span id="spot-type"></span></p>

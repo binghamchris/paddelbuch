@@ -32,7 +32,7 @@ const Header = () => {
         </Link>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav" className="justify-content-end">
-          <Nav className="mr-auto">
+          <Nav className="mr-auto" >
             <Link to="/" className="link-no-style">
               <Nav.Link as="span" eventKey="spots">
                 Spots
@@ -45,7 +45,7 @@ const Header = () => {
                   const{name, slug} = waterway;
               
                     return (
-                      <NavDropdown.Item>
+                      <NavDropdown.Item key={slug}>
                         <Link to={`/waterways/${slug}`} className="link-no-style">
                           <Nav.Link as="span">
                             {name}
@@ -71,7 +71,7 @@ const Header = () => {
                 .map(waterway => {
                   const{name, slug} = waterway;
                   return (
-                    <NavDropdown.Item>
+                    <NavDropdown.Item key={slug}>
                       <Link to={`/waterways/${slug}`} className="link-no-style">
                         <Nav.Link as="span">
                           {name}
@@ -97,7 +97,7 @@ const Header = () => {
                 .map(waterway => {
                   const{name, slug} = waterway;
                   return (
-                    <NavDropdown.Item>
+                    <NavDropdown.Item key={slug}>
                       <Link to={`/waterways/${slug}`} className="link-no-style">
                         <Nav.Link as="span">
                           {name}
