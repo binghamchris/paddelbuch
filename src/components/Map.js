@@ -35,7 +35,7 @@ const Map = (props) => {
     ...rest,
   };
 
-const mapboxUrl = process.env.GATSBY_MAPBOX_URL
+  const mapboxUrl = process.env.GATSBY_MAPBOX_URL;
 
   return (
     <div className={mapClassName}>
@@ -58,6 +58,8 @@ Map.propTypes = {
   className: PropTypes.string,
   defaultBaseMap: PropTypes.string,
 };
+
+
 
 
 export default Map;
