@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { MapContainer, WMSTileLayer, ZoomControl } from "react-leaflet";
+import { MapContainer, TileLayer, ZoomControl } from "react-leaflet";
 import { useConfigureLeaflet } from "hooks";
 import { isDomAvailable } from "lib/util";
 
@@ -31,7 +31,6 @@ const Map = (props) => {
   const mapSettings = {
     className: "map-base",
     zoomControl: false,
-    
     ...rest,
   };
 
@@ -42,10 +41,9 @@ const Map = (props) => {
       <MapContainer tap={false} {...mapSettings}>
         {children}
         {/* {basemap && <TileLayer {...basemap} />} */}
-        <WMSTileLayer
+        <TileLayer
           url = {mapboxUrl}
           attribution="© <a href='https://www.mapbox.com/about/maps/' target='_blank' rel='noopener'>Mapbox</a> © <a href='http://www.openstreetmap.org/copyright' target='_blank' rel='noopener'>OpenStreetMap</a> <strong><a href='https://www.mapbox.com/map-feedback/' target='_blank' rel='noopener'>Improve this map</a></strong>"
-          header={{Authorization: "https://test.localhost"}}
         />
         <ZoomControl position="bottomright" />
       </MapContainer>

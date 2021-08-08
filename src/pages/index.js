@@ -8,6 +8,7 @@ import { Container, Row, Col } from "react-bootstrap";
 import { isDomAvailable } from 'lib/util';
 import L from "leaflet";
 import  { markerStyles } from 'lib/marker-styles';
+import { Link, Trans, useTranslation, I18nextContext } from 'gatsby-plugin-react-i18next';
 
 const CH_CENTRE = {
   lat: 46.801111,
@@ -19,34 +20,15 @@ const MAP_BOUNDS = [
 ]
 const CENTER = [CH_CENTRE.lat, CH_CENTRE.lng];
 
-function IndexPage () {
+function IndexPage ({ data }) {
 
-  const { spots } = useStaticQuery(graphql`
-    query {
-      spots: allGraphCmsSpot(filter: {locale: {eq: en}}) {
-        nodes {
-          name
-          approximateAddress
-          description {
-            html
-          }
-          location {
-            latitude
-            longitude
-          }
-          waterways {
-            name
-            slug
-          }
-          spotType {
-            name
-            slug
-          }
-          slug
-        }
-      }
-    }
-  `)
+  const spots = data.spots
+
+  const context = React.useContext(I18nextContext);
+
+  console.log(context)
+
+  const {t} = useTranslation();
 
   var spotEinsteigAufsteigIcon
   var spotNurEinsteigIcon
@@ -215,7 +197,7 @@ function IndexPage () {
           <Col xl="3" lg="3" md="12" sm="12" xs="12">
             <div className="info-pane">
               <div id="welcome-message">
-                <p>Please click a spot for information</p>
+               <p><Trans>Please click a spot for information</Trans></p>
               </div>
               <div id="spot-details" hidden={true}>
                 <h1 id="spot-name"> </h1>
@@ -236,3 +218,41 @@ function IndexPage () {
 };
 
 export default IndexPage;
+
+export const pageQuery = graphql`
+  query($language: String!) {
+    locales: allLocale(
+      filter: {language: {eq: $language}}
+    ) {
+      edges {
+        node {
+          ns
+          data
+          language
+        }
+      }
+    }
+    spots: allGraphCmsSpot(filter: {locale: {eq: en}}) {
+      nodes {
+        name
+        approximateAddress
+        description {
+          html
+        }
+        location {
+          latitude
+          longitude
+        }
+        waterways {
+          name
+          slug
+        }
+        spotType {
+          name
+          slug
+        }
+        slug
+      }
+    }
+  }
+`;
