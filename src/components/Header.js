@@ -1,10 +1,12 @@
 import React from "react";
-import { Link } from "gatsby";
 import { graphql, useStaticQuery } from "gatsby"
 import { Navbar, Nav, NavDropdown } from "react-bootstrap"
+import { Link, useI18next, Trans, useTranslation } from 'gatsby-plugin-react-i18next';
 
 const Header = () => {
-  //const { companyName } = useSiteMetadata();
+  const {t} = useTranslation();
+
+  const {languages, originalPath} = useI18next();
 
   const { waterways } = useStaticQuery(graphql`
     query {
@@ -21,7 +23,7 @@ const Header = () => {
         }
       }
     }
-  `)
+  `);
 
   return (
     <header>
@@ -35,10 +37,10 @@ const Header = () => {
           <Nav className="mr-auto" >
             <Link to="/" className="link-no-style">
               <Nav.Link as="span" eventKey="spots">
-                Spots
+                <Trans>Spots</Trans>
               </Nav.Link>
             </Link>
-            <NavDropdown title="Lakes" id="nav-dropdown-lakes" className="link-no-style">
+            <NavDropdown title={t('Lakes')} id="nav-dropdown-lakes" className="link-no-style">
               { waterways.nodes
                 .filter(waterway => waterway.paddlingEnvironments.name === "Lake")
                 .map(waterway => {
@@ -65,7 +67,7 @@ const Header = () => {
               </NavDropdown.Item>
             </NavDropdown>
 
-            <NavDropdown title="Rivers" id="nav-dropdown-rivers" className="link-no-style">
+            <NavDropdown title={t('Rivers')} id="nav-dropdown-rivers" className="link-no-style">
               { waterways.nodes
                 .filter(waterway => waterway.paddlingEnvironments.name === "River")
                 .map(waterway => {
@@ -91,7 +93,7 @@ const Header = () => {
               </NavDropdown.Item>
             </NavDropdown>
 
-            <NavDropdown title="Whitewater" id="nav-dropdown-whitewater" className="link-no-style">
+            <NavDropdown title={t('Whitewater')} id="nav-dropdown-whitewater" className="link-no-style">
               { waterways.nodes
                 .filter(waterway => waterway.paddlingEnvironments.name === "Whitewater")
                 .map(waterway => {
@@ -117,21 +119,33 @@ const Header = () => {
               </NavDropdown.Item>
             </NavDropdown>
 
-            <NavDropdown title="About" id="nav-dropdown-about" className="link-no-style" align="end">
+            <NavDropdown title={t('About')} id="nav-dropdown-about" className="link-no-style" align="end">
               <NavDropdown.Item>
                 <Link to="/about" className="link-no-style">
                   <Nav.Link as="span" eventKey="about">
-                    About Swiss Paddel Buch
+                    <Trans>About Swiss Paddel Buch</Trans>
                   </Nav.Link>
                 </Link>
               </NavDropdown.Item>
               <NavDropdown.Item>
                 <Link to="/about/api" className="link-no-style">
                   <Nav.Link as="span" eventKey="api">
-                    Public Database/API
+                    <Trans>Public Database/API</Trans>
                   </Nav.Link>
                 </Link>
               </NavDropdown.Item>
+            </NavDropdown>
+
+            <NavDropdown title={t('Language')} id="nav-dropdown-about" className="link-no-style languages" align="end">
+              {languages.map((lng) => (
+                <NavDropdown.Item>
+                <Link to={originalPath} className="link-no-style" language={lng}>
+                  <Nav.Link as="span" eventKey={lng}>
+                    {lng}
+                  </Nav.Link>
+                </Link>
+              </NavDropdown.Item>
+              ))}
             </NavDropdown>
           </Nav>
         </Navbar.Collapse>
