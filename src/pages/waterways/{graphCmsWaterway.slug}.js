@@ -2,7 +2,7 @@ import * as React from "react";
 import { Helmet } from "react-helmet";
 import Layout from "components/Layout";
 import Map from "components/Map";
-import { graphql, Link } from "gatsby";
+import { graphql } from "gatsby";
 import { Marker, Popup, GeoJSON } from "react-leaflet";
 import { Container, Row, Col } from "react-bootstrap";
 import L from "leaflet";
@@ -10,10 +10,22 @@ import * as layerStyle from '../../hooks/useLayerStyles';
 import { RichText } from '@graphcms/rich-text-react-renderer';
 import { isDomAvailable } from 'lib/util';
 import  { markerStyles } from 'lib/marker-styles';
+import { Link, Trans, useTranslation } from 'gatsby-plugin-react-i18next';
 
 export const pageQuery = graphql`
-  query LakePageQuery($slug: String!) {
-    graphCmsWaterway(locale: {eq: en}, slug: {eq: $slug}) {
+  query LakePageQuery($slug: String!, $language: GraphCMS_Locale!) {
+    locales: allLocale(
+      filter: {language: {eq: $language}}
+    ) {
+      edges {
+        node {
+          ns
+          data
+          language
+        }
+      }
+    }
+    graphCmsWaterway(locale: {eq: $language}, slug: {eq: $slug}) {
       name
       geometry
       spots {
@@ -64,6 +76,9 @@ export const pageQuery = graphql`
 `;
 
 export default function LakeDetailsPage({ data: { graphCmsWaterway } }) {
+
+  const {t} = useTranslation();
+
   var spotEinsteigAufsteigIcon
   var spotNurEinsteigIcon
   var spotNurAufsteigIcon
@@ -87,7 +102,7 @@ export default function LakeDetailsPage({ data: { graphCmsWaterway } }) {
     
     <Layout pageName="waterway-details">
       <Helmet>
-        <title>Swiss Paddel Buch - Lakes - {graphCmsWaterway.name}</title>
+        <title>{t(`Swiss Paddel Buch - Waterways`)} - {graphCmsWaterway.name}</title>
       </Helmet>
       <Container fluid >
         <Row className="justify-content-center g-0">
@@ -113,11 +128,11 @@ export default function LakeDetailsPage({ data: { graphCmsWaterway } }) {
                       <Popup>
                         <b>{name}</b>
                         <br />{obstacleType.name}
-                        <p><Link to={`/obstacles/${slug}`}>More details</Link></p>
+                        <p><Link to={`/obstacles/${slug}`}><Trans>More details</Trans></Link></p>
                       </Popup>
                     </GeoJSON>
                     <GeoJSON data={portageRoute} style={layerStyle.portageStyle}>
-                      <Popup><b>Portage route for {name}</b></Popup>
+                      <Popup><b><Trans>Portage route for</Trans> {name}</b></Popup>
                     </GeoJSON>
                   </div>
                 )
@@ -134,7 +149,7 @@ export default function LakeDetailsPage({ data: { graphCmsWaterway } }) {
                   {<Popup>
                     <b>{name}</b>
                     <RichText content={description.raw} />
-                    <p><Link to={`/spots/${slug}`}>More details</Link></p>
+                    <p><Link to={`/spots/${slug}`}><Trans>More details</Trans></Link></p>
                   </Popup>}
                 </Marker>
                 );
@@ -149,7 +164,7 @@ export default function LakeDetailsPage({ data: { graphCmsWaterway } }) {
                   {<Popup>
                     <b>{name}</b>
                     <RichText content={description.raw} />
-                    <p><Link to={`/spots/${slug}`}>More details</Link></p>
+                    <p><Link to={`/spots/${slug}`}><Trans>More details</Trans></Link></p>
                   </Popup>}
                 </Marker>
                 );
@@ -164,7 +179,7 @@ export default function LakeDetailsPage({ data: { graphCmsWaterway } }) {
                   {<Popup>
                     <b>{name}</b>
                     <RichText content={description.raw} />
-                    <p><Link to={`/spots/${slug}`}>More details</Link></p>
+                    <p><Link to={`/spots/${slug}`}><Trans>More details</Trans></Link></p>
                   </Popup>}
                 </Marker>
                 );
@@ -179,7 +194,7 @@ export default function LakeDetailsPage({ data: { graphCmsWaterway } }) {
                   {<Popup>
                     <b>{name}</b>
                     <RichText content={description.raw} />
-                    <p><Link to={`/spots/${slug}`}>More details</Link></p>
+                    <p><Link to={`/spots/${slug}`}><Trans>More details</Trans></Link></p>
                   </Popup>}
                 </Marker>
                 );
