@@ -1,3 +1,8 @@
 {
-  "Spot": "Einsteigsorte"
+  "Spot": "Einsteigsorte",
+  "More Details": "Weitere Details",
+  "GPS": "GPS",
+  "Type": "Typ",
+  "Approx. Address": "Ungefähre Adresse",
+  "Waterway": "Wasserweg"
 }

@@ -8,7 +8,7 @@ import { Container, Row, Col } from "react-bootstrap";
 import { isDomAvailable } from 'lib/util';
 import L from "leaflet";
 import  { markerStyles } from 'lib/marker-styles';
-import { Link, Trans, useTranslation, I18nextContext } from 'gatsby-plugin-react-i18next';
+import { Link, Trans, useTranslation } from 'gatsby-plugin-react-i18next';
 
 const CH_CENTRE = {
   lat: 46.801111,
@@ -23,10 +23,6 @@ const CENTER = [CH_CENTRE.lat, CH_CENTRE.lng];
 function IndexPage ({ data }) {
 
   const spots = data.spots
-
-  const context = React.useContext(I18nextContext);
-
-  console.log(context)
 
   const {t} = useTranslation();
 
@@ -202,10 +198,10 @@ function IndexPage ({ data }) {
               <div id="spot-details" hidden={true}>
                 <h1 id="spot-name"> </h1>
                 <span id="spot-desc"></span>
-                <p><b>Type:</b> <span id="spot-type"></span></p>
-                <p><b>GPS:</b> <span id="spot-gps"></span></p>
-                <p><b>Approx. Address:</b> <span id="spot-address"></span></p>
-                <p><b>Waterway: </b><span id="spot-waterway"></span></p>
+                <p><b><Trans>Type</Trans>:</b> <span id="spot-type"></span></p>
+                <p><b><Trans>GPS</Trans>:</b> <span id="spot-gps"></span></p>
+                <p><b><Trans>Approx. Address</Trans>:</b> <span id="spot-address"></span></p>
+                <p><b><Trans>Waterway</Trans>:</b> <span id="spot-waterway"></span></p>
                 <p><span id="spot-link"></span></p>
               </div>
             </div>
@@ -219,8 +215,9 @@ function IndexPage ({ data }) {
 
 export default IndexPage;
 
+
 export const pageQuery = graphql`
-  query($language: String!) {
+  query($language: GraphCMS_Locale!) {
     locales: allLocale(
       filter: {language: {eq: $language}}
     ) {
@@ -232,7 +229,7 @@ export const pageQuery = graphql`
         }
       }
     }
-    spots: allGraphCmsSpot(filter: {locale: {eq: en}}) {
+    spots: allGraphCmsSpot(filter: {locale: {eq: $language}}) {
       nodes {
         name
         approximateAddress
