@@ -31,13 +31,6 @@ module.exports = {
         path: `${__dirname}/src/assets/images`,
       },
     },
-    {
-      resolve: `gatsby-source-filesystem`,
-      options: {
-        name: `tours`,
-        path: `${__dirname}/src/pages/tours`,
-      },
-    },
     "gatsby-plugin-react-leaflet",
     {
       resolve: "gatsby-plugin-manifest",
@@ -56,7 +49,32 @@ module.exports = {
         token: process.env.GCMS_TOKEN,
       }
     },
-    "gatsby-plugin-gatsby-cloud"
+    "gatsby-plugin-gatsby-cloud",
+    {
+      resolve: `gatsby-source-filesystem`,
+      options: {
+        path: `${__dirname}/src/locales`,
+        name: `locale`
+      }
+    },
+    {
+      resolve: `gatsby-plugin-react-i18next`,
+      options: {
+        localeJsonSourceName: `locale`,
+        languages: ['en', 'de'],
+        defaultLanguage: 'de',
+        siteUrl: process.env.SITE_URL,
+        redirect: true,
+        i18nextOptions: {
+          debug: true,
+          interpolation: {
+            escapeValue: false 
+          },
+          keySeparator: false,
+          nsSeparator: false
+        }
+      }
+    }
   ],
 };
 
