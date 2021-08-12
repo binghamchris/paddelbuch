@@ -1,27 +1,34 @@
 import React from "react";
-import { Link } from "gatsby";
 import { graphql, useStaticQuery } from "gatsby"
 import { Navbar, Nav, NavDropdown } from "react-bootstrap"
+import { Link, useI18next, Trans, useTranslation, I18nextContext } from 'gatsby-plugin-react-i18next';
+
 
 const Header = () => {
-  //const { companyName } = useSiteMetadata();
+  const {t} = useTranslation();
+
+  const {languages, originalPath} = useI18next();
+  const context = React.useContext(I18nextContext);
+
+  const language = context.language
 
   const { waterways } = useStaticQuery(graphql`
     query {
       waterways: allGraphCmsWaterway(
-        filter: {locale: {eq: en}, showInMenu: {eq: true}}
+        filter: {showInMenu: {eq: true}}
         sort: {fields: name}
       ) {
         nodes {
           name
           slug
+          locale
           paddlingEnvironments {
-            name
+            slug
           }
         }
       }
     }
-  `)
+  `);
 
   return (
     <header>
@@ -35,12 +42,12 @@ const Header = () => {
           <Nav className="mr-auto" >
             <Link to="/" className="link-no-style">
               <Nav.Link as="span" eventKey="spots">
-                Spots
+                <Trans>Spots</Trans>
               </Nav.Link>
             </Link>
-            <NavDropdown title="Lakes" id="nav-dropdown-lakes" className="link-no-style">
+            <NavDropdown title={t('Lakes')} id="nav-dropdown-lakes" className="link-no-style">
               { waterways.nodes
-                .filter(waterway => waterway.paddlingEnvironments.name === "Lake")
+                .filter(waterway => waterway.paddlingEnvironments.slug === "see" && waterway.locale === language)
                 .map(waterway => {
                   const{name, slug} = waterway;
               
@@ -59,15 +66,15 @@ const Header = () => {
               <NavDropdown.Item>
                 <Link to={`/waterways/lakes`} className="link-no-style">
                   <Nav.Link as="span">
-                    More lakes...
+                    <Trans>More lakes</Trans>...
                   </Nav.Link>
                 </Link>
               </NavDropdown.Item>
             </NavDropdown>
 
-            <NavDropdown title="Rivers" id="nav-dropdown-rivers" className="link-no-style">
+            <NavDropdown title={t('Rivers')} id="nav-dropdown-rivers" className="link-no-style">
               { waterways.nodes
-                .filter(waterway => waterway.paddlingEnvironments.name === "River")
+                .filter(waterway => waterway.paddlingEnvironments.slug === "fluss" && waterway.locale === language)
                 .map(waterway => {
                   const{name, slug} = waterway;
                   return (
@@ -85,15 +92,15 @@ const Header = () => {
               <NavDropdown.Item>
                 <Link to={`/waterways/rivers`} className="link-no-style">
                   <Nav.Link as="span">
-                    More rivers...
+                    <Trans>More rivers</Trans>...
                   </Nav.Link>
                 </Link>
               </NavDropdown.Item>
             </NavDropdown>
 
-            <NavDropdown title="Whitewater" id="nav-dropdown-whitewater" className="link-no-style">
+            <NavDropdown title={t('Whitewater')} id="nav-dropdown-whitewater" className="link-no-style">
               { waterways.nodes
-                .filter(waterway => waterway.paddlingEnvironments.name === "Whitewater")
+                .filter(waterway => waterway.paddlingEnvironments.slug === "wildwasser" && waterway.locale === language)
                 .map(waterway => {
                   const{name, slug} = waterway;
                   return (
@@ -110,28 +117,40 @@ const Header = () => {
               <NavDropdown.Divider />
               <NavDropdown.Item>
                 <Link to={`/waterways/whitewater`} className="link-no-style">
-                  <Nav.Link as="span">
-                    More whitewater...
+                  <Nav.Link as="span">          
+                    <Trans>More whitewater</Trans>...
                   </Nav.Link>
                 </Link>
               </NavDropdown.Item>
             </NavDropdown>
 
-            <NavDropdown title="About" id="nav-dropdown-about" className="link-no-style" align="end">
+            <NavDropdown title={t('About')} id="nav-dropdown-about" className="link-no-style" align="end">
               <NavDropdown.Item>
                 <Link to="/about" className="link-no-style">
                   <Nav.Link as="span" eventKey="about">
-                    About Swiss Paddel Buch
+                    <Trans>About Swiss Paddel Buch</Trans>
                   </Nav.Link>
                 </Link>
               </NavDropdown.Item>
               <NavDropdown.Item>
                 <Link to="/about/api" className="link-no-style">
                   <Nav.Link as="span" eventKey="api">
-                    Public Database/API
+                    <Trans>Public Database/API</Trans>
                   </Nav.Link>
                 </Link>
               </NavDropdown.Item>
+            </NavDropdown>
+            <NavDropdown.Divider />
+            <NavDropdown title={t('Language')} id="nav-dropdown-about" className="link-no-style languages" align="end">
+              {languages.map((lng) => (
+                <NavDropdown.Item>
+                <Link to={originalPath} className="link-no-style" language={lng}>
+                  <Nav.Link as="span" eventKey={lng}>
+                    {lng}
+                  </Nav.Link>
+                </Link>
+              </NavDropdown.Item>
+              ))}
             </NavDropdown>
           </Nav>
         </Navbar.Collapse>

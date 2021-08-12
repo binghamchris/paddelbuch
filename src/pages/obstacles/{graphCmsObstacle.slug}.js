@@ -2,7 +2,7 @@ import * as React from "react";
 import { Helmet } from "react-helmet";
 import Layout from "components/Layout";
 import Map from "components/Map";
-import { graphql, Link } from "gatsby";
+import { graphql } from "gatsby";
 import { Marker, Popup, GeoJSON } from "react-leaflet";
 import { Container, Row, Col } from "react-bootstrap";
 import * as layerStyle from '../../hooks/useLayerStyles';
@@ -10,10 +10,22 @@ import { RichText } from '@graphcms/rich-text-react-renderer';
 import { isDomAvailable } from 'lib/util';
 import L from "leaflet";
 import  { markerStyles } from 'lib/marker-styles';
+import { Link, Trans, useTranslation } from 'gatsby-plugin-react-i18next';
 
 export const pageQuery = graphql`
-query ObstaclePageQuery($slug: String!) {
-  graphCmsObstacle(locale: {eq: en}, slug: {eq: $slug}) {
+query ObstaclePageQuery($slug: String!, $language: GraphCMS_Locale!) {
+  locales: allLocale(
+    filter: {language: {eq: $language}}
+  ) {
+    edges {
+      node {
+        ns
+        data
+        language
+      }
+    }
+  }
+  graphCmsObstacle(locale: {eq: $language}, slug: {eq: $slug}) {
     name
     slug
     geometry
@@ -63,6 +75,9 @@ query ObstaclePageQuery($slug: String!) {
 `;
 
 export default function ObstacleDetailsPage({ data: { graphCmsObstacle } }) {
+
+  const {t} = useTranslation();
+
   var spotEinsteigAufsteigIcon
   var spotNurEinsteigIcon
   var spotNurAufsteigIcon
@@ -88,7 +103,7 @@ export default function ObstacleDetailsPage({ data: { graphCmsObstacle } }) {
     return(
       <Layout pageName="obstacle-details">
         <Helmet>
-          <title>Swiss Paddel Buch - Obstacles - {graphCmsObstacle.name}</title>
+          <title>{t(`Swiss Paddel Buch - Obstacles`)} - {graphCmsObstacle.name}</title>
         </Helmet>
         <Container fluid >
           <Row className="justify-content-center g-0">
@@ -120,10 +135,10 @@ export default function ObstacleDetailsPage({ data: { graphCmsObstacle } }) {
           </Row>
           <Row className="justify-content-center g-0 obstacle-description">
             <Col xl="12" lg="12" md="12" sm="12" xs="12">
-              <h2>Obstacle Details</h2>
-              <p><b>Type:</b> {graphCmsObstacle.obstacleType.name}</p>
-              <p><b>GPS:</b> {(!!obstacleCentre) ? obstacleCentre["lat"] : null}, {(!!obstacleCentre) ? obstacleCentre["lng"] : null}</p>
-              <p><b>Waterway:</b> <Link to={`/waterways/${graphCmsObstacle.waterway.slug}`}>{graphCmsObstacle.waterway.name}</Link></p>
+              <h2><Trans>Obstacle Details</Trans></h2>
+              <p><b><Trans>Type</Trans>:</b> {graphCmsObstacle.obstacleType.name}</p>
+              <p><b><Trans>GPS</Trans>:</b> {(!!obstacleCentre) ? obstacleCentre["lat"] : null}, {(!!obstacleCentre) ? obstacleCentre["lng"] : null}</p>
+              <p><b><Trans>Waterway</Trans>:</b> <Link to={`/waterways/${graphCmsObstacle.waterway.slug}`}>{graphCmsObstacle.waterway.name}</Link></p>
             </Col>
           </Row>
         </Container>
@@ -134,7 +149,7 @@ export default function ObstacleDetailsPage({ data: { graphCmsObstacle } }) {
     return(
       <Layout pageName="obstacle-details">
         <Helmet>
-          <title>Swiss Paddel Buch - Obstacles - {graphCmsObstacle.name}</title>
+          <title>{t(`Swiss Paddel Buch - Obstacles`)} - {graphCmsObstacle.name}</title>
         </Helmet>
         <Container fluid >
           <Row className="justify-content-center g-0">
@@ -170,7 +185,7 @@ export default function ObstacleDetailsPage({ data: { graphCmsObstacle } }) {
                     {<Popup>
                       <b>{name}</b>
                       <RichText content={description.raw} />
-                      <p><Link to={`/spots/${slug}`}>More details</Link></p>
+                      <p><Link to={`/spots/${slug}`}><Trans>More details</Trans></Link></p>
                     </Popup>}
                   </Marker>
                   );
@@ -185,7 +200,7 @@ export default function ObstacleDetailsPage({ data: { graphCmsObstacle } }) {
                     {<Popup>
                       <b>{name}</b>
                       <RichText content={description.raw} />
-                      <p><Link to={`/spots/${slug}`}>More details</Link></p>
+                      <p><Link to={`/spots/${slug}`}><Trans>More details</Trans></Link></p>
                     </Popup>}
                   </Marker>
                   );
@@ -200,7 +215,7 @@ export default function ObstacleDetailsPage({ data: { graphCmsObstacle } }) {
                     {<Popup>
                       <b>{name}</b>
                       <RichText content={description.raw} />
-                      <p><Link to={`/spots/${slug}`}>More details</Link></p>
+                      <p><Link to={`/spots/${slug}`}><Trans>More details</Trans></Link></p>
                     </Popup>}
                   </Marker>
                   );
@@ -215,7 +230,7 @@ export default function ObstacleDetailsPage({ data: { graphCmsObstacle } }) {
                     {<Popup>
                       <b>{name}</b>
                       <RichText content={description.raw} />
-                      <p><Link to={`/spots/${slug}`}>More details</Link></p>
+                      <p><Link to={`/spots/${slug}`}><Trans>More details</Trans></Link></p>
                     </Popup>}
                   </Marker>
                   );
@@ -230,18 +245,18 @@ export default function ObstacleDetailsPage({ data: { graphCmsObstacle } }) {
           </Row>
           <Row className="justify-content-center g-0 obstacle-description">
             <Col xl="6" lg="6" md="12" sm="12" xs="12">
-              <h2>Obstacle Details</h2>
+              <h2><Trans>Obstacle Details</Trans></h2>
               <RichText content={graphCmsObstacle.description.raw} />
-              <p><b>Type:</b> {graphCmsObstacle.obstacleType.name}</p>
-              <p><b>GPS:</b> {(!!obstacleCentre) ? obstacleCentre["lat"] : null}, {(!!obstacleCentre) ? obstacleCentre["lng"] : null}</p>
-              <p><b>Waterway:</b> <Link to={`/waterways/${graphCmsObstacle.waterway.slug}`}>{graphCmsObstacle.waterway.name}</Link></p>
+              <p><b><Trans>Type</Trans>:</b> {graphCmsObstacle.obstacleType.name}</p>
+              <p><b><Trans>GPS</Trans>:</b> {(!!obstacleCentre) ? obstacleCentre["lat"] : null}, {(!!obstacleCentre) ? obstacleCentre["lng"] : null}</p>
+              <p><b><Trans>Waterway</Trans>:</b> <Link to={`/waterways/${graphCmsObstacle.waterway.slug}`}>{graphCmsObstacle.waterway.name}</Link></p>
             </Col>
             <Col xl="6" lg="6" md="12" sm="12" xs="12">
-              <h2>Portage Route</h2>
+              <h2><Trans>Portage Route</Trans></h2>
               <RichText content={graphCmsObstacle.portageDescription.raw} />
-              <p><b>Distance:</b> {graphCmsObstacle.portageDistance}m</p>
-              <p><b>Exit Spot:</b> <Link to={`/spots/${graphCmsObstacle.spots.filter(spot => spot.spotType.slug === "nur-aufsteig")[0].slug}`}>{graphCmsObstacle.spots.filter(spot => spot.spotType.slug === "nur-aufsteig")[0].name}</Link></p>
-              <p><b>Re-entry Spot:</b> <Link to={`/spots/${graphCmsObstacle.spots.filter(spot => spot.spotType.slug === "nur-einsteig")[0].slug}`}>{graphCmsObstacle.spots.filter(spot => spot.spotType.slug === "nur-einsteig")[0].name}</Link></p>
+              <p><b><Trans>Distance</Trans>:</b> {graphCmsObstacle.portageDistance}m</p>
+              <p><b><Trans>Exit Spot</Trans>:</b> <Link to={`/spots/${graphCmsObstacle.spots.filter(spot => spot.spotType.slug === "nur-aufsteig")[0].slug}`}>{graphCmsObstacle.spots.filter(spot => spot.spotType.slug === "nur-aufsteig")[0].name}</Link></p>
+              <p><b><Trans>Re-entry Spot</Trans>:</b> <Link to={`/spots/${graphCmsObstacle.spots.filter(spot => spot.spotType.slug === "nur-einsteig")[0].slug}`}>{graphCmsObstacle.spots.filter(spot => spot.spotType.slug === "nur-einsteig")[0].name}</Link></p>
               
             </Col>
           </Row>
