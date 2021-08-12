@@ -1,24 +1,29 @@
 import React from "react";
 import { graphql, useStaticQuery } from "gatsby"
 import { Navbar, Nav, NavDropdown } from "react-bootstrap"
-import { Link, useI18next, Trans, useTranslation } from 'gatsby-plugin-react-i18next';
+import { Link, useI18next, Trans, useTranslation, I18nextContext } from 'gatsby-plugin-react-i18next';
+
 
 const Header = () => {
   const {t} = useTranslation();
 
   const {languages, originalPath} = useI18next();
+  const context = React.useContext(I18nextContext);
+
+  const language = context.language
 
   const { waterways } = useStaticQuery(graphql`
     query {
       waterways: allGraphCmsWaterway(
-        filter: {locale: {eq: en}, showInMenu: {eq: true}}
+        filter: {showInMenu: {eq: true}}
         sort: {fields: name}
       ) {
         nodes {
           name
           slug
+          locale
           paddlingEnvironments {
-            name
+            slug
           }
         }
       }
@@ -42,7 +47,7 @@ const Header = () => {
             </Link>
             <NavDropdown title={t('Lakes')} id="nav-dropdown-lakes" className="link-no-style">
               { waterways.nodes
-                .filter(waterway => waterway.paddlingEnvironments.name === "Lake")
+                .filter(waterway => waterway.paddlingEnvironments.slug === "see" && waterway.locale === language)
                 .map(waterway => {
                   const{name, slug} = waterway;
               
@@ -69,7 +74,7 @@ const Header = () => {
 
             <NavDropdown title={t('Rivers')} id="nav-dropdown-rivers" className="link-no-style">
               { waterways.nodes
-                .filter(waterway => waterway.paddlingEnvironments.name === "River")
+                .filter(waterway => waterway.paddlingEnvironments.slug === "fluss" && waterway.locale === language)
                 .map(waterway => {
                   const{name, slug} = waterway;
                   return (
@@ -95,7 +100,7 @@ const Header = () => {
 
             <NavDropdown title={t('Whitewater')} id="nav-dropdown-whitewater" className="link-no-style">
               { waterways.nodes
-                .filter(waterway => waterway.paddlingEnvironments.name === "Whitewater")
+                .filter(waterway => waterway.paddlingEnvironments.slug === "wildwasser" && waterway.locale === language)
                 .map(waterway => {
                   const{name, slug} = waterway;
                   return (
