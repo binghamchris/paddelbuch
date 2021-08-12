@@ -140,7 +140,7 @@ const Header = () => {
                 </Link>
               </NavDropdown.Item>
             </NavDropdown>
-
+            <NavDropdown.Divider />
             <NavDropdown title={t('Language')} id="nav-dropdown-about" className="link-no-style languages" align="end">
               {languages.map((lng) => (
                 <NavDropdown.Item>
