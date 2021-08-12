@@ -3,12 +3,12 @@ import { Helmet } from "react-helmet";
 import { Marker } from "react-leaflet";
 import Layout from "components/Layout";
 import Map from "components/Map";
-import { graphql, useStaticQuery } from "gatsby"
+import { graphql } from "gatsby"
 import { Container, Row, Col } from "react-bootstrap";
 import { isDomAvailable } from 'lib/util';
 import L from "leaflet";
 import  { markerStyles } from 'lib/marker-styles';
-import { Link, Trans, useTranslation } from 'gatsby-plugin-react-i18next';
+import { Trans, useTranslation } from 'gatsby-plugin-react-i18next';
 
 const CH_CENTRE = {
   lat: 46.801111,
@@ -71,7 +71,7 @@ function IndexPage ({ data }) {
                         document.getElementById('spot-waterway').innerHTML = `<a href="./waterways/${waterways.slug}">${waterways.name}</a>`;
                         document.getElementById('spot-gps').textContent = location.latitude + ", " + location.longitude;
                         document.getElementById('spot-address').textContent = approximateAddress;
-                        document.getElementById('spot-link').innerHTML = `<a href="./spots/${slug}">More details</a>`;
+                        document.getElementById('spot-link').innerHTML = `<a href="./spots/${slug}">` + t('More details') + `</a>`;
                         document.getElementById('spot-type').textContent = spotType.name;
 
                         if (description.html !== "<p>None</p>") {
@@ -105,7 +105,7 @@ function IndexPage ({ data }) {
                         document.getElementById('spot-waterway').innerHTML = `<a href="./waterways/${waterways.slug}">${waterways.name}</a>`;
                         document.getElementById('spot-gps').textContent = location.latitude + ", " + location.longitude;
                         document.getElementById('spot-address').textContent = approximateAddress;
-                        document.getElementById('spot-link').innerHTML = `<a href="./spots/${slug}">More details</a>`;
+                        document.getElementById('spot-link').innerHTML = `<a href="./spots/${slug}">` + t('More details') + `</a>`;
                         document.getElementById('spot-type').textContent = spotType.name;
 
                         if (description.html !== "<p>None</p>") {
@@ -139,7 +139,7 @@ function IndexPage ({ data }) {
                         document.getElementById('spot-waterway').innerHTML = `<a href="./waterways/${waterways.slug}">${waterways.name}</a>`;
                         document.getElementById('spot-gps').textContent = location.latitude + ", " + location.longitude;
                         document.getElementById('spot-address').textContent = approximateAddress;
-                        document.getElementById('spot-link').innerHTML = `<a href="./spots/${slug}">More details</a>`;
+                        document.getElementById('spot-link').innerHTML = `<a href="./spots/${slug}">` + t('More details') + `</a>`;
                         document.getElementById('spot-type').textContent = spotType.name;
 
                         if (description.html !== "<p>None</p>") {
@@ -173,7 +173,7 @@ function IndexPage ({ data }) {
                         document.getElementById('spot-waterway').innerHTML = `<a href="./waterways/${waterways.slug}">${waterways.name}</a>`;
                         document.getElementById('spot-gps').textContent = location.latitude + ", " + location.longitude;
                         document.getElementById('spot-address').textContent = approximateAddress;
-                        document.getElementById('spot-link').innerHTML = `<a href="./spots/${slug}">More details</a>`;
+                        document.getElementById('spot-link').innerHTML = `<a href="./spots/${slug}">` + t('More details') + `</a>`;
                         document.getElementById('spot-type').textContent = spotType.name;
 
                         if (description.html !== "<p>None</p>") {
@@ -235,6 +235,7 @@ export const pageQuery = graphql`
         approximateAddress
         description {
           html
+          raw
         }
         location {
           latitude
