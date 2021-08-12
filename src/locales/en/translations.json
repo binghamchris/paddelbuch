@@ -4,5 +4,6 @@
   "GPS": "GPS",
   "Type": "Type",
   "Approx. Address": "Approx. Address",
-  "Waterway": "Waterway"
+  "Waterway": "Waterway",
+  "Name": "Name"
 }
