@@ -66,7 +66,6 @@ module.exports = {
         siteUrl: process.env.SITE_URL,
         redirect: true,
         i18nextOptions: {
-          debug: true,
           interpolation: {
             escapeValue: false 
           },
