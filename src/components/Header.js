@@ -61,7 +61,7 @@ const Header = () => {
               <NavDropdown.Item>
                 <Link to={`/waterways/lakes`} className="link-no-style">
                   <Nav.Link as="span">
-                    More lakes...
+                    <Trans>More lakes</Trans>...
                   </Nav.Link>
                 </Link>
               </NavDropdown.Item>
@@ -87,7 +87,7 @@ const Header = () => {
               <NavDropdown.Item>
                 <Link to={`/waterways/rivers`} className="link-no-style">
                   <Nav.Link as="span">
-                    More rivers...
+                    <Trans>More rivers</Trans>...
                   </Nav.Link>
                 </Link>
               </NavDropdown.Item>
@@ -112,8 +112,8 @@ const Header = () => {
               <NavDropdown.Divider />
               <NavDropdown.Item>
                 <Link to={`/waterways/whitewater`} className="link-no-style">
-                  <Nav.Link as="span">
-                    More whitewater...
+                  <Nav.Link as="span">          
+                    <Trans>More whitewater</Trans>...
                   </Nav.Link>
                 </Link>
               </NavDropdown.Item>
