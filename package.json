@@ -7,9 +7,9 @@
     "name": "Chris Bingham"
   },
   "dependencies": {
-    "@graphcms/rich-text-react-renderer": "^0.1.5",
+    "@graphcms/rich-text-react-renderer": "^0.2.0",
     "bootstrap": "^5.0.2",
-    "gatsby": "^3.11.0",
+    "gatsby": "^3.11.1",
     "gatsby-plugin-gatsby-cloud": "^2.11.0",
     "gatsby-plugin-manifest": "^3.11.0",
     "gatsby-plugin-react-helmet": "^4.11.0",
