@@ -31,13 +31,6 @@ module.exports = {
         path: `${__dirname}/src/assets/images`,
       },
     },
-    {
-      resolve: `gatsby-source-filesystem`,
-      options: {
-        name: `tours`,
-        path: `${__dirname}/src/pages/tours`,
-      },
-    },
     "gatsby-plugin-react-leaflet",
     {
       resolve: "gatsby-plugin-manifest",
