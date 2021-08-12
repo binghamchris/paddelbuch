@@ -2,7 +2,7 @@ import * as React from "react";
 import { Helmet } from "react-helmet";
 import Layout from "components/Layout";
 import Map from "components/Map";
-import { graphql, Link } from "gatsby";
+import { graphql } from "gatsby";
 import { Marker, Popup, GeoJSON } from "react-leaflet";
 import { Container, Row, Col } from "react-bootstrap";
 import * as layerStyle from '../../hooks/useLayerStyles';
@@ -10,10 +10,22 @@ import { RichText } from '@graphcms/rich-text-react-renderer';
 import { isDomAvailable } from 'lib/util';
 import L from "leaflet";
 import  { markerStyles } from 'lib/marker-styles';
+import { Link, Trans, useTranslation } from 'gatsby-plugin-react-i18next';
 
 export const pageQuery = graphql`
-  query SpotPageQuery($slug: String!) {
-    graphCmsSpot(locale: {eq: en}, slug: {eq: $slug}) {
+  query SpotPageQuery($slug: String!, $language: GraphCMS_Locale!) {
+    locales: allLocale(
+      filter: {language: {eq: $language}}
+    ) {
+      edges {
+        node {
+          ns
+          data
+          language
+        }
+      }
+    }
+    graphCmsSpot(locale: {eq: $language}, slug: {eq: $slug}) {
       name
       approximateAddress
       description {
@@ -80,6 +92,9 @@ export const pageQuery = graphql`
 `;
 
 export default function SpotDetailsPage({ data: { graphCmsSpot } }) {
+
+  const {t} = useTranslation();
+
   var spotEinsteigAufsteigIcon
   var spotNurEinsteigIcon
   var spotNurAufsteigIcon
@@ -101,7 +116,7 @@ export default function SpotDetailsPage({ data: { graphCmsSpot } }) {
     
     <Layout pageName="spot-details">
       <Helmet>
-        <title>Swiss Paddel Buch - Spots - {graphCmsSpot.name}</title>
+        <title>{t(`Swiss Paddel Buch - Spots`)} - {graphCmsSpot.name}</title>
       </Helmet>
       <Container fluid >
         <Row className="justify-content-center g-0">
@@ -126,11 +141,11 @@ export default function SpotDetailsPage({ data: { graphCmsSpot } }) {
                       <Popup>
                         <b>{name}</b>
                         <br />{obstacleType.name}
-                        <p><Link to={`/obstacles/${slug}`}>More details</Link></p>
+                        <p><Link to={`/obstacles/${slug}`}><Trans>More details</Trans></Link></p>
                       </Popup>
                     </GeoJSON>
                     <GeoJSON data={portageRoute} style={layerStyle.portageStyle}>
-                      <Popup><b>Portage route for {name}</b></Popup>
+                      <Popup><b><Trans>Portage route for</Trans> {name}</b></Popup>
                     </GeoJSON>
                   </div>
                 )
@@ -147,7 +162,7 @@ export default function SpotDetailsPage({ data: { graphCmsSpot } }) {
                   {<Popup>
                     <b>{name}</b>
                     <RichText content={description.raw} />
-                    <p><Link to={`/spots/${slug}`}>More details</Link></p>
+                    <p><Link to={`/spots/${slug}`}><Trans>More details</Trans></Link></p>
                   </Popup>}
                 </Marker>
                 );
@@ -162,7 +177,7 @@ export default function SpotDetailsPage({ data: { graphCmsSpot } }) {
                   {<Popup>
                     <b>{name}</b>
                     <RichText content={description.raw} />
-                    <p><Link to={`/spots/${slug}`}>More details</Link></p>
+                    <p><Link to={`/spots/${slug}`}><Trans>More details</Trans></Link></p>
                   </Popup>}
                 </Marker>
                 );
@@ -177,7 +192,7 @@ export default function SpotDetailsPage({ data: { graphCmsSpot } }) {
                   {<Popup>
                     <b>{name}</b>
                     <RichText content={description.raw} />
-                    <p><Link to={`/spots/${slug}`}>More details</Link></p>
+                    <p><Link to={`/spots/${slug}`}><Trans>More details</Trans></Link></p>
                   </Popup>}
                 </Marker>
                 );
@@ -192,7 +207,7 @@ export default function SpotDetailsPage({ data: { graphCmsSpot } }) {
                   {<Popup>
                     <b>{name}</b>
                     <RichText content={description.raw} />
-                    <p><Link to={`/spots/${slug}`}>More details</Link></p>
+                    <p><Link to={`/spots/${slug}`}><Trans>More details</Trans></Link></p>
                   </Popup>}
                 </Marker>
                 );
@@ -209,10 +224,10 @@ export default function SpotDetailsPage({ data: { graphCmsSpot } }) {
           <Col xl="12" lg="12" md="12" sm="12" xs="12">
             <h2>Spot Details</h2>
             <RichText content={graphCmsSpot.description.raw} />
-            <p><b>Type:</b> {graphCmsSpot.spotType.name}</p>
-            <p><b>GPS:</b> {graphCmsSpot.location.latitude}, {graphCmsSpot.location.longitude}</p>
-            <p><b>Approx. Address:</b> {graphCmsSpot.approximateAddress}</p>
-            <p><b>Waterway:</b> <Link to={`/waterways/${graphCmsSpot.waterways.slug}`}>{graphCmsSpot.waterways.name}</Link></p>
+            <p><b><Trans>Type</Trans>:</b> {graphCmsSpot.spotType.name}</p>
+            <p><b><Trans>GPS</Trans>:</b> {graphCmsSpot.location.latitude}, {graphCmsSpot.location.longitude}</p>
+            <p><b><Trans>Approx. Address</Trans>:</b> {graphCmsSpot.approximateAddress}</p>
+            <p><b><Trans>Waterway</Trans>:</b> <Link to={`/waterways/${graphCmsSpot.waterways.slug}`}>{graphCmsSpot.waterways.name}</Link></p>
           </Col>
         </Row>
       </Container>

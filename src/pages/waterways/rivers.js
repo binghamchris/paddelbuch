@@ -1,38 +1,53 @@
 import React from "react";
 import { Helmet } from "react-helmet";
-import { Link } from "gatsby";
 import Layout from "components/Layout";
 import Container from "components/Container";
-import { graphql, useStaticQuery } from "gatsby"
+import { graphql } from "gatsby";
+import { Link, Trans, useTranslation } from 'gatsby-plugin-react-i18next';
 
-const RiversListPage = () => {
-
-  const { rivers } = useStaticQuery(graphql`
-    query {
-      rivers: allGraphCmsWaterway(
-        filter: {locale: {eq: en}, paddlingEnvironments: {slug: {eq: "fluss"}}}
-        sort: {fields: name}
-      ) {
-        nodes {
-          name
-          slug
+export const pageQuery = graphql`
+  query RiversPageQuery($language: GraphCMS_Locale!) {
+    locales: allLocale(
+      filter: {language: {eq: $language}}
+    ) {
+      edges {
+        node {
+          ns
+          data
+          language
         }
       }
     }
-  `)
+    rivers: allGraphCmsWaterway(
+      filter: {locale: {eq: $language}, paddlingEnvironments: {slug: {eq: "fluss"}}}
+      sort: {fields: name}
+    ) {
+      nodes {
+        name
+        slug
+      }
+    }
+  }
+`;
+
+const RiversListPage = ({ data }) => {
+
+  const {t} = useTranslation();
+
+  const rivers = data.rivers
 
   return (
     <Layout pageName="rivers">
       <Helmet>
-        <title>Swiss Paddel Buch - Rivers</title>
+        <title>{t(`Swiss Paddel Buch - Rivers`)}</title>
       </Helmet>
 
       <Container className="rivers-list">
-        <h2>Rivers</h2>
+        <h2><Trans>Rivers</Trans></h2>
         <table>
           <tbody>
             <tr>
-              <th>Name</th>
+              <th><Trans>Name</Trans></th>
             </tr>
             { rivers.nodes.map(river => {
               const {

@@ -3,11 +3,12 @@ import { Helmet } from "react-helmet";
 import { Marker } from "react-leaflet";
 import Layout from "components/Layout";
 import Map from "components/Map";
-import { graphql, useStaticQuery } from "gatsby"
+import { graphql } from "gatsby"
 import { Container, Row, Col } from "react-bootstrap";
 import { isDomAvailable } from 'lib/util';
 import L from "leaflet";
 import  { markerStyles } from 'lib/marker-styles';
+import { Trans, useTranslation } from 'gatsby-plugin-react-i18next';
 
 const CH_CENTRE = {
   lat: 46.801111,
@@ -19,34 +20,11 @@ const MAP_BOUNDS = [
 ]
 const CENTER = [CH_CENTRE.lat, CH_CENTRE.lng];
 
-function IndexPage () {
+function IndexPage ({ data }) {
 
-  const { spots } = useStaticQuery(graphql`
-    query {
-      spots: allGraphCmsSpot(filter: {locale: {eq: en}}) {
-        nodes {
-          name
-          approximateAddress
-          description {
-            html
-          }
-          location {
-            latitude
-            longitude
-          }
-          waterways {
-            name
-            slug
-          }
-          spotType {
-            name
-            slug
-          }
-          slug
-        }
-      }
-    }
-  `)
+  const spots = data.spots
+
+  const {t} = useTranslation();
 
   var spotEinsteigAufsteigIcon
   var spotNurEinsteigIcon
@@ -93,7 +71,7 @@ function IndexPage () {
                         document.getElementById('spot-waterway').innerHTML = `<a href="./waterways/${waterways.slug}">${waterways.name}</a>`;
                         document.getElementById('spot-gps').textContent = location.latitude + ", " + location.longitude;
                         document.getElementById('spot-address').textContent = approximateAddress;
-                        document.getElementById('spot-link').innerHTML = `<a href="./spots/${slug}">More details</a>`;
+                        document.getElementById('spot-link').innerHTML = `<a href="./spots/${slug}">` + t('More details') + `</a>`;
                         document.getElementById('spot-type').textContent = spotType.name;
 
                         if (description.html !== "<p>None</p>") {
@@ -127,7 +105,7 @@ function IndexPage () {
                         document.getElementById('spot-waterway').innerHTML = `<a href="./waterways/${waterways.slug}">${waterways.name}</a>`;
                         document.getElementById('spot-gps').textContent = location.latitude + ", " + location.longitude;
                         document.getElementById('spot-address').textContent = approximateAddress;
-                        document.getElementById('spot-link').innerHTML = `<a href="./spots/${slug}">More details</a>`;
+                        document.getElementById('spot-link').innerHTML = `<a href="./spots/${slug}">` + t('More details') + `</a>`;
                         document.getElementById('spot-type').textContent = spotType.name;
 
                         if (description.html !== "<p>None</p>") {
@@ -161,7 +139,7 @@ function IndexPage () {
                         document.getElementById('spot-waterway').innerHTML = `<a href="./waterways/${waterways.slug}">${waterways.name}</a>`;
                         document.getElementById('spot-gps').textContent = location.latitude + ", " + location.longitude;
                         document.getElementById('spot-address').textContent = approximateAddress;
-                        document.getElementById('spot-link').innerHTML = `<a href="./spots/${slug}">More details</a>`;
+                        document.getElementById('spot-link').innerHTML = `<a href="./spots/${slug}">` + t('More details') + `</a>`;
                         document.getElementById('spot-type').textContent = spotType.name;
 
                         if (description.html !== "<p>None</p>") {
@@ -195,7 +173,7 @@ function IndexPage () {
                         document.getElementById('spot-waterway').innerHTML = `<a href="./waterways/${waterways.slug}">${waterways.name}</a>`;
                         document.getElementById('spot-gps').textContent = location.latitude + ", " + location.longitude;
                         document.getElementById('spot-address').textContent = approximateAddress;
-                        document.getElementById('spot-link').innerHTML = `<a href="./spots/${slug}">More details</a>`;
+                        document.getElementById('spot-link').innerHTML = `<a href="./spots/${slug}">` + t('More details') + `</a>`;
                         document.getElementById('spot-type').textContent = spotType.name;
 
                         if (description.html !== "<p>None</p>") {
@@ -213,17 +191,17 @@ function IndexPage () {
             </Map>
           </Col>
           <Col xl="3" lg="3" md="12" sm="12" xs="12">
-            <div class="info-pane">
+            <div className="info-pane">
               <div id="welcome-message">
-                <p>Please click a spot for information</p>
+               <p><Trans>Please click a spot for information</Trans></p>
               </div>
-              <div id="spot-details" hidden="true">
+              <div id="spot-details" hidden={true}>
                 <h1 id="spot-name"> </h1>
                 <span id="spot-desc"></span>
-                <p><b>Type:</b> <span id="spot-type"></span></p>
-                <p><b>GPS:</b> <span id="spot-gps"></span></p>
-                <p><b>Approx. Address:</b> <span id="spot-address"></span></p>
-                <p><b>Waterway: </b><span id="spot-waterway"></span></p>
+                <p><b><Trans>Type</Trans>:</b> <span id="spot-type"></span></p>
+                <p><b><Trans>GPS</Trans>:</b> <span id="spot-gps"></span></p>
+                <p><b><Trans>Approx. Address</Trans>:</b> <span id="spot-address"></span></p>
+                <p><b><Trans>Waterway</Trans>:</b> <span id="spot-waterway"></span></p>
                 <p><span id="spot-link"></span></p>
               </div>
             </div>
@@ -236,3 +214,43 @@ function IndexPage () {
 };
 
 export default IndexPage;
+
+
+export const pageQuery = graphql`
+  query($language: GraphCMS_Locale!) {
+    locales: allLocale(
+      filter: {language: {eq: $language}}
+    ) {
+      edges {
+        node {
+          ns
+          data
+          language
+        }
+      }
+    }
+    spots: allGraphCmsSpot(filter: {locale: {eq: $language}}) {
+      nodes {
+        name
+        approximateAddress
+        description {
+          html
+          raw
+        }
+        location {
+          latitude
+          longitude
+        }
+        waterways {
+          name
+          slug
+        }
+        spotType {
+          name
+          slug
+        }
+        slug
+      }
+    }
+  }
+`;
