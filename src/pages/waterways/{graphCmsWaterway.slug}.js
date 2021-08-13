@@ -6,10 +6,10 @@ import { graphql } from "gatsby";
 import { Marker, Popup, GeoJSON } from "react-leaflet";
 import { Container, Row, Col } from "react-bootstrap";
 import L from "leaflet";
-import * as layerStyle from '../../hooks/useLayerStyles';
+import * as layerStyle from 'data/layer-styles';
 import { RichText } from '@graphcms/rich-text-react-renderer';
 import { isDomAvailable } from 'lib/util';
-import  { markerStyles } from 'lib/marker-styles';
+import  { markerStyles } from 'data/marker-styles';
 import { Link, Trans, useTranslation } from 'gatsby-plugin-react-i18next';
 
 export const pageQuery = graphql`

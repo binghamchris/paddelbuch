@@ -7,7 +7,7 @@ import { graphql } from "gatsby"
 import { Container, Row, Col } from "react-bootstrap";
 import { isDomAvailable } from 'lib/util';
 import L from "leaflet";
-import  { markerStyles } from 'lib/marker-styles';
+import  { markerStyles } from 'data/marker-styles';
 import { Trans, useTranslation } from 'gatsby-plugin-react-i18next';
 
 const CH_CENTRE = {
