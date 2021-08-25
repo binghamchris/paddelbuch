@@ -2,7 +2,8 @@ import React from "react";
 import { graphql, useStaticQuery } from "gatsby"
 import { Navbar, Nav, NavDropdown } from "react-bootstrap"
 import { Link, useI18next, Trans, useTranslation, I18nextContext } from 'gatsby-plugin-react-i18next';
-
+import { StaticImage } from "gatsby-plugin-image";
+import "@fontsource/gowun-dodum";
 
 const Header = () => {
   const {t} = useTranslation();
@@ -34,8 +35,18 @@ const Header = () => {
     <header>
       <Navbar variant="dark" expand="lg" id="site-navbar">
         {/* <Container> */}
+        
         <Link to="/" className="link-no-style">
-          <Navbar.Brand as="span">Swiss Paddel Buch</Navbar.Brand>
+          <Navbar.Brand as="span">
+            <StaticImage
+              src="../assets/images/logo.png"
+              alt="The Swiss Paddel Buch Logo"
+              width="33.75"
+              height="33.75"
+              className="paddelbuch-logo"
+            />
+            Swiss Paddel Buch
+          </Navbar.Brand>
         </Link>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav" className="justify-content-end">
