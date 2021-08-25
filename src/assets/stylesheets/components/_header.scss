@@ -50,4 +50,18 @@ header {
     color: $white !important;
   }
 
+  .paddelbuch-logo {
+    margin-right: 12px !important;
+    display: inline-block;
+    vertical-align:middle;
+  }
+
+  .navbar-brand {
+    font-family: $font-brand;
+    font-size: 1.8em;
+  }
+
+  .navbar-nav {
+    font-size: 1.2em;
+  }
 }

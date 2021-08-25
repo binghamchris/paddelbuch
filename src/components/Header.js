@@ -2,7 +2,8 @@ import React from "react";
 import { graphql, useStaticQuery } from "gatsby"
 import { Navbar, Nav, NavDropdown } from "react-bootstrap"
 import { Link, useI18next, Trans, useTranslation, I18nextContext } from 'gatsby-plugin-react-i18next';
-
+import { StaticImage } from "gatsby-plugin-image";
+import "@fontsource/gowun-dodum";
 
 const Header = () => {
   const {t} = useTranslation();
@@ -34,8 +35,18 @@ const Header = () => {
     <header>
       <Navbar variant="dark" expand="lg" id="site-navbar">
         {/* <Container> */}
+        
         <Link to="/" className="link-no-style">
-          <Navbar.Brand as="span">Swiss Paddel Buch</Navbar.Brand>
+          <Navbar.Brand as="span">
+            <StaticImage
+              src="../assets/images/logo.png"
+              alt="The Swiss Paddel Buch Logo"
+              width="33.75"
+              height="33.75"
+              className="paddelbuch-logo"
+            />
+            Swiss Paddel Buch
+          </Navbar.Brand>
         </Link>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav" className="justify-content-end">
@@ -53,7 +64,7 @@ const Header = () => {
               
                     return (
                       <NavDropdown.Item key={slug}>
-                        <Link to={`/waterways/${slug}`} className="link-no-style">
+                        <Link to={`/wasserlaeufe/${slug}`} className="link-no-style">
                           <Nav.Link as="span">
                             {name}
                           </Nav.Link>
@@ -64,7 +75,7 @@ const Header = () => {
               }
               <NavDropdown.Divider />
               <NavDropdown.Item>
-                <Link to={`/waterways/lakes`} className="link-no-style">
+                <Link to={`/wasserlaeufe/seen`} className="link-no-style">
                   <Nav.Link as="span">
                     <Trans>More lakes</Trans>...
                   </Nav.Link>
@@ -79,7 +90,7 @@ const Header = () => {
                   const{name, slug} = waterway;
                   return (
                     <NavDropdown.Item key={slug}>
-                      <Link to={`/waterways/${slug}`} className="link-no-style">
+                      <Link to={`/wasserlaeufe/${slug}`} className="link-no-style">
                         <Nav.Link as="span">
                           {name}
                         </Nav.Link>
@@ -90,7 +101,7 @@ const Header = () => {
               }
               <NavDropdown.Divider />
               <NavDropdown.Item>
-                <Link to={`/waterways/rivers`} className="link-no-style">
+                <Link to={`/wasserlaeufe/fluesse`} className="link-no-style">
                   <Nav.Link as="span">
                     <Trans>More rivers</Trans>...
                   </Nav.Link>
@@ -105,7 +116,7 @@ const Header = () => {
                   const{name, slug} = waterway;
                   return (
                     <NavDropdown.Item key={slug}>
-                      <Link to={`/waterways/${slug}`} className="link-no-style">
+                      <Link to={`/wasserlaeufe/${slug}`} className="link-no-style">
                         <Nav.Link as="span">
                           {name}
                         </Nav.Link>
@@ -116,7 +127,7 @@ const Header = () => {
               }
               <NavDropdown.Divider />
               <NavDropdown.Item>
-                <Link to={`/waterways/whitewater`} className="link-no-style">
+                <Link to={`/wasserlaeufe/wildwasser`} className="link-no-style">
                   <Nav.Link as="span">          
                     <Trans>More whitewater</Trans>...
                   </Nav.Link>
@@ -126,14 +137,14 @@ const Header = () => {
 
             <NavDropdown title={t('About')} id="nav-dropdown-about" className="link-no-style" align="end">
               <NavDropdown.Item>
-                <Link to="/about" className="link-no-style">
-                  <Nav.Link as="span" eventKey="about">
+                <Link to="/ueber" className="link-no-style">
+                  <Nav.Link as="span" eventKey="ueber">
                     <Trans>About Swiss Paddel Buch</Trans>
                   </Nav.Link>
                 </Link>
               </NavDropdown.Item>
               <NavDropdown.Item>
-                <Link to="/about/api" className="link-no-style">
+                <Link to="/ueber/api" className="link-no-style">
                   <Nav.Link as="span" eventKey="api">
                     <Trans>Public Database/API</Trans>
                   </Nav.Link>
@@ -141,7 +152,7 @@ const Header = () => {
               </NavDropdown.Item>
             </NavDropdown>
             <NavDropdown.Divider />
-            <NavDropdown title={t('Language')} id="nav-dropdown-about" className="link-no-style languages" align="end">
+            <NavDropdown title={t('Language')} id="nav-dropdown-lang" className="link-no-style languages" align="end">
               {languages.map((lng) => (
                 <NavDropdown.Item>
                 <Link to={originalPath} className="link-no-style" language={lng}>

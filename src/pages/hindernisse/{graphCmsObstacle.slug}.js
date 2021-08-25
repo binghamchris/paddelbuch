@@ -5,11 +5,11 @@ import Map from "components/Map";
 import { graphql } from "gatsby";
 import { Marker, Popup, GeoJSON } from "react-leaflet";
 import { Container, Row, Col } from "react-bootstrap";
-import * as layerStyle from '../../hooks/useLayerStyles';
+import * as layerStyle from 'data/layer-styles';
 import { RichText } from '@graphcms/rich-text-react-renderer';
 import { isDomAvailable } from 'lib/util';
 import L from "leaflet";
-import  { markerStyles } from 'lib/marker-styles';
+import  { markerStyles } from 'data/marker-styles';
 import { Link, Trans, useTranslation } from 'gatsby-plugin-react-i18next';
 
 export const pageQuery = graphql`
@@ -81,7 +81,7 @@ export default function ObstacleDetailsPage({ data: { graphCmsObstacle } }) {
   var spotEinsteigAufsteigIcon
   var spotNurEinsteigIcon
   var spotNurAufsteigIcon
-  var spotRaststatteIcon
+  var spotRasthalteIcon
   var mapSettings
   var obstacleCentre
 
@@ -89,7 +89,7 @@ export default function ObstacleDetailsPage({ data: { graphCmsObstacle } }) {
     spotEinsteigAufsteigIcon = new L.icon(markerStyles.spotEinsteigAufsteigIcon)
     spotNurEinsteigIcon = new L.icon(markerStyles.spotNurEinsteigIcon)
     spotNurAufsteigIcon = new L.icon(markerStyles.spotNurAufsteigIcon)
-    spotRaststatteIcon = new L.icon(markerStyles.spotRaststatteIcon)
+    spotRasthalteIcon = new L.icon(markerStyles.spotRasthalteIcon)
 
     const geometryL = L.geoJSON(graphCmsObstacle.geometry)
     const obstacleBounds = geometryL.getBounds()
@@ -138,7 +138,7 @@ export default function ObstacleDetailsPage({ data: { graphCmsObstacle } }) {
               <h2><Trans>Obstacle Details</Trans></h2>
               <p><b><Trans>Type</Trans>:</b> {graphCmsObstacle.obstacleType.name}</p>
               <p><b><Trans>GPS</Trans>:</b> {(!!obstacleCentre) ? obstacleCentre["lat"] : null}, {(!!obstacleCentre) ? obstacleCentre["lng"] : null}</p>
-              <p><b><Trans>Waterway</Trans>:</b> <Link to={`/waterways/${graphCmsObstacle.waterway.slug}`}>{graphCmsObstacle.waterway.name}</Link></p>
+              <p><b><Trans>Waterway</Trans>:</b> <Link to={`/wasserlaeufe/${graphCmsObstacle.waterway.slug}`}>{graphCmsObstacle.waterway.name}</Link></p>
             </Col>
           </Row>
         </Container>
@@ -185,7 +185,7 @@ export default function ObstacleDetailsPage({ data: { graphCmsObstacle } }) {
                     {<Popup>
                       <b>{name}</b>
                       <RichText content={description.raw} />
-                      <p><Link to={`/spots/${slug}`}><Trans>More details</Trans></Link></p>
+                      <p><Link to={`/einsteigsorte/${slug}`}><Trans>More details</Trans></Link></p>
                     </Popup>}
                   </Marker>
                   );
@@ -200,7 +200,7 @@ export default function ObstacleDetailsPage({ data: { graphCmsObstacle } }) {
                     {<Popup>
                       <b>{name}</b>
                       <RichText content={description.raw} />
-                      <p><Link to={`/spots/${slug}`}><Trans>More details</Trans></Link></p>
+                      <p><Link to={`/einsteigsorte/${slug}`}><Trans>More details</Trans></Link></p>
                     </Popup>}
                   </Marker>
                   );
@@ -215,22 +215,22 @@ export default function ObstacleDetailsPage({ data: { graphCmsObstacle } }) {
                     {<Popup>
                       <b>{name}</b>
                       <RichText content={description.raw} />
-                      <p><Link to={`/spots/${slug}`}><Trans>More details</Trans></Link></p>
+                      <p><Link to={`/einsteigsorte/${slug}`}><Trans>More details</Trans></Link></p>
                     </Popup>}
                   </Marker>
                   );
                 })}
                 { graphCmsObstacle.spots
-                .filter(spot => spot.spotType.slug === "raststatte")
+                .filter(spot => spot.spotType.slug === "rasthalte")
                 .map(spot => {
                 const { name, location, description, slug } = spot;
                 const position = [location.latitude, location.longitude];
                 return (
-                  <Marker key={slug} position={position} icon={(!!spotRaststatteIcon) ? spotRaststatteIcon : null}>
+                  <Marker key={slug} position={position} icon={(!!spotRasthalteIcon) ? spotRasthalteIcon : null}>
                     {<Popup>
                       <b>{name}</b>
                       <RichText content={description.raw} />
-                      <p><Link to={`/spots/${slug}`}><Trans>More details</Trans></Link></p>
+                      <p><Link to={`/einsteigsorte/${slug}`}><Trans>More details</Trans></Link></p>
                     </Popup>}
                   </Marker>
                   );
@@ -249,14 +249,14 @@ export default function ObstacleDetailsPage({ data: { graphCmsObstacle } }) {
               <RichText content={graphCmsObstacle.description.raw} />
               <p><b><Trans>Type</Trans>:</b> {graphCmsObstacle.obstacleType.name}</p>
               <p><b><Trans>GPS</Trans>:</b> {(!!obstacleCentre) ? obstacleCentre["lat"] : null}, {(!!obstacleCentre) ? obstacleCentre["lng"] : null}</p>
-              <p><b><Trans>Waterway</Trans>:</b> <Link to={`/waterways/${graphCmsObstacle.waterway.slug}`}>{graphCmsObstacle.waterway.name}</Link></p>
+              <p><b><Trans>Waterway</Trans>:</b> <Link to={`/wasserlaeufe/${graphCmsObstacle.waterway.slug}`}>{graphCmsObstacle.waterway.name}</Link></p>
             </Col>
             <Col xl="6" lg="6" md="12" sm="12" xs="12">
               <h2><Trans>Portage Route</Trans></h2>
               <RichText content={graphCmsObstacle.portageDescription.raw} />
               <p><b><Trans>Distance</Trans>:</b> {graphCmsObstacle.portageDistance}m</p>
-              <p><b><Trans>Exit Spot</Trans>:</b> <Link to={`/spots/${graphCmsObstacle.spots.filter(spot => spot.spotType.slug === "nur-aufsteig")[0].slug}`}>{graphCmsObstacle.spots.filter(spot => spot.spotType.slug === "nur-aufsteig")[0].name}</Link></p>
-              <p><b><Trans>Re-entry Spot</Trans>:</b> <Link to={`/spots/${graphCmsObstacle.spots.filter(spot => spot.spotType.slug === "nur-einsteig")[0].slug}`}>{graphCmsObstacle.spots.filter(spot => spot.spotType.slug === "nur-einsteig")[0].name}</Link></p>
+              <p><b><Trans>Exit Spot</Trans>:</b> <Link to={`/einsteigsorte/${graphCmsObstacle.spots.filter(spot => spot.spotType.slug === "nur-aufsteig")[0].slug}`}>{graphCmsObstacle.spots.filter(spot => spot.spotType.slug === "nur-aufsteig")[0].name}</Link></p>
+              <p><b><Trans>Re-entry Spot</Trans>:</b> <Link to={`/einsteigsorte/${graphCmsObstacle.spots.filter(spot => spot.spotType.slug === "nur-einsteig")[0].slug}`}>{graphCmsObstacle.spots.filter(spot => spot.spotType.slug === "nur-einsteig")[0].name}</Link></p>
               
             </Col>
           </Row>

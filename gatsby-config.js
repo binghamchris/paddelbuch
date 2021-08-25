@@ -4,7 +4,7 @@ require("dotenv").config({
 
 const config = require("./package.json"); 
 
-const { title, description, author, repository, homepage } = config;
+const { description, homepage } = config;
 
 const siteMetadata = {
   companyName: "Swiss Paddel Buch",
@@ -38,7 +38,7 @@ module.exports = {
         name: siteMetadata.companyName,
         short_name: siteMetadata.companyName,
         start_url: "/",
-        icon: "src/assets/images/react-leaflet-icon.png",
+        icon: "src/assets/images/logo.png",
       },
     },
     {
@@ -73,7 +73,9 @@ module.exports = {
           nsSeparator: false
         }
       }
-    }
+    },
+    `gatsby-plugin-image`,
+    `gatsby-plugin-sharp`
   ],
 };
 

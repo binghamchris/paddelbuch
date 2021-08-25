@@ -45,6 +45,7 @@ main {
 }
 
 h1 { 
+  font-family: $font-heading;
   font-size: 1.8em;
   color: $swisscanoe-blue;
   padding-top: 0.4em;
@@ -52,12 +53,14 @@ h1 {
 }
 
 h2 {
+  font-family: $font-heading;
   font-size: 1.5em;
   color: $swisscanoe-blue;
   padding-top: 0.8em;
 }
 
 h3 {
+  font-family: $font-heading;
   font-size: 1.3em;
   color: $swisscanoe-blue;
   padding-top: 0.4em;

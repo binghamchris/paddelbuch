@@ -7,7 +7,7 @@ import { graphql } from "gatsby"
 import { Container, Row, Col } from "react-bootstrap";
 import { isDomAvailable } from 'lib/util';
 import L from "leaflet";
-import  { markerStyles } from 'lib/marker-styles';
+import  { markerStyles } from 'data/marker-styles';
 import { Trans, useTranslation } from 'gatsby-plugin-react-i18next';
 
 const CH_CENTRE = {
@@ -29,13 +29,13 @@ function IndexPage ({ data }) {
   var spotEinsteigAufsteigIcon
   var spotNurEinsteigIcon
   var spotNurAufsteigIcon
-  var spotRaststatteIcon
+  var spotRasthalteIcon
 
   if (isDomAvailable()) {
     spotEinsteigAufsteigIcon = new L.icon(markerStyles.spotEinsteigAufsteigIcon)
     spotNurEinsteigIcon = new L.icon(markerStyles.spotNurEinsteigIcon)
     spotNurAufsteigIcon = new L.icon(markerStyles.spotNurAufsteigIcon)
-    spotRaststatteIcon = new L.icon(markerStyles.spotRaststatteIcon)
+    spotRasthalteIcon = new L.icon(markerStyles.spotRasthalteIcon)
   }
 
   const mapSettings = {
@@ -68,10 +68,10 @@ function IndexPage ({ data }) {
                         document.getElementById('spot-details').hidden = false;
                         document.getElementById('spot-name').textContent = name;
                         document.getElementById('spot-desc').innerHTML = description.html;
-                        document.getElementById('spot-waterway').innerHTML = `<a href="./waterways/${waterways.slug}">${waterways.name}</a>`;
+                        document.getElementById('spot-waterway').innerHTML = `<a href="./wasserlaeufe/${waterways.slug}">${waterways.name}</a>`;
                         document.getElementById('spot-gps').textContent = location.latitude + ", " + location.longitude;
                         document.getElementById('spot-address').textContent = approximateAddress;
-                        document.getElementById('spot-link').innerHTML = `<a href="./spots/${slug}">` + t('More details') + `</a>`;
+                        document.getElementById('spot-link').innerHTML = `<a href="./einsteigsorte/${slug}">` + t('More details') + `</a>`;
                         document.getElementById('spot-type').textContent = spotType.name;
 
                         if (description.html !== "<p>None</p>") {
@@ -102,10 +102,10 @@ function IndexPage ({ data }) {
                         document.getElementById('spot-details').hidden = false;
                         document.getElementById('spot-name').textContent = name;
                         document.getElementById('spot-desc').innerHTML = description.html;
-                        document.getElementById('spot-waterway').innerHTML = `<a href="./waterways/${waterways.slug}">${waterways.name}</a>`;
+                        document.getElementById('spot-waterway').innerHTML = `<a href="./wasserlaeufe/${waterways.slug}">${waterways.name}</a>`;
                         document.getElementById('spot-gps').textContent = location.latitude + ", " + location.longitude;
                         document.getElementById('spot-address').textContent = approximateAddress;
-                        document.getElementById('spot-link').innerHTML = `<a href="./spots/${slug}">` + t('More details') + `</a>`;
+                        document.getElementById('spot-link').innerHTML = `<a href="./einsteigsorte/${slug}">` + t('More details') + `</a>`;
                         document.getElementById('spot-type').textContent = spotType.name;
 
                         if (description.html !== "<p>None</p>") {
@@ -136,10 +136,10 @@ function IndexPage ({ data }) {
                         document.getElementById('spot-details').hidden = false;
                         document.getElementById('spot-name').textContent = name;
                         document.getElementById('spot-desc').innerHTML = description.html;
-                        document.getElementById('spot-waterway').innerHTML = `<a href="./waterways/${waterways.slug}">${waterways.name}</a>`;
+                        document.getElementById('spot-waterway').innerHTML = `<a href="./wasserlaeufe/${waterways.slug}">${waterways.name}</a>`;
                         document.getElementById('spot-gps').textContent = location.latitude + ", " + location.longitude;
                         document.getElementById('spot-address').textContent = approximateAddress;
-                        document.getElementById('spot-link').innerHTML = `<a href="./spots/${slug}">` + t('More details') + `</a>`;
+                        document.getElementById('spot-link').innerHTML = `<a href="./einsteigsorte/${slug}">` + t('More details') + `</a>`;
                         document.getElementById('spot-type').textContent = spotType.name;
 
                         if (description.html !== "<p>None</p>") {
@@ -155,7 +155,7 @@ function IndexPage ({ data }) {
                 );
             })}
             { spots.nodes
-              .filter(spot => spot.spotType.slug === "raststatte")
+              .filter(spot => spot.spotType.slug === "rasthalte")
               .map(spot => {
                 const { name, location, description, waterways, slug, approximateAddress, spotType } = spot;
                 const position = [location.latitude, location.longitude];
@@ -163,17 +163,17 @@ function IndexPage ({ data }) {
                   <Marker
                     key={slug}
                     position={position}
-                    icon={(!!spotRaststatteIcon) ? spotRaststatteIcon : null}
+                    icon={(!!spotRasthalteIcon) ? spotRasthalteIcon : null}
                     eventHandlers={{
                       click: () => {
                         document.getElementById('welcome-message').hidden = true;
                         document.getElementById('spot-details').hidden = false;
                         document.getElementById('spot-name').textContent = name;
                         document.getElementById('spot-desc').innerHTML = description.html;
-                        document.getElementById('spot-waterway').innerHTML = `<a href="./waterways/${waterways.slug}">${waterways.name}</a>`;
+                        document.getElementById('spot-waterway').innerHTML = `<a href="./wasserlaeufe/${waterways.slug}">${waterways.name}</a>`;
                         document.getElementById('spot-gps').textContent = location.latitude + ", " + location.longitude;
                         document.getElementById('spot-address').textContent = approximateAddress;
-                        document.getElementById('spot-link').innerHTML = `<a href="./spots/${slug}">` + t('More details') + `</a>`;
+                        document.getElementById('spot-link').innerHTML = `<a href="./einsteigsorte/${slug}">` + t('More details') + `</a>`;
                         document.getElementById('spot-type').textContent = spotType.name;
 
                         if (description.html !== "<p>None</p>") {

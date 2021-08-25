@@ -23,7 +23,7 @@ export const markerStyles = {
     popupAnchor: [0, -41],
     iconSize: [25, 41],
   },
-  spotRaststatteIcon: {
+  spotRasthalteIcon: {
     iconRetinaUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png",
     iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-orange.png",  
     shadowUrl: require("leaflet/dist/images/marker-shadow.png").default,
