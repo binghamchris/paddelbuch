@@ -98,13 +98,13 @@ export default function SpotDetailsPage({ data: { graphCmsSpot } }) {
   var spotEinsteigAufsteigIcon
   var spotNurEinsteigIcon
   var spotNurAufsteigIcon
-  var spotRaststatteIcon
+  var spotRasthalteIcon
 
   if (isDomAvailable()) {
     spotEinsteigAufsteigIcon = new L.icon(markerStyles.spotEinsteigAufsteigIcon)
     spotNurEinsteigIcon = new L.icon(markerStyles.spotNurEinsteigIcon)
     spotNurAufsteigIcon = new L.icon(markerStyles.spotNurAufsteigIcon)
-    spotRaststatteIcon = new L.icon(markerStyles.spotRaststatteIcon)
+    spotRasthalteIcon = new L.icon(markerStyles.spotRasthalteIcon)
   }
 
   const mapSettings = {
@@ -141,7 +141,7 @@ export default function SpotDetailsPage({ data: { graphCmsSpot } }) {
                       <Popup>
                         <b>{name}</b>
                         <br />{obstacleType.name}
-                        <p><Link to={`/obstacles/${slug}`}><Trans>More details</Trans></Link></p>
+                        <p><Link to={`/hindernisse/${slug}`}><Trans>More details</Trans></Link></p>
                       </Popup>
                     </GeoJSON>
                     <GeoJSON data={portageRoute} style={layerStyle.portageStyle}>
@@ -162,7 +162,7 @@ export default function SpotDetailsPage({ data: { graphCmsSpot } }) {
                   {<Popup>
                     <b>{name}</b>
                     <RichText content={description.raw} />
-                    <p><Link to={`/spots/${slug}`}><Trans>More details</Trans></Link></p>
+                    <p><Link to={`/einsteigsorte/${slug}`}><Trans>More details</Trans></Link></p>
                   </Popup>}
                 </Marker>
                 );
@@ -177,7 +177,7 @@ export default function SpotDetailsPage({ data: { graphCmsSpot } }) {
                   {<Popup>
                     <b>{name}</b>
                     <RichText content={description.raw} />
-                    <p><Link to={`/spots/${slug}`}><Trans>More details</Trans></Link></p>
+                    <p><Link to={`/einsteigsorte/${slug}`}><Trans>More details</Trans></Link></p>
                   </Popup>}
                 </Marker>
                 );
@@ -192,22 +192,22 @@ export default function SpotDetailsPage({ data: { graphCmsSpot } }) {
                   {<Popup>
                     <b>{name}</b>
                     <RichText content={description.raw} />
-                    <p><Link to={`/spots/${slug}`}><Trans>More details</Trans></Link></p>
+                    <p><Link to={`/einsteigsorte/${slug}`}><Trans>More details</Trans></Link></p>
                   </Popup>}
                 </Marker>
                 );
               })}
               { graphCmsSpot.waterways.spots
-              .filter(spot => spot.spotType.slug === "raststatte")
+              .filter(spot => spot.spotType.slug === "rasthalte")
               .map(spot => {
               const { name, location, description, slug } = spot;
               const position = [location.latitude, location.longitude];
               return (
-                <Marker key={slug} position={position} icon={(!!spotRaststatteIcon) ? spotRaststatteIcon : null}>
+                <Marker key={slug} position={position} icon={(!!spotRasthalteIcon) ? spotRasthalteIcon : null}>
                   {<Popup>
                     <b>{name}</b>
                     <RichText content={description.raw} />
-                    <p><Link to={`/spots/${slug}`}><Trans>More details</Trans></Link></p>
+                    <p><Link to={`/einsteigsorte/${slug}`}><Trans>More details</Trans></Link></p>
                   </Popup>}
                 </Marker>
                 );
@@ -227,7 +227,7 @@ export default function SpotDetailsPage({ data: { graphCmsSpot } }) {
             <p><b><Trans>Type</Trans>:</b> {graphCmsSpot.spotType.name}</p>
             <p><b><Trans>GPS</Trans>:</b> {graphCmsSpot.location.latitude}, {graphCmsSpot.location.longitude}</p>
             <p><b><Trans>Approx. Address</Trans>:</b> {graphCmsSpot.approximateAddress}</p>
-            <p><b><Trans>Waterway</Trans>:</b> <Link to={`/waterways/${graphCmsSpot.waterways.slug}`}>{graphCmsSpot.waterways.name}</Link></p>
+            <p><b><Trans>Waterway</Trans>:</b> <Link to={`/wasserlaeufe/${graphCmsSpot.waterways.slug}`}>{graphCmsSpot.waterways.name}</Link></p>
           </Col>
         </Row>
       </Container>
