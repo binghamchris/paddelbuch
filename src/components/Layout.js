@@ -1,12 +1,9 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { Helmet } from "react-helmet";
-
 import "assets/stylesheets/application.scss";
-
 import { Container, Row, Col } from "react-bootstrap";
 import Header from "components/Header";
-//import Footer from "components/Footer";
  
 const Layout = ({ children, pageName }) => {
   let className = "";
@@ -32,9 +29,7 @@ const Layout = ({ children, pageName }) => {
           
           <Row className="g-0">
             <Col>
-              
               <main>{children}</main>
-              
             </Col>
           </Row>
         </Container>
