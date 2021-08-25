@@ -6,7 +6,7 @@ import { graphql } from "gatsby";
 import { Link, Trans, useTranslation } from 'gatsby-plugin-react-i18next';
 
 export const pageQuery = graphql`
-  query RiversPageQuery($language: GraphCMS_Locale!) {
+  query WhitewaterPageQuery($language: GraphCMS_Locale!) {
     locales: allLocale(
       filter: {language: {eq: $language}}
     ) {
@@ -18,8 +18,8 @@ export const pageQuery = graphql`
         }
       }
     }
-    rivers: allGraphCmsWaterway(
-      filter: {locale: {eq: $language}, paddlingEnvironments: {slug: {eq: "fluss"}}}
+    whitewater: allGraphCmsWaterway(
+      filter: {locale: {eq: $language}, paddlingEnvironments: {slug: {eq: "wildwasser"}}}
       sort: {fields: name}
     ) {
       nodes {
@@ -30,34 +30,34 @@ export const pageQuery = graphql`
   }
 `;
 
-const RiversListPage = ({ data }) => {
+const WhitewaterListPage = ({ data }) => {
 
   const {t} = useTranslation();
 
-  const rivers = data.rivers
+  const whitewater = data.whitewater
 
   return (
-    <Layout pageName="rivers">
+    <Layout pageName="whitewater">
       <Helmet>
-        <title>{t(`Swiss Paddel Buch - Rivers`)}</title>
+        <title>{t(`Swiss Paddel Buch - Whitewater`)}</title>
       </Helmet>
 
-      <Container className="rivers-list">
-        <h2><Trans>Rivers</Trans></h2>
+      <Container className="whitewater-list">
+        <h2><Trans>Whitewater</Trans></h2>
         <table>
           <tbody>
             <tr>
               <th><Trans>Name</Trans></th>
             </tr>
-            { rivers.nodes.map(river => {
+            { whitewater.nodes.map(whitewater => {
               const {
                 name,
                 slug
-              } = river;
+              } = whitewater;
 
               return <tr>
                       <td>
-                        <Link to={`/waterways/${slug}`}>
+                        <Link to={`/wasserlaeufe/${slug}`}>
                           {name}
                         </Link>
                       </td>
@@ -70,4 +70,4 @@ const RiversListPage = ({ data }) => {
   );
 };
 
-export default RiversListPage;
+export default WhitewaterListPage;

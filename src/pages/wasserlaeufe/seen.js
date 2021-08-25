@@ -57,7 +57,7 @@ const LakesListPage = ({ data }) => {
 
               return <tr>
                       <td>
-                        <Link to={`/waterways/${slug}`}>
+                        <Link to={`/wasserlaeufe/${slug}`}>
                           {name}
                         </Link>
                       </td>
