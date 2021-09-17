@@ -10,7 +10,7 @@
     "@fontsource/gowun-dodum": "^4.5.1",
     "@graphcms/rich-text-react-renderer": "^0.3.0",
     "bootstrap": "^5.0.2",
-    "gatsby": "^3.11.1",
+    "gatsby": "^3.13.1",
     "gatsby-plugin-gatsby-cloud": "^3.0.0",
     "gatsby-plugin-manifest": "^3.11.0",
     "gatsby-plugin-react-helmet": "^4.11.0",
