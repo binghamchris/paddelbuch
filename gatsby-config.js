@@ -53,6 +53,11 @@ module.exports = {
       resolve: `gatsby-plugin-gatsby-cloud`,
       options: {
         mergeSecurityHeaders: false,
+        allPageHeaders: [
+          "X-Frame-Options: DENY",
+          "X-XSS-Protection: 1; mode=block",
+          "X-Content-Type-Options: nosniff"
+        ]
       }
     },
     {
