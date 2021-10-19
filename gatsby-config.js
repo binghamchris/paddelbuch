@@ -49,7 +49,12 @@ module.exports = {
         token: process.env.GCMS_TOKEN,
       }
     },
-    "gatsby-plugin-gatsby-cloud",
+    {
+      resolve: `gatsby-plugin-gatsby-cloud`,
+      options: {
+        mergeSecurityHeaders: false,
+      }
+    },
     {
       resolve: `gatsby-source-filesystem`,
       options: {
