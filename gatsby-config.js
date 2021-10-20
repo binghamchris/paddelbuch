@@ -59,7 +59,8 @@ module.exports = {
           "X-Frame-Options: DENY",
           "X-XSS-Protection: 1; mode=block",
           "X-Content-Type-Options: nosniff",
-          "Referrer-Policy: strict-origin-when-cross-origin"
+          "Referrer-Policy: strict-origin-when-cross-origin",
+          "Content-Security-Policy: default-src 'self'; img-src raw.githubusercontent.com api.mapbox.com; style-src unpkg.com"
         ]
       }
     },
