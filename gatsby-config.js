@@ -60,7 +60,7 @@ module.exports = {
           "X-XSS-Protection: 1; mode=block",
           "X-Content-Type-Options: nosniff",
           "Referrer-Policy: strict-origin-when-cross-origin",
-          "Content-Security-Policy: default-src 'self'; img-src 'self' data: raw.githubusercontent.com api.mapbox.com; style-src 'self' 'unsafe-inline' unpkg.com; script-src 'self' 'unsafe-inline'; font-src 'self' 'unsafe-inline'"
+          "Content-Security-Policy: default-src 'self'; img-src 'self' data: raw.githubusercontent.com api.mapbox.com; style-src 'self' 'unsafe-inline' unpkg.com; script-src 'self' 'unsafe-inline'; font-src 'self' data:"
         ]
       }
     },
