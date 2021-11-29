@@ -51,11 +51,6 @@ const Header = () => {
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav" className="justify-content-end">
           <Nav className="mr-auto" >
-            <Link to="/" className="link-no-style">
-              <Nav.Link as="span" eventKey="spots">
-                <Trans>Spots</Trans>
-              </Nav.Link>
-            </Link>
             <NavDropdown title={t('Lakes')} id="nav-dropdown-lakes" className="link-no-style">
               { waterways.nodes
                 .filter(waterway => waterway.paddlingEnvironments.slug === "see" && waterway.locale === language)
@@ -109,22 +104,12 @@ const Header = () => {
               </NavDropdown.Item>
             </NavDropdown>
 
-            <NavDropdown title={t('About')} id="nav-dropdown-about" className="link-no-style" align="end">
-              <NavDropdown.Item>
-                <Link to="/ueber" className="link-no-style">
-                  <Nav.Link as="span" eventKey="ueber">
-                    <Trans>About Swiss Paddel Buch</Trans>
-                  </Nav.Link>
-                </Link>
-              </NavDropdown.Item>
-              <NavDropdown.Item>
-                <Link to="/ueber/api" className="link-no-style">
-                  <Nav.Link as="span" eventKey="api">
-                    <Trans>Public Database/API</Trans>
-                  </Nav.Link>
-                </Link>
-              </NavDropdown.Item>
-            </NavDropdown>
+            <Link to="/ueber" className="link-no-style">
+              <Nav.Link as="span" eventKey="spots">
+                <Trans>About</Trans>
+              </Nav.Link>
+            </Link>
+
             <NavDropdown.Divider />
             <NavDropdown title={t('Language')} id="nav-dropdown-lang" className="link-no-style languages" align="end">
               {languages.map((lng) => (
