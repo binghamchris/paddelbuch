@@ -109,32 +109,6 @@ const Header = () => {
               </NavDropdown.Item>
             </NavDropdown>
 
-            <NavDropdown title={t('Whitewater')} id="nav-dropdown-whitewater" className="link-no-style">
-              { waterways.nodes
-                .filter(waterway => waterway.paddlingEnvironments.slug === "wildwasser" && waterway.locale === language)
-                .map(waterway => {
-                  const{name, slug} = waterway;
-                  return (
-                    <NavDropdown.Item key={slug}>
-                      <Link to={`/wasserlaeufe/${slug}`} className="link-no-style">
-                        <Nav.Link as="span">
-                          {name}
-                        </Nav.Link>
-                      </Link>
-                    </NavDropdown.Item>
-                  )
-              })
-              }
-              <NavDropdown.Divider />
-              <NavDropdown.Item>
-                <Link to={`/wasserlaeufe/wildwasser`} className="link-no-style">
-                  <Nav.Link as="span">          
-                    <Trans>More whitewater</Trans>...
-                  </Nav.Link>
-                </Link>
-              </NavDropdown.Item>
-            </NavDropdown>
-
             <NavDropdown title={t('About')} id="nav-dropdown-about" className="link-no-style" align="end">
               <NavDropdown.Item>
                 <Link to="/ueber" className="link-no-style">
