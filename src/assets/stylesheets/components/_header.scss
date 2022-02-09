@@ -1,18 +1,13 @@
 header {
-
   width: 100%;
   color: $white;
   background-color: $swisscanoe-blue;
   padding-right: 1em;
   padding-left: 1em;
-
+  
   .container {
     display: flex;
     justify-content: space-between;
- //   height: 2.5em;
-    height: 4vh;
-//    line-height: 2.5em;
-    line-height: 4vh;
   }
 
   ul,
