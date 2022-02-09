@@ -24,6 +24,8 @@ const CENTER = [CH_CENTRE.lat, CH_CENTRE.lng];
 
 function IndexPage ({ data }) {
 
+  
+
   const spots = data.spots
   const protectedAreas = data.protectedAreas
   const obstacles = data.obstacles
