@@ -4,6 +4,10 @@
     padding: 0;
   }
 
+  .map {
+    height: calc(100vh - $menu-height) !important;
+  }
+
 }
 
 .home-start {
@@ -24,6 +28,8 @@
   }  
 
 }
+
+
 
 
 table {

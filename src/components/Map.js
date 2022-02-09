@@ -31,6 +31,7 @@ const Map = (props) => {
   const mapSettings = {
     className: "map-base",
     zoomControl: false,
+    maxZoom: 20,
     ...rest,
   };
 
@@ -44,6 +45,7 @@ const Map = (props) => {
         <TileLayer
           url = {mapboxUrl}
           attribution="© <a href='https://www.mapbox.com/about/maps/' target='_blank' rel='noopener'>Mapbox</a> © <a href='http://www.openstreetmap.org/copyright' target='_blank' rel='noopener'>OpenStreetMap</a> <strong><a href='https://www.mapbox.com/map-feedback/' target='_blank' rel='noopener'>Improve this map</a></strong>"
+          maxZoom = "20"
         />
         <ZoomControl position="bottomright" />
       </MapContainer>
@@ -56,6 +58,7 @@ Map.propTypes = {
   className: PropTypes.string,
   defaultBaseMap: PropTypes.string,
 };
+
 
 
 

@@ -11,6 +11,7 @@ body {
   font-family: $font-default;
   padding: 0;
   margin: 0;
+  height: 100vh;
 }
 
 .wrapper {
@@ -25,7 +26,7 @@ main {
 
 @media screen and (min-width: 992px) {
   .map {
-    height: 94vh;
+    height: calc(100vh - $menu-height);
   }
 }
 @media screen and (max-width: 992px) {
