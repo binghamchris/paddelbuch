@@ -5,15 +5,15 @@ import Map from "components/Map";
 import { graphql } from "gatsby";
 import { Marker, Popup, GeoJSON } from "react-leaflet";
 import { Container, Row, Col } from "react-bootstrap";
+import L from "leaflet";
 import * as layerStyle from 'data/layer-styles';
 import { RichText } from '@graphcms/rich-text-react-renderer';
 import { isDomAvailable } from 'lib/util';
-import L from "leaflet";
 import  { markerStyles } from 'data/marker-styles';
 import { Link, Trans, useTranslation } from 'gatsby-plugin-react-i18next';
 
 export const pageQuery = graphql`
-  query SpotPageQuery($slug: String!, $language: GraphCMS_Locale!) {
+  query LakePageQuery($slug: String!, $language: GraphCMS_Locale!) {
     locales: allLocale(
       filter: {language: {eq: $language}}
     ) {
@@ -25,25 +25,9 @@ export const pageQuery = graphql`
         }
       }
     }
-    thisSpot: graphCmsSpot(locale: {eq: $language}, slug: {eq: $slug}) {
+    thisWaterway: graphCmsWaterway(locale: {eq: $language}, slug: {eq: $slug}) {
       name
-      approximateAddress
-      description {
-        raw
-      }
-      location {
-        latitude
-        longitude
-      }
-      spotType {
-        name
-        slug
-      }
-      waterways {
-        name
-        slug
-      }
-      slug    
+      geometry
     }
     spots: allGraphCmsSpot(filter: {locale: {eq: $language}}) {
       nodes {
@@ -100,7 +84,7 @@ export const pageQuery = graphql`
   }
 `;
 
-export default function SpotDetailsPage({ data: { thisSpot, spots, protectedAreas, obstacles } }) {
+export default function LakeDetailsPage({ data: { thisWaterway, spots, protectedAreas, obstacles  } }) {
 
   const {t} = useTranslation();
 
@@ -108,31 +92,34 @@ export default function SpotDetailsPage({ data: { thisSpot, spots, protectedArea
   var spotNurEinsteigIcon
   var spotNurAufsteigIcon
   var spotRasthalteIcon
+  var mapSettings
 
   if (isDomAvailable()) {
     spotEinsteigAufsteigIcon = new L.icon(markerStyles.spotEinsteigAufsteigIcon)
     spotNurEinsteigIcon = new L.icon(markerStyles.spotNurEinsteigIcon)
     spotNurAufsteigIcon = new L.icon(markerStyles.spotNurAufsteigIcon)
     spotRasthalteIcon = new L.icon(markerStyles.spotRasthalteIcon)
-  }
 
-  const mapSettings = {
-    center: [thisSpot.location.latitude, thisSpot.location.longitude],
-    zoom: 16,
-  };
+    const geometryL = L.geoJSON(thisWaterway.geometry)
+    const mapBounds = geometryL.getBounds()
+    mapSettings = {
+      bounds: mapBounds
+    };
+  } 
 
   return(
     
-    <Layout pageName="spot-details">
+    <Layout pageName="waterway-details">
       <Helmet>
-        <title>{t(`Swiss Paddel Buch - Spots`)} - {thisSpot.name}</title>
+        <title>{t(`Swiss Paddel Buch - Waterways`)} - {thisWaterway.name}</title>
       </Helmet>
       <Container fluid >
         <Row className="justify-content-center g-0">
           <Col id="map" xl="12" lg="12" md="12" sm="12" xs="12">
-            <Map {...mapSettings}>
+            <Map {...(!!mapSettings) ? mapSettings : null}>
+              <GeoJSON data={thisWaterway.geometry} style={layerStyle.lakeStyle}/>
 
-            { spots.nodes
+              { spots.nodes
               .filter(spot => spot.spotType.slug === "einsteig-aufsteig")
               .map(spot => {
                 const { name, location, description, waterways, slug, approximateAddress, spotType } = spot;
@@ -247,19 +234,9 @@ export default function SpotDetailsPage({ data: { thisSpot, spots, protectedArea
             </Map>
           </Col>
         </Row>
-        <Row className="justify-content-center g-0 spot-description spot-title">
+        <Row className="justify-content-center g-0 waterway-description waterway-title">
           <Col>
-            <h1>{thisSpot.name}</h1>
-          </Col>
-        </Row>
-        <Row className="justify-content-center g-0 spot-description">
-          <Col xl="12" lg="12" md="12" sm="12" xs="12">
-            <h2>Spot Details</h2>
-            <RichText content={thisSpot.description.raw} />
-            <p><b><Trans>Type</Trans>:</b> {thisSpot.spotType.name}</p>
-            <p><b><Trans>GPS</Trans>:</b> {thisSpot.location.latitude}, {thisSpot.location.longitude}</p>
-            <p><b><Trans>Approx. Address</Trans>:</b> {thisSpot.approximateAddress}</p>
-            <p><b><Trans>Waterway</Trans>:</b> <Link to={`/gewaesser/${thisSpot.waterways.slug}`}>{thisSpot.waterways.name}</Link></p>
+            <h1>{thisWaterway.name}</h1>
           </Col>
         </Row>
       </Container>
