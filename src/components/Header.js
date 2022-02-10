@@ -59,7 +59,7 @@ const Header = () => {
               
                     return (
                       <NavDropdown.Item key={slug}>
-                        <Link to={`/wasserlaeufe/${slug}`} className="link-no-style">
+                        <Link to={`/gewaesser/${slug}`} className="link-no-style">
                           <Nav.Link as="span">
                             {name}
                           </Nav.Link>
@@ -70,7 +70,7 @@ const Header = () => {
               }
               <NavDropdown.Divider />
               <NavDropdown.Item>
-                <Link to={`/wasserlaeufe/seen`} className="link-no-style">
+                <Link to={`/gewaesser/seen`} className="link-no-style">
                   <Nav.Link as="span">
                     <Trans>More lakes</Trans>...
                   </Nav.Link>
@@ -85,7 +85,7 @@ const Header = () => {
                   const{name, slug} = waterway;
                   return (
                     <NavDropdown.Item key={slug}>
-                      <Link to={`/wasserlaeufe/${slug}`} className="link-no-style">
+                      <Link to={`/gewaesser/${slug}`} className="link-no-style">
                         <Nav.Link as="span">
                           {name}
                         </Nav.Link>
@@ -96,7 +96,7 @@ const Header = () => {
               }
               <NavDropdown.Divider />
               <NavDropdown.Item>
-                <Link to={`/wasserlaeufe/fluesse`} className="link-no-style">
+                <Link to={`/gewaesser/fluesse`} className="link-no-style">
                   <Nav.Link as="span">
                     <Trans>More rivers</Trans>...
                   </Nav.Link>

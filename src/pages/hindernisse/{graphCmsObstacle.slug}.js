@@ -138,7 +138,7 @@ export default function ObstacleDetailsPage({ data: { graphCmsObstacle } }) {
               <h2><Trans>Obstacle Details</Trans></h2>
               <p><b><Trans>Type</Trans>:</b> {graphCmsObstacle.obstacleType.name}</p>
               <p><b><Trans>GPS</Trans>:</b> {(!!obstacleCentre) ? obstacleCentre["lat"] : null}, {(!!obstacleCentre) ? obstacleCentre["lng"] : null}</p>
-              <p><b><Trans>Waterway</Trans>:</b> <Link to={`/wasserlaeufe/${graphCmsObstacle.waterway.slug}`}>{graphCmsObstacle.waterway.name}</Link></p>
+              <p><b><Trans>Waterway</Trans>:</b> <Link to={`/gewaesser/${graphCmsObstacle.waterway.slug}`}>{graphCmsObstacle.waterway.name}</Link></p>
             </Col>
           </Row>
         </Container>
@@ -249,7 +249,7 @@ export default function ObstacleDetailsPage({ data: { graphCmsObstacle } }) {
               <RichText content={graphCmsObstacle.description.raw} />
               <p><b><Trans>Type</Trans>:</b> {graphCmsObstacle.obstacleType.name}</p>
               <p><b><Trans>GPS</Trans>:</b> {(!!obstacleCentre) ? obstacleCentre["lat"] : null}, {(!!obstacleCentre) ? obstacleCentre["lng"] : null}</p>
-              <p><b><Trans>Waterway</Trans>:</b> <Link to={`/wasserlaeufe/${graphCmsObstacle.waterway.slug}`}>{graphCmsObstacle.waterway.name}</Link></p>
+              <p><b><Trans>Waterway</Trans>:</b> <Link to={`/gewaesser/${graphCmsObstacle.waterway.slug}`}>{graphCmsObstacle.waterway.name}</Link></p>
             </Col>
             <Col xl="6" lg="6" md="12" sm="12" xs="12">
               <h2><Trans>Portage Route</Trans></h2>
