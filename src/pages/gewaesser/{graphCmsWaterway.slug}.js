@@ -25,24 +25,35 @@ export const pageQuery = graphql`
         }
       }
     }
-    graphCmsWaterway(locale: {eq: $language}, slug: {eq: $slug}) {
+    thisWaterway: graphCmsWaterway(locale: {eq: $language}, slug: {eq: $slug}) {
       name
       geometry
-      spots {
+    }
+    spots: allGraphCmsSpot(filter: {locale: {eq: $language}}) {
+      nodes {
         name
+        approximateAddress
         description {
+          html
           raw
         }
         location {
           latitude
           longitude
         }
+        waterways {
+          name
+          slug
+        }
         spotType {
+          name
           slug
         }
         slug
       }
-      protectedAreas {
+    }
+    protectedAreas: allGraphCmsProtectedArea(filter: {locale: {eq: $language}}) {
+      nodes {
         name
         geometry
         slug
@@ -52,12 +63,9 @@ export const pageQuery = graphql`
         }
         isAreaMarked
       }
-      tours {
-        name
-        slug
-        geometry
-      }
-      obstacles {
+    }
+    obstacles: allGraphCmsObstacle(filter: {locale: {eq: $language}}) {
+      nodes {
         slug
         portageRoute
         geometry
@@ -69,13 +77,14 @@ export const pageQuery = graphql`
         isPortagePossible
         obstacleType {
           name
+          slug
         }
       }
     }
   }
 `;
 
-export default function LakeDetailsPage({ data: { graphCmsWaterway } }) {
+export default function LakeDetailsPage({ data: { thisWaterway, spots, protectedAreas, obstacles  } }) {
 
   const {t} = useTranslation();
 
@@ -91,7 +100,7 @@ export default function LakeDetailsPage({ data: { graphCmsWaterway } }) {
     spotNurAufsteigIcon = new L.icon(markerStyles.spotNurAufsteigIcon)
     spotRasthalteIcon = new L.icon(markerStyles.spotRasthalteIcon)
 
-    const geometryL = L.geoJSON(graphCmsWaterway.geometry)
+    const geometryL = L.geoJSON(thisWaterway.geometry)
     const mapBounds = geometryL.getBounds()
     mapSettings = {
       bounds: mapBounds
@@ -102,109 +111,132 @@ export default function LakeDetailsPage({ data: { graphCmsWaterway } }) {
     
     <Layout pageName="waterway-details">
       <Helmet>
-        <title>{t(`Swiss Paddel Buch - Waterways`)} - {graphCmsWaterway.name}</title>
+        <title>{t(`Swiss Paddel Buch - Waterways`)} - {thisWaterway.name}</title>
       </Helmet>
       <Container fluid >
         <Row className="justify-content-center g-0">
           <Col id="map" xl="12" lg="12" md="12" sm="12" xs="12">
             <Map {...(!!mapSettings) ? mapSettings : null}>
-              <GeoJSON data={graphCmsWaterway.geometry} style={layerStyle.lakeStyle}/>
+              <GeoJSON data={thisWaterway.geometry} style={layerStyle.lakeStyle}/>
 
-              { graphCmsWaterway.protectedAreas.map(protectedArea => {
-                const { name, geometry, protectedAreaType } = protectedArea;
-                return (
-                  <GeoJSON data={geometry} style={layerStyle.protectedAreaStyle}>
-                    <Popup><b>{name}</b><br />{protectedAreaType.name}</Popup>
-                  </GeoJSON>
-                )
-              
-              })}
-
-              { graphCmsWaterway.obstacles.map(obstacle => {
-                const { name, geometry, obstacleType, portageRoute, slug } = obstacle;
-                return (
-                  <div>
-                    <GeoJSON data={geometry} style={layerStyle.obstacleStyle}>
-                      <Popup>
-                        <b>{name}</b>
-                        <br />{obstacleType.name}
-                        <p><Link to={`/hindernisse/${slug}`}><Trans>More details</Trans></Link></p>
-                      </Popup>
-                    </GeoJSON>
-                    <GeoJSON data={portageRoute} style={layerStyle.portageStyle}>
-                      <Popup><b><Trans>Portage route for</Trans> {name}</b></Popup>
-                    </GeoJSON>
-                  </div>
-                )
-              
-              })}
-
-              { graphCmsWaterway.spots
+              { spots.nodes
               .filter(spot => spot.spotType.slug === "einsteig-aufsteig")
               .map(spot => {
-              const { name, location, description, slug } = spot;
-              const position = [location.latitude, location.longitude];
-              return (
-                <Marker key={slug} position={position} icon={(!!spotEinsteigAufsteigIcon) ? spotEinsteigAufsteigIcon : null}>
-                  {<Popup>
-                    <b>{name}</b>
-                    <RichText content={description.raw} />
-                    <p><Link to={`/einsteigsorte/${slug}`}><Trans>More details</Trans></Link></p>
-                  </Popup>}
-                </Marker>
+                const { name, location, description, waterways, slug, approximateAddress, spotType } = spot;
+                const position = [location.latitude, location.longitude];
+                return (
+                  <Marker key={slug} position={position} icon={(!!spotEinsteigAufsteigIcon) ? spotEinsteigAufsteigIcon : null}>
+                    {<Popup>
+                      <b>{name}</b>
+                      <RichText content={description.raw} />
+                      <p><b><Trans>Type</Trans>:</b> {spotType.name}</p>
+                      <p><b><Trans>GPS</Trans>:</b> {location.latitude}, {location.longitude}</p>
+                      <p><b><Trans>Approx. Address</Trans>:</b> {approximateAddress}</p>
+                      <p><b><Trans>Waterway</Trans>:</b> {waterways.name}</p>
+                      <p><Link to={`/einsteigsorte/${slug}`}><Trans>More details</Trans></Link></p>
+                    </Popup>}
+                  </Marker>
                 );
-              })}
-              { graphCmsWaterway.spots
+            })}
+
+            { spots.nodes
               .filter(spot => spot.spotType.slug === "nur-einsteig")
               .map(spot => {
-              const { name, location, description, slug } = spot;
-              const position = [location.latitude, location.longitude];
-              return (
-                <Marker key={slug} position={position} icon={(!!spotNurEinsteigIcon) ? spotNurEinsteigIcon : null}>
-                  {<Popup>
-                    <b>{name}</b>
-                    <RichText content={description.raw} />
-                    <p><Link to={`/einsteigsorte/${slug}`}><Trans>More details</Trans></Link></p>
-                  </Popup>}
-                </Marker>
+                const { name, location, description, waterways, slug, approximateAddress, spotType } = spot;
+                const position = [location.latitude, location.longitude];
+                return (
+                  <Marker key={slug} position={position} icon={(!!spotNurEinsteigIcon) ? spotNurEinsteigIcon : null}>
+                    {<Popup>
+                      <b>{name}</b>
+                      <RichText content={description.raw} />
+                      <p><b><Trans>Type</Trans>:</b> {spotType.name}</p>
+                      <p><b><Trans>GPS</Trans>:</b> {location.latitude}, {location.longitude}</p>
+                      <p><b><Trans>Approx. Address</Trans>:</b> {approximateAddress}</p>
+                      <p><b><Trans>Waterway</Trans>:</b> {waterways.name}</p>
+                      <p><Link to={`/einsteigsorte/${slug}`}><Trans>More details</Trans></Link></p>
+                    </Popup>}
+                  </Marker>
                 );
-              })}
-              { graphCmsWaterway.spots
+            })}
+
+            { spots.nodes
               .filter(spot => spot.spotType.slug === "nur-aufsteig")
               .map(spot => {
-              const { name, location, description, slug } = spot;
-              const position = [location.latitude, location.longitude];
-              return (
-                <Marker key={slug} position={position} icon={(!!spotNurAufsteigIcon) ? spotNurAufsteigIcon : null}>
-                  {<Popup>
-                    <b>{name}</b>
-                    <RichText content={description.raw} />
-                    <p><Link to={`/einsteigsorte/${slug}`}><Trans>More details</Trans></Link></p>
-                  </Popup>}
-                </Marker>
+                const { name, location, description, waterways, slug, approximateAddress, spotType  } = spot;
+                const position = [location.latitude, location.longitude];
+                return (
+                  <Marker key={slug} position={position} icon={(!!spotNurAufsteigIcon) ? spotNurAufsteigIcon : null}>
+                    {<Popup>
+                      <b>{name}</b>
+                      <RichText content={description.raw} />
+                      <p><b><Trans>Type</Trans>:</b> {spotType.name}</p>
+                      <p><b><Trans>GPS</Trans>:</b> {location.latitude}, {location.longitude}</p>
+                      <p><b><Trans>Approx. Address</Trans>:</b> {approximateAddress}</p>
+                      <p><b><Trans>Waterway</Trans>:</b> {waterways.name}</p>
+                      <p><Link to={`/einsteigsorte/${slug}`}><Trans>More details</Trans></Link></p>
+                    </Popup>}
+                  </Marker>
                 );
-              })}
-              { graphCmsWaterway.spots
+            })}
+
+            { spots.nodes
               .filter(spot => spot.spotType.slug === "rasthalte")
               .map(spot => {
-              const { name, location, description, slug } = spot;
-              const position = [location.latitude, location.longitude];
-              return (
-                <Marker key={slug} position={position} icon={(!!spotRasthalteIcon) ? spotRasthalteIcon : null}>
-                  {<Popup>
-                    <b>{name}</b>
-                    <RichText content={description.raw} />
+                const { name, location, description, waterways, slug, approximateAddress, spotType  } = spot;
+                const position = [location.latitude, location.longitude];
+                return (
+                  <Marker key={slug} position={position} icon={(!!spotRasthalteIcon) ? spotRasthalteIcon : null}>
+                    {<Popup>
+                      <b>{name}</b>
+                      <RichText content={description.raw} />
+                      <p><b><Trans>Type</Trans>:</b> {spotType.name}</p>
+                      <p><b><Trans>GPS</Trans>:</b> {location.latitude}, {location.longitude}</p>
+                      <p><b><Trans>Approx. Address</Trans>:</b> {approximateAddress}</p>
+                      <p><b><Trans>Waterway</Trans>:</b> {waterways.name}</p>
                     <p><Link to={`/einsteigsorte/${slug}`}><Trans>More details</Trans></Link></p>
-                  </Popup>}
-                </Marker>
+                    </Popup>}
+                  </Marker>
                 );
+            })}
+
+            { protectedAreas.nodes
+              .map(protectedArea => {
+              const { name, geometry, protectedAreaType } = protectedArea;
+              return (
+                <GeoJSON data={geometry} style={layerStyle.protectedAreaStyle}>
+                  <Popup>
+                    <b>{name}</b>
+                    <br />{protectedAreaType.name}
+                  </Popup>
+                </GeoJSON>
+              )              
+            })}
+            
+            { obstacles.nodes
+              .map(obstacle => {
+              const { name, geometry, obstacleType, portageRoute, slug } = obstacle;
+              return (
+                <div>
+                  <GeoJSON data={geometry} style={layerStyle.obstacleStyle}>
+                    <Popup>
+                      <b>{name}</b>
+                      <br />{obstacleType.name}
+                      <p><Link to={`/hindernisse/${slug}`}><Trans>More details</Trans></Link></p>
+                    </Popup>
+                  </GeoJSON>
+                  <GeoJSON data={portageRoute} style={layerStyle.portageStyle}>
+                    <Popup><b><Trans>Portage route for</Trans> {name}</b></Popup>
+                  </GeoJSON>
+                </div>
+              )            
               })}
+
             </Map>
           </Col>
         </Row>
         <Row className="justify-content-center g-0 waterway-description waterway-title">
           <Col>
-            <h1>{graphCmsWaterway.name}</h1>
+            <h1>{thisWaterway.name}</h1>
           </Col>
         </Row>
       </Container>
