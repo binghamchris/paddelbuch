@@ -227,7 +227,7 @@ export default function SpotDetailsPage({ data: { graphCmsSpot } }) {
             <p><b><Trans>Type</Trans>:</b> {graphCmsSpot.spotType.name}</p>
             <p><b><Trans>GPS</Trans>:</b> {graphCmsSpot.location.latitude}, {graphCmsSpot.location.longitude}</p>
             <p><b><Trans>Approx. Address</Trans>:</b> {graphCmsSpot.approximateAddress}</p>
-            <p><b><Trans>Waterway</Trans>:</b> <Link to={`/wasserlaeufe/${graphCmsSpot.waterways.slug}`}>{graphCmsSpot.waterways.name}</Link></p>
+            <p><b><Trans>Waterway</Trans>:</b> <Link to={`/gewaesser/${graphCmsSpot.waterways.slug}`}>{graphCmsSpot.waterways.name}</Link></p>
           </Col>
         </Row>
       </Container>
