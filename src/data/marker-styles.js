@@ -31,7 +31,15 @@ export const markerStyles = {
     popupAnchor: [0, -41],
     iconSize: [25, 41],
   },
-    obstacleIcon: {
+  spotNotauswasserungIcon: {
+    iconRetinaUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-violet.png",
+    iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-violet.png",  
+    shadowUrl: require("leaflet/dist/images/marker-shadow.png").default,
+    iconAnchor: [12, 41],
+    popupAnchor: [0, -41],
+    iconSize: [25, 41],
+  },
+  obstacleIcon: {
     iconRetinaUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png",
     iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",  
     shadowUrl: require("leaflet/dist/images/marker-shadow.png").default,
