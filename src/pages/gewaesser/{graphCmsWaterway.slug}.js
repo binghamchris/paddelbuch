@@ -92,6 +92,7 @@ export default function LakeDetailsPage({ data: { thisWaterway, spots, protected
   var spotNurEinsteigIcon
   var spotNurAufsteigIcon
   var spotRasthalteIcon
+  var spotNotauswasserungIcon
   var mapSettings
 
   if (isDomAvailable()) {
@@ -99,6 +100,7 @@ export default function LakeDetailsPage({ data: { thisWaterway, spots, protected
     spotNurEinsteigIcon = new L.icon(markerStyles.spotNurEinsteigIcon)
     spotNurAufsteigIcon = new L.icon(markerStyles.spotNurAufsteigIcon)
     spotRasthalteIcon = new L.icon(markerStyles.spotRasthalteIcon)
+    spotNotauswasserungIcon = new L.icon(markerStyles.spotNotauswasserungIcon)
 
     const geometryL = L.geoJSON(thisWaterway.geometry)
     const mapBounds = geometryL.getBounds()
@@ -186,6 +188,26 @@ export default function LakeDetailsPage({ data: { thisWaterway, spots, protected
                 const position = [location.latitude, location.longitude];
                 return (
                   <Marker key={slug} position={position} icon={(!!spotRasthalteIcon) ? spotRasthalteIcon : null}>
+                    {<Popup>
+                      <b>{name}</b>
+                      <RichText content={description.raw} />
+                      <p><b><Trans>Type</Trans>:</b> {spotType.name}</p>
+                      <p><b><Trans>GPS</Trans>:</b> {location.latitude}, {location.longitude}</p>
+                      <p><b><Trans>Approx. Address</Trans>:</b> {approximateAddress}</p>
+                      <p><b><Trans>Waterway</Trans>:</b> {waterways.name}</p>
+                    <p><Link to={`/einsteigsorte/${slug}`}><Trans>More details</Trans></Link></p>
+                    </Popup>}
+                  </Marker>
+                );
+            })}
+
+            { spots.nodes
+              .filter(spot => spot.spotType.slug === "notauswasserungsstelle")
+              .map(spot => {
+                const { name, location, description, waterways, slug, approximateAddress, spotType  } = spot;
+                const position = [location.latitude, location.longitude];
+                return (
+                  <Marker key={slug} position={position} icon={(!!spotNotauswasserungIcon) ? spotNotauswasserungIcon : null}>
                     {<Popup>
                       <b>{name}</b>
                       <RichText content={description.raw} />
