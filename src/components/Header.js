@@ -13,7 +13,7 @@ const Header = () => {
 
   const language = context.language
 
-  const { waterways } = useStaticQuery(graphql`
+  const { waterways, staticPages } = useStaticQuery(graphql`
     query {
       waterways: allGraphCmsWaterway(
         filter: {showInMenu: {eq: true}}
@@ -26,6 +26,14 @@ const Header = () => {
           paddlingEnvironments {
             slug
           }
+        }
+      }
+      staticPages: allGraphCmsStaticPage {
+        nodes {
+          title
+          slug
+          locale
+          menu
         }
       }
     }
@@ -104,11 +112,24 @@ const Header = () => {
               </NavDropdown.Item>
             </NavDropdown>
 
-            <Link to="/ueber" className="link-no-style">
-              <Nav.Link as="span" eventKey="spots">
-                <Trans>About</Trans>
-              </Nav.Link>
-            </Link>
+            <NavDropdown title={t('About')} id="nav-dropdown-lang" className="link-no-style languages" align="end">
+              {staticPages.nodes
+                .filter(staticPage => staticPage.menu === "About" && staticPage.locale === language)
+                .map(staticPage => {
+                  const{title, slug} = staticPage;
+                  return (
+                    <NavDropdown.Item key={slug}>
+                      <Link to={`/ueber/${slug}`} className="link-no-style">
+                        <Nav.Link as="span">
+                          {title}
+                        </Nav.Link>
+                      </Link>
+                    </NavDropdown.Item>
+                  )
+              })
+              }
+            </NavDropdown>
+
 
             <NavDropdown.Divider />
             <NavDropdown title={t('Language')} id="nav-dropdown-lang" className="link-no-style languages" align="end">
