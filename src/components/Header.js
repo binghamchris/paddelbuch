@@ -28,7 +28,9 @@ const Header = () => {
           }
         }
       }
-      staticPages: allGraphCmsStaticPage {
+      staticPages: allGraphCmsStaticPage(
+        sort: {fields: createdAt, order: ASC}
+      ) {
         nodes {
           title
           slug
@@ -112,7 +114,7 @@ const Header = () => {
               </NavDropdown.Item>
             </NavDropdown>
 
-            <NavDropdown title={t('About')} id="nav-dropdown-lang" className="link-no-style languages" align="end">
+            <NavDropdown title={t('About')} id="nav-dropdown-lang" className="link-no-style languages">
               {staticPages.nodes
                 .filter(staticPage => staticPage.menu === "About" && staticPage.locale === language)
                 .map(staticPage => {
