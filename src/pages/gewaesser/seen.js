@@ -39,7 +39,7 @@ const LakesListPage = ({ data }) => {
   return (
     <Layout pageName="lakes">
       <Helmet>
-        <title>{t(`Swiss Paddel Buch - Lakes`)}</title>
+        <title>{t(`Paddel Buch - Lakes`)}</title>
       </Helmet>
 
       <Container className="lakes-list">

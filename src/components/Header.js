@@ -50,12 +50,12 @@ const Header = () => {
           <Navbar.Brand as="span">
             <StaticImage
               src="../assets/images/logo.png"
-              alt="The Swiss Paddel Buch Logo"
+              alt="The Paddel Buch Logo"
               width="33.75"
               height="33.75"
               className="paddelbuch-logo"
             />
-            Swiss Paddel Buch
+            Paddel Buch
           </Navbar.Brand>
         </Link>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
