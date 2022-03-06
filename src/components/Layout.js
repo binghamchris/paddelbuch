@@ -18,7 +18,7 @@ const Layout = ({ children, pageName }) => {
         bodyAttributes={{ class: className }}
         htmlAttributes={{ lang: 'en' }}
       >
-        <title>Swiss Paddel Buch</title>
+        <title>Paddel Buch</title>
       </Helmet>
       <Container fluid="true" className="px-0 main g-0">
           <Row className="justify-content-center g-0">

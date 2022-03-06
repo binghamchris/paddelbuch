@@ -7,7 +7,7 @@ const config = require("./package.json");
 const { description, homepage } = config;
 
 const siteMetadata = {
-  companyName: "Swiss Paddel Buch",
+  companyName: "Paddel Buch",
   authorName: "Chris Bingham",
   siteUrl: homepage,
   siteDescription: description,

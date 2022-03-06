@@ -37,7 +37,7 @@ const ToursListPage = () => {
   return (
     <Layout pageName="tours">
       <Helmet>
-        <title>Swiss Paddel Buch - Tours</title>
+        <title>Paddel Buch - Tours</title>
       </Helmet>
 
       <Container className="tour-list">

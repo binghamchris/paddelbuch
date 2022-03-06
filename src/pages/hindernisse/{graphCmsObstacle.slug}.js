@@ -146,7 +146,7 @@ export default function ObstacleDetailsPage({ data: { thisObstacle, spots, prote
     return(
       <Layout pageName="obstacle-details">
         <Helmet>
-          <title>{t(`Swiss Paddel Buch - Obstacles`)} - {thisObstacle.name}</title>
+          <title>{t(`Paddel Buch - Obstacles`)} - {thisObstacle.name}</title>
         </Helmet>
         <Container fluid >
           <Row className="justify-content-center g-0">
@@ -304,7 +304,7 @@ export default function ObstacleDetailsPage({ data: { thisObstacle, spots, prote
     return(
       <Layout pageName="obstacle-details">
         <Helmet>
-          <title>{t(`Swiss Paddel Buch - Obstacles`)} - {thisObstacle.name}</title>
+          <title>{t(`Paddel Buch - Obstacles`)} - {thisObstacle.name}</title>
         </Helmet>
         <Container fluid >
           <Row className="justify-content-center g-0">
