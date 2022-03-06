@@ -25,7 +25,6 @@ header {
   }
 
   a {
-    color: white !important; 
     text-decoration: none;
     padding: 0 .5em;
   }
@@ -39,6 +38,10 @@ header {
   .dropdown-menu {
     color: $white;
     background-color: $swisscanoe-blue;
+  }
+
+  .dropdown-item:hover .nav-link{
+    color: $swisscanoe-blue !important;
   }
 
   .nav-link {
