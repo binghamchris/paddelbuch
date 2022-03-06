@@ -1,9 +1,7 @@
 {
-  "Swiss Paddel Buch - Waterways": "Swiss Paddel Buch - Wasserwege",
-  "Swiss Paddel Buch - Rivers": "Swiss Paddel Buch - Flüsse",
-  "Swiss Paddel Buch - Lakes": "Swiss Paddel Buch - Seen",
-  "Swiss Paddel Buch - Whitewater": "Swiss Paddel Buch - Wildwasser",
+  "Paddel Buch - Waterways": "Paddel Buch - Wasserwege",
+  "Paddel Buch - Rivers": "Paddel Buch - Flüsse",
+  "Paddel Buch - Lakes": "Paddel Buch - Seen",
   "Lakes": "Seen",
-  "Rivers": "Flüsse",
-  "Whitewater": "Wildwasser"
+  "Rivers": "Flüsse"
 }

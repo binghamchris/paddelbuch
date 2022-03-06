@@ -52,7 +52,7 @@ function IndexPage ({ data }) {
   return (
     <Layout pageName="home">
       <Helmet>
-        <title>Swiss Paddel Buch</title>
+        <title>Paddel Buch</title>
       </Helmet>
       <Container fluid className="g-0">
       <Row className="justify-content-center g-0">

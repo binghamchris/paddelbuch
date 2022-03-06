@@ -146,11 +146,11 @@ export default function ObstacleDetailsPage({ data: { thisObstacle, spots, prote
     return(
       <Layout pageName="obstacle-details">
         <Helmet>
-          <title>{t(`Swiss Paddel Buch - Obstacles`)} - {thisObstacle.name}</title>
+          <title>{t(`Paddel Buch - Obstacles`)} - {thisObstacle.name}</title>
         </Helmet>
         <Container fluid >
           <Row className="justify-content-center g-0">
-            <Col id="map" xl="12" lg="12" md="12" sm="12" xs="12">
+            <Col id="map" xl="8" lg="8" md="12" sm="12" xs="12">
               <Map {...mapSettings}>
                 
               { spots.nodes
@@ -171,131 +171,126 @@ export default function ObstacleDetailsPage({ data: { thisObstacle, spots, prote
                     </Popup>}
                   </Marker>
                 );
-            })}
-
-            { spots.nodes
-              .filter(spot => spot.spotType.slug === "nur-einsteig")
-              .map(spot => {
-                const { name, location, description, waterways, slug, approximateAddress, spotType } = spot;
-                const position = [location.latitude, location.longitude];
-                return (
-                  <Marker key={slug} position={position} icon={(!!spotNurEinsteigIcon) ? spotNurEinsteigIcon : null}>
-                    {<Popup>
-                      <b>{name}</b>
-                      <RichText content={description.raw} />
-                      <p><b><Trans>Type</Trans>:</b> {spotType.name}</p>
-                      <p><b><Trans>GPS</Trans>:</b> {location.latitude}, {location.longitude}</p>
-                      <p><b><Trans>Approx. Address</Trans>:</b> {approximateAddress}</p>
-                      <p><b><Trans>Waterway</Trans>:</b> {waterways.name}</p>
-                      <p><Link to={`/einsteigsorte/${slug}`}><Trans>More details</Trans></Link></p>
-                    </Popup>}
-                  </Marker>
-                );
-            })}
-
-            { spots.nodes
-              .filter(spot => spot.spotType.slug === "nur-aufsteig")
-              .map(spot => {
-                const { name, location, description, waterways, slug, approximateAddress, spotType  } = spot;
-                const position = [location.latitude, location.longitude];
-                return (
-                  <Marker key={slug} position={position} icon={(!!spotNurAufsteigIcon) ? spotNurAufsteigIcon : null}>
-                    {<Popup>
-                      <b>{name}</b>
-                      <RichText content={description.raw} />
-                      <p><b><Trans>Type</Trans>:</b> {spotType.name}</p>
-                      <p><b><Trans>GPS</Trans>:</b> {location.latitude}, {location.longitude}</p>
-                      <p><b><Trans>Approx. Address</Trans>:</b> {approximateAddress}</p>
-                      <p><b><Trans>Waterway</Trans>:</b> {waterways.name}</p>
-                      <p><Link to={`/einsteigsorte/${slug}`}><Trans>More details</Trans></Link></p>
-                    </Popup>}
-                  </Marker>
-                );
-            })}
-
-            { spots.nodes
-              .filter(spot => spot.spotType.slug === "rasthalte")
-              .map(spot => {
-                const { name, location, description, waterways, slug, approximateAddress, spotType  } = spot;
-                const position = [location.latitude, location.longitude];
-                return (
-                  <Marker key={slug} position={position} icon={(!!spotRasthalteIcon) ? spotRasthalteIcon : null}>
-                    {<Popup>
-                      <b>{name}</b>
-                      <RichText content={description.raw} />
-                      <p><b><Trans>Type</Trans>:</b> {spotType.name}</p>
-                      <p><b><Trans>GPS</Trans>:</b> {location.latitude}, {location.longitude}</p>
-                      <p><b><Trans>Approx. Address</Trans>:</b> {approximateAddress}</p>
-                      <p><b><Trans>Waterway</Trans>:</b> {waterways.name}</p>
-                    <p><Link to={`/einsteigsorte/${slug}`}><Trans>More details</Trans></Link></p>
-                    </Popup>}
-                  </Marker>
-                );
-            })}
-
-            { spots.nodes
-              .filter(spot => spot.spotType.slug === "notauswasserungsstelle")
-              .map(spot => {
-                const { name, location, description, waterways, slug, approximateAddress, spotType  } = spot;
-                const position = [location.latitude, location.longitude];
-                return (
-                  <Marker key={slug} position={position} icon={(!!spotNotauswasserungIcon) ? spotNotauswasserungIcon : null}>
-                    {<Popup>
-                      <b>{name}</b>
-                      <RichText content={description.raw} />
-                      <p><b><Trans>Type</Trans>:</b> {spotType.name}</p>
-                      <p><b><Trans>GPS</Trans>:</b> {location.latitude}, {location.longitude}</p>
-                      <p><b><Trans>Approx. Address</Trans>:</b> {approximateAddress}</p>
-                      <p><b><Trans>Waterway</Trans>:</b> {waterways.name}</p>
-                    <p><Link to={`/einsteigsorte/${slug}`}><Trans>More details</Trans></Link></p>
-                    </Popup>}
-                  </Marker>
-                );
-            })}
-
-            { protectedAreas.nodes
-              .map(protectedArea => {
-              const { name, geometry, protectedAreaType } = protectedArea;
-              return (
-                <GeoJSON data={geometry} style={layerStyle.protectedAreaStyle}>
-                  <Popup>
-                    <b>{name}</b>
-                    <br />{protectedAreaType.name}
-                  </Popup>
-                </GeoJSON>
-              )              
-            })}
-            
-            { obstacles.nodes
-              .map(obstacle => {
-              const { name, geometry, obstacleType, portageRoute, slug } = obstacle;
-              return (
-                <div>
-                  <GeoJSON data={geometry} style={layerStyle.obstacleStyle}>
-                    <Popup>
-                      <b>{name}</b>
-                      <br />{obstacleType.name}
-                      <p><Link to={`/hindernisse/${slug}`}><Trans>More details</Trans></Link></p>
-                    </Popup>
-                  </GeoJSON>
-                  <GeoJSON data={portageRoute} style={layerStyle.portageStyle}>
-                    <Popup><b><Trans>Portage route for</Trans> {name}</b></Popup>
-                  </GeoJSON>
-                </div>
-              )            
               })}
 
-            </Map>
+              { spots.nodes
+                .filter(spot => spot.spotType.slug === "nur-einsteig")
+                .map(spot => {
+                  const { name, location, description, waterways, slug, approximateAddress, spotType } = spot;
+                  const position = [location.latitude, location.longitude];
+                  return (
+                    <Marker key={slug} position={position} icon={(!!spotNurEinsteigIcon) ? spotNurEinsteigIcon : null}>
+                      {<Popup>
+                        <b>{name}</b>
+                        <RichText content={description.raw} />
+                        <p><b><Trans>Type</Trans>:</b> {spotType.name}</p>
+                        <p><b><Trans>GPS</Trans>:</b> {location.latitude}, {location.longitude}</p>
+                        <p><b><Trans>Approx. Address</Trans>:</b> {approximateAddress}</p>
+                        <p><b><Trans>Waterway</Trans>:</b> {waterways.name}</p>
+                        <p><Link to={`/einsteigsorte/${slug}`}><Trans>More details</Trans></Link></p>
+                      </Popup>}
+                    </Marker>
+                  );
+              })}
+
+              { spots.nodes
+                .filter(spot => spot.spotType.slug === "nur-aufsteig")
+                .map(spot => {
+                  const { name, location, description, waterways, slug, approximateAddress, spotType  } = spot;
+                  const position = [location.latitude, location.longitude];
+                  return (
+                    <Marker key={slug} position={position} icon={(!!spotNurAufsteigIcon) ? spotNurAufsteigIcon : null}>
+                      {<Popup>
+                        <b>{name}</b>
+                        <RichText content={description.raw} />
+                        <p><b><Trans>Type</Trans>:</b> {spotType.name}</p>
+                        <p><b><Trans>GPS</Trans>:</b> {location.latitude}, {location.longitude}</p>
+                        <p><b><Trans>Approx. Address</Trans>:</b> {approximateAddress}</p>
+                        <p><b><Trans>Waterway</Trans>:</b> {waterways.name}</p>
+                        <p><Link to={`/einsteigsorte/${slug}`}><Trans>More details</Trans></Link></p>
+                      </Popup>}
+                    </Marker>
+                  );
+              })}
+
+              { spots.nodes
+                .filter(spot => spot.spotType.slug === "rasthalte")
+                .map(spot => {
+                  const { name, location, description, waterways, slug, approximateAddress, spotType  } = spot;
+                  const position = [location.latitude, location.longitude];
+                  return (
+                    <Marker key={slug} position={position} icon={(!!spotRasthalteIcon) ? spotRasthalteIcon : null}>
+                      {<Popup>
+                        <b>{name}</b>
+                        <RichText content={description.raw} />
+                        <p><b><Trans>Type</Trans>:</b> {spotType.name}</p>
+                        <p><b><Trans>GPS</Trans>:</b> {location.latitude}, {location.longitude}</p>
+                        <p><b><Trans>Approx. Address</Trans>:</b> {approximateAddress}</p>
+                        <p><b><Trans>Waterway</Trans>:</b> {waterways.name}</p>
+                      <p><Link to={`/einsteigsorte/${slug}`}><Trans>More details</Trans></Link></p>
+                      </Popup>}
+                    </Marker>
+                  );
+              })}
+
+              { spots.nodes
+                .filter(spot => spot.spotType.slug === "notauswasserungsstelle")
+                .map(spot => {
+                  const { name, location, description, waterways, slug, approximateAddress, spotType  } = spot;
+                  const position = [location.latitude, location.longitude];
+                  return (
+                    <Marker key={slug} position={position} icon={(!!spotNotauswasserungIcon) ? spotNotauswasserungIcon : null}>
+                      {<Popup>
+                        <b>{name}</b>
+                        <RichText content={description.raw} />
+                        <p><b><Trans>Type</Trans>:</b> {spotType.name}</p>
+                        <p><b><Trans>GPS</Trans>:</b> {location.latitude}, {location.longitude}</p>
+                        <p><b><Trans>Approx. Address</Trans>:</b> {approximateAddress}</p>
+                        <p><b><Trans>Waterway</Trans>:</b> {waterways.name}</p>
+                      <p><Link to={`/einsteigsorte/${slug}`}><Trans>More details</Trans></Link></p>
+                      </Popup>}
+                    </Marker>
+                  );
+              })}
+
+              { protectedAreas.nodes
+                .map(protectedArea => {
+                const { name, geometry, protectedAreaType } = protectedArea;
+                return (
+                  <GeoJSON data={geometry} style={layerStyle.protectedAreaStyle}>
+                    <Popup>
+                      <b>{name}</b>
+                      <br />{protectedAreaType.name}
+                    </Popup>
+                  </GeoJSON>
+                )              
+              })}
+              
+              { obstacles.nodes
+                .map(obstacle => {
+                const { name, geometry, obstacleType, portageRoute, slug } = obstacle;
+                return (
+                  <div>
+                    <GeoJSON data={geometry} style={layerStyle.obstacleStyle}>
+                      <Popup>
+                        <b>{name}</b>
+                        <br />{obstacleType.name}
+                        <p><Link to={`/hindernisse/${slug}`}><Trans>More details</Trans></Link></p>
+                      </Popup>
+                    </GeoJSON>
+                    <GeoJSON data={portageRoute} style={layerStyle.portageStyle}>
+                      <Popup><b><Trans>Portage route for</Trans> {name}</b></Popup>
+                    </GeoJSON>
+                  </div>
+                )            
+                })}
+
+              </Map>
             </Col>
-          </Row>
-          <Row className="justify-content-center g-0 obstacle-description obstacle-title">
-            <Col>
-              <h1>{thisObstacle.name}</h1>
-            </Col>
-          </Row>
-          <Row className="justify-content-center g-0 obstacle-description">
-            <Col xl="12" lg="12" md="12" sm="12" xs="12">
-              <h2><Trans>Obstacle Details</Trans></h2>
+            <Col className="obstacle-description" xl="4" lg="4" md="12" sm="12" xs="12">
+              <div className="obstacle-title">
+                <h1>{thisObstacle.name}</h1>
+              </div>
               <p><b><Trans>Type</Trans>:</b> {thisObstacle.obstacleType.name}</p>
               <p><b><Trans>GPS</Trans>:</b> {(!!obstacleCentre) ? obstacleCentre["lat"] : null}, {(!!obstacleCentre) ? obstacleCentre["lng"] : null}</p>
               <p><b><Trans>Waterway</Trans>:</b> <Link to={`/gewaesser/${thisObstacle.waterway.slug}`}>{thisObstacle.waterway.name}</Link></p>
@@ -309,11 +304,11 @@ export default function ObstacleDetailsPage({ data: { thisObstacle, spots, prote
     return(
       <Layout pageName="obstacle-details">
         <Helmet>
-          <title>{t(`Swiss Paddel Buch - Obstacles`)} - {thisObstacle.name}</title>
+          <title>{t(`Paddel Buch - Obstacles`)} - {thisObstacle.name}</title>
         </Helmet>
         <Container fluid >
           <Row className="justify-content-center g-0">
-            <Col id="map" xl="12" lg="12" md="12" sm="12" xs="12">
+            <Col id="map" xl="8" lg="8" md="12" sm="12" xs="12">
               <Map {...mapSettings}>
                 
 
@@ -431,27 +426,19 @@ export default function ObstacleDetailsPage({ data: { thisObstacle, spots, prote
 
               </Map>
             </Col>
-          </Row>
-          <Row className="justify-content-center g-0 obstacle-description obstacle-title">
-            <Col>
-              <h1>{thisObstacle.name}</h1>
-            </Col>
-          </Row>
-          <Row className="justify-content-center g-0 obstacle-description">
-            <Col xl="6" lg="6" md="12" sm="12" xs="12">
-              <h2><Trans>Obstacle Details</Trans></h2>
+            <Col className="obstacle-description" xl="4" lg="4" md="12" sm="12" xs="12">
+              <div className="obstacle-title">
+                <h1>{thisObstacle.name}</h1>
+              </div>
               <RichText content={thisObstacle.description.raw} />
               <p><b><Trans>Type</Trans>:</b> {thisObstacle.obstacleType.name}</p>
               <p><b><Trans>GPS</Trans>:</b> {(!!obstacleCentre) ? obstacleCentre["lat"] : null}, {(!!obstacleCentre) ? obstacleCentre["lng"] : null}</p>
               <p><b><Trans>Waterway</Trans>:</b> <Link to={`/gewaesser/${thisObstacle.waterway.slug}`}>{thisObstacle.waterway.name}</Link></p>
-            </Col>
-            <Col xl="6" lg="6" md="12" sm="12" xs="12">
               <h2><Trans>Portage Route</Trans></h2>
               <RichText content={thisObstacle.portageDescription.raw} />
               <p><b><Trans>Distance</Trans>:</b> {thisObstacle.portageDistance}m</p>
               <p><b><Trans>Exit Spot</Trans>:</b> <Link to={`/einsteigsorte/${thisObstacle.spots.filter(spot => spot.spotType.slug === "nur-aufsteig")[0].slug}`}>{thisObstacle.spots.filter(spot => spot.spotType.slug === "nur-aufsteig")[0].name}</Link></p>
-              <p><b><Trans>Re-entry Spot</Trans>:</b> <Link to={`/einsteigsorte/${thisObstacle.spots.filter(spot => spot.spotType.slug === "nur-einsteig")[0].slug}`}>{thisObstacle.spots.filter(spot => spot.spotType.slug === "nur-einsteig")[0].name}</Link></p>
-              
+              <p><b><Trans>Re-entry Spot</Trans>:</b> <Link to={`/einsteigsorte/${thisObstacle.spots.filter(spot => spot.spotType.slug === "nur-einsteig")[0].slug}`}>{thisObstacle.spots.filter(spot => spot.spotType.slug === "nur-einsteig")[0].name}</Link></p>    
             </Col>
           </Row>
         </Container>
