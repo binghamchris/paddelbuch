@@ -32,7 +32,7 @@ export default function StaticPage({ data: { page } }) {
   return (
     <Layout pageName="about">
       <Helmet>
-        <title>Swiss Paddel Buch - {page.title}</title>
+        <title>Paddel Buch - {page.title}</title>
       </Helmet>
       <Container type="content">
         <h1>{page.title}</h1>

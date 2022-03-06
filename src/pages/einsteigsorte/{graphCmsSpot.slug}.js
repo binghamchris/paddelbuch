@@ -130,7 +130,7 @@ export default function SpotDetailsPage({ data: { thisSpot, spots, protectedArea
     
     <Layout pageName="spot-details">
       <Helmet>
-        <title>{t(`Swiss Paddel Buch - Spots`)} - {thisSpot.name}</title>
+        <title>{t(`Paddel Buch - Spots`)} - {thisSpot.name}</title>
       </Helmet>
       <Container fluid >
         <Row className="justify-content-center g-0">

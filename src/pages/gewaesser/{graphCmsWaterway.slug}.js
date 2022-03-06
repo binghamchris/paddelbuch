@@ -113,7 +113,7 @@ export default function LakeDetailsPage({ data: { thisWaterway, spots, protected
     
     <Layout pageName="waterway-details">
       <Helmet>
-        <title>{t(`Swiss Paddel Buch - Waterways`)} - {thisWaterway.name}</title>
+        <title>{t(`Paddel Buch - Waterways`)} - {thisWaterway.name}</title>
       </Helmet>
       <Container fluid >
         <Row className="justify-content-center g-0">
