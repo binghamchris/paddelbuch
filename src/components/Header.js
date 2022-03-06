@@ -29,7 +29,7 @@ const Header = () => {
         }
       }
       staticPages: allGraphCmsStaticPage(
-        sort: {fields: createdAt, order: ASC}
+        sort: {fields: menuOrder, order: ASC}
       ) {
         nodes {
           title
