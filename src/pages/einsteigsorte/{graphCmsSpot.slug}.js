@@ -28,6 +28,9 @@ export const pageQuery = graphql`
     thisSpot: graphCmsSpot(locale: {eq: $language}, slug: {eq: $slug}) {
       name
       approximateAddress
+      potentiallyUsableBy {
+        name
+      }
       description {
         raw
       }
@@ -131,7 +134,7 @@ export default function SpotDetailsPage({ data: { thisSpot, spots, protectedArea
       </Helmet>
       <Container fluid >
         <Row className="justify-content-center g-0">
-          <Col id="map" xl="12" lg="12" md="12" sm="12" xs="12">
+          <Col id="map" xl="8" lg="8" md="12" sm="12" xs="12">
             <Map {...mapSettings}>
 
             { spots.nodes
@@ -268,19 +271,26 @@ export default function SpotDetailsPage({ data: { thisSpot, spots, protectedArea
 
             </Map>
           </Col>
-        </Row>
-        <Row className="justify-content-center g-0 spot-description spot-title">
-          <Col>
-            <h1>{thisSpot.name}</h1>
-          </Col>
-        </Row>
-        <Row className="justify-content-center g-0 spot-description">
-          <Col xl="12" lg="12" md="12" sm="12" xs="12">
-            <h2>Spot Details</h2>
+          <Col className="spot-description" xl="4" lg="4" md="12" sm="12" xs="12">
+            <div className="spot-title">
+              <h1>{thisSpot.name}</h1>
+            </div>
             <RichText content={thisSpot.description.raw} />
             <p><b><Trans>Type</Trans>:</b> {thisSpot.spotType.name}</p>
             <p><b><Trans>GPS</Trans>:</b> {thisSpot.location.latitude}, {thisSpot.location.longitude}</p>
             <p><b><Trans>Approx. Address</Trans>:</b> {thisSpot.approximateAddress}</p>
+            <p><b><Trans>Potentially Usable By</Trans>:</b>
+              <ul>
+                {thisSpot.potentiallyUsableBy
+                  .map(paddleCraft => {
+                    const { name } = paddleCraft;
+                    return (
+                      <li>{name}</li>
+                    )
+                  })
+                }
+              </ul>
+            </p>
             <p><b><Trans>Waterway</Trans>:</b> <Link to={`/gewaesser/${thisSpot.waterways.slug}`}>{thisSpot.waterways.name}</Link></p>
           </Col>
         </Row>
