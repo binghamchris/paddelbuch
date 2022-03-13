@@ -119,7 +119,6 @@ export default function LakeDetailsPage({ data: { thisWaterway, spots, protected
         <Row className="justify-content-center g-0">
           <Col id="map" xl="12" lg="12" md="12" sm="12" xs="12">
             <Map {...(!!mapSettings) ? mapSettings : null}>
-              <GeoJSON data={thisWaterway.geometry} style={layerStyle.lakeStyle}/>
 
               { spots.nodes
               .filter(spot => spot.spotType.slug === "einsteig-aufsteig")
