@@ -34,3 +34,29 @@
   }
 
 }
+
+.popup-icon {
+  height: 20px;
+  padding-right: 10px;
+}
+
+.popup-icon-div {
+  border-bottom: 1px solid $secondary-blue;
+  margin-bottom: 1em;
+  padding-bottom: 1em;
+  height: 30px;
+}
+
+.popup-details-table th {
+  width: 70px;
+  padding-right: 10px;
+}
+
+.popup-details-table ul {
+  margin-bottom: 0;
+  padding-left: 1rem;
+}
+
+.popup-details-table {
+  margin-bottom: 1rem;
+}
