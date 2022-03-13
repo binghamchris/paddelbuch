@@ -1,11 +1,13 @@
+import * as colour from 'data/paddelbuch-colours';
+
 export const lakeStyle = {
-  color: '#3b89a5',
+  color: colour.secondaryBlue,
   weight: 2,
   fill: false
 }
 
 export const protectedAreaStyle = {
-  color: '#f2c136',
+  color: colour.warningYellow,
   weight: 2,
   fill: true,
   fillOpacity: 0.6,
@@ -13,7 +15,7 @@ export const protectedAreaStyle = {
 }
 
 export const obstacleStyle = {
-  color: '#AE3450',
+  color: colour.dangerRed,
   weight: 2,
   fill: true,
   fillOpacity: 0.8,
@@ -22,7 +24,7 @@ export const obstacleStyle = {
 }
 
 export const portageStyle = {
-  color: '#008000',
+  color: colour.routesPurple,
   weight: 4,
   fill: false,
   dashArray: "15 9 1 9",
