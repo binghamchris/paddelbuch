@@ -114,7 +114,7 @@ const Header = () => {
               </NavDropdown.Item>
             </NavDropdown>
 
-            <NavDropdown title={t('About')} id="nav-dropdown-lang" className="link-no-style languages">
+            <NavDropdown title={t('About')} id="nav-dropdown-lang" className="link-no-style">
               {staticPages.nodes
                 .filter(staticPage => staticPage.menu === "About" && staticPage.locale === language)
                 .map(staticPage => {
