@@ -6,5 +6,10 @@
   "Approx. Address": "Approx. Address",
   "Waterway": "Waterway",
   "Name": "Name",
-  "Portage route for": "Portage route for"
+  "Portage route for": "Portage route for",
+  "Entry and exit spot icon": "Entry and exit spot icon",
+  "Entry spot icon": "Entry spot icon",
+  "Exit spot icon": "Exit spot icon",
+  "Rest spot icon": "Rest spot icon",
+  "Emergency exit spot icon": "Emergency exit spot icon"
 }

@@ -6,5 +6,10 @@
   "Approx. Address": "Ungefähre Adresse",
   "Waterway": "Gewässer",
   "Name": "Name",
-  "Portage route for": "Portage-Route für"
+  "Portage route for": "Portage-Route für",
+  "Entry and exit spot icon": "Ein-/Aufsteigsorte Symbol",
+  "Entry spot icon": "Einsteigsorte Symbol",
+  "Exit spot icon": "Aufsteigsorte Symbol",
+  "Rest spot icon": "Rasthalte Symbol",
+  "Emergency exit spot icon": "Notauswasserungsstelle Symbol"
 }
