@@ -11,5 +11,10 @@
   "Entry spot icon": "Einsteigsorte Symbol",
   "Exit spot icon": "Aufsteigsorte Symbol",
   "Rest spot icon": "Rasthalte Symbol",
-  "Emergency exit spot icon": "Notauswasserungsstelle Symbol"
+  "Emergency exit spot icon": "Notauswasserungsstelle Symbol",
+  "Entry & Exit Spots": "Ein-/Aufsteigsorte",
+  "Entry Only Spots": "Einsteigsorte",
+  "Exit Only Spots": "Aufsteigsorte",
+  "Rest Spots": "Rasthalte",
+  "Emergency Exit Spots": "Notauswasserungsstelle"
 }
