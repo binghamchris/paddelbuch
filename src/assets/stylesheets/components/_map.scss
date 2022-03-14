@@ -45,6 +45,9 @@
   margin-bottom: 1em;
   padding-bottom: 1em;
   height: 30px;
+  font-family: $font-brand;
+  font-size: 1.2em;
+  font-weight: 300;
 }
 
 .popup-details-table th {
@@ -59,4 +62,32 @@
 
 .popup-details-table {
   margin-bottom: 1rem;
+}
+
+.popup-title h1 {
+  font-family: $font-brand;
+  font-size: 1.6em;
+  font-weight: 700;
+  color: white;
+}
+
+.leaflet-control-layers {
+  background-color: $swisscanoe-blue;
+  border: 0 !important;
+  color: white;
+  border-radius: 0;
+}
+
+.leaflet-control-zoom a {
+  border-radius: 0 !important;
+}
+
+.leaflet-control-zoom a:hover {
+  background-color: $secondary-blue;
+  color: white;
+}
+
+.leaflet-control-zoom {
+  border: 1px solid $secondary-blue !important;
+  border-radius: 0 !important;
 }

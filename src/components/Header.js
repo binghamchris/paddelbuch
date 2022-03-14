@@ -3,7 +3,8 @@ import { graphql, useStaticQuery } from "gatsby"
 import { Navbar, Nav, NavDropdown } from "react-bootstrap"
 import { Link, useI18next, Trans, useTranslation, I18nextContext } from 'gatsby-plugin-react-i18next';
 import { StaticImage } from "gatsby-plugin-image";
-import "@fontsource/gowun-dodum";
+import "@fontsource/fredoka";
+import "@fontsource/quicksand";
 
 const Header = () => {
   const {t} = useTranslation();
