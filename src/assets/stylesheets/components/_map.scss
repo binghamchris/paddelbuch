@@ -60,3 +60,21 @@
 .popup-details-table {
   margin-bottom: 1rem;
 }
+
+.leaflet-control-layers {
+  background-color: $swisscanoe-blue;
+  border: 0 !important;
+  color: white;
+  border-radius: 0;
+}
+
+.leaflet-control-zoom a {
+  background-color: $swisscanoe-blue;
+  border: 0;
+  color: white;
+  border-radius: 0 !important;
+}
+
+.leaflet-control-zoom {
+  border: 0 !important;
+}

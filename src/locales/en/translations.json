@@ -11,5 +11,10 @@
   "Entry spot icon": "Entry spot icon",
   "Exit spot icon": "Exit spot icon",
   "Rest spot icon": "Rest spot icon",
-  "Emergency exit spot icon": "Emergency exit spot icon"
+  "Emergency exit spot icon": "Emergency exit spot icon",
+  "Entry & Exit Spots": "Entry & Exit Spots",
+  "Entry Only Spots": "Entry Only Spots",
+  "Exit Only Spots": "Exit Only Spots",
+  "Rest Spots": "Rest Spots",
+  "Emergency Exit Spots": "Emergency Exit Spots"
 }

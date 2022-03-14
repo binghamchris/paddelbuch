@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { MapContainer, TileLayer, ZoomControl, Marker, Popup, GeoJSON } from "react-leaflet";
+import { MapContainer, TileLayer, ZoomControl, Marker, Popup, GeoJSON, LayerGroup, LayersControl } from "react-leaflet";
 import { useConfigureLeaflet } from "hooks";
 import { isDomAvailable } from "lib/util";
 import { graphql, useStaticQuery } from "gatsby";
@@ -144,7 +144,9 @@ const Map = (props) => {
           maxZoom = "20"
         />
         <ZoomControl position="bottomright" />
-
+        <LayersControl position="topleft" collapsed='false'>
+          <LayersControl.Overlay checked name={t("Entry & Exit Spots")}>
+            <LayerGroup>
         { spots.nodes
               .filter(spot => spot.spotType.slug === "einsteig-aufsteig" && spot.locale === language)
               .map(spot => {
@@ -188,7 +190,10 @@ const Map = (props) => {
                   </Marker>
                 );
             })}
-
+            </LayerGroup>
+          </LayersControl.Overlay>
+          <LayersControl.Overlay checked name={t("Entry Only Spots")}>
+            <LayerGroup>
             { spots.nodes
               .filter(spot => spot.spotType.slug === "nur-einsteig" && spot.locale === language)
               .map(spot => {
@@ -232,7 +237,10 @@ const Map = (props) => {
                   </Marker>
                 );
             })}
-
+            </LayerGroup>
+          </LayersControl.Overlay>
+          <LayersControl.Overlay checked name={t("Exit Only Spots")}>
+            <LayerGroup>
             { spots.nodes
               .filter(spot => spot.spotType.slug === "nur-aufsteig" && spot.locale === language)
               .map(spot => {
@@ -276,7 +284,10 @@ const Map = (props) => {
                   </Marker>
                 );
             })}
-
+            </LayerGroup>
+          </LayersControl.Overlay>
+          <LayersControl.Overlay checked name={t("Rest Spots")}>
+            <LayerGroup>
             { spots.nodes
               .filter(spot => spot.spotType.slug === "rasthalte" && spot.locale === language)
               .map(spot => {
@@ -320,7 +331,10 @@ const Map = (props) => {
                   </Marker>
                 );
             })}
-
+            </LayerGroup>
+          </LayersControl.Overlay>
+          <LayersControl.Overlay checked name={t("Emergency Exit Spots")}>
+            <LayerGroup>
             { spots.nodes
               .filter(spot => spot.spotType.slug === "notauswasserungsstelle" && spot.locale === language)
               .map(spot => {
@@ -364,6 +378,9 @@ const Map = (props) => {
                   </Marker>
                 );
             })}
+            </LayerGroup>
+          </LayersControl.Overlay>
+        </LayersControl>
 
             { protectedAreas.nodes
               .filter(protectedArea => protectedArea.locale === language)
@@ -378,7 +395,7 @@ const Map = (props) => {
                 </GeoJSON>
               )              
             })}
-            
+
             { obstacles.nodes
               .filter(obstacles => obstacles.locale === language)
               .map(obstacle => {
@@ -398,8 +415,8 @@ const Map = (props) => {
                 </div>
               )            
               })}
-
-
+          
+        
       </MapContainer>
     </div>
   );
