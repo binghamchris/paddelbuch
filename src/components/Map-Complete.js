@@ -147,7 +147,7 @@ const Map = (props) => {
         <LayersControl position="topleft" collapsed='false'>
           <LayersControl.Overlay checked name={t("Entry & Exit Spots")}>
             <LayerGroup>
-        { spots.nodes
+            { spots.nodes
               .filter(spot => spot.spotType.slug === "einsteig-aufsteig" && spot.locale === language)
               .map(spot => {
                 const { name, location, description, slug, approximateAddress, spotType, potentiallyUsableBy } = spot;
@@ -158,7 +158,9 @@ const Map = (props) => {
                       <div class="popup-icon-div">
                         <p><img src={entryExitWhite} class="popup-icon" alt={t('Entry and exit spot icon')}/> {spotType.name}</p>
                       </div>
-                      <b>{name}</b>
+                      <span class="popup-title">
+                        <h1>{name}</h1>
+                      </span>
                       <RichText content={description.raw} />
                       <table class="popup-details-table">
                         <tr>
@@ -205,7 +207,9 @@ const Map = (props) => {
                       <div class="popup-icon-div">
                         <p><img src={entryWhite} class="popup-icon" alt={t('Entry spot icon')}/> {spotType.name}</p>
                       </div>
-                      <b>{name}</b>
+                      <span class="popup-title">
+                        <h1>{name}</h1>
+                      </span>
                       <RichText content={description.raw} />
                       <table class="popup-details-table">
                         <tr>
@@ -252,7 +256,9 @@ const Map = (props) => {
                       <div class="popup-icon-div">
                         <p><img src={exitWhite} class="popup-icon" alt={t('Exit spot icon')}/> {spotType.name}</p>
                       </div>
-                      <b>{name}</b>
+                      <span class="popup-title">
+                        <h1>{name}</h1>
+                      </span>
                       <RichText content={description.raw} />
                       <table class="popup-details-table">
                         <tr>
@@ -299,7 +305,9 @@ const Map = (props) => {
                       <div class="popup-icon-div">
                         <p><img src={restWhite} class="popup-icon" alt={t('Rest spot icon')}/> {spotType.name}</p>
                       </div>
-                      <b>{name}</b>
+                      <span class="popup-title">
+                        <h1>{name}</h1>
+                      </span>
                       <RichText content={description.raw} />
                       <table class="popup-details-table">
                         <tr>
@@ -346,7 +354,9 @@ const Map = (props) => {
                       <div class="popup-icon-div">
                         <p><img src={emergencyWhite} class="popup-icon" alt={t('Emergency exit spot icon')}/> {spotType.name}</p>
                       </div>
-                      <b>{name}</b>
+                      <span class="popup-title">
+                        <h1>{name}</h1>
+                      </span>
                       <RichText content={description.raw} />
                       <table class="popup-details-table">
                         <tr>
@@ -389,8 +399,10 @@ const Map = (props) => {
               return (
                 <GeoJSON data={geometry} style={layerStyle.protectedAreaStyle}>
                   <Popup>
-                    <b>{name}</b>
-                    <br />{protectedAreaType.name}
+                    <span class="popup-title">
+                      <h1>{name}</h1>
+                    </span>
+                    {protectedAreaType.name}
                   </Popup>
                 </GeoJSON>
               )              
@@ -404,8 +416,9 @@ const Map = (props) => {
                 <div>
                   <GeoJSON data={geometry} style={layerStyle.obstacleStyle}>
                     <Popup>
-                      <b>{name}</b>
-                      <br />{obstacleType.name}
+                      <span class="popup-title">
+                        <h1>{name}</h1>
+                      </span>
                       <p><Link to={`/hindernisse/${slug}`}><Trans>More details</Trans></Link></p>
                     </Popup>
                   </GeoJSON>
