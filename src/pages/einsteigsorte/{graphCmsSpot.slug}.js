@@ -108,10 +108,6 @@ export default function SpotDetailsPage({ data: { thisSpot } }) {
                 <th><Trans>Waterway</Trans>:</th>
                 <td><Link to={`/gewaesser/${thisSpot.waterways.slug}`}>{thisSpot.waterways.name}</Link></td>
               </tr>
-              <tr>
-                <th><Trans>Data Source</Trans>:</th>
-                <td>{thisSpot.dataSourceType.name}</td>
-              </tr>
             </table>
 
           </Col>

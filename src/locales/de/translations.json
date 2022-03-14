@@ -16,5 +16,6 @@
   "Entry Only Spots": "Einsteigsorte",
   "Exit Only Spots": "Aufsteigsorte",
   "Rest Spots": "Rasthalte",
-  "Emergency Exit Spots": "Notauswasserungsstelle"
+  "Emergency Exit Spots": "Notauswasserungsstelle",
+  "Data Source": "Datenquelle"
 }
