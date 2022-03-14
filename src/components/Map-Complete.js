@@ -411,7 +411,7 @@ const Map = (props) => {
             { obstacles.nodes
               .filter(obstacles => obstacles.locale === language)
               .map(obstacle => {
-              const { name, geometry, obstacleType, portageRoute, slug } = obstacle;
+              const { name, geometry, portageRoute, slug } = obstacle;
               return (
                 <div>
                   <GeoJSON data={geometry} style={layerStyle.obstacleStyle}>

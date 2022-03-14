@@ -72,10 +72,10 @@
 }
 
 .leaflet-control-layers {
-  background-color: $swisscanoe-blue;
+  background-color: $swisscanoe-blue !important;
   border: 0 !important;
-  color: white;
-  border-radius: 0;
+  color: white !important;
+  border-radius: 0 !important;
 }
 
 .leaflet-control-zoom a {
