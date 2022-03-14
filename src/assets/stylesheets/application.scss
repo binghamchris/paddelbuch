@@ -79,6 +79,7 @@ h3 {
   border-radius: 0px !important;
   color: $white !important;
   background-color: $swisscanoe-blue !important;
+  font-family: $font-default;
 }
 .leaflet-popup-content-wrapper a, .leaflet-popup a.leaflet-popup-close-button {
   color: $white !important;
@@ -86,4 +87,8 @@ h3 {
 
 .leaflet-popup-tip {
   background-color: $swisscanoe-blue !important;
+}
+
+.leaflet-container {
+  font-family: $font-default;
 }
