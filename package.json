@@ -11,7 +11,7 @@
     "@fontsource/quicksand": "^4.5.4",
     "@graphcms/rich-text-react-renderer": "^0.4.2",
     "bootstrap": "^5.0.2",
-    "gatsby": "^4.9.3",
+    "gatsby": "^4.10.0",
     "gatsby-plugin-gatsby-cloud": "^4.9.0",
     "gatsby-plugin-manifest": "^4.9.0",
     "gatsby-plugin-react-helmet": "^5.9.0",
