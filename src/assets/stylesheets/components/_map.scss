@@ -91,3 +91,11 @@
   border: 1px solid $secondary-blue !important;
   border-radius: 0 !important;
 }
+
+.clipboard-cell-popup > .clipboard-btn:hover {
+  background-color: $purple-1;
+}
+
+.clipboard-cell-popup > .clipboard-btn:active {
+  background-color: $startringspots-green;
+}
