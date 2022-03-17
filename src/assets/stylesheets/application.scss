@@ -28,10 +28,18 @@ main {
   .map {
     height: calc(100vh - $menu-height);
   }
+
+  .clipboard-cell {
+    padding-left: 2em;
+  }
 }
 @media screen and (max-width: 992px) {
   .map {
     height: 60vh;
+  }
+
+  .clipboard-cell {
+    padding-left: 3em;
   }
 }
 
@@ -91,4 +99,18 @@ h3 {
 
 .leaflet-container {
   font-family: $font-default !important;
+}
+
+.clipboard-btn {
+  border: 0;
+  background-color: $secondary-blue;
+  color: white;
+}
+
+.clipboard-btn:hover {
+  background-color: $swisscanoe-blue;
+}
+
+.clipboard-btn:active {
+  background-color: $startringspots-green;
 }

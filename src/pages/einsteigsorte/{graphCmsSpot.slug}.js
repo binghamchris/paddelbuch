@@ -7,6 +7,7 @@ import { Container, Row, Col } from "react-bootstrap";
 import { RichText } from '@graphcms/rich-text-react-renderer';
 import { Link, Trans, useTranslation } from 'gatsby-plugin-react-i18next';
 import SpotIconBlack from "components/SpotIconBlack";
+import Clipboard from 'react-clipboard.js';
 
 export const pageQuery = graphql`
   query SpotPageQuery($slug: String!, $language: GraphCMS_Locale!) {
@@ -98,11 +99,25 @@ export default function SpotDetailsPage({ data: { thisSpot } }) {
               </tr>
               <tr>
                 <th><Trans>GPS</Trans>:</th>
-                  <td>{thisSpot.location.latitude}, {thisSpot.location.longitude}</td>
+                  <td>
+                    {thisSpot.location.latitude}, {thisSpot.location.longitude}
+                  </td>
+                  <td class="clipboard-cell">
+                    <Clipboard button-class="clipboard-btn" button-title={t(`Copy GPS to clipboard`)} data-clipboard-text={`${thisSpot.location.latitude}, ${thisSpot.location.longitude}`}>
+                      <Trans>Copy</Trans>
+                    </Clipboard>
+                  </td>
               </tr>
               <tr>
                 <th><Trans>Approx. Address</Trans>:</th>
-                <td>{thisSpot.approximateAddress}</td>
+                <td>
+                  {thisSpot.approximateAddress}
+                </td>
+                <td class="clipboard-cell">
+                  <Clipboard button-class="clipboard-btn" button-title={t(`Copy approx. address to clipboard`)} data-clipboard-text={`${thisSpot.approximateAddress}`}>
+                    <Trans>Copy</Trans>
+                  </Clipboard>
+                </td>
               </tr>
               <tr>
                 <th><Trans>Waterway</Trans>:</th>

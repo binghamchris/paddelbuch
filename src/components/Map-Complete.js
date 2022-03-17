@@ -14,6 +14,7 @@ import entryWhite from "assets/images/icons/entry-white.png";
 import exitWhite from "assets/images/icons/exit-white.png";
 import emergencyWhite from "assets/images/icons/emergency-white.png";
 import restWhite from "assets/images/icons/rest-white.png";
+import Clipboard from 'react-clipboard.js';
 
 const Map = (props) => {
 
@@ -181,10 +182,20 @@ const Map = (props) => {
                         <tr>
                           <th><Trans>GPS</Trans>:</th>
                           <td>{location.latitude}, {location.longitude}</td>
+                          <td class="clipboard-cell-popup">
+                            <Clipboard button-class="clipboard-btn" button-title={t(`Copy GPS to clipboard`)} data-clipboard-text={`${location.latitude}, ${location.longitude}`}>
+                              <Trans>Copy</Trans>
+                            </Clipboard>
+                          </td>
                         </tr>
                         <tr>
                           <th><Trans>Approx. Address</Trans>:</th>
                           <td>{approximateAddress}</td>
+                          <td class="clipboard-cell-popup">
+                            <Clipboard button-class="clipboard-btn" button-title={t(`Copy approx. address to clipboard`)} data-clipboard-text={`${approximateAddress}`}>
+                              <Trans>Copy</Trans>
+                            </Clipboard>
+                          </td>
                         </tr>
                       </table>
                       <Link to={`/einsteigsorte/${slug}`}><Trans>More details</Trans></Link>
@@ -230,10 +241,20 @@ const Map = (props) => {
                         <tr>
                           <th><Trans>GPS</Trans>:</th>
                           <td>{location.latitude}, {location.longitude}</td>
+                          <td class="clipboard-cell-popup">
+                            <Clipboard button-class="clipboard-btn" button-title={t(`Copy GPS to clipboard`)} data-clipboard-text={`${location.latitude}, ${location.longitude}`}>
+                              <Trans>Copy</Trans>
+                            </Clipboard>
+                          </td>
                         </tr>
                         <tr>
                           <th><Trans>Approx. Address</Trans>:</th>
                           <td>{approximateAddress}</td>
+                          <td class="clipboard-cell-popup">
+                            <Clipboard button-class="clipboard-btn" button-title={t(`Copy approx. address to clipboard`)} data-clipboard-text={`${approximateAddress}`}>
+                              <Trans>Copy</Trans>
+                            </Clipboard>
+                          </td>
                         </tr>
                       </table>
                       <Link to={`/einsteigsorte/${slug}`}><Trans>More details</Trans></Link>
@@ -279,10 +300,20 @@ const Map = (props) => {
                         <tr>
                           <th><Trans>GPS</Trans>:</th>
                           <td>{location.latitude}, {location.longitude}</td>
+                          <td class="clipboard-cell-popup">
+                            <Clipboard button-class="clipboard-btn" button-title={t(`Copy GPS to clipboard`)} data-clipboard-text={`${location.latitude}, ${location.longitude}`}>
+                              <Trans>Copy</Trans>
+                            </Clipboard>
+                          </td>
                         </tr>
                         <tr>
                           <th><Trans>Approx. Address</Trans>:</th>
                           <td>{approximateAddress}</td>
+                          <td class="clipboard-cell-popup">
+                            <Clipboard button-class="clipboard-btn" button-title={t(`Copy approx. address to clipboard`)} data-clipboard-text={`${approximateAddress}`}>
+                              <Trans>Copy</Trans>
+                            </Clipboard>
+                          </td>
                         </tr>
                       </table>
                       <Link to={`/einsteigsorte/${slug}`}><Trans>More details</Trans></Link>
@@ -328,10 +359,20 @@ const Map = (props) => {
                         <tr>
                           <th><Trans>GPS</Trans>:</th>
                           <td>{location.latitude}, {location.longitude}</td>
+                          <td class="clipboard-cell-popup">
+                            <Clipboard button-class="clipboard-btn" button-title={t(`Copy GPS to clipboard`)} data-clipboard-text={`${location.latitude}, ${location.longitude}`}>
+                              <Trans>Copy</Trans>
+                            </Clipboard>
+                          </td>
                         </tr>
                         <tr>
                           <th><Trans>Approx. Address</Trans>:</th>
                           <td>{approximateAddress}</td>
+                          <td class="clipboard-cell-popup">
+                            <Clipboard button-class="clipboard-btn" button-title={t(`Copy approx. address to clipboard`)} data-clipboard-text={`${approximateAddress}`}>
+                              <Trans>Copy</Trans>
+                            </Clipboard>
+                          </td>
                         </tr>
                       </table>
                       <Link to={`/einsteigsorte/${slug}`}><Trans>More details</Trans></Link>
@@ -377,10 +418,20 @@ const Map = (props) => {
                         <tr>
                           <th><Trans>GPS</Trans>:</th>
                           <td>{location.latitude}, {location.longitude}</td>
+                          <td class="clipboard-cell-popup">
+                            <Clipboard button-class="clipboard-btn" button-title={t(`Copy GPS to clipboard`)} data-clipboard-text={`${location.latitude}, ${location.longitude}`}>
+                              <Trans>Copy</Trans>
+                            </Clipboard>
+                          </td>
                         </tr>
                         <tr>
                           <th><Trans>Approx. Address</Trans>:</th>
                           <td>{approximateAddress}</td>
+                          <td class="clipboard-cell-popup">
+                            <Clipboard button-class="clipboard-btn" button-title={t(`Copy approx. address to clipboard`)} data-clipboard-text={`${approximateAddress}`}>
+                              <Trans>Copy</Trans>
+                            </Clipboard>
+                          </td>
                         </tr>
                       </table>
                       <Link to={`/einsteigsorte/${slug}`}><Trans>More details</Trans></Link>
