@@ -87,6 +87,11 @@ h3 {
   font-family: $font-default !important;
 }
 
+.clipboard-btn {
+  border: 0;
+  background-color: $secondary-blue;
+  color: white;
+}
 
 .clipboard-btn:hover {
   background-color: $swisscanoe-blue;

@@ -5,7 +5,7 @@ import Map from "components/Map-Complete";
 import { graphql } from "gatsby";
 import { Container, Row, Col } from "react-bootstrap";
 import { RichText } from '@graphcms/rich-text-react-renderer';
-import { Link, Trans, useTranslation } from 'gatsby-plugin-react-i18next';
+import { Link, Trans, I18nextContext, useTranslation } from 'gatsby-plugin-react-i18next';
 import SpotIconDarkDetailsPane from "components/SpotIcon-Dark-DetailsPane";
 import Clipboard from 'react-clipboard.js';
 
@@ -46,14 +46,29 @@ export const pageQuery = graphql`
       dataSourceType {
         name
       }
-      slug    
+      slug
+      updatedAt 
     }
   }
 `;
 
 export default function SpotDetailsPage({ data: { thisSpot } }) {
+  
+  console.log();
 
   const {t} = useTranslation();
+  const context = React.useContext(I18nextContext);
+  const language = context.language
+
+  var lastUpdateDtFormat = { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' };
+  var lastUpdateDtRaw = new Date(thisSpot.updatedAt)
+
+  if ( language == "en" ) {
+    var lastUpdateDt = new Intl.DateTimeFormat('en-UK', lastUpdateDtFormat).format(lastUpdateDtRaw)
+  }
+  if ( language == "de" ) {
+    var lastUpdateDt = new Intl.DateTimeFormat('de-DE', lastUpdateDtFormat).format(lastUpdateDtRaw)
+  }
 
   const mapSettings = {
     center: [thisSpot.location.latitude, thisSpot.location.longitude],
@@ -119,6 +134,12 @@ export default function SpotDetailsPage({ data: { thisSpot } }) {
               <tr>
                 <th><Trans>Waterway</Trans>:</th>
                 <td><Link to={`/gewaesser/${thisSpot.waterways.slug}`}>{thisSpot.waterways.name}</Link></td>
+              </tr>
+              <tr>
+                <th><Trans>Last Updated</Trans></th>
+                <td>
+                  {lastUpdateDt}
+                </td>
               </tr>
             </table>
 
