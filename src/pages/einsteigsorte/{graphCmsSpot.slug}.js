@@ -62,12 +62,13 @@ export default function SpotDetailsPage({ data: { thisSpot } }) {
 
   var lastUpdateDtFormat = { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' };
   var lastUpdateDtRaw = new Date(thisSpot.updatedAt)
+  var lastUpdateDt
 
-  if ( language == "en" ) {
-    var lastUpdateDt = new Intl.DateTimeFormat('en-UK', lastUpdateDtFormat).format(lastUpdateDtRaw)
+  if ( language === "en" ) {
+    lastUpdateDt = new Intl.DateTimeFormat('en-UK', lastUpdateDtFormat).format(lastUpdateDtRaw)
   }
-  if ( language == "de" ) {
-    var lastUpdateDt = new Intl.DateTimeFormat('de-DE', lastUpdateDtFormat).format(lastUpdateDtRaw)
+  if ( language === "de" ) {
+    lastUpdateDt = new Intl.DateTimeFormat('de-DE', lastUpdateDtFormat).format(lastUpdateDtRaw)
   }
 
   const mapSettings = {

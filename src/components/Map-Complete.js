@@ -6,7 +6,6 @@ import { isDomAvailable } from "lib/util";
 import { graphql, useStaticQuery } from "gatsby";
 import * as layerStyle from 'data/layer-styles';
 import { markerStyles } from 'data/marker-styles';
-import { RichText } from '@graphcms/rich-text-react-renderer';
 import { Link, Trans, I18nextContext, useTranslation } from 'gatsby-plugin-react-i18next';
 import L from "leaflet";
 import MapPopup from 'components/Map-Popup';
