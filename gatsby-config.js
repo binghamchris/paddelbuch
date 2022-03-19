@@ -38,7 +38,7 @@ module.exports = {
         name: siteMetadata.companyName,
         short_name: siteMetadata.companyName,
         start_url: "/",
-        icon: "src/assets/images/logo.png",
+        icon: "src/assets/images/logo-dark.svg",
       },
     },
     {

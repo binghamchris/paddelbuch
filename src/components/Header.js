@@ -50,7 +50,7 @@ const Header = () => {
         <Link to="/" className="link-no-style">
           <Navbar.Brand as="span">
             <StaticImage
-              src="../assets/images/logo.png"
+              src="../assets/images/logo-light.svg"
               alt="The Paddel Buch Logo"
               width="33.75"
               height="33.75"
