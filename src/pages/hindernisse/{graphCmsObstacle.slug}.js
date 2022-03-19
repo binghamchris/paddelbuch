@@ -7,7 +7,7 @@ import { Container, Row, Col } from "react-bootstrap";
 import { RichText } from '@graphcms/rich-text-react-renderer';
 import { isDomAvailable } from 'lib/util';
 import L from "leaflet";
-import { Link, Trans, useTranslation } from 'gatsby-plugin-react-i18next';
+import { Link, Trans, I18nextContext, useTranslation } from 'gatsby-plugin-react-i18next';
 
 export const pageQuery = graphql`
 query ObstaclePageQuery($slug: String!, $language: GraphCMS_Locale!) {
@@ -56,6 +56,7 @@ query ObstaclePageQuery($slug: String!, $language: GraphCMS_Locale!) {
       slug
       name
     }
+    updatedAt
   }
 }
 `;
@@ -63,7 +64,20 @@ query ObstaclePageQuery($slug: String!, $language: GraphCMS_Locale!) {
 export default function ObstacleDetailsPage({ data: { thisObstacle, spots, protectedAreas, obstacles } }) {
 
   const {t} = useTranslation();
+  const context = React.useContext(I18nextContext);
+  const language = context.language
 
+  var lastUpdateDtFormat = { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' };
+  var lastUpdateDtRaw = new Date(thisObstacle.updatedAt)
+  var lastUpdateDt
+
+  if ( language === "en" ) {
+    lastUpdateDt = new Intl.DateTimeFormat('en-UK', lastUpdateDtFormat).format(lastUpdateDtRaw)
+  }
+  if ( language === "de" ) {
+    lastUpdateDt = new Intl.DateTimeFormat('de-DE', lastUpdateDtFormat).format(lastUpdateDtRaw)
+  }
+  
   var mapSettings
   var obstacleCentre
 
@@ -113,6 +127,12 @@ export default function ObstacleDetailsPage({ data: { thisObstacle, spots, prote
                     <Link to={`/gewaesser/${thisObstacle.waterway.slug}`}>{thisObstacle.waterway.name}</Link>
                   </td>
                 </tr>
+                <tr>
+                  <th><Trans>Last Updated</Trans>:</th>
+                  <td>
+                    {lastUpdateDt}
+                  </td>
+                </tr>
               </table>
             </Col>
           </Row>
@@ -155,6 +175,12 @@ export default function ObstacleDetailsPage({ data: { thisObstacle, spots, prote
                   <th><Trans>Waterway</Trans>:</th>
                   <td>
                     <Link to={`/gewaesser/${thisObstacle.waterway.slug}`}>{thisObstacle.waterway.name}</Link>
+                  </td>
+                </tr>
+                <tr>
+                  <th><Trans>Last Updated</Trans>:</th>
+                  <td>
+                    {lastUpdateDt}
                   </td>
                 </tr>
               </table>

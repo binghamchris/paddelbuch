@@ -6,15 +6,10 @@ import { isDomAvailable } from "lib/util";
 import { graphql, useStaticQuery } from "gatsby";
 import * as layerStyle from 'data/layer-styles';
 import { markerStyles } from 'data/marker-styles';
-import { RichText } from '@graphcms/rich-text-react-renderer';
-import { Link, Trans, I18nextContext, useTranslation } from 'gatsby-plugin-react-i18next';
+import { Trans, I18nextContext, useTranslation } from 'gatsby-plugin-react-i18next';
 import L from "leaflet";
-import entryExitWhite from "assets/images/icons/entryexit-white.png";
-import entryWhite from "assets/images/icons/entry-white.png";
-import exitWhite from "assets/images/icons/exit-white.png";
-import emergencyWhite from "assets/images/icons/emergency-white.png";
-import restWhite from "assets/images/icons/rest-white.png";
-import Clipboard from 'react-clipboard.js';
+import MapSpotPopup from 'components/Map-Spot-Popup';
+import MapObstaclePopup from 'components/Map-Obstacle-Popup';
 
 const Map = (props) => {
 
@@ -79,9 +74,6 @@ const Map = (props) => {
           portageRoute
           geometry
           name
-          description {
-            raw
-          }
           isPortageNecessary
           isPortagePossible
           obstacleType {
@@ -155,51 +147,7 @@ const Map = (props) => {
                 const position = [location.latitude, location.longitude];
                 return (
                   <Marker key={slug} position={position} icon={(!!spotEinsteigAufsteigIcon) ? spotEinsteigAufsteigIcon : null}>
-                    {<Popup>
-                      <div class="popup-icon-div">
-                        <p><img src={entryExitWhite} class="popup-icon" alt={t('Entry and exit spot icon')}/> {spotType.name}</p>
-                      </div>
-                      <span class="popup-title">
-                        <h1>{name}</h1>
-                      </span>
-                      <RichText content={description.raw} />
-                      <table class="popup-details-table">
-                        <tr>
-                          <th><Trans>Potentially Usable By</Trans>:</th>
-                          <td>
-                            <ul>
-                              {potentiallyUsableBy
-                                .map(paddleCraft => {
-                                  const { name } = paddleCraft;
-                                  return (
-                                    <li>{name}</li>
-                                  )
-                                })
-                              }
-                            </ul>
-                          </td>
-                        </tr>
-                        <tr>
-                          <th><Trans>GPS</Trans>:</th>
-                          <td>{location.latitude}, {location.longitude}</td>
-                          <td class="clipboard-cell-popup">
-                            <Clipboard button-class="clipboard-btn" button-title={t(`Copy GPS to clipboard`)} data-clipboard-text={`${location.latitude}, ${location.longitude}`}>
-                              <Trans>Copy</Trans>
-                            </Clipboard>
-                          </td>
-                        </tr>
-                        <tr>
-                          <th><Trans>Approx. Address</Trans>:</th>
-                          <td>{approximateAddress}</td>
-                          <td class="clipboard-cell-popup">
-                            <Clipboard button-class="clipboard-btn" button-title={t(`Copy approx. address to clipboard`)} data-clipboard-text={`${approximateAddress}`}>
-                              <Trans>Copy</Trans>
-                            </Clipboard>
-                          </td>
-                        </tr>
-                      </table>
-                      <Link to={`/einsteigsorte/${slug}`}><Trans>More details</Trans></Link>
-                    </Popup>}
+                    {<MapSpotPopup name={name} location={location} description={description} slug={slug} approximateAddress={approximateAddress} spotType={spotType} potentiallyUsableBy={potentiallyUsableBy}/>}
                   </Marker>
                 );
             })}
@@ -214,51 +162,7 @@ const Map = (props) => {
                 const position = [location.latitude, location.longitude];
                 return (
                   <Marker key={slug} position={position} icon={(!!spotNurEinsteigIcon) ? spotNurEinsteigIcon : null}>
-                    {<Popup>
-                      <div class="popup-icon-div">
-                        <p><img src={entryWhite} class="popup-icon" alt={t('Entry spot icon')}/> {spotType.name}</p>
-                      </div>
-                      <span class="popup-title">
-                        <h1>{name}</h1>
-                      </span>
-                      <RichText content={description.raw} />
-                      <table class="popup-details-table">
-                        <tr>
-                          <th><Trans>Potentially Usable By</Trans>:</th>
-                          <td>
-                            <ul>
-                              {potentiallyUsableBy
-                                .map(paddleCraft => {
-                                  const { name } = paddleCraft;
-                                  return (
-                                    <li>{name}</li>
-                                  )
-                                })
-                              }
-                            </ul>
-                          </td>
-                        </tr>
-                        <tr>
-                          <th><Trans>GPS</Trans>:</th>
-                          <td>{location.latitude}, {location.longitude}</td>
-                          <td class="clipboard-cell-popup">
-                            <Clipboard button-class="clipboard-btn" button-title={t(`Copy GPS to clipboard`)} data-clipboard-text={`${location.latitude}, ${location.longitude}`}>
-                              <Trans>Copy</Trans>
-                            </Clipboard>
-                          </td>
-                        </tr>
-                        <tr>
-                          <th><Trans>Approx. Address</Trans>:</th>
-                          <td>{approximateAddress}</td>
-                          <td class="clipboard-cell-popup">
-                            <Clipboard button-class="clipboard-btn" button-title={t(`Copy approx. address to clipboard`)} data-clipboard-text={`${approximateAddress}`}>
-                              <Trans>Copy</Trans>
-                            </Clipboard>
-                          </td>
-                        </tr>
-                      </table>
-                      <Link to={`/einsteigsorte/${slug}`}><Trans>More details</Trans></Link>
-                    </Popup>}
+                    {<MapSpotPopup name={name} location={location} description={description} slug={slug} approximateAddress={approximateAddress} spotType={spotType} potentiallyUsableBy={potentiallyUsableBy}/>}
                   </Marker>
                 );
             })}
@@ -273,51 +177,7 @@ const Map = (props) => {
                 const position = [location.latitude, location.longitude];
                 return (
                   <Marker key={slug} position={position} icon={(!!spotNurAufsteigIcon) ? spotNurAufsteigIcon : null}>
-                    {<Popup>
-                      <div class="popup-icon-div">
-                        <p><img src={exitWhite} class="popup-icon" alt={t('Exit spot icon')}/> {spotType.name}</p>
-                      </div>
-                      <span class="popup-title">
-                        <h1>{name}</h1>
-                      </span>
-                      <RichText content={description.raw} />
-                      <table class="popup-details-table">
-                        <tr>
-                          <th><Trans>Potentially Usable By</Trans>:</th>
-                          <td>
-                            <ul>
-                              {potentiallyUsableBy
-                                .map(paddleCraft => {
-                                  const { name } = paddleCraft;
-                                  return (
-                                    <li>{name}</li>
-                                  )
-                                })
-                              }
-                            </ul>
-                          </td>
-                        </tr>
-                        <tr>
-                          <th><Trans>GPS</Trans>:</th>
-                          <td>{location.latitude}, {location.longitude}</td>
-                          <td class="clipboard-cell-popup">
-                            <Clipboard button-class="clipboard-btn" button-title={t(`Copy GPS to clipboard`)} data-clipboard-text={`${location.latitude}, ${location.longitude}`}>
-                              <Trans>Copy</Trans>
-                            </Clipboard>
-                          </td>
-                        </tr>
-                        <tr>
-                          <th><Trans>Approx. Address</Trans>:</th>
-                          <td>{approximateAddress}</td>
-                          <td class="clipboard-cell-popup">
-                            <Clipboard button-class="clipboard-btn" button-title={t(`Copy approx. address to clipboard`)} data-clipboard-text={`${approximateAddress}`}>
-                              <Trans>Copy</Trans>
-                            </Clipboard>
-                          </td>
-                        </tr>
-                      </table>
-                      <Link to={`/einsteigsorte/${slug}`}><Trans>More details</Trans></Link>
-                    </Popup>}
+                    {<MapSpotPopup name={name} location={location} description={description} slug={slug} approximateAddress={approximateAddress} spotType={spotType} potentiallyUsableBy={potentiallyUsableBy}/>}
                   </Marker>
                 );
             })}
@@ -332,51 +192,7 @@ const Map = (props) => {
                 const position = [location.latitude, location.longitude];
                 return (
                   <Marker key={slug} position={position} icon={(!!spotRasthalteIcon) ? spotRasthalteIcon : null}>
-                    {<Popup>
-                      <div class="popup-icon-div">
-                        <p><img src={restWhite} class="popup-icon" alt={t('Rest spot icon')}/> {spotType.name}</p>
-                      </div>
-                      <span class="popup-title">
-                        <h1>{name}</h1>
-                      </span>
-                      <RichText content={description.raw} />
-                      <table class="popup-details-table">
-                        <tr>
-                          <th><Trans>Potentially Usable By</Trans>:</th>
-                          <td>
-                            <ul>
-                              {potentiallyUsableBy
-                                .map(paddleCraft => {
-                                  const { name } = paddleCraft;
-                                  return (
-                                    <li>{name}</li>
-                                  )
-                                })
-                              }
-                            </ul>
-                          </td>
-                        </tr>
-                        <tr>
-                          <th><Trans>GPS</Trans>:</th>
-                          <td>{location.latitude}, {location.longitude}</td>
-                          <td class="clipboard-cell-popup">
-                            <Clipboard button-class="clipboard-btn" button-title={t(`Copy GPS to clipboard`)} data-clipboard-text={`${location.latitude}, ${location.longitude}`}>
-                              <Trans>Copy</Trans>
-                            </Clipboard>
-                          </td>
-                        </tr>
-                        <tr>
-                          <th><Trans>Approx. Address</Trans>:</th>
-                          <td>{approximateAddress}</td>
-                          <td class="clipboard-cell-popup">
-                            <Clipboard button-class="clipboard-btn" button-title={t(`Copy approx. address to clipboard`)} data-clipboard-text={`${approximateAddress}`}>
-                              <Trans>Copy</Trans>
-                            </Clipboard>
-                          </td>
-                        </tr>
-                      </table>
-                      <Link to={`/einsteigsorte/${slug}`}><Trans>More details</Trans></Link>
-                    </Popup>}
+                    {<MapSpotPopup name={name} location={location} description={description} slug={slug} approximateAddress={approximateAddress} spotType={spotType} potentiallyUsableBy={potentiallyUsableBy}/>}
                   </Marker>
                 );
             })}
@@ -391,51 +207,7 @@ const Map = (props) => {
                 const position = [location.latitude, location.longitude];
                 return (
                   <Marker key={slug} position={position} icon={(!!spotNotauswasserungIcon) ? spotNotauswasserungIcon : null}>
-                    {<Popup>
-                      <div class="popup-icon-div">
-                        <p><img src={emergencyWhite} class="popup-icon" alt={t('Emergency exit spot icon')}/> {spotType.name}</p>
-                      </div>
-                      <span class="popup-title">
-                        <h1>{name}</h1>
-                      </span>
-                      <RichText content={description.raw} />
-                      <table class="popup-details-table">
-                        <tr>
-                          <th><Trans>Potentially Usable By</Trans>:</th>
-                          <td>
-                            <ul>
-                              {potentiallyUsableBy
-                                .map(paddleCraft => {
-                                  const { name } = paddleCraft;
-                                  return (
-                                    <li>{name}</li>
-                                  )
-                                })
-                              }
-                            </ul>
-                          </td>
-                        </tr>
-                        <tr>
-                          <th><Trans>GPS</Trans>:</th>
-                          <td>{location.latitude}, {location.longitude}</td>
-                          <td class="clipboard-cell-popup">
-                            <Clipboard button-class="clipboard-btn" button-title={t(`Copy GPS to clipboard`)} data-clipboard-text={`${location.latitude}, ${location.longitude}`}>
-                              <Trans>Copy</Trans>
-                            </Clipboard>
-                          </td>
-                        </tr>
-                        <tr>
-                          <th><Trans>Approx. Address</Trans>:</th>
-                          <td>{approximateAddress}</td>
-                          <td class="clipboard-cell-popup">
-                            <Clipboard button-class="clipboard-btn" button-title={t(`Copy approx. address to clipboard`)} data-clipboard-text={`${approximateAddress}`}>
-                              <Trans>Copy</Trans>
-                            </Clipboard>
-                          </td>
-                        </tr>
-                      </table>
-                      <Link to={`/einsteigsorte/${slug}`}><Trans>More details</Trans></Link>
-                    </Popup>}
+                    {<MapSpotPopup name={name} location={location} description={description} slug={slug} approximateAddress={approximateAddress} spotType={spotType} potentiallyUsableBy={potentiallyUsableBy}/>}
                   </Marker>
                 );
             })}
@@ -462,16 +234,11 @@ const Map = (props) => {
             { obstacles.nodes
               .filter(obstacles => obstacles.locale === language)
               .map(obstacle => {
-              const { name, geometry, portageRoute, slug } = obstacle;
+              const { name, geometry, portageRoute, isPortagePossible, slug } = obstacle;
               return (
                 <div>
                   <GeoJSON data={geometry} style={layerStyle.obstacleStyle}>
-                    <Popup>
-                      <span class="popup-title">
-                        <h1>{name}</h1>
-                      </span>
-                      <p><Link to={`/hindernisse/${slug}`}><Trans>More details</Trans></Link></p>
-                    </Popup>
+                    <MapObstaclePopup name={name} isPortagePossible={isPortagePossible} slug={slug}/>
                   </GeoJSON>
                   <GeoJSON data={portageRoute} style={layerStyle.portageStyle}>
                     <Popup><b><Trans>Portage route for</Trans> {name}</b></Popup>

@@ -5,8 +5,8 @@ import Map from "components/Map-Complete";
 import { graphql } from "gatsby";
 import { Container, Row, Col } from "react-bootstrap";
 import { RichText } from '@graphcms/rich-text-react-renderer';
-import { Link, Trans, useTranslation } from 'gatsby-plugin-react-i18next';
-import SpotIconBlack from "components/SpotIconBlack";
+import { Link, Trans, I18nextContext, useTranslation } from 'gatsby-plugin-react-i18next';
+import SpotIconDarkDetailsPane from "components/SpotIcon-Dark-DetailsPane";
 import Clipboard from 'react-clipboard.js';
 
 export const pageQuery = graphql`
@@ -46,7 +46,8 @@ export const pageQuery = graphql`
       dataSourceType {
         name
       }
-      slug    
+      slug
+      updatedAt 
     }
   }
 `;
@@ -54,6 +55,19 @@ export const pageQuery = graphql`
 export default function SpotDetailsPage({ data: { thisSpot } }) {
 
   const {t} = useTranslation();
+  const context = React.useContext(I18nextContext);
+  const language = context.language
+
+  var lastUpdateDtFormat = { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' };
+  var lastUpdateDtRaw = new Date(thisSpot.updatedAt)
+  var lastUpdateDt
+
+  if ( language === "en" ) {
+    lastUpdateDt = new Intl.DateTimeFormat('en-UK', lastUpdateDtFormat).format(lastUpdateDtRaw)
+  }
+  if ( language === "de" ) {
+    lastUpdateDt = new Intl.DateTimeFormat('de-DE', lastUpdateDtFormat).format(lastUpdateDtRaw)
+  }
 
   const mapSettings = {
     center: [thisSpot.location.latitude, thisSpot.location.longitude],
@@ -61,7 +75,6 @@ export default function SpotDetailsPage({ data: { thisSpot } }) {
   };
 
   return(
-    
     <Layout pageName="spot-details">
       <Helmet>
         <title>{t(`Paddel Buch - Spots`)} - {thisSpot.name}</title>
@@ -74,9 +87,7 @@ export default function SpotDetailsPage({ data: { thisSpot } }) {
             </Map>
           </Col>
           <Col className="spot-description" xl="4" lg="4" md="12" sm="12" xs="12">
-            
-          
-            <SpotIconBlack slug={thisSpot.spotType.slug} name={thisSpot.spotType.name}/>
+            <SpotIconDarkDetailsPane slug={thisSpot.spotType.slug} name={thisSpot.spotType.name}/>
             <div class="spot-title">
               <h1>{thisSpot.name}</h1>
             </div>
@@ -122,6 +133,12 @@ export default function SpotDetailsPage({ data: { thisSpot } }) {
               <tr>
                 <th><Trans>Waterway</Trans>:</th>
                 <td><Link to={`/gewaesser/${thisSpot.waterways.slug}`}>{thisSpot.waterways.name}</Link></td>
+              </tr>
+              <tr>
+                <th><Trans>Last Updated</Trans>:</th>
+                <td>
+                  {lastUpdateDt}
+                </td>
               </tr>
             </table>
 

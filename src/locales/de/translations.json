@@ -20,5 +20,10 @@
   "Data Source": "Datenquelle",
   "Copy GPS to clipboard": "GPS in der Zwischenablage kopieren",
   "Copy approx. address to clipboard": "Ungefähre Adresse in der Zwischenablage kopieren",
-  "Copy": "Kopieren"
+  "Copy": "Kopieren",
+  "Last Updated": "Zuletzt aktualisiert",
+  "Yes": "Ja",
+  "No": "Nein",
+  "Unknown": "Unbekannt",
+  "Portage Possible": "Portage möglich"
 }

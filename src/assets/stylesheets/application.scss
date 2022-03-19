@@ -83,20 +83,6 @@ h3 {
   padding-left: 0.5em;
 }
 
-.leaflet-popup-content-wrapper {
-  border-radius: 0px !important;
-  color: $white !important;
-  background-color: $swisscanoe-blue !important;
-  font-family: $font-default;
-}
-.leaflet-popup-content-wrapper a, .leaflet-popup a.leaflet-popup-close-button {
-  color: $white !important;
-}
-
-.leaflet-popup-tip {
-  background-color: $swisscanoe-blue !important;
-}
-
 .leaflet-container {
   font-family: $font-default !important;
 }
