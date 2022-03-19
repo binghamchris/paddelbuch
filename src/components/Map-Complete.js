@@ -6,9 +6,10 @@ import { isDomAvailable } from "lib/util";
 import { graphql, useStaticQuery } from "gatsby";
 import * as layerStyle from 'data/layer-styles';
 import { markerStyles } from 'data/marker-styles';
-import { Link, Trans, I18nextContext, useTranslation } from 'gatsby-plugin-react-i18next';
+import { Trans, I18nextContext, useTranslation } from 'gatsby-plugin-react-i18next';
 import L from "leaflet";
-import MapPopup from 'components/Map-Popup';
+import MapSpotPopup from 'components/Map-Spot-Popup';
+import MapObstaclePopup from 'components/Map-Obstacle-Popup';
 
 const Map = (props) => {
 
@@ -73,9 +74,6 @@ const Map = (props) => {
           portageRoute
           geometry
           name
-          description {
-            raw
-          }
           isPortageNecessary
           isPortagePossible
           obstacleType {
@@ -149,7 +147,7 @@ const Map = (props) => {
                 const position = [location.latitude, location.longitude];
                 return (
                   <Marker key={slug} position={position} icon={(!!spotEinsteigAufsteigIcon) ? spotEinsteigAufsteigIcon : null}>
-                    {<MapPopup name={name} location={location} description={description} slug={slug} approximateAddress={approximateAddress} spotType={spotType} potentiallyUsableBy={potentiallyUsableBy}/>}
+                    {<MapSpotPopup name={name} location={location} description={description} slug={slug} approximateAddress={approximateAddress} spotType={spotType} potentiallyUsableBy={potentiallyUsableBy}/>}
                   </Marker>
                 );
             })}
@@ -164,7 +162,7 @@ const Map = (props) => {
                 const position = [location.latitude, location.longitude];
                 return (
                   <Marker key={slug} position={position} icon={(!!spotNurEinsteigIcon) ? spotNurEinsteigIcon : null}>
-                    {<MapPopup name={name} location={location} description={description} slug={slug} approximateAddress={approximateAddress} spotType={spotType} potentiallyUsableBy={potentiallyUsableBy}/>}
+                    {<MapSpotPopup name={name} location={location} description={description} slug={slug} approximateAddress={approximateAddress} spotType={spotType} potentiallyUsableBy={potentiallyUsableBy}/>}
                   </Marker>
                 );
             })}
@@ -179,7 +177,7 @@ const Map = (props) => {
                 const position = [location.latitude, location.longitude];
                 return (
                   <Marker key={slug} position={position} icon={(!!spotNurAufsteigIcon) ? spotNurAufsteigIcon : null}>
-                    {<MapPopup name={name} location={location} description={description} slug={slug} approximateAddress={approximateAddress} spotType={spotType} potentiallyUsableBy={potentiallyUsableBy}/>}
+                    {<MapSpotPopup name={name} location={location} description={description} slug={slug} approximateAddress={approximateAddress} spotType={spotType} potentiallyUsableBy={potentiallyUsableBy}/>}
                   </Marker>
                 );
             })}
@@ -194,7 +192,7 @@ const Map = (props) => {
                 const position = [location.latitude, location.longitude];
                 return (
                   <Marker key={slug} position={position} icon={(!!spotRasthalteIcon) ? spotRasthalteIcon : null}>
-                    {<MapPopup name={name} location={location} description={description} slug={slug} approximateAddress={approximateAddress} spotType={spotType} potentiallyUsableBy={potentiallyUsableBy}/>}
+                    {<MapSpotPopup name={name} location={location} description={description} slug={slug} approximateAddress={approximateAddress} spotType={spotType} potentiallyUsableBy={potentiallyUsableBy}/>}
                   </Marker>
                 );
             })}
@@ -209,7 +207,7 @@ const Map = (props) => {
                 const position = [location.latitude, location.longitude];
                 return (
                   <Marker key={slug} position={position} icon={(!!spotNotauswasserungIcon) ? spotNotauswasserungIcon : null}>
-                    {<MapPopup name={name} location={location} description={description} slug={slug} approximateAddress={approximateAddress} spotType={spotType} potentiallyUsableBy={potentiallyUsableBy}/>}
+                    {<MapSpotPopup name={name} location={location} description={description} slug={slug} approximateAddress={approximateAddress} spotType={spotType} potentiallyUsableBy={potentiallyUsableBy}/>}
                   </Marker>
                 );
             })}
@@ -236,16 +234,11 @@ const Map = (props) => {
             { obstacles.nodes
               .filter(obstacles => obstacles.locale === language)
               .map(obstacle => {
-              const { name, geometry, portageRoute, slug } = obstacle;
+              const { name, geometry, portageRoute, isPortagePossible, slug } = obstacle;
               return (
                 <div>
                   <GeoJSON data={geometry} style={layerStyle.obstacleStyle}>
-                    <Popup>
-                      <span class="popup-title">
-                        <h1>{name}</h1>
-                      </span>
-                      <p><Link to={`/hindernisse/${slug}`}><Trans>More details</Trans></Link></p>
-                    </Popup>
+                    <MapObstaclePopup name={name} isPortagePossible={isPortagePossible} slug={slug}/>
                   </GeoJSON>
                   <GeoJSON data={portageRoute} style={layerStyle.portageStyle}>
                     <Popup><b><Trans>Portage route for</Trans> {name}</b></Popup>

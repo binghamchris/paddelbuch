@@ -36,7 +36,6 @@ const SpotIconLightPopup = (props) => {
       </div>
     );
   }
-
   else if (props.slug === "nur-aufsteig") {
     return (
       <div class="popup-icon-div">
@@ -52,7 +51,6 @@ const SpotIconLightPopup = (props) => {
       </div>
     );
   }
-
   else if (props.slug === "notauswasserungsstelle") {
     return (
       <div class="popup-icon-div">
@@ -68,7 +66,6 @@ const SpotIconLightPopup = (props) => {
       </div>
     );
   }
-
   else if (props.slug === "rasthalte") {
     return (
       <div class="popup-icon-div">
@@ -84,7 +81,6 @@ const SpotIconLightPopup = (props) => {
       </div>
     );
   }
-
   else {
     return (
       <div class="spot-icon-div">

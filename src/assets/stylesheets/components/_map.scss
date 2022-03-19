@@ -71,7 +71,7 @@
 .popup-title h1 {
   font-family: $font-brand;
   font-size: 1.6em;
-  font-weight: 700;
+  font-weight: 500;
   color: white;
 }
 
@@ -83,7 +83,7 @@
 
 .popup-btn-right {
   float: right;
-  text-decoration: none;
+  text-decoration: none !important;
 }
 
 .leaflet-control-layers {
@@ -140,4 +140,8 @@
 
 .leaflet-control-layers-overlays {
   font-size: 1.2em;
+}
+
+.obstacle-details-btn {
+  margin-top: 1.5em;
 }
