@@ -11,9 +11,7 @@ const MapPopup = (props) => {
 
   return(
     <Popup>
-      <div class="popup-icon-div">
-        <SpotIconLightPopup slug={props.spotType.slug} name={props.spotType.name} height='20'/>
-      </div>
+      <SpotIconLightPopup slug={props.spotType.slug} name={props.spotType.name} height='20'/>
       <span class="popup-title">
         <h1>{props.name}</h1>
       </span>
@@ -54,7 +52,7 @@ const MapPopup = (props) => {
         </tr>
       </table>
       <button class="popup-btn popup-btn-right">
-        <Link to={`/einsteigsorte/${props.slug}`} class="popup-btn popup-btn-right">
+        <Link to={`/einsteigsorte/${props.slug}`} class="popup-btn-right">
           <Trans>More details</Trans>
         </Link>
       </button>

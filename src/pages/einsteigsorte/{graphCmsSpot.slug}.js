@@ -6,7 +6,7 @@ import { graphql } from "gatsby";
 import { Container, Row, Col } from "react-bootstrap";
 import { RichText } from '@graphcms/rich-text-react-renderer';
 import { Link, Trans, useTranslation } from 'gatsby-plugin-react-i18next';
-import SpotIconBlack from "components/SpotIconBlack";
+import SpotIconDarkDetailsPane from "components/SpotIcon-Dark-DetailsPane";
 import Clipboard from 'react-clipboard.js';
 
 export const pageQuery = graphql`
@@ -61,7 +61,6 @@ export default function SpotDetailsPage({ data: { thisSpot } }) {
   };
 
   return(
-    
     <Layout pageName="spot-details">
       <Helmet>
         <title>{t(`Paddel Buch - Spots`)} - {thisSpot.name}</title>
@@ -74,9 +73,7 @@ export default function SpotDetailsPage({ data: { thisSpot } }) {
             </Map>
           </Col>
           <Col className="spot-description" xl="4" lg="4" md="12" sm="12" xs="12">
-            
-          
-            <SpotIconBlack slug={thisSpot.spotType.slug} name={thisSpot.spotType.name}/>
+            <SpotIconDarkDetailsPane slug={thisSpot.spotType.slug} name={thisSpot.spotType.name}/>
             <div class="spot-title">
               <h1>{thisSpot.name}</h1>
             </div>
