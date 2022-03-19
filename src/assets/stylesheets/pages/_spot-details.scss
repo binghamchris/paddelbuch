@@ -40,7 +40,6 @@
 
   .spot-icon-div {
     border-bottom: 1px solid $secondary-blue;
-
     padding-bottom: 2em;
     font-family: $font-brand;
     font-size: 1.2em;
@@ -53,6 +52,10 @@
   .spot-icon {
     height: 20px;
     padding-right: 10px;
+  }
+  
+  .spot-icon img {
+    width: 20px !important;
   }
 
   .spot-details-table ul {
