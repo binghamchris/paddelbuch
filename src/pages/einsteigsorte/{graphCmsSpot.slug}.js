@@ -53,8 +53,6 @@ export const pageQuery = graphql`
 `;
 
 export default function SpotDetailsPage({ data: { thisSpot } }) {
-  
-  console.log();
 
   const {t} = useTranslation();
   const context = React.useContext(I18nextContext);
@@ -137,7 +135,7 @@ export default function SpotDetailsPage({ data: { thisSpot } }) {
                 <td><Link to={`/gewaesser/${thisSpot.waterways.slug}`}>{thisSpot.waterways.name}</Link></td>
               </tr>
               <tr>
-                <th><Trans>Last Updated</Trans></th>
+                <th><Trans>Last Updated</Trans>:</th>
                 <td>
                   {lastUpdateDt}
                 </td>

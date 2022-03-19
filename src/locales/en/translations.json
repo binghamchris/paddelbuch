@@ -21,5 +21,9 @@
   "Copy GPS to clipboard": "Copy GPS to clipboard",
   "Copy approx. address to clipboard": "Copy approx. address to clipboard",
   "Copy": "Copy",
-  "Last Updated": "Last Updated"
+  "Last Updated": "Last Updated",
+  "Yes": "Yes",
+  "No": "No",
+  "Unknown": "Unknown",
+  "Portage Possible": "Portage Possible"
 }

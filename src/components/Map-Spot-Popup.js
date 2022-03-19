@@ -5,7 +5,7 @@ import Clipboard from 'react-clipboard.js';
 import { RichText } from '@graphcms/rich-text-react-renderer';
 import { Popup } from "react-leaflet";
 
-const MapPopup = (props) => {
+const MapSpotPopup = (props) => {
 
   const {t} = useTranslation();
 
@@ -60,4 +60,4 @@ const MapPopup = (props) => {
   )
 }
 
-export default MapPopup;
+export default MapSpotPopup;

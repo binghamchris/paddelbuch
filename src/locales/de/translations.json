@@ -21,5 +21,9 @@
   "Copy GPS to clipboard": "GPS in der Zwischenablage kopieren",
   "Copy approx. address to clipboard": "Ungefähre Adresse in der Zwischenablage kopieren",
   "Copy": "Kopieren",
-  "Last Updated": "Zuletzt aktualisiert"
+  "Last Updated": "Zuletzt aktualisiert",
+  "Yes": "Ja",
+  "No": "Nein",
+  "Unknown": "Unbekannt",
+  "Portage Possible": "Portage möglich"
 }
