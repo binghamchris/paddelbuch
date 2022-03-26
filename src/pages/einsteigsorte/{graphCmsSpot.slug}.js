@@ -81,12 +81,12 @@ export default function SpotDetailsPage({ data: { thisSpot } }) {
       </Helmet>
       <Container fluid >
         <Row className="justify-content-center g-0">
-          <Col id="map" xl="8" lg="8" md="12" sm="12" xs="12">
+          <Col id="map" xl="8" lg="7" md="12" sm="12" xs="12">
             <Map {...mapSettings}>
 
             </Map>
           </Col>
-          <Col className="spot-description" xl="4" lg="4" md="12" sm="12" xs="12">
+          <Col className="spot-description" xl="4" lg="5" md="12" sm="12" xs="12">
             <SpotIconDarkDetailsPane slug={thisSpot.spotType.slug} name={thisSpot.spotType.name}/>
             <div class="spot-title">
               <h1>{thisSpot.name}</h1>
