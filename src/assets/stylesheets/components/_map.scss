@@ -123,8 +123,6 @@
   //margin-top: 0 !important;
 }
 
-
-
 .leaflet-popup-tip {
   background-color: $swisscanoe-blue !important;
 }
@@ -138,11 +136,28 @@
 }
 
 .clipboard-cell-popup > .clipboard-btn:active {
-  background-color: $startringspots-green;
+  background-color: $green-1;
 }
 
 .leaflet-control-layers-overlays {
   font-size: 1.2em;
+}
+
+.leaflet-control-layers-overlays > label {
+  margin-bottom: 5px;
+}
+
+.leaflet-control-layers-overlays input {
+  height: 1.3em;
+  width: 1.3em;
+  margin-right: 0.5em;
+}
+
+.leaflet-control-layers-list {
+  padding-left: 0.7em;
+  padding-right: 0.7em;
+  padding-top: 0.7em;
+  padding-bottom: 0.5em;
 }
 
 .obstacle-details-btn {
