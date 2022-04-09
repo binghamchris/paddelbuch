@@ -18,20 +18,22 @@ const MapObstaclePopup = (props) => {
 
   return(
     <Popup>
-      <span class="popup-title">
+      <span className="popup-title">
         <h1>{props.name}</h1>
       </span>
       <table>
-        <tr>
-          <th>
-            <Trans>Portage Possible</Trans>:</th>
-          <td>
-            <Trans>{portageResult}</Trans>            
-          </td>
-        </tr>
+        <tbody>
+          <tr>
+            <th>
+              <Trans>Portage Possible</Trans>:</th>
+            <td>
+              <Trans>{portageResult}</Trans>            
+            </td>
+          </tr>
+          </tbody>
       </table>
-      <button class="popup-btn popup-btn-right obstacle-details-btn">
-        <Link to={`/hindernisse/${props.slug}`} class="popup-btn-right">
+      <button className="popup-btn popup-btn-right obstacle-details-btn">
+        <Link to={`/hindernisse/${props.slug}`} className="popup-btn-right">
           <Trans>More details</Trans>
         </Link>
       </button>                   

@@ -10,46 +10,48 @@ const MapSpotPopup = (props) => {
   const {t} = useTranslation();
 
   return(
-    <Popup>
+    <Popup key={props.slug}>
       <SpotIconLightPopup slug={props.spotType.slug} name={props.spotType.name} height='20'/>
       <span class="popup-title">
         <h1>{props.name}</h1>
       </span>
       <RichText content={props.description.raw} />
       <table class="popup-details-table">
-        <tr>
-          <th><Trans>Potentially Usable By</Trans>:</th>
-          <td>
-            <ul>
-              {props.potentiallyUsableBy
-                .map(paddleCraft => {
-                  const { name } = paddleCraft;
-                  return (
-                    <li>{name}</li>
-                  )
-                })
-              }
-            </ul>
-          </td>
-        </tr>
-        <tr>
-          <th><Trans>GPS</Trans>:</th>
-          <td>{props.location.latitude}, {props.location.longitude}</td>
-          <td class="clipboard-cell-popup">
-            <Clipboard button-class="popup-btn" button-title={t(`Copy GPS to clipboard`)} data-clipboard-text={`${props.location.latitude}, ${props.location.longitude}`}>
-              <Trans>Copy</Trans>
-            </Clipboard>
-          </td>
-        </tr>
-        <tr>
-          <th><Trans>Approx. Address</Trans>:</th>
-          <td>{props.approximateAddress}</td>
-          <td class="clipboard-cell-popup">
-            <Clipboard button-class="popup-btn" button-title={t(`Copy approx. address to clipboard`)} data-clipboard-text={`${props.approximateAddress}`}>
-              <Trans>Copy</Trans>
-            </Clipboard>
-          </td>
-        </tr>
+        <tbody>
+          <tr>
+            <th><Trans>Potentially Usable By</Trans>:</th>
+            <td>
+              <ul>
+                {props.potentiallyUsableBy
+                  .map(paddleCraft => {
+                    const { name, id } = paddleCraft;
+                    return (
+                      <li key={id}>{name}</li>
+                    )
+                  })
+                }
+              </ul>
+            </td>
+          </tr>
+          <tr>
+            <th><Trans>GPS</Trans>:</th>
+            <td>{props.location.latitude}, {props.location.longitude}</td>
+            <td class="clipboard-cell-popup">
+              <Clipboard button-class="popup-btn" button-title={t(`Copy GPS to clipboard`)} data-clipboard-text={`${props.location.latitude}, ${props.location.longitude}`}>
+                <Trans>Copy</Trans>
+              </Clipboard>
+            </td>
+          </tr>
+          <tr>
+            <th><Trans>Approx. Address</Trans>:</th>
+            <td>{props.approximateAddress}</td>
+            <td class="clipboard-cell-popup">
+              <Clipboard button-class="popup-btn" button-title={t(`Copy approx. address to clipboard`)} data-clipboard-text={`${props.approximateAddress}`}>
+                <Trans>Copy</Trans>
+              </Clipboard>
+            </td>
+          </tr>
+        </tbody>
       </table>
       <button class="popup-btn popup-btn-right">
         <Link to={`/einsteigsorte/${props.slug}`} class="popup-btn-right">
