@@ -52,8 +52,8 @@ const Header = () => {
             <StaticImage
               src="../assets/images/logo-light.svg"
               alt="The Paddel Buch Logo"
-              width="33.75"
-              height="33.75"
+              width={33.75}
+              height={33.75}
               className="paddelbuch-logo"
             />
             Paddel Buch
@@ -137,7 +137,7 @@ const Header = () => {
             <NavDropdown.Divider />
             <NavDropdown title={t('Language')} id="nav-dropdown-lang" className="link-no-style languages" align="end">
               {languages.map((lng) => (
-                <NavDropdown.Item>
+                <NavDropdown.Item key={lng}>
                 <Link to={originalPath} className="link-no-style" language={lng}>
                   <Nav.Link as="span" eventKey={lng}>
                     {lng}

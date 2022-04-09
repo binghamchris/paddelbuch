@@ -50,6 +50,7 @@ const Map = (props) => {
           }
           potentiallyUsableBy {
             name
+            id
           }
           slug
         }
@@ -128,7 +129,7 @@ const Map = (props) => {
 
   return (
     <div className={mapClassName}>
-      <MapContainer tap={false} {...mapSettings}>
+      <MapContainer tap={false} {...mapSettings} key="map">
         {children}
         {/* {basemap && <TileLayer {...basemap} />} */}
         <TileLayer
@@ -222,7 +223,7 @@ const Map = (props) => {
               return (
                 <GeoJSON data={geometry} style={layerStyle.protectedAreaStyle}>
                   <Popup>
-                    <span class="popup-title">
+                    <span className="popup-title">
                       <h1>{name}</h1>
                     </span>
                     {protectedAreaType.name}
