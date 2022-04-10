@@ -66,6 +66,7 @@
 
 .popup-details-table {
   margin-bottom: 1rem;
+  width: 100%;
 }
 
 .popup-title h1 {
@@ -161,4 +162,8 @@
 
 .obstacle-details-btn {
   margin-top: 1.5em;
+}
+
+.popup-eventnotice-table th {
+  min-width: 130px;
 }
