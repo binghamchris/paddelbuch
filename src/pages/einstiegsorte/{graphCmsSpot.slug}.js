@@ -22,7 +22,7 @@ export const pageQuery = graphql`
         }
       }
     }
-    thisSpot: graphCmsSpot(locale: {eq: $language}, slug: {eq: $slug}, rejected: {ne: true}) {
+    thisSpot: graphCmsSpot(locale: {eq: $language}, slug: {eq: $slug}) {
       name
       approximateAddress
       potentiallyUsableBy {
