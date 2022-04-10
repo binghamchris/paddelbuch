@@ -6,89 +6,79 @@ const SpotIconDarkDetailsPane = (props) => {
 
   const {t} = useTranslation();
   
-  if (props.slug === "einsteig-aufsteig") {
+  if (props.slug === "einstieg-aufstieg") {
     return (
-      <div class="spot-icon-div">
-        <p>
+      <div className="spot-icon-div">
           <StaticImage
             src="../assets/images/icons/entryexit-dark.svg"
             alt={t('Entry and exit spot icon')}           
-            height="20"
+            height={20}
             className="spot-icon"
           />
           {props.name}
-        </p>
       </div>
     );
   }
-  else if (props.slug === "nur-einsteig") {
+  else if (props.slug === "nur-einstieg") {
     return (
-      <div class="spot-icon-div">
-        <p>
+      <div className="spot-icon-div">
           <StaticImage
             src="../assets/images/icons/entry-dark.svg"
             alt={t('Entry spot icon')}           
-            height="20"
+            height={20}
             className="spot-icon"
           />
           {props.name}
-        </p>
       </div>
     );
   }
 
-  else if (props.slug === "nur-aufsteig") {
+  else if (props.slug === "nur-aufstieg") {
     return (
-      <div class="spot-icon-div">
-        <p>
+      <div className="spot-icon-div">
           <StaticImage
             src="../assets/images/icons/exit-dark.svg"
             alt={t('Exit spot icon')}           
-            height="20"
+            height={20}
             className="spot-icon"
           />
           {props.name}
-        </p>
       </div>
     );
   }
 
   else if (props.slug === "notauswasserungsstelle") {
     return (
-      <div class="spot-icon-div">
-        <p>
+      <div className="spot-icon-div">
           <StaticImage
             src="../assets/images/icons/emergency-dark.svg"
             alt={t('Emergency exit spot icon')}           
-            height="20"
+            height={20}
             className="spot-icon"
           />
           {props.name}
-        </p>
       </div>
     );
   }
 
   else if (props.slug === "rasthalte") {
     return (
-      <div class="spot-icon-div">
-        <p>
+      <div className="spot-icon-div">
           <StaticImage
             src="../assets/images/icons/rest-dark.svg"
             alt={t('Rest spot icon')}           
-            height="20"
+            height={20}
             className="spot-icon"
           />
           {props.name}
-        </p>
       </div>
     );
   }
 
   else {
     return (
-      <div class="spot-icon-div">
-        <p>{props.name}</p>
+      <div className="spot-icon-div">
+        {props.name}
       </div>
     )
   }

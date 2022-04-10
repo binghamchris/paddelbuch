@@ -109,30 +109,32 @@ export default function ObstacleDetailsPage({ data: { thisObstacle, spots, prote
                 <h1>{thisObstacle.name}</h1>
               </div>
               <table>
-                <tr>
-                  <th><Trans>Type</Trans>:</th>
-                  <td>
-                    {thisObstacle.obstacleType.name}
-                  </td>
-                </tr>
-                <tr>
-                  <th><Trans>GPS</Trans>:</th>
-                  <td>
-                    {(!!obstacleCentre) ? obstacleCentre["lat"] : null}, {(!!obstacleCentre) ? obstacleCentre["lng"] : null}
-                  </td>
-                </tr>
-                <tr>
-                  <th><Trans>Waterway</Trans>:</th>
-                  <td>
-                    <Link to={`/gewaesser/${thisObstacle.waterway.slug}`}>{thisObstacle.waterway.name}</Link>
-                  </td>
-                </tr>
-                <tr>
-                  <th><Trans>Last Updated</Trans>:</th>
-                  <td>
-                    {lastUpdateDt}
-                  </td>
-                </tr>
+                <tbody>
+                  <tr>
+                    <th><Trans>Type</Trans>:</th>
+                    <td>
+                      {thisObstacle.obstacleType.name}
+                    </td>
+                  </tr>
+                  <tr>
+                    <th><Trans>GPS</Trans>:</th>
+                    <td>
+                      {(!!obstacleCentre) ? obstacleCentre["lat"] : null}, {(!!obstacleCentre) ? obstacleCentre["lng"] : null}
+                    </td>
+                  </tr>
+                  <tr>
+                    <th><Trans>Waterway</Trans>:</th>
+                    <td>
+                      <Link to={`/gewaesser/${thisObstacle.waterway.slug}`}>{thisObstacle.waterway.name}</Link>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th><Trans>Last Updated</Trans>:</th>
+                    <td>
+                      {lastUpdateDt}
+                    </td>
+                  </tr>
+                </tbody>
               </table>
             </Col>
           </Row>
@@ -159,52 +161,56 @@ export default function ObstacleDetailsPage({ data: { thisObstacle, spots, prote
               </div>
               <RichText content={thisObstacle.description.raw} />
               <table>
-                <tr>
-                  <th><Trans>Type</Trans>:</th>
-                  <td>
-                    {thisObstacle.obstacleType.name}
-                  </td>
-                </tr>
-                <tr>
-                  <th><Trans>GPS</Trans>:</th>
-                  <td>
-                    {(!!obstacleCentre) ? obstacleCentre["lat"] : null}, {(!!obstacleCentre) ? obstacleCentre["lng"] : null}
-                  </td>
-                </tr>
-                <tr>
-                  <th><Trans>Waterway</Trans>:</th>
-                  <td>
-                    <Link to={`/gewaesser/${thisObstacle.waterway.slug}`}>{thisObstacle.waterway.name}</Link>
-                  </td>
-                </tr>
-                <tr>
-                  <th><Trans>Last Updated</Trans>:</th>
-                  <td>
-                    {lastUpdateDt}
-                  </td>
-                </tr>
+                <tbody>
+                  <tr>
+                    <th><Trans>Type</Trans>:</th>
+                    <td>
+                      {thisObstacle.obstacleType.name}
+                    </td>
+                  </tr>
+                  <tr>
+                    <th><Trans>GPS</Trans>:</th>
+                    <td>
+                      {(!!obstacleCentre) ? obstacleCentre["lat"] : null}, {(!!obstacleCentre) ? obstacleCentre["lng"] : null}
+                    </td>
+                  </tr>
+                  <tr>
+                    <th><Trans>Waterway</Trans>:</th>
+                    <td>
+                      <Link to={`/gewaesser/${thisObstacle.waterway.slug}`}>{thisObstacle.waterway.name}</Link>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th><Trans>Last Updated</Trans>:</th>
+                    <td>
+                      {lastUpdateDt}
+                    </td>
+                  </tr>
+                  </tbody>
               </table>
               <h2><Trans>Portage Route</Trans></h2>
               <RichText content={thisObstacle.portageDescription.raw} />
               <table>
-                <tr>
-                  <th><Trans>Distance</Trans>:</th>
-                  <td>
-                    {thisObstacle.portageDistance}m
-                  </td>
-                </tr>
-                <tr>
-                  <th><Trans>Exit Spot</Trans>:</th>
-                  <td>
-                    <Link to={`/einsteigsorte/${thisObstacle.spots.filter(spot => spot.spotType.slug === "nur-aufsteig")[0].slug}`}>{thisObstacle.spots.filter(spot => spot.spotType.slug === "nur-aufsteig")[0].name}</Link>
-                  </td>
-                </tr>
-                <tr>
-                  <th><Trans>Re-entry Spot</Trans>:</th>
-                  <td>
-                    <Link to={`/einsteigsorte/${thisObstacle.spots.filter(spot => spot.spotType.slug === "nur-einsteig")[0].slug}`}>{thisObstacle.spots.filter(spot => spot.spotType.slug === "nur-einsteig")[0].name}</Link>
-                  </td>
-                </tr>
+                <tbody>
+                  <tr>
+                    <th><Trans>Distance</Trans>:</th>
+                    <td>
+                      {thisObstacle.portageDistance}m
+                    </td>
+                  </tr>
+                  <tr>
+                    <th><Trans>Exit Spot</Trans>:</th>
+                    <td>
+                      <Link to={`/einstiegsorte/${thisObstacle.spots.filter(spot => spot.spotType.slug === "nur-aufstieg")[0].slug}`}>{thisObstacle.spots.filter(spot => spot.spotType.slug === "nur-aufstieg")[0].name}</Link>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th><Trans>Re-entry Spot</Trans>:</th>
+                    <td>
+                      <Link to={`/einstiegsorte/${thisObstacle.spots.filter(spot => spot.spotType.slug === "nur-einstieg")[0].slug}`}>{thisObstacle.spots.filter(spot => spot.spotType.slug === "nur-einstieg")[0].name}</Link>
+                    </td>
+                  </tr>
+                </tbody>
               </table>
             </Col>
           </Row>
