@@ -112,14 +112,14 @@ export default function SpotDetailsPage({ data: { thisSpot } }) {
                 </tr>
                 <tr>
                   <th><Trans>GPS</Trans>:</th>
-                    <td>
-                      {thisSpot.location.latitude}, {thisSpot.location.longitude}
-                    </td>
-                    <td className="clipboard-cell">
-                      <Clipboard button-class="clipboard-btn" button-title={t(`Copy GPS to clipboard`)} data-clipboard-text={`${thisSpot.location.latitude}, ${thisSpot.location.longitude}`}>
-                        <Trans>Copy</Trans>
-                      </Clipboard>
-                    </td>
+                  <td>
+                    {thisSpot.location.latitude}, {thisSpot.location.longitude}
+                  </td>
+                  <td className="clipboard-cell">
+                    <Clipboard button-class="clipboard-btn" button-title={t(`Copy GPS to clipboard`)} data-clipboard-text={`${thisSpot.location.latitude}, ${thisSpot.location.longitude}`}>
+                      <Trans>Copy</Trans>
+                    </Clipboard>
+                  </td>
                 </tr>
                 <tr>
                   <th><Trans>Approx. Address</Trans>:</th>
