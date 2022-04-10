@@ -6,7 +6,8 @@ import { graphql } from "gatsby";
 import { Container, Row, Col } from "react-bootstrap";
 import L from "leaflet";
 import { isDomAvailable } from 'lib/util';
-import { useTranslation } from 'gatsby-plugin-react-i18next';
+import { useTranslation, Trans } from 'gatsby-plugin-react-i18next';
+import EventNoticeList from 'components/EventNotice-List';
 
 export const pageQuery = graphql`
   query LakePageQuery($slug: String!, $language: GraphCMS_Locale!) {
@@ -25,10 +26,19 @@ export const pageQuery = graphql`
       name
       geometry
     }
+   thisWaterwayEventNotices: allGraphCmsWaterwayEventNotice(filter: {locale: {eq: $language}, affectedWaterways: {elemMatch: {slug: {eq: $slug}}}}) {
+      nodes {
+        slug
+        updatedAt
+        name
+        locale
+        endDate
+      }
+    }
   }
 `;
 
-export default function LakeDetailsPage({ data: { thisWaterway, spots, protectedAreas, obstacles  } }) {
+export default function LakeDetailsPage({ data: { thisWaterway, thisWaterwayEventNotices  } }) {
 
   const {t} = useTranslation();
   
@@ -51,15 +61,19 @@ export default function LakeDetailsPage({ data: { thisWaterway, spots, protected
       </Helmet>
       <Container fluid >
         <Row className="justify-content-center g-0">
-          <Col id="map" xl="12" lg="12" md="12" sm="12" xs="12">
+          <Col id="map" xl="8" lg="7" md="12" sm="12" xs="12">
             <Map {...(!!mapSettings) ? mapSettings : null}>
 
             </Map>
           </Col>
-        </Row>
-        <Row className="justify-content-center g-0 waterway-description waterway-title">
-          <Col>
-            <h1>{thisWaterway.name}</h1>
+          <Col className="waterway-details" xl="4" lg="5" md="12" sm="12" xs="12">
+            <div className="waterway-title">
+              <h1>{thisWaterway.name}</h1>
+            </div>
+            <h2>
+              <Trans>Event Notices</Trans>
+            </h2>
+            <EventNoticeList thisWaterwayEventNotices={thisWaterwayEventNotices}/>
           </Col>
         </Row>
       </Container>

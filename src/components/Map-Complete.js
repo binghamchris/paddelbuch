@@ -10,6 +10,7 @@ import { Trans, I18nextContext, useTranslation } from 'gatsby-plugin-react-i18ne
 import L from "leaflet";
 import MapSpotPopup from 'components/Map-Spot-Popup';
 import MapObstaclePopup from 'components/Map-Obstacle-Popup';
+import MapEventNoticePopup from 'components/Map-EventNotice-Popup';
 
 const Map = (props) => {
 
@@ -25,7 +26,7 @@ const Map = (props) => {
 
   useConfigureLeaflet();
 
-  const { spots, protectedAreas, obstacles, } = useStaticQuery(graphql`
+  const { spots, protectedAreas, obstacles, waterwayEventNotices } = useStaticQuery(graphql`
     query {
       spots: allGraphCmsSpot(filter: {rejected: {ne: true}}) {
         nodes {
@@ -83,6 +84,24 @@ const Map = (props) => {
           }
         }
       }
+      waterwayEventNotices: allGraphCmsWaterwayEventNotice {
+        nodes {
+          slug
+          updatedAt
+          name
+          locale
+          location {
+            latitude
+            longitude
+          }
+          affectedArea
+          description {
+            raw
+          }
+          endDate
+          startDate
+        }
+      }
     }
   `);
 
@@ -97,6 +116,7 @@ const Map = (props) => {
   var spotNurAufstiegIcon
   var spotRasthalteIcon
   var spotNotauswasserungIcon
+  var waterwayEventNoticeIcon
 
   if (isDomAvailable()) {
     spotEinstiegAufstiegIcon = new L.icon(markerStyles.spotEinstiegAufstiegIcon)
@@ -104,6 +124,7 @@ const Map = (props) => {
     spotNurAufstiegIcon = new L.icon(markerStyles.spotNurAufstiegIcon)
     spotRasthalteIcon = new L.icon(markerStyles.spotRasthalteIcon)
     spotNotauswasserungIcon = new L.icon(markerStyles.spotNotauswasserungIcon)
+    waterwayEventNoticeIcon = new L.icon(markerStyles.waterwayEventNoticeIcon)
   }
 
   if (!isDomAvailable()) {
@@ -212,6 +233,26 @@ const Map = (props) => {
             })}
             </LayerGroup>
           </LayersControl.Overlay>
+          <LayersControl.Overlay checked name={t("Waterway Event Notices")}>
+            <LayerGroup>
+            { waterwayEventNotices.nodes
+              .filter(waterwayEventNotice => new Date(waterwayEventNotice.endDate) - new Date() > 0 && waterwayEventNotice.locale === language)
+              .map(waterwayEventNotice => {
+                const { name, slug, location, affectedArea, endDate, startDate, description } = waterwayEventNotice;
+                const position = [location.latitude, location.longitude];
+                return (
+                  <div>
+                    <Marker key="{slug}-marker" position={position} icon={(!!waterwayEventNoticeIcon) ? waterwayEventNoticeIcon : null}>
+                      {<MapEventNoticePopup name={name} location={location} description={description} slug={slug} startDate={startDate} endDate={endDate} />}
+                    </Marker>
+                    <GeoJSON key="{slug}-geojson" data={affectedArea} style={layerStyle.waterwayEventNoticeAreaStyle}>
+                      {<MapEventNoticePopup name={name} location={location} description={description} slug={slug} startDate={startDate} endDate={endDate} />}
+                    </GeoJSON>
+                  </div>
+                );
+            })}
+            </LayerGroup>
+          </LayersControl.Overlay>
         </LayersControl>
 
             { protectedAreas.nodes
@@ -219,7 +260,7 @@ const Map = (props) => {
               .map(protectedArea => {
               const { name, geometry, protectedAreaType, slug } = protectedArea;
               return (
-                <GeoJSON data={geometry} style={layerStyle.protectedAreaStyle}>
+                <GeoJSON key={slug} data={geometry} style={layerStyle.protectedAreaStyle}>
                   <Popup>
                     <span className="popup-title">
                       <h1>{name}</h1>

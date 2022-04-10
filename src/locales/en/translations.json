@@ -25,5 +25,12 @@
   "Yes": "Yes",
   "No": "No",
   "Unknown": "Unknown",
-  "Portage Possible": "Portage Possible"
+  "Portage Possible": "Portage Possible",
+  "Approx. End Date": "Approx. End Date",
+  "Approx. Start Date": "Approx. Start Date",
+  "Area affected by a waterway event notice": "Area affected by a waterway event notice",
+  "Waterway Event Notices": "Waterway Event Notices",
+  "There are presently no event notices for this waterway": "There are presently no event notices for this waterway",
+  "Event Notices": "Event Notices",
+  "Summary": "Summary"
 }
