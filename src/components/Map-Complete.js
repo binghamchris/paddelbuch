@@ -27,7 +27,7 @@ const Map = (props) => {
 
   const { spots, protectedAreas, obstacles, } = useStaticQuery(graphql`
     query {
-      spots: allGraphCmsSpot {
+      spots: allGraphCmsSpot(filter: {rejected: {ne: true}}) {
         nodes {
           locale
           name
