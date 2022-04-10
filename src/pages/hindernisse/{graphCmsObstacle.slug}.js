@@ -201,13 +201,13 @@ export default function ObstacleDetailsPage({ data: { thisObstacle, spots, prote
                   <tr>
                     <th><Trans>Exit Spot</Trans>:</th>
                     <td>
-                      <Link to={`/einstiegsorte/${thisObstacle.spots.filter(spot => spot.spotType.slug === "nur-aufsteig")[0].slug}`}>{thisObstacle.spots.filter(spot => spot.spotType.slug === "nur-aufsteig")[0].name}</Link>
+                      <Link to={`/einstiegsorte/${thisObstacle.spots.filter(spot => spot.spotType.slug === "nur-aufstieg")[0].slug}`}>{thisObstacle.spots.filter(spot => spot.spotType.slug === "nur-aufstieg")[0].name}</Link>
                     </td>
                   </tr>
                   <tr>
                     <th><Trans>Re-entry Spot</Trans>:</th>
                     <td>
-                      <Link to={`/einstiegsorte/${thisObstacle.spots.filter(spot => spot.spotType.slug === "nur-einsteig")[0].slug}`}>{thisObstacle.spots.filter(spot => spot.spotType.slug === "nur-einsteig")[0].name}</Link>
+                      <Link to={`/einstiegsorte/${thisObstacle.spots.filter(spot => spot.spotType.slug === "nur-einstieg")[0].slug}`}>{thisObstacle.spots.filter(spot => spot.spotType.slug === "nur-einstieg")[0].name}</Link>
                     </td>
                   </tr>
                 </tbody>

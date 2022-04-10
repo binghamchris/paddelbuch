@@ -6,7 +6,7 @@ const SpotIconDarkDetailsPane = (props) => {
 
   const {t} = useTranslation();
   
-  if (props.slug === "einsteig-aufsteig") {
+  if (props.slug === "einstieg-aufstieg") {
     return (
       <div className="spot-icon-div">
           <StaticImage
@@ -19,7 +19,7 @@ const SpotIconDarkDetailsPane = (props) => {
       </div>
     );
   }
-  else if (props.slug === "nur-einsteig") {
+  else if (props.slug === "nur-einstieg") {
     return (
       <div className="spot-icon-div">
           <StaticImage
@@ -33,7 +33,7 @@ const SpotIconDarkDetailsPane = (props) => {
     );
   }
 
-  else if (props.slug === "nur-aufsteig") {
+  else if (props.slug === "nur-aufstieg") {
     return (
       <div className="spot-icon-div">
           <StaticImage

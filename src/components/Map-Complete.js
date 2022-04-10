@@ -92,16 +92,16 @@ const Map = (props) => {
     mapClassName = `${mapClassName} ${className}`;
   }
 
-  var spotEinsteigAufsteigIcon
-  var spotNurEinsteigIcon
-  var spotNurAufsteigIcon
+  var spotEinstiegAufstiegIcon
+  var spotNurEinstiegIcon
+  var spotNurAufstiegIcon
   var spotRasthalteIcon
   var spotNotauswasserungIcon
 
   if (isDomAvailable()) {
-    spotEinsteigAufsteigIcon = new L.icon(markerStyles.spotEinsteigAufsteigIcon)
-    spotNurEinsteigIcon = new L.icon(markerStyles.spotNurEinsteigIcon)
-    spotNurAufsteigIcon = new L.icon(markerStyles.spotNurAufsteigIcon)
+    spotEinstiegAufstiegIcon = new L.icon(markerStyles.spotEinstiegAufstiegIcon)
+    spotNurEinstiegIcon = new L.icon(markerStyles.spotNurEinstiegIcon)
+    spotNurAufstiegIcon = new L.icon(markerStyles.spotNurAufstiegIcon)
     spotRasthalteIcon = new L.icon(markerStyles.spotRasthalteIcon)
     spotNotauswasserungIcon = new L.icon(markerStyles.spotNotauswasserungIcon)
   }
@@ -145,7 +145,7 @@ const Map = (props) => {
                 const { name, location, description, slug, approximateAddress, spotType, potentiallyUsableBy } = spot;
                 const position = [location.latitude, location.longitude];
                 return (
-                  <Marker key={slug} position={position} icon={(!!spotEinsteigAufsteigIcon) ? spotEinsteigAufsteigIcon : null}>
+                  <Marker key={slug} position={position} icon={(!!spotEinstiegAufstiegIcon) ? spotEinstiegAufstiegIcon : null}>
                     {<MapSpotPopup name={name} location={location} description={description} slug={slug} approximateAddress={approximateAddress} spotType={spotType} potentiallyUsableBy={potentiallyUsableBy}/>}
                   </Marker>
                 );
@@ -160,7 +160,7 @@ const Map = (props) => {
                 const { name, location, description, slug, approximateAddress, spotType, potentiallyUsableBy } = spot;
                 const position = [location.latitude, location.longitude];
                 return (
-                  <Marker key={slug} position={position} icon={(!!spotNurEinsteigIcon) ? spotNurEinsteigIcon : null}>
+                  <Marker key={slug} position={position} icon={(!!spotNurEinstiegIcon) ? spotNurEinstiegIcon : null}>
                     {<MapSpotPopup name={name} location={location} description={description} slug={slug} approximateAddress={approximateAddress} spotType={spotType} potentiallyUsableBy={potentiallyUsableBy}/>}
                   </Marker>
                 );
@@ -175,7 +175,7 @@ const Map = (props) => {
                 const { name, location, description, slug, approximateAddress, spotType, potentiallyUsableBy } = spot;
                 const position = [location.latitude, location.longitude];
                 return (
-                  <Marker key={slug} position={position} icon={(!!spotNurAufsteigIcon) ? spotNurAufsteigIcon : null}>
+                  <Marker key={slug} position={position} icon={(!!spotNurAufstiegIcon) ? spotNurAufstiegIcon : null}>
                     {<MapSpotPopup name={name} location={location} description={description} slug={slug} approximateAddress={approximateAddress} spotType={spotType} potentiallyUsableBy={potentiallyUsableBy}/>}
                   </Marker>
                 );
@@ -219,7 +219,7 @@ const Map = (props) => {
               .map(protectedArea => {
               const { name, geometry, protectedAreaType, slug } = protectedArea;
               return (
-                <GeoJSON key={slug} data={geometry} style={layerStyle.protectedAreaStyle}>
+                <GeoJSON data={geometry} style={layerStyle.protectedAreaStyle}>
                   <Popup>
                     <span className="popup-title">
                       <h1>{name}</h1>
