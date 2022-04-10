@@ -54,7 +54,7 @@ const MapSpotPopup = (props) => {
         </tbody>
       </table>
       <button class="popup-btn popup-btn-right">
-        <Link to={`/einsteigsorte/${props.slug}`} class="popup-btn-right">
+        <Link to={`/einstiegsorte/${props.slug}`} class="popup-btn-right">
           <Trans>More details</Trans>
         </Link>
       </button>
