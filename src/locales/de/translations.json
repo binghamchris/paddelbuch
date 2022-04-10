@@ -25,5 +25,12 @@
   "Yes": "Ja",
   "No": "Nein",
   "Unknown": "Unbekannt",
-  "Portage Possible": "Portage möglich"
+  "Portage Possible": "Portage möglich",
+  "Approx. End Date": "Ungefähres Enddatum",
+  "Approx. Start Date": "Ungefähres Startdatum",
+  "Area affected by a waterway event notice": "Von einer Meldung über ein Wasserstraßenereignis betroffenes Gebiet",
+  "Waterway Event Notices": "Absehbare Gewässerereignisse",
+  "There are presently no event notices for this waterway": "Zurzeit gibt es keine Veranstaltungshinweise für diese Gewässer",
+  "Event Notices": "Gewässerereignisse",
+  "Summary": "Kurzfassung"
 }

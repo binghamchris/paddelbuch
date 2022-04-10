@@ -15,7 +15,7 @@
 
   @media screen and (min-width: 992px) {
     .map {
-      height: 82vh;
+      height: calc(100vh - $menu-height) !important;
     }
   }
   @media screen and (max-width: 992px) {
@@ -24,14 +24,22 @@
     }
   }
 
-  .waterway-description {
+  .waterway-details {
     padding-right: 1.5em;
     padding-left: 1.5em;
   }
 
-  .waterway-title .col {
+  .waterway-details > div {
+    padding-right: 1em;
+  }
+
+  .waterway-title {
     padding-top: 0.7em;
+    margin-bottom: 1em;
     border-bottom: 1px solid $swisscanoe-blue;
   }
 
+  td {
+    padding-right: 1em;
+  }
 }

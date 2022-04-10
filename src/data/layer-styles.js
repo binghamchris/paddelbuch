@@ -11,7 +11,7 @@ export const protectedAreaStyle = {
   weight: 2,
   fill: true,
   fillOpacity: 0.6,
-  dashArray: "12 9",
+  dashArray: "1 10",
 }
 
 export const obstacleStyle = {
@@ -29,4 +29,12 @@ export const portageStyle = {
   fill: false,
   dashArray: "15 9 1 9",
   lineJoin: "arcs",
+}
+
+export const waterwayEventNoticeAreaStyle = {
+  color: colour.warningYellow,
+  weight: 2,
+  fill: true,
+  fillOpacity: 0.4,
+  dashArray: "12 9",
 }
