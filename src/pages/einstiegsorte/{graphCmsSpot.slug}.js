@@ -27,6 +27,7 @@ export const pageQuery = graphql`
       approximateAddress
       potentiallyUsableBy {
         name
+        id
       }
       description {
         raw
@@ -88,58 +89,60 @@ export default function SpotDetailsPage({ data: { thisSpot } }) {
           </Col>
           <Col className="spot-description" xl="4" lg="5" md="12" sm="12" xs="12">
             <SpotIconDarkDetailsPane slug={thisSpot.spotType.slug} name={thisSpot.spotType.name}/>
-            <div class="spot-title">
+            <div className="spot-title">
               <h1>{thisSpot.name}</h1>
             </div>
             <RichText content={thisSpot.description.raw} />
-            <table class="spot-details-table">
-              <tr>
-                <th><Trans>Potentially Usable By</Trans>:</th>
-                <td>
-                  <ul>
-                    {thisSpot.potentiallyUsableBy
-                      .map(paddleCraft => {
-                      const { name } = paddleCraft;
-                        return (
-                          <li>{name}</li>
-                        )
-                      })
-                    }
-                  </ul>
-                </td>
-              </tr>
-              <tr>
-                <th><Trans>GPS</Trans>:</th>
+            <table className="spot-details-table">
+              <tbody>
+                <tr>
+                  <th><Trans>Potentially Usable By</Trans>:</th>
                   <td>
-                    {thisSpot.location.latitude}, {thisSpot.location.longitude}
+                    <ul>
+                      {thisSpot.potentiallyUsableBy
+                        .map(paddleCraft => {
+                        const { name, id } = paddleCraft;
+                          return (
+                            <li key={id}>{name}</li>
+                          )
+                        })
+                      }
+                    </ul>
                   </td>
-                  <td class="clipboard-cell">
-                    <Clipboard button-class="clipboard-btn" button-title={t(`Copy GPS to clipboard`)} data-clipboard-text={`${thisSpot.location.latitude}, ${thisSpot.location.longitude}`}>
+                </tr>
+                <tr>
+                  <th><Trans>GPS</Trans>:</th>
+                    <td>
+                      {thisSpot.location.latitude}, {thisSpot.location.longitude}
+                    </td>
+                    <td className="clipboard-cell">
+                      <Clipboard button-class="clipboard-btn" button-title={t(`Copy GPS to clipboard`)} data-clipboard-text={`${thisSpot.location.latitude}, ${thisSpot.location.longitude}`}>
+                        <Trans>Copy</Trans>
+                      </Clipboard>
+                    </td>
+                </tr>
+                <tr>
+                  <th><Trans>Approx. Address</Trans>:</th>
+                  <td>
+                    {thisSpot.approximateAddress}
+                  </td>
+                  <td className="clipboard-cell">
+                    <Clipboard button-class="clipboard-btn" button-title={t(`Copy approx. address to clipboard`)} data-clipboard-text={`${thisSpot.approximateAddress}`}>
                       <Trans>Copy</Trans>
                     </Clipboard>
                   </td>
-              </tr>
-              <tr>
-                <th><Trans>Approx. Address</Trans>:</th>
-                <td>
-                  {thisSpot.approximateAddress}
-                </td>
-                <td class="clipboard-cell">
-                  <Clipboard button-class="clipboard-btn" button-title={t(`Copy approx. address to clipboard`)} data-clipboard-text={`${thisSpot.approximateAddress}`}>
-                    <Trans>Copy</Trans>
-                  </Clipboard>
-                </td>
-              </tr>
-              <tr>
-                <th><Trans>Waterway</Trans>:</th>
-                <td><Link to={`/gewaesser/${thisSpot.waterways.slug}`}>{thisSpot.waterways.name}</Link></td>
-              </tr>
-              <tr>
-                <th><Trans>Last Updated</Trans>:</th>
-                <td>
-                  {lastUpdateDt}
-                </td>
-              </tr>
+                </tr>
+                <tr>
+                  <th><Trans>Waterway</Trans>:</th>
+                  <td><Link to={`/gewaesser/${thisSpot.waterways.slug}`}>{thisSpot.waterways.name}</Link></td>
+                </tr>
+                <tr>
+                  <th><Trans>Last Updated</Trans>:</th>
+                  <td>
+                    {lastUpdateDt}
+                  </td>
+                </tr>
+              </tbody>
             </table>
 
           </Col>
