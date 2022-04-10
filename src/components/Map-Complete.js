@@ -116,8 +116,6 @@ const Map = (props) => {
     
   }
 
-  console.log(spotEinsteigAufsteigIcon)
-
   const mapSettings = {
     className: "map-base",
     zoomControl: false,
@@ -142,7 +140,7 @@ const Map = (props) => {
           <LayersControl.Overlay checked name={t("Entry & Exit Spots")}>
             <LayerGroup>
             { spots.nodes
-              .filter(spot => spot.spotType.slug === "einsteig-aufsteig" && spot.locale === language)
+              .filter(spot => spot.spotType.slug === "einstieg-aufstieg" && spot.locale === language)
               .map(spot => {
                 const { name, location, description, slug, approximateAddress, spotType, potentiallyUsableBy } = spot;
                 const position = [location.latitude, location.longitude];
@@ -157,7 +155,7 @@ const Map = (props) => {
           <LayersControl.Overlay checked name={t("Entry Only Spots")}>
             <LayerGroup>
             { spots.nodes
-              .filter(spot => spot.spotType.slug === "nur-einsteig" && spot.locale === language)
+              .filter(spot => spot.spotType.slug === "nur-einstieg" && spot.locale === language)
               .map(spot => {
                 const { name, location, description, slug, approximateAddress, spotType, potentiallyUsableBy } = spot;
                 const position = [location.latitude, location.longitude];
@@ -172,7 +170,7 @@ const Map = (props) => {
           <LayersControl.Overlay checked name={t("Exit Only Spots")}>
             <LayerGroup>
             { spots.nodes
-              .filter(spot => spot.spotType.slug === "nur-aufsteig" && spot.locale === language)
+              .filter(spot => spot.spotType.slug === "nur-aufstieg" && spot.locale === language)
               .map(spot => {
                 const { name, location, description, slug, approximateAddress, spotType, potentiallyUsableBy } = spot;
                 const position = [location.latitude, location.longitude];
@@ -219,9 +217,9 @@ const Map = (props) => {
             { protectedAreas.nodes
               .filter(protectedArea => protectedArea.locale === language)
               .map(protectedArea => {
-              const { name, geometry, protectedAreaType } = protectedArea;
+              const { name, geometry, protectedAreaType, slug } = protectedArea;
               return (
-                <GeoJSON data={geometry} style={layerStyle.protectedAreaStyle}>
+                <GeoJSON key={slug} data={geometry} style={layerStyle.protectedAreaStyle}>
                   <Popup>
                     <span className="popup-title">
                       <h1>{name}</h1>
@@ -238,7 +236,7 @@ const Map = (props) => {
               const { name, geometry, portageRoute, isPortagePossible, slug } = obstacle;
               return (
                 <div>
-                  <GeoJSON data={geometry} style={layerStyle.obstacleStyle}>
+                  <GeoJSON key={slug} data={geometry} style={layerStyle.obstacleStyle}>
                     <MapObstaclePopup name={name} isPortagePossible={isPortagePossible} slug={slug}/>
                   </GeoJSON>
                   <GeoJSON data={portageRoute} style={layerStyle.portageStyle}>
