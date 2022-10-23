@@ -44,7 +44,7 @@ module.exports = {
     {
       resolve: "gatsby-source-graphcms",
       options: {
-        endpoint: "https://api-eu-central-1.graphcms.com/v2/ckq3v9412ku0401w70mgs10qp/master",
+        endpoint: "https://api-eu-central-1.hygraph.com/v2/ckq3v9412ku0401w70mgs10qp/master",
         locales: ['en', 'de'],
         token: process.env.GCMS_TOKEN,
       }
