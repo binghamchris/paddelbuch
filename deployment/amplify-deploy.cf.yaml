@@ -1,0 +1,161 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Paddel Buch Amplify deployment
+Parameters:
+  AppName:
+    Type: String
+    Description: The name for the app in Amplify
+  AppDomainName:
+    Type: String
+    Description: The domain name the app should be served on
+    AllowedPattern: ^(((?!-)[A-Za-z0-9-]{0,62}[A-Za-z0-9])\.)+((?!-)[A-Za-z0-9-]{1,62}[A-Za-z0-9])(\.)?$
+  AppDescription:
+    Type: String
+    Description: The description for the app in Amplify
+  AppStage:
+    Type: String
+    Description: The stage for this deployment
+    AllowedValues:
+      - PRODUCTION
+      - BETA
+      - DEVELOPMENT
+      - EXPERIMENTAL
+      - PULL_REQUEST
+  EnvVarMapboxUrl:
+    Type: String
+    Description: The URL for the MapBox map style to be used during the Gatsby build process
+  EnvVarGcmsToken:
+    Type: String
+    Description: The API token for accessing the Hygraph (formally GraphCMS) API during the Gatsby build process
+  GithubRepoUrl:
+    Type: String
+    Description: The URL of the GitHub repo to be deployed
+  GithubBranchName:
+    Type: String
+    Description: The name of branch in the GitHub repo to be used for deployment
+  GithubToken:
+    Type: String
+    Description: The GitHub personal access token to be used during the setup of the Amplify app
+Resources:
+  PaddelBuchApp:
+    Type: AWS::Amplify::App
+    Properties: 
+      AccessToken:
+        Ref: GithubToken
+      BuildSpec: |-
+        version: 1
+        frontend:
+          phases:
+            preBuild:
+              commands:
+                - nvm use $VERSION_NODE_16
+                - npm ci
+            build:
+              commands:
+                - gatsby build
+          artifacts:
+            baseDirectory: public
+            files:
+              - '**/*'
+          cache:
+            paths:
+              - node_modules/**/*
+      CustomHeaders: |-
+        customHeaders:
+          - pattern: '*'
+            headers:
+              - key: X-Frame-Options
+                value: DENY
+              - key: X-XSS-Protection
+                value: 1; mode=block
+              - key: X-Content-Type-Options
+                value: nosniff
+              - key: Referrer-Policy
+                value: strict-origin-when-cross-origin
+              - key: Content-Security-Policy
+                value: >-
+                  default-src 'self'; img-src 'self' data: unpkg.com
+                  raw.githubusercontent.com api.mapbox.com; style-src 'self'
+                  'unsafe-inline' unpkg.com; script-src 'self' 'unsafe-inline'; font-src
+                  'self' data:
+              - key: Permissions-Policy
+                value: >-
+                  accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(),
+                  camera=(), cross-origin-isolated=(), display-capture=(),
+                  document-domain=(), encrypted-media=(),
+                  execution-while-not-rendered=(), execution-while-out-of-viewport=(),
+                  fullscreen=(self), geolocation=(), gyroscope=(), magnetometer=(),
+                  microphone=(), midi=(), navigation-override=(), payment=(),
+                  picture-in-picture=(), publickey-credentials-get=(),
+                  screen-wake-lock=(), sync-xhr=(), usb=(), web-share=(),
+                  xr-spatial-tracking=(), clipboard-read=(), clipboard-write=(),
+                  gamepad=(), speaker-selection=(), conversion-measurement=(),
+                  focus-without-user-activation=(), hid=(), idle-detection=(),
+                  serial=(), sync-script=(), trust-token-redemption=(),
+                  vertical-scroll=(self)
+      CustomRules:
+        - Source:
+            !Join
+              - ""
+              - - https://
+                - Ref: AppDomainName 
+          Status: 302
+          Target:
+            !Join
+              - "."
+              - - https://www
+                - Ref: AppDomainName
+      Description:
+        Ref: AppDescription
+      EnableBranchAutoDeletion: False
+      EnvironmentVariables: 
+        - Name: GATSBY_MAPBOX_URL
+          Value:
+            Ref: EnvVarMapboxUrl
+        - Name: GCMS_TOKEN
+          Value:
+            Ref: EnvVarGcmsToken
+      Name:
+        Ref: AppName
+      Repository:
+        Ref: GithubRepoUrl
+      Tags: 
+        - Key: app
+          Value:
+            Ref: AppName
+        - Key: stage
+          Value:
+            Ref: AppStage
+  PaddelBuchBranch:
+    Type: AWS::Amplify::Branch
+    Properties: 
+      AppId:
+        !GetAtt PaddelBuchApp.AppId
+      BranchName:
+        Ref: GithubBranchName
+      EnableAutoBuild: True
+      EnablePerformanceMode: False
+      EnablePullRequestPreview: True
+      Stage:
+        Ref: AppStage
+      Tags: 
+        - Key: app
+          Value:
+            Ref: AppName
+        - Key: stage
+          Value:
+            Ref: AppStage
+  PaddelBuchDomain:
+    Type: AWS::Amplify::Domain
+    Properties: 
+      AppId:
+        !GetAtt PaddelBuchApp.AppId
+      DomainName:
+        Ref: AppDomainName
+      EnableAutoSubDomain: False
+      SubDomainSettings:
+        - BranchName:
+            Ref: GithubBranchName
+          Prefix: ""
+        - BranchName:
+            Ref: GithubBranchName
+          Prefix: www
