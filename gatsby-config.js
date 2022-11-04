@@ -51,22 +51,6 @@ module.exports = {
       }
     },
     {
-      resolve: `gatsby-plugin-gatsby-cloud`,
-      options: {
-        mergeSecurityHeaders: false,
-        mergeCachingHeaders: true,
-        mergeLinkHeaders: true,
-        allPageHeaders: [
-          "X-Frame-Options: DENY",
-          "X-XSS-Protection: 1; mode=block",
-          "X-Content-Type-Options: nosniff",
-          "Referrer-Policy: strict-origin-when-cross-origin",
-          "Content-Security-Policy: default-src 'self'; img-src 'self' data: unpkg.com raw.githubusercontent.com api.mapbox.com; style-src 'self' 'unsafe-inline' unpkg.com; script-src 'self' 'unsafe-inline'; font-src 'self' data:",
-          "Permissions-Policy: accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), camera=(), cross-origin-isolated=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(self), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), midi=(), navigation-override=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), sync-xhr=(), usb=(), web-share=(), xr-spatial-tracking=(), clipboard-read=(), clipboard-write=(), gamepad=(), speaker-selection=(), conversion-measurement=(), focus-without-user-activation=(), hid=(), idle-detection=(), serial=(), sync-script=(), trust-token-redemption=(), vertical-scroll=(self)"
-        ]
-      }
-    },
-    {
       resolve: `gatsby-source-filesystem`,
       options: {
         path: `${__dirname}/src/locales`,
