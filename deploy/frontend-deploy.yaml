@@ -154,8 +154,8 @@ Resources:
       EnableAutoSubDomain: False
       SubDomainSettings:
         - BranchName:
-            Ref: GithubBranchName
+            !GetAtt PaddelBuchBranch.BranchName
           Prefix: ""
         - BranchName:
-            Ref: GithubBranchName
+            !GetAtt PaddelBuchBranch.BranchName
           Prefix: www
