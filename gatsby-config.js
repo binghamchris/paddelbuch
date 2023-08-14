@@ -4,12 +4,12 @@ require("dotenv").config({
 
 const config = require("./package.json"); 
 
-const { description, homepage } = config;
+const { description } = config;
 
 const siteMetadata = {
   companyName: "Paddel Buch",
   authorName: "Chris Bingham",
-  siteUrl: homepage,
+  siteUrl: "https://www.paddelbuch.ch",
   siteDescription: description,
 };
 
@@ -74,8 +74,19 @@ module.exports = {
         }
       }
     },
+    {
+      resolve: 'gatsby-plugin-robots-txt',
+      options: {
+        policy: [
+          {userAgent: 'CCbot', disallow: '/'},
+          {userAgent: 'GBTBot', disallow: '/'},
+          {userAgent: 'ChatGPT-User', disallow: '/'}
+        ]
+      }
+    },
     `gatsby-plugin-image`,
-    `gatsby-plugin-sharp`
+    `gatsby-plugin-sharp`,
+    "gatsby-plugin-sitemap"
   ],
 };
 
