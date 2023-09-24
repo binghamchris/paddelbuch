@@ -10,7 +10,7 @@ import { useTranslation, Trans } from 'gatsby-plugin-react-i18next';
 import EventNoticeList from 'components/EventNotice-List';
 
 export const pageQuery = graphql`
-  query LakePageQuery($slug: String!, $language: GraphCMS_Locale!) {
+  query LakePageQuery($slug: String!, $language: String!) {
     locales: allLocale(
       filter: {language: {eq: $language}}
     ) {
@@ -22,16 +22,18 @@ export const pageQuery = graphql`
         }
       }
     }
-    thisWaterway: graphCmsWaterway(locale: {eq: $language}, slug: {eq: $slug}) {
+    thisWaterway: contentfulWaterway(node_locale: {eq: $language}, slug: {eq: $slug}) {
       name
-      geometry
+      geometry {
+        json
+      }
     }
-   thisWaterwayEventNotices: allGraphCmsWaterwayEventNotice(filter: {locale: {eq: $language}, affectedWaterways: {elemMatch: {slug: {eq: $slug}}}}) {
+   thisWaterwayEventNotices: allContentfulWaterwayEventNotice(filter: {node_locale: {eq: $language}, affectedWaterways: {elemMatch: {slug: {eq: $slug}}}}) {
       nodes {
         slug
         updatedAt
         name
-        locale
+        node_locale
         endDate
       }
     }

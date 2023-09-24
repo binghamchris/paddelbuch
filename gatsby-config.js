@@ -42,15 +42,6 @@ module.exports = {
       },
     },
     {
-      resolve: "gatsby-source-graphcms",
-      options: {
-        endpoint: "https://api-eu-central-1.hygraph.com/v2/ckq3v9412ku0401w70mgs10qp/master",
-        locales: ['en', 'de'],
-        token: process.env.GCMS_TOKEN,
-        queryConcurrency: 1,
-      }
-    },
-    {
       resolve: `gatsby-source-filesystem`,
       options: {
         path: `${__dirname}/src/locales`,
@@ -86,7 +77,16 @@ module.exports = {
     },
     `gatsby-plugin-image`,
     `gatsby-plugin-sharp`,
-    "gatsby-plugin-sitemap"
+    "gatsby-plugin-sitemap",
+    {
+      resolve: `gatsby-source-contentful`,
+      options: {
+        spaceId: `mwuqd55n7yfb`,
+        accessToken: process.env.CONTENTFUL_ACCESS_TOKEN,
+        environment: 'dev',
+        downloadLocal: true
+      },
+    },
   ],
 };
 

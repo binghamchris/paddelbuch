@@ -4,13 +4,13 @@ import Layout from "components/Layout";
 import Map from "components/Map-Complete";
 import { graphql } from "gatsby";
 import { Container, Row, Col } from "react-bootstrap";
-import { RichText } from '@graphcms/rich-text-react-renderer';
+//import { RichText } from '@graphcms/rich-text-react-renderer';
 import { Link, Trans, I18nextContext, useTranslation } from 'gatsby-plugin-react-i18next';
 import SpotIconDarkDetailsPane from "components/SpotIcon-Dark-DetailsPane";
 import Clipboard from 'react-clipboard.js';
 
 export const pageQuery = graphql`
-  query SpotPageQuery($slug: String!, $language: GraphCMS_Locale!) {
+  query SpotPageQuery($slug: String!, $language: String!) {
     locales: allLocale(
       filter: {language: {eq: $language}}
     ) {
@@ -22,10 +22,12 @@ export const pageQuery = graphql`
         }
       }
     }
-    thisSpot: graphCmsSpot(locale: {eq: $language}, slug: {eq: $slug}) {
+    thisSpot: contentfulSpot(node_locale: {eq: $language}, slug: {eq: $slug}) {
       name
-      approximateAddress
-      potentiallyUsableBy {
+      approximateAddress {
+        json
+      }
+      paddleCraftType {
         name
         id
       }
@@ -40,7 +42,7 @@ export const pageQuery = graphql`
         name
         slug
       }
-      waterways {
+      waterway {
         name
         slug
       }

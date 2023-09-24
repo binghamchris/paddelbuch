@@ -16,26 +16,24 @@ const Header = () => {
 
   const { waterways, staticPages } = useStaticQuery(graphql`
     query {
-      waterways: allGraphCmsWaterway(
+      waterways: allContentfulWaterway(
         filter: {showInMenu: {eq: true}}
-        sort: {fields: name}
+        sort: {name: ASC}
       ) {
         nodes {
           name
           slug
-          locale
+          node_locale
           paddlingEnvironments {
             slug
           }
         }
       }
-      staticPages: allGraphCmsStaticPage(
-        sort: {fields: menuOrder, order: ASC}
-      ) {
+      staticPages: allContentfulStaticPage(sort: {menuOrder: ASC}) {
         nodes {
           title
           slug
-          locale
+          node_locale
           menu
         }
       }
@@ -64,7 +62,7 @@ const Header = () => {
           <Nav className="mr-auto" >
             <NavDropdown title={t('Lakes')} id="nav-dropdown-lakes" className="link-no-style">
               { waterways.nodes
-                .filter(waterway => waterway.paddlingEnvironments.slug === "see" && waterway.locale === language)
+                .filter(waterway => waterway.paddlingEnvironments.slug === "see" && waterway.node_locale === language)
                 .map(waterway => {
                   const{name, slug} = waterway;
               
@@ -91,7 +89,7 @@ const Header = () => {
 
             <NavDropdown title={t('Rivers')} id="nav-dropdown-rivers" className="link-no-style">
               { waterways.nodes
-                .filter(waterway => waterway.paddlingEnvironments.slug === "fluss" && waterway.locale === language)
+                .filter(waterway => waterway.paddlingEnvironments.slug === "fluss" && waterway.node_locale === language)
                 .map(waterway => {
                   const{name, slug} = waterway;
                   return (
@@ -117,7 +115,7 @@ const Header = () => {
 
             <NavDropdown title={t('About')} id="nav-dropdown-about" className="link-no-style">
               {staticPages.nodes
-                .filter(staticPage => staticPage.menu === "About" && staticPage.locale === language)
+                .filter(staticPage => staticPage.menu === "About" && staticPage.node_locale === language)
                 .map(staticPage => {
                   const{title, slug} = staticPage;
                   return (

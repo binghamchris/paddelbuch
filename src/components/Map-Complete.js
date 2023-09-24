@@ -28,20 +28,21 @@ const Map = (props) => {
 
   const { spots, protectedAreas, obstacles, waterwayEventNotices } = useStaticQuery(graphql`
     query {
-      spots: allGraphCmsSpot(filter: {rejected: {ne: true}}) {
+      spots: allContentfulSpot(filter: {rejected: {ne: true}}) {
         nodes {
-          locale
+          node_locale
           name
-          approximateAddress
+          approximateAddress {
+            json
+          }
           description {
-            html
-            raw
+            json
           }
           location {
             latitude
             longitude
           }
-          waterways {
+          waterway {
             name
             slug
           }
@@ -49,18 +50,20 @@ const Map = (props) => {
             name
             slug
           }
-          potentiallyUsableBy {
+          paddleCraftType {
             name
             id
           }
           slug
         }
       }
-      protectedAreas: allGraphCmsProtectedArea {
+      protectedAreas: allContentfulProtectedArea {
         nodes {
-          locale
+          node_locale
           name
-          geometry
+          geometry {
+            json
+          }
           slug
           protectedAreaType {
             name
@@ -69,12 +72,16 @@ const Map = (props) => {
           isAreaMarked
         }
       }
-      obstacles: allGraphCmsObstacle {
+      obstacles: allContentfulObstacle {
         nodes {
-          locale
+          node_locale
           slug
-          portageRoute
-          geometry
+          portageRoute {
+            json
+          }
+          geometry {
+            json
+          }
           name
           isPortageNecessary
           isPortagePossible
@@ -84,17 +91,19 @@ const Map = (props) => {
           }
         }
       }
-      waterwayEventNotices: allGraphCmsWaterwayEventNotice {
+      waterwayEventNotices: allContentfulWaterwayEventNotice {
         nodes {
           slug
           updatedAt
           name
-          locale
+          node_locale
           location {
             latitude
             longitude
           }
-          affectedArea
+          affectedArea {
+            json
+          }
           description {
             raw
           }
@@ -161,7 +170,7 @@ const Map = (props) => {
           <LayersControl.Overlay checked name={t("Entry & Exit Spots")}>
             <LayerGroup>
             { spots.nodes
-              .filter(spot => spot.spotType.slug === "einstieg-aufstieg" && spot.locale === language)
+              .filter(spot => spot.spotType.slug === "einstieg-aufstieg" && spot.node_locale === language)
               .map(spot => {
                 const { name, location, description, slug, approximateAddress, spotType, potentiallyUsableBy } = spot;
                 const position = [location.latitude, location.longitude];
@@ -176,7 +185,7 @@ const Map = (props) => {
           <LayersControl.Overlay checked name={t("Entry Only Spots")}>
             <LayerGroup>
             { spots.nodes
-              .filter(spot => spot.spotType.slug === "nur-einstieg" && spot.locale === language)
+              .filter(spot => spot.spotType.slug === "nur-einstieg" && spot.node_locale === language)
               .map(spot => {
                 const { name, location, description, slug, approximateAddress, spotType, potentiallyUsableBy } = spot;
                 const position = [location.latitude, location.longitude];
@@ -191,7 +200,7 @@ const Map = (props) => {
           <LayersControl.Overlay checked name={t("Exit Only Spots")}>
             <LayerGroup>
             { spots.nodes
-              .filter(spot => spot.spotType.slug === "nur-aufstieg" && spot.locale === language)
+              .filter(spot => spot.spotType.slug === "nur-aufstieg" && spot.node_locale === language)
               .map(spot => {
                 const { name, location, description, slug, approximateAddress, spotType, potentiallyUsableBy } = spot;
                 const position = [location.latitude, location.longitude];
@@ -206,7 +215,7 @@ const Map = (props) => {
           <LayersControl.Overlay checked name={t("Rest Spots")}>
             <LayerGroup>
             { spots.nodes
-              .filter(spot => spot.spotType.slug === "rasthalte" && spot.locale === language)
+              .filter(spot => spot.spotType.slug === "rasthalte" && spot.node_locale === language)
               .map(spot => {
                 const { name, location, description, slug, approximateAddress, spotType, potentiallyUsableBy } = spot;
                 const position = [location.latitude, location.longitude];
@@ -221,7 +230,7 @@ const Map = (props) => {
           <LayersControl.Overlay checked name={t("Emergency Exit Spots")}>
             <LayerGroup>
             { spots.nodes
-              .filter(spot => spot.spotType.slug === "notauswasserungsstelle" && spot.locale === language)
+              .filter(spot => spot.spotType.slug === "notauswasserungsstelle" && spot.node_locale === language)
               .map(spot => {
                 const { name, location, description, slug, approximateAddress, spotType, potentiallyUsableBy } = spot;
                 const position = [location.latitude, location.longitude];
@@ -236,7 +245,7 @@ const Map = (props) => {
           <LayersControl.Overlay checked name={t("Waterway Event Notices")}>
             <LayerGroup>
             { waterwayEventNotices.nodes
-              .filter(waterwayEventNotice => new Date(waterwayEventNotice.endDate) - new Date() > 0 && waterwayEventNotice.locale === language)
+              .filter(waterwayEventNotice => new Date(waterwayEventNotice.endDate) - new Date() > 0 && waterwayEventNotice.node_locale === language)
               .map(waterwayEventNotice => {
                 const { name, slug, location, affectedArea, endDate, startDate, description } = waterwayEventNotice;
                 const position = [location.latitude, location.longitude];
@@ -256,7 +265,7 @@ const Map = (props) => {
         </LayersControl>
 
             { protectedAreas.nodes
-              .filter(protectedArea => protectedArea.locale === language)
+              .filter(protectedArea => protectedArea.node_locale === language)
               .map(protectedArea => {
               const { name, geometry, protectedAreaType, slug } = protectedArea;
               return (
@@ -272,7 +281,7 @@ const Map = (props) => {
             })}
 
             { obstacles.nodes
-              .filter(obstacles => obstacles.locale === language)
+              .filter(obstacles => obstacles.node_locale === language)
               .map(obstacle => {
               const { name, geometry, portageRoute, isPortagePossible, slug } = obstacle;
               return (
