@@ -3,10 +3,10 @@ import { Helmet } from "react-helmet";
 import Layout from "components/Layout";
 import Container from "components/Container";
 import { graphql } from "gatsby";
-import { RichText } from '@graphcms/rich-text-react-renderer';
+//import { RichText } from '@graphcms/rich-text-react-renderer';
 
 export const pageQuery = graphql`
-  query StaticPageQuery($slug: String!, $language: GraphCMS_Locale!) {
+  query StaticPageQuery($slug: String!, $language: String!) {
     locales: allLocale(
       filter: {language: {eq: $language}}
     ) {
@@ -18,11 +18,11 @@ export const pageQuery = graphql`
         }
       }
     }
-    page: graphCmsStaticPage(menu: {eq: About}, locale: {eq: $language}, slug: {eq: $slug}) {
+    page: contentfulStaticPage(menu: {eq: About}, node_locale: {eq: $language}, slug: {eq: $slug}) {
       slug
       title
       pageContents {
-        raw
+        json
       }
     }
   }

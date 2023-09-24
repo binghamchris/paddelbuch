@@ -4,13 +4,13 @@ import Layout from "components/Layout";
 import Map from "components/Map-Complete";
 import { graphql } from "gatsby";
 import { Container, Row, Col } from "react-bootstrap";
-import { RichText } from '@graphcms/rich-text-react-renderer';
+//import { RichText } from '@graphcms/rich-text-react-renderer';
 import { isDomAvailable } from 'lib/util';
 import L from "leaflet";
 import { Link, Trans, I18nextContext, useTranslation } from 'gatsby-plugin-react-i18next';
 
 export const pageQuery = graphql`
-query ObstaclePageQuery($slug: String!, $language: GraphCMS_Locale!) {
+query ObstaclePageQuery($slug: String!, $language: String!) {
   locales: allLocale(
     filter: {language: {eq: $language}}
   ) {
@@ -22,15 +22,17 @@ query ObstaclePageQuery($slug: String!, $language: GraphCMS_Locale!) {
       }
     }
   }
-  thisObstacle: graphCmsObstacle(locale: {eq: $language}, slug: {eq: $slug}) {
+  thisObstacle: contentfulObstacle(node_locale: {eq: $language}, slug: {eq: $slug}) {
     name
     slug
-    geometry
+    geometry {
+      json
+    }
     spots {
       slug
       name
       description {
-        raw
+        json
       }
       location {
         latitude
@@ -44,13 +46,15 @@ query ObstaclePageQuery($slug: String!, $language: GraphCMS_Locale!) {
     obstacleType {
       name
     }
-    portageRoute
+    portageRoute {
+      json
+    }
     portageDistance
     portageDescription {
-      raw
+      json
     }
     description {
-      raw
+      json
     }
     waterway {
       slug

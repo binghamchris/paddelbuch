@@ -4,13 +4,13 @@ import Layout from "components/Layout";
 import Map from "components/Map-Complete";
 import { graphql } from "gatsby";
 import { Container, Row, Col } from "react-bootstrap";
-import { RichText } from '@graphcms/rich-text-react-renderer';
+//import { RichText } from '@graphcms/rich-text-react-renderer';
 import { Trans, I18nextContext, useTranslation } from 'gatsby-plugin-react-i18next';
 import { isDomAvailable } from 'lib/util';
 import L from "leaflet";
 
 export const pageQuery = graphql`
-  query WaterwayEventNoticePageQuery($slug: String!, $language: GraphCMS_Locale!) {
+  query WaterwayEventNoticePageQuery($slug: String!, $language: String!) {
     locales: allLocale(
       filter: {language: {eq: $language}}
     ) {
@@ -22,7 +22,7 @@ export const pageQuery = graphql`
         }
       }
     }
-    thisNotice: graphCmsWaterwayEventNotice(locale: {eq: $language}, slug: {eq: $slug}) {
+    thisNotice: contentfulWaterwayEventNotice(node_locale: {eq: $language}, slug: {eq: $slug}) {
       slug
       updatedAt
       name
@@ -30,17 +30,19 @@ export const pageQuery = graphql`
         latitude
         longitude
       }
-      affectedArea
+      affectedArea {
+        json
+      }
       affectedSpots {
         name
         slug
       }
-      affectedWaterways {
+      affectedWaterway {
         name
         slug
       }
       description {
-        raw
+        json
       }
       endDate
       startDate

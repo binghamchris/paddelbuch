@@ -2,7 +2,7 @@ import React from "react";
 import SpotIconLightPopup from "components/SpotIcon-Light-Popup";
 import { Link, Trans, useTranslation } from 'gatsby-plugin-react-i18next';
 import Clipboard from 'react-clipboard.js';
-import { RichText } from '@graphcms/rich-text-react-renderer';
+//import { RichText } from '@graphcms/rich-text-react-renderer';
 import { Popup } from "react-leaflet";
 
 const MapSpotPopup = (props) => {
