@@ -71,7 +71,9 @@ module.exports = {
         policy: [
           {userAgent: 'CCbot', disallow: '/'},
           {userAgent: 'GBTBot', disallow: '/'},
-          {userAgent: 'ChatGPT-User', disallow: '/'}
+          {userAgent: 'ChatGPT-User', disallow: '/'},
+          {userAgent: 'Google-Extended', disallow: '/'},
+          {userAgent: 'GoogleOther', disallow: '/'}
         ]
       }
     },
