@@ -4,7 +4,7 @@ import Layout from "components/Layout";
 import Map from "components/Map-Complete";
 import { graphql } from "gatsby";
 import { Container, Row, Col } from "react-bootstrap";
-//import { RichText } from '@graphcms/rich-text-react-renderer';
+import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 import { isDomAvailable } from 'lib/util';
 import L from "leaflet";
 import { Link, Trans, I18nextContext, useTranslation } from 'gatsby-plugin-react-i18next';
@@ -26,17 +26,19 @@ query ObstaclePageQuery($slug: String!, $language: String!) {
     name
     slug
     geometry {
-      json
+      internal {
+        content
+      }
     }
-    spots {
+    spot {
       slug
       name
       description {
-        json
+        raw
       }
       location {
-        latitude
-        longitude
+        lat
+        lon
       }
       spotType {
         name
@@ -47,14 +49,16 @@ query ObstaclePageQuery($slug: String!, $language: String!) {
       name
     }
     portageRoute {
-      json
+      internal {
+        content
+      }
     }
     portageDistance
     portageDescription {
-      json
+      raw
     }
     description {
-      json
+      raw
     }
     waterway {
       slug
@@ -65,7 +69,7 @@ query ObstaclePageQuery($slug: String!, $language: String!) {
 }
 `;
 
-export default function ObstacleDetailsPage({ data: { thisObstacle, spots, protectedAreas, obstacles } }) {
+export default function ObstacleDetailsPage({ data: { thisObstacle, spot, protectedAreas, obstacles } }) {
 
   const {t} = useTranslation();
   const context = React.useContext(I18nextContext);
@@ -87,7 +91,7 @@ export default function ObstacleDetailsPage({ data: { thisObstacle, spots, prote
 
   if (isDomAvailable()) {
 
-    const geometryL = L.geoJSON(thisObstacle.geometry)
+    const geometryL = L.geoJSON(JSON.parse(thisObstacle.geometry.internal.content))
     const obstacleBounds = geometryL.getBounds()
     obstacleCentre = obstacleBounds.getCenter()
     mapSettings = {
@@ -163,7 +167,9 @@ export default function ObstacleDetailsPage({ data: { thisObstacle, spots, prote
               <div className="obstacle-title">
                 <h1>{thisObstacle.name}</h1>
               </div>
-              <RichText content={thisObstacle.description.raw} />
+              <div dangerouslySetInnerHTML={{ __html: 
+                documentToHtmlString(JSON.parse(thisObstacle.description.raw))
+              }} />
               <table>
                 <tbody>
                   <tr>
@@ -193,7 +199,9 @@ export default function ObstacleDetailsPage({ data: { thisObstacle, spots, prote
                   </tbody>
               </table>
               <h2><Trans>Portage Route</Trans></h2>
-              <RichText content={thisObstacle.portageDescription.raw} />
+              <div dangerouslySetInnerHTML={{ __html: 
+                documentToHtmlString(JSON.parse(thisObstacle.portageDescription.raw))
+              }} />
               <table>
                 <tbody>
                   <tr>
@@ -205,13 +213,13 @@ export default function ObstacleDetailsPage({ data: { thisObstacle, spots, prote
                   <tr>
                     <th><Trans>Exit Spot</Trans>:</th>
                     <td>
-                      <Link to={`/einstiegsorte/${thisObstacle.spots.filter(spot => spot.spotType.slug === "nur-aufstieg")[0].slug}`}>{thisObstacle.spots.filter(spot => spot.spotType.slug === "nur-aufstieg")[0].name}</Link>
+                      <Link to={`/einstiegsorte/${thisObstacle.spot.filter(spot => spot.spotType.slug === "nur-aufstieg")[0].slug}`}>{thisObstacle.spot.filter(spot => spot.spotType.slug === "nur-aufstieg")[0].name}</Link>
                     </td>
                   </tr>
                   <tr>
                     <th><Trans>Re-entry Spot</Trans>:</th>
                     <td>
-                      <Link to={`/einstiegsorte/${thisObstacle.spots.filter(spot => spot.spotType.slug === "nur-einstieg")[0].slug}`}>{thisObstacle.spots.filter(spot => spot.spotType.slug === "nur-einstieg")[0].name}</Link>
+                      <Link to={`/einstiegsorte/${thisObstacle.spot.filter(spot => spot.spotType.slug === "nur-einstieg")[0].slug}`}>{thisObstacle.spot.filter(spot => spot.spotType.slug === "nur-einstieg")[0].name}</Link>
                     </td>
                   </tr>
                 </tbody>

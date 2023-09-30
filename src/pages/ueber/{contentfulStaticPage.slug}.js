@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet";
 import Layout from "components/Layout";
 import Container from "components/Container";
 import { graphql } from "gatsby";
-//import { RichText } from '@graphcms/rich-text-react-renderer';
+import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 
 export const pageQuery = graphql`
   query StaticPageQuery($slug: String!, $language: String!) {
@@ -18,11 +18,12 @@ export const pageQuery = graphql`
         }
       }
     }
-    page: contentfulStaticPage(menu: {eq: About}, node_locale: {eq: $language}, slug: {eq: $slug}) {
+    page: contentfulStaticPage(menu: {eq: "About"}, node_locale: {eq: $language}, slug: {eq: $slug}) {
       slug
       title
       pageContents {
-        json
+        raw
+        
       }
     }
   }
@@ -36,7 +37,9 @@ export default function StaticPage({ data: { page } }) {
       </Helmet>
       <Container type="content">
         <h1>{page.title}</h1>
-        <RichText content={page.pageContents.raw} />
+        <div dangerouslySetInnerHTML={{ __html: 
+          documentToHtmlString(JSON.parse(page.pageContents.raw))
+        }} />
       </Container>
     </Layout>
   );

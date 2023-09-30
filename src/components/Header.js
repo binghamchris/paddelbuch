@@ -24,7 +24,7 @@ const Header = () => {
           name
           slug
           node_locale
-          paddlingEnvironments {
+          paddlingEnvironmentType {
             slug
           }
         }
@@ -62,7 +62,7 @@ const Header = () => {
           <Nav className="mr-auto" >
             <NavDropdown title={t('Lakes')} id="nav-dropdown-lakes" className="link-no-style">
               { waterways.nodes
-                .filter(waterway => waterway.paddlingEnvironments.slug === "see" && waterway.node_locale === language)
+                .filter(waterway => waterway.paddlingEnvironmentType.slug === "see" && waterway.node_locale === language)
                 .map(waterway => {
                   const{name, slug} = waterway;
               
@@ -89,7 +89,7 @@ const Header = () => {
 
             <NavDropdown title={t('Rivers')} id="nav-dropdown-rivers" className="link-no-style">
               { waterways.nodes
-                .filter(waterway => waterway.paddlingEnvironments.slug === "fluss" && waterway.node_locale === language)
+                .filter(waterway => waterway.paddlingEnvironmentType.slug === "fluss" && waterway.node_locale === language)
                 .map(waterway => {
                   const{name, slug} = waterway;
                   return (

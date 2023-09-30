@@ -20,7 +20,7 @@ export const pageQuery = graphql`
     }
     rivers: allContentfulWaterway(
       filter: {node_locale: {eq: $language}, paddlingEnvironmentType: {slug: {eq: "fluss"}}}
-      sort: {fields: name}
+      sort: {name: ASC}
     ) {
       nodes {
         name
