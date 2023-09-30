@@ -4,7 +4,7 @@ import Layout from "components/Layout";
 import Map from "components/Map-Complete";
 import { graphql } from "gatsby";
 import { Container, Row, Col } from "react-bootstrap";
-//import { RichText } from '@graphcms/rich-text-react-renderer';
+import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 import { Trans, I18nextContext, useTranslation } from 'gatsby-plugin-react-i18next';
 import { isDomAvailable } from 'lib/util';
 import L from "leaflet";
@@ -27,22 +27,24 @@ export const pageQuery = graphql`
       updatedAt
       name
       location {
-        latitude
-        longitude
+        lat
+        lon
       }
       affectedArea {
-        json
+        internal {
+          content
+        }
       }
-      affectedSpots {
+      spot {
         name
         slug
       }
-      affectedWaterway {
+      waterway {
         name
         slug
       }
       description {
-        json
+        raw
       }
       endDate
       startDate
@@ -69,7 +71,7 @@ export default function WaterwayEventNoticeDetailsPage({ data: { thisNotice } })
   var mapSettings
 
   if (isDomAvailable()) {
-    const geometryL = L.geoJSON(thisNotice.affectedArea)
+    const geometryL = L.geoJSON(JSON.parse(thisNotice.affectedArea.internal.content))
     const affectedAreaBounds = geometryL.getBounds()
     mapSettings = {
       bounds: affectedAreaBounds,
@@ -92,7 +94,9 @@ export default function WaterwayEventNoticeDetailsPage({ data: { thisNotice } })
             <div className="notice-title">
               <h1>{thisNotice.name}</h1>
             </div>
-            <RichText content={thisNotice.description.raw} />
+            <div dangerouslySetInnerHTML={{ __html: 
+              documentToHtmlString(JSON.parse(thisNotice.description.raw))
+            }} />
             <table className="notice-details-table">
               <tbody>
                 <tr>

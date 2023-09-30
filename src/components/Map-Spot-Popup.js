@@ -2,7 +2,7 @@ import React from "react";
 import SpotIconLightPopup from "components/SpotIcon-Light-Popup";
 import { Link, Trans, useTranslation } from 'gatsby-plugin-react-i18next';
 import Clipboard from 'react-clipboard.js';
-//import { RichText } from '@graphcms/rich-text-react-renderer';
+import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 import { Popup } from "react-leaflet";
 
 const MapSpotPopup = (props) => {
@@ -15,14 +15,16 @@ const MapSpotPopup = (props) => {
       <span class="popup-title">
         <h1>{props.name}</h1>
       </span>
-      <RichText content={props.description.raw} />
+      <div dangerouslySetInnerHTML={{ __html: 
+        documentToHtmlString(JSON.parse(props.description.raw))
+      }} />
       <table class="popup-details-table">
         <tbody>
           <tr>
             <th><Trans>Potentially Usable By</Trans>:</th>
             <td>
               <ul>
-                {props.potentiallyUsableBy
+                {props.paddleCraftType
                   .map(paddleCraft => {
                     const { name, id } = paddleCraft;
                     return (
@@ -35,9 +37,9 @@ const MapSpotPopup = (props) => {
           </tr>
           <tr>
             <th><Trans>GPS</Trans>:</th>
-            <td>{props.location.latitude}, {props.location.longitude}</td>
+            <td>{props.location.lat}, {props.location.lon}</td>
             <td class="clipboard-cell-popup">
-              <Clipboard button-class="popup-btn" button-title={t(`Copy GPS to clipboard`)} data-clipboard-text={`${props.location.latitude}, ${props.location.longitude}`}>
+              <Clipboard button-class="popup-btn" button-title={t(`Copy GPS to clipboard`)} data-clipboard-text={`${props.location.lat}, ${props.location.lon}`}>
                 <Trans>Copy</Trans>
               </Clipboard>
             </td>

@@ -33,14 +33,14 @@ const Map = (props) => {
           node_locale
           name
           approximateAddress {
-            json
+            approximateAddress
           }
           description {
-            json
+            raw
           }
           location {
-            latitude
-            longitude
+            lat
+            lon
           }
           waterway {
             name
@@ -62,7 +62,9 @@ const Map = (props) => {
           node_locale
           name
           geometry {
-            json
+            internal {
+              content
+            }
           }
           slug
           protectedAreaType {
@@ -77,10 +79,14 @@ const Map = (props) => {
           node_locale
           slug
           portageRoute {
-            json
+            internal {
+              content
+            }
           }
           geometry {
-            json
+            internal {
+              content
+            }
           }
           name
           isPortageNecessary
@@ -98,11 +104,13 @@ const Map = (props) => {
           name
           node_locale
           location {
-            latitude
-            longitude
+            lat
+            lon
           }
           affectedArea {
-            json
+            internal {
+              content
+            }
           }
           description {
             raw
@@ -172,11 +180,11 @@ const Map = (props) => {
             { spots.nodes
               .filter(spot => spot.spotType.slug === "einstieg-aufstieg" && spot.node_locale === language)
               .map(spot => {
-                const { name, location, description, slug, approximateAddress, spotType, potentiallyUsableBy } = spot;
-                const position = [location.latitude, location.longitude];
+                const { name, location, description, slug, approximateAddress, spotType, paddleCraftType } = spot;
+                const position = [location.lat, location.lon];
                 return (
                   <Marker key={slug} position={position} icon={(!!spotEinstiegAufstiegIcon) ? spotEinstiegAufstiegIcon : null}>
-                    {<MapSpotPopup name={name} location={location} description={description} slug={slug} approximateAddress={approximateAddress} spotType={spotType} potentiallyUsableBy={potentiallyUsableBy}/>}
+                    {<MapSpotPopup name={name} location={location} description={description} slug={slug} approximateAddress={approximateAddress.approximateAddress} spotType={spotType} paddleCraftType={paddleCraftType}/>}
                   </Marker>
                 );
             })}
@@ -187,11 +195,11 @@ const Map = (props) => {
             { spots.nodes
               .filter(spot => spot.spotType.slug === "nur-einstieg" && spot.node_locale === language)
               .map(spot => {
-                const { name, location, description, slug, approximateAddress, spotType, potentiallyUsableBy } = spot;
-                const position = [location.latitude, location.longitude];
+                const { name, location, description, slug, approximateAddress, spotType, paddleCraftType } = spot;
+                const position = [location.lat, location.lon];
                 return (
                   <Marker key={slug} position={position} icon={(!!spotNurEinstiegIcon) ? spotNurEinstiegIcon : null}>
-                    {<MapSpotPopup name={name} location={location} description={description} slug={slug} approximateAddress={approximateAddress} spotType={spotType} potentiallyUsableBy={potentiallyUsableBy}/>}
+                    {<MapSpotPopup name={name} location={location} description={description} slug={slug} approximateAddress={approximateAddress.approximateAddress} spotType={spotType} paddleCraftType={paddleCraftType}/>}
                   </Marker>
                 );
             })}
@@ -202,11 +210,11 @@ const Map = (props) => {
             { spots.nodes
               .filter(spot => spot.spotType.slug === "nur-aufstieg" && spot.node_locale === language)
               .map(spot => {
-                const { name, location, description, slug, approximateAddress, spotType, potentiallyUsableBy } = spot;
-                const position = [location.latitude, location.longitude];
+                const { name, location, description, slug, approximateAddress, spotType, paddleCraftType } = spot;
+                const position = [location.lat, location.lon];
                 return (
                   <Marker key={slug} position={position} icon={(!!spotNurAufstiegIcon) ? spotNurAufstiegIcon : null}>
-                    {<MapSpotPopup name={name} location={location} description={description} slug={slug} approximateAddress={approximateAddress} spotType={spotType} potentiallyUsableBy={potentiallyUsableBy}/>}
+                    {<MapSpotPopup name={name} location={location} description={description} slug={slug} approximateAddress={approximateAddress.approximateAddress} spotType={spotType} paddleCraftType={paddleCraftType}/>}
                   </Marker>
                 );
             })}
@@ -217,11 +225,11 @@ const Map = (props) => {
             { spots.nodes
               .filter(spot => spot.spotType.slug === "rasthalte" && spot.node_locale === language)
               .map(spot => {
-                const { name, location, description, slug, approximateAddress, spotType, potentiallyUsableBy } = spot;
-                const position = [location.latitude, location.longitude];
+                const { name, location, description, slug, approximateAddress, spotType, paddleCraftType } = spot;
+                const position = [location.lat, location.lon];
                 return (
                   <Marker key={slug} position={position} icon={(!!spotRasthalteIcon) ? spotRasthalteIcon : null}>
-                    {<MapSpotPopup name={name} location={location} description={description} slug={slug} approximateAddress={approximateAddress} spotType={spotType} potentiallyUsableBy={potentiallyUsableBy}/>}
+                    {<MapSpotPopup name={name} location={location} description={description} slug={slug} approximateAddress={approximateAddress.approximateAddress} spotType={spotType} paddleCraftType={paddleCraftType}/>}
                   </Marker>
                 );
             })}
@@ -232,11 +240,11 @@ const Map = (props) => {
             { spots.nodes
               .filter(spot => spot.spotType.slug === "notauswasserungsstelle" && spot.node_locale === language)
               .map(spot => {
-                const { name, location, description, slug, approximateAddress, spotType, potentiallyUsableBy } = spot;
-                const position = [location.latitude, location.longitude];
+                const { name, location, description, slug, approximateAddress, spotType, paddleCraftType } = spot;
+                const position = [location.lat, location.lon];
                 return (
                   <Marker key={slug} position={position} icon={(!!spotNotauswasserungIcon) ? spotNotauswasserungIcon : null}>
-                    {<MapSpotPopup name={name} location={location} description={description} slug={slug} approximateAddress={approximateAddress} spotType={spotType} potentiallyUsableBy={potentiallyUsableBy}/>}
+                    {<MapSpotPopup name={name} location={location} description={description} slug={slug} approximateAddress={approximateAddress.approximateAddress} spotType={spotType} paddleCraftType={paddleCraftType}/>}
                   </Marker>
                 );
             })}
@@ -248,13 +256,13 @@ const Map = (props) => {
               .filter(waterwayEventNotice => new Date(waterwayEventNotice.endDate) - new Date() > 0 && waterwayEventNotice.node_locale === language)
               .map(waterwayEventNotice => {
                 const { name, slug, location, affectedArea, endDate, startDate, description } = waterwayEventNotice;
-                const position = [location.latitude, location.longitude];
+                const position = [location.lat, location.lon];
                 return (
                   <div>
                     <Marker key="{slug}-marker" position={position} icon={(!!waterwayEventNoticeIcon) ? waterwayEventNoticeIcon : null}>
                       {<MapEventNoticePopup name={name} location={location} description={description} slug={slug} startDate={startDate} endDate={endDate} />}
                     </Marker>
-                    <GeoJSON key="{slug}-geojson" data={affectedArea} style={layerStyle.waterwayEventNoticeAreaStyle}>
+                    <GeoJSON key="{slug}-geojson" data={JSON.parse(affectedArea.internal.content)} style={layerStyle.waterwayEventNoticeAreaStyle}>
                       {<MapEventNoticePopup name={name} location={location} description={description} slug={slug} startDate={startDate} endDate={endDate} />}
                     </GeoJSON>
                   </div>
@@ -269,7 +277,7 @@ const Map = (props) => {
               .map(protectedArea => {
               const { name, geometry, protectedAreaType, slug } = protectedArea;
               return (
-                <GeoJSON key={slug} data={geometry} style={layerStyle.protectedAreaStyle}>
+                <GeoJSON key={slug} data={JSON.parse(geometry.internal.content)} style={layerStyle.protectedAreaStyle}>
                   <Popup>
                     <span className="popup-title">
                       <h1>{name}</h1>
@@ -285,13 +293,13 @@ const Map = (props) => {
               .map(obstacle => {
               const { name, geometry, portageRoute, isPortagePossible, slug } = obstacle;
               return (
-                <div>
-                  <GeoJSON key={slug} data={geometry} style={layerStyle.obstacleStyle}>
+                <div>              
+                  <GeoJSON key={slug} data={JSON.parse(geometry.internal.content)} style={layerStyle.obstacleStyle}>
                     <MapObstaclePopup name={name} isPortagePossible={isPortagePossible} slug={slug}/>
                   </GeoJSON>
-                  <GeoJSON data={portageRoute} style={layerStyle.portageStyle}>
+                  {portageRoute ? <GeoJSON data={JSON.parse(portageRoute.internal.content)} style={layerStyle.portageStyle}>
                     <Popup><b><Trans>Portage route for</Trans> {name}</b></Popup>
-                  </GeoJSON>
+                  </GeoJSON>: null }
                 </div>
               )            
               })}

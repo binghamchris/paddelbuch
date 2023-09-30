@@ -25,10 +25,12 @@ export const pageQuery = graphql`
     thisWaterway: contentfulWaterway(node_locale: {eq: $language}, slug: {eq: $slug}) {
       name
       geometry {
-        json
+        internal {
+          content
+        }
       }
     }
-   thisWaterwayEventNotices: allContentfulWaterwayEventNotice(filter: {node_locale: {eq: $language}, affectedWaterways: {elemMatch: {slug: {eq: $slug}}}}) {
+   thisWaterwayEventNotices: allContentfulWaterwayEventNotice(filter: {node_locale: {eq: $language}, waterway: {elemMatch: {slug: {eq: $slug}}}}) {
       nodes {
         slug
         updatedAt
@@ -48,7 +50,7 @@ export default function LakeDetailsPage({ data: { thisWaterway, thisWaterwayEven
 
   if (isDomAvailable()) {
 
-    const geometryL = L.geoJSON(thisWaterway.geometry)
+    const geometryL = L.geoJSON(JSON.parse(thisWaterway.geometry.internal.content))
     const mapBounds = geometryL.getBounds()
     mapSettings = {
       bounds: mapBounds
