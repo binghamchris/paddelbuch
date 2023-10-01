@@ -105,7 +105,7 @@ export default function ObstacleDetailsPage({ data: { thisObstacle, spot, protec
         <Helmet>
           <title>{t(`Paddel Buch - Obstacles`)} - {thisObstacle.name}</title>
         </Helmet>
-        <Container fluid >
+        <Container fluid className="g-0">
           <Row className="justify-content-center g-0">
             <Col id="map" xl="8" lg="8" md="12" sm="12" xs="12">
               <Map {...mapSettings}>
@@ -156,7 +156,7 @@ export default function ObstacleDetailsPage({ data: { thisObstacle, spot, protec
         <Helmet>
           <title>{t(`Paddel Buch - Obstacles`)} - {thisObstacle.name}</title>
         </Helmet>
-        <Container fluid >
+        <Container fluid className="g-0">
           <Row className="justify-content-center g-0">
             <Col id="map" xl="8" lg="8" md="12" sm="12" xs="12">
               <Map {...mapSettings}>
