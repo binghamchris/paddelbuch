@@ -7,10 +7,6 @@ const EventNoticeList = (props) => {
   const language = context.language
 
   var endDtFormat = { year: 'numeric', month: 'long', day: 'numeric' };
-  
-  console.log(props)
-
-  console.log(props.thisWaterwayEventNotices.nodes.length)
 
   if (props.thisWaterwayEventNotices.nodes.length > 0) {
     return (
