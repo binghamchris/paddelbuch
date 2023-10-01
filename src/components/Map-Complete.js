@@ -145,13 +145,11 @@ const Map = (props) => {
   }
 
   if (!isDomAvailable()) {
-
     return (
       <div className={mapClassName}>
         <p className="map-loading">Loading map...</p>
       </div>
     );
-    
   }
 
   const mapSettings = {
@@ -167,16 +165,15 @@ const Map = (props) => {
     <div className={mapClassName}>
       <MapContainer tap={false} {...mapSettings} key="map">
         {children}
-        {/* {basemap && <TileLayer {...basemap} />} */}
         <TileLayer
           url = {mapboxUrl}
           attribution="© <a href='https://www.mapbox.com/about/maps/' target='_blank' rel='noopener'>Mapbox</a> © <a href='http://www.openstreetmap.org/copyright' target='_blank' rel='noopener'>OpenStreetMap</a> <strong><a href='https://www.mapbox.com/map-feedback/' target='_blank' rel='noopener'>Improve this map</a></strong>"
           maxZoom = "20"
         />
-        <ZoomControl position="bottomright" />
-        <LayersControl position="topleft" collapsed='false'>
-          <LayersControl.Overlay checked name={t("Entry & Exit Spots")}>
-            <LayerGroup>
+        <ZoomControl key="zoom-control" position="bottomright" />
+        <LayersControl key="layer-control" position="topleft" collapsed='false'>
+          <LayersControl.Overlay key="entry-exit" checked name={t("Entry & Exit Spots")}>
+            <LayerGroup key="entry-exit-group">
             { spots.nodes
               .filter(spot => spot.spotType.slug === "einstieg-aufstieg" && spot.node_locale === language)
               .map(spot => {
@@ -190,8 +187,8 @@ const Map = (props) => {
             })}
             </LayerGroup>
           </LayersControl.Overlay>
-          <LayersControl.Overlay checked name={t("Entry Only Spots")}>
-            <LayerGroup>
+          <LayersControl.Overlay key="entry" checked name={t("Entry Only Spots")}>
+            <LayerGroup key="entry-group">
             { spots.nodes
               .filter(spot => spot.spotType.slug === "nur-einstieg" && spot.node_locale === language)
               .map(spot => {
@@ -205,8 +202,8 @@ const Map = (props) => {
             })}
             </LayerGroup>
           </LayersControl.Overlay>
-          <LayersControl.Overlay checked name={t("Exit Only Spots")}>
-            <LayerGroup>
+          <LayersControl.Overlay key="exit" checked name={t("Exit Only Spots")}>
+            <LayerGroup key="exit-group">
             { spots.nodes
               .filter(spot => spot.spotType.slug === "nur-aufstieg" && spot.node_locale === language)
               .map(spot => {
@@ -220,8 +217,8 @@ const Map = (props) => {
             })}
             </LayerGroup>
           </LayersControl.Overlay>
-          <LayersControl.Overlay checked name={t("Rest Spots")}>
-            <LayerGroup>
+          <LayersControl.Overlay key="rest" checked name={t("Rest Spots")}>
+            <LayerGroup key="rest-group">
             { spots.nodes
               .filter(spot => spot.spotType.slug === "rasthalte" && spot.node_locale === language)
               .map(spot => {
@@ -235,8 +232,8 @@ const Map = (props) => {
             })}
             </LayerGroup>
           </LayersControl.Overlay>
-          <LayersControl.Overlay checked name={t("Emergency Exit Spots")}>
-            <LayerGroup>
+          <LayersControl.Overlay key="emergency" checked name={t("Emergency Exit Spots")}>
+            <LayerGroup key="emergency-group">
             { spots.nodes
               .filter(spot => spot.spotType.slug === "notauswasserungsstelle" && spot.node_locale === language)
               .map(spot => {
@@ -250,8 +247,8 @@ const Map = (props) => {
             })}
             </LayerGroup>
           </LayersControl.Overlay>
-          <LayersControl.Overlay checked name={t("Waterway Event Notices")}>
-            <LayerGroup>
+          <LayersControl.Overlay key="event" checked name={t("Waterway Event Notices")}>
+            <LayerGroup key="event-group">
             { waterwayEventNotices.nodes
               .filter(waterwayEventNotice => new Date(waterwayEventNotice.endDate) - new Date() > 0 && waterwayEventNotice.node_locale === language)
               .map(waterwayEventNotice => {
@@ -271,7 +268,6 @@ const Map = (props) => {
             </LayerGroup>
           </LayersControl.Overlay>
         </LayersControl>
-
             { protectedAreas.nodes
               .filter(protectedArea => protectedArea.node_locale === language)
               .map(protectedArea => {
@@ -303,8 +299,6 @@ const Map = (props) => {
                 </div>
               )            
               })}
-          
-        
       </MapContainer>
     </div>
   );
