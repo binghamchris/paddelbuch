@@ -6,7 +6,7 @@ import { graphql } from "gatsby";
 import { Link, Trans, useTranslation } from 'gatsby-plugin-react-i18next';
 
 export const pageQuery = graphql`
-  query LakesPageQuery($language: GraphCMS_Locale!) {
+  query LakesPageQuery($language: String!) {
     locales: allLocale(
       filter: {language: {eq: $language}}
     ) {
@@ -18,9 +18,9 @@ export const pageQuery = graphql`
         }
       }
     }
-    lakes: allGraphCmsWaterway(
-      filter: {locale: {eq: $language}, paddlingEnvironments: {slug: {eq: "see"}}}
-      sort: {fields: name}
+    lakes: allContentfulWaterway(
+      filter: {node_locale: {eq: $language}, paddlingEnvironmentType: {slug: {eq: "see"}}}
+      sort: {name: ASC}
     ) {
       nodes {
         name
