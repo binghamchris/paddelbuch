@@ -4,13 +4,13 @@ import Layout from "components/Layout";
 import Map from "components/Map-Complete";
 import { graphql } from "gatsby";
 import { Container, Row, Col } from "react-bootstrap";
-import { RichText } from '@graphcms/rich-text-react-renderer';
+import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 import { Trans, I18nextContext, useTranslation } from 'gatsby-plugin-react-i18next';
 import { isDomAvailable } from 'lib/util';
 import L from "leaflet";
 
 export const pageQuery = graphql`
-  query WaterwayEventNoticePageQuery($slug: String!, $language: GraphCMS_Locale!) {
+  query WaterwayEventNoticePageQuery($slug: String!, $language: String!) {
     locales: allLocale(
       filter: {language: {eq: $language}}
     ) {
@@ -22,20 +22,20 @@ export const pageQuery = graphql`
         }
       }
     }
-    thisNotice: graphCmsWaterwayEventNotice(locale: {eq: $language}, slug: {eq: $slug}) {
+    thisNotice: contentfulWaterwayEventNotice(node_locale: {eq: $language}, slug: {eq: $slug}) {
       slug
       updatedAt
       name
       location {
-        latitude
-        longitude
+        lat
+        lon
       }
-      affectedArea
-      affectedSpots {
-        name
-        slug
+      affectedArea {
+        internal {
+          content
+        }
       }
-      affectedWaterways {
+      waterway {
         name
         slug
       }
@@ -67,7 +67,7 @@ export default function WaterwayEventNoticeDetailsPage({ data: { thisNotice } })
   var mapSettings
 
   if (isDomAvailable()) {
-    const geometryL = L.geoJSON(thisNotice.affectedArea)
+    const geometryL = L.geoJSON(JSON.parse(thisNotice.affectedArea.internal.content))
     const affectedAreaBounds = geometryL.getBounds()
     mapSettings = {
       bounds: affectedAreaBounds,
@@ -79,7 +79,7 @@ export default function WaterwayEventNoticeDetailsPage({ data: { thisNotice } })
       <Helmet>
         <title>{t(`Paddel Buch - Notices`)} - {thisNotice.name}</title>
       </Helmet>
-      <Container fluid >
+      <Container fluid className="g-0">
         <Row className="justify-content-center g-0">
           <Col id="map" xl="8" lg="7" md="12" sm="12" xs="12">
             <Map {...mapSettings}>
@@ -90,7 +90,9 @@ export default function WaterwayEventNoticeDetailsPage({ data: { thisNotice } })
             <div className="notice-title">
               <h1>{thisNotice.name}</h1>
             </div>
-            <RichText content={thisNotice.description.raw} />
+            <div dangerouslySetInnerHTML={{ __html: 
+              documentToHtmlString(JSON.parse(thisNotice.description.raw))
+            }} />
             <table className="notice-details-table">
               <tbody>
                 <tr>

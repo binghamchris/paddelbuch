@@ -23,9 +23,15 @@ Parameters:
   EnvVarMapboxUrl:
     Type: String
     Description: The URL for the MapBox map style to be used during the Gatsby build process
-  EnvVarGcmsToken:
+  EnvVarContentfulToken:
     Type: String
-    Description: The API token for accessing the Hygraph (formally GraphCMS) API during the Gatsby build process
+    Description: The API token for accessing the Contentful API during the Gatsby build process
+  EnvVarContentfulSpace:
+    Type: String
+    Description: The Contentful space ID to use for accessing the Contentful API during the Gatsby build process
+  EnvVarContentfulEnv:
+    Type: String
+    Description: The Contentful environment ID for accessing the Contentful API during the Gatsby build process
   GithubRepoUrl:
     Type: String
     Description: The URL of the GitHub repo to be deployed
@@ -111,9 +117,15 @@ Resources:
         - Name: GATSBY_MAPBOX_URL
           Value:
             Ref: EnvVarMapboxUrl
-        - Name: GCMS_TOKEN
+        - Name: CONTENTFUL_ACCESS_TOKEN
           Value:
-            Ref: EnvVarGcmsToken
+            Ref: EnvVarContentfulToken
+        - Name: CONTENTFUL_SPACE_ID
+          Value:
+            Ref: EnvVarContentfulSpace
+        - Name: CONTENTFUL_ENVIRONMENT
+          Value:
+            Ref: EnvVarContentfulEnv
       Name:
         Ref: AppName
       Repository:
