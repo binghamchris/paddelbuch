@@ -35,10 +35,6 @@ export const pageQuery = graphql`
           content
         }
       }
-      spot {
-        name
-        slug
-      }
       waterway {
         name
         slug
