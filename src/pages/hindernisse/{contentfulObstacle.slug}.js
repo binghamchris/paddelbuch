@@ -4,13 +4,13 @@ import Layout from "components/Layout";
 import Map from "components/Map-Complete";
 import { graphql } from "gatsby";
 import { Container, Row, Col } from "react-bootstrap";
-import { RichText } from '@graphcms/rich-text-react-renderer';
+import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 import { isDomAvailable } from 'lib/util';
 import L from "leaflet";
 import { Link, Trans, I18nextContext, useTranslation } from '@herob/gatsby-plugin-react-i18next';
 
 export const pageQuery = graphql`
-query ObstaclePageQuery($slug: String!, $language: GraphCMS_Locale!) {
+query ObstaclePageQuery($slug: String!, $language: String!) {
   locales: allLocale(
     filter: {language: {eq: $language}}
   ) {
@@ -22,19 +22,23 @@ query ObstaclePageQuery($slug: String!, $language: GraphCMS_Locale!) {
       }
     }
   }
-  thisObstacle: graphCmsObstacle(locale: {eq: $language}, slug: {eq: $slug}) {
+  thisObstacle: contentfulObstacle(node_locale: {eq: $language}, slug: {eq: $slug}) {
     name
     slug
-    geometry
-    spots {
+    geometry {
+      internal {
+        content
+      }
+    }
+    spot {
       slug
       name
       description {
         raw
       }
       location {
-        latitude
-        longitude
+        lat
+        lon
       }
       spotType {
         name
@@ -44,7 +48,11 @@ query ObstaclePageQuery($slug: String!, $language: GraphCMS_Locale!) {
     obstacleType {
       name
     }
-    portageRoute
+    portageRoute {
+      internal {
+        content
+      }
+    }
     portageDistance
     portageDescription {
       raw
@@ -61,7 +69,7 @@ query ObstaclePageQuery($slug: String!, $language: GraphCMS_Locale!) {
 }
 `;
 
-export default function ObstacleDetailsPage({ data: { thisObstacle, spots, protectedAreas, obstacles } }) {
+export default function ObstacleDetailsPage({ data: { thisObstacle, spot, protectedAreas, obstacles } }) {
 
   const {t} = useTranslation();
   const context = React.useContext(I18nextContext);
@@ -83,7 +91,7 @@ export default function ObstacleDetailsPage({ data: { thisObstacle, spots, prote
 
   if (isDomAvailable()) {
 
-    const geometryL = L.geoJSON(thisObstacle.geometry)
+    const geometryL = L.geoJSON(JSON.parse(thisObstacle.geometry.internal.content))
     const obstacleBounds = geometryL.getBounds()
     obstacleCentre = obstacleBounds.getCenter()
     mapSettings = {
@@ -97,7 +105,7 @@ export default function ObstacleDetailsPage({ data: { thisObstacle, spots, prote
         <Helmet>
           <title>{t(`Paddel Buch - Obstacles`)} - {thisObstacle.name}</title>
         </Helmet>
-        <Container fluid >
+        <Container fluid className="g-0">
           <Row className="justify-content-center g-0">
             <Col id="map" xl="8" lg="8" md="12" sm="12" xs="12">
               <Map {...mapSettings}>
@@ -148,7 +156,7 @@ export default function ObstacleDetailsPage({ data: { thisObstacle, spots, prote
         <Helmet>
           <title>{t(`Paddel Buch - Obstacles`)} - {thisObstacle.name}</title>
         </Helmet>
-        <Container fluid >
+        <Container fluid className="g-0">
           <Row className="justify-content-center g-0">
             <Col id="map" xl="8" lg="8" md="12" sm="12" xs="12">
               <Map {...mapSettings}>
@@ -159,7 +167,9 @@ export default function ObstacleDetailsPage({ data: { thisObstacle, spots, prote
               <div className="obstacle-title">
                 <h1>{thisObstacle.name}</h1>
               </div>
-              <RichText content={thisObstacle.description.raw} />
+              <div dangerouslySetInnerHTML={{ __html: 
+                documentToHtmlString(JSON.parse(thisObstacle.description.raw))
+              }} />
               <table>
                 <tbody>
                   <tr>
@@ -189,7 +199,9 @@ export default function ObstacleDetailsPage({ data: { thisObstacle, spots, prote
                   </tbody>
               </table>
               <h2><Trans>Portage Route</Trans></h2>
-              <RichText content={thisObstacle.portageDescription.raw} />
+              <div dangerouslySetInnerHTML={{ __html: 
+                documentToHtmlString(JSON.parse(thisObstacle.portageDescription.raw))
+              }} />
               <table>
                 <tbody>
                   <tr>
@@ -201,13 +213,13 @@ export default function ObstacleDetailsPage({ data: { thisObstacle, spots, prote
                   <tr>
                     <th><Trans>Exit Spot</Trans>:</th>
                     <td>
-                      <Link to={`/einstiegsorte/${thisObstacle.spots.filter(spot => spot.spotType.slug === "nur-aufstieg")[0].slug}`}>{thisObstacle.spots.filter(spot => spot.spotType.slug === "nur-aufstieg")[0].name}</Link>
+                      <Link to={`/einstiegsorte/${thisObstacle.spot.filter(spot => spot.spotType.slug === "nur-aufstieg")[0].slug}`}>{thisObstacle.spot.filter(spot => spot.spotType.slug === "nur-aufstieg")[0].name}</Link>
                     </td>
                   </tr>
                   <tr>
                     <th><Trans>Re-entry Spot</Trans>:</th>
                     <td>
-                      <Link to={`/einstiegsorte/${thisObstacle.spots.filter(spot => spot.spotType.slug === "nur-einstieg")[0].slug}`}>{thisObstacle.spots.filter(spot => spot.spotType.slug === "nur-einstieg")[0].name}</Link>
+                      <Link to={`/einstiegsorte/${thisObstacle.spot.filter(spot => spot.spotType.slug === "nur-einstieg")[0].slug}`}>{thisObstacle.spot.filter(spot => spot.spotType.slug === "nur-einstieg")[0].name}</Link>
                     </td>
                   </tr>
                 </tbody>

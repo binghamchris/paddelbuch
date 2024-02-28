@@ -28,20 +28,21 @@ const Map = (props) => {
 
   const { spots, protectedAreas, obstacles, waterwayEventNotices } = useStaticQuery(graphql`
     query {
-      spots: allGraphCmsSpot(filter: {rejected: {ne: true}}) {
+      spots: allContentfulSpot(filter: {rejected: {ne: true}}) {
         nodes {
-          locale
+          node_locale
           name
-          approximateAddress
+          approximateAddress {
+            approximateAddress
+          }
           description {
-            html
             raw
           }
           location {
-            latitude
-            longitude
+            lat
+            lon
           }
-          waterways {
+          waterway {
             name
             slug
           }
@@ -49,18 +50,22 @@ const Map = (props) => {
             name
             slug
           }
-          potentiallyUsableBy {
+          paddleCraftType {
             name
             id
           }
           slug
         }
       }
-      protectedAreas: allGraphCmsProtectedArea {
+      protectedAreas: allContentfulProtectedArea {
         nodes {
-          locale
+          node_locale
           name
-          geometry
+          geometry {
+            internal {
+              content
+            }
+          }
           slug
           protectedAreaType {
             name
@@ -69,12 +74,20 @@ const Map = (props) => {
           isAreaMarked
         }
       }
-      obstacles: allGraphCmsObstacle {
+      obstacles: allContentfulObstacle {
         nodes {
-          locale
+          node_locale
           slug
-          portageRoute
-          geometry
+          portageRoute {
+            internal {
+              content
+            }
+          }
+          geometry {
+            internal {
+              content
+            }
+          }
           name
           isPortageNecessary
           isPortagePossible
@@ -84,17 +97,21 @@ const Map = (props) => {
           }
         }
       }
-      waterwayEventNotices: allGraphCmsWaterwayEventNotice {
+      waterwayEventNotices: allContentfulWaterwayEventNotice {
         nodes {
           slug
           updatedAt
           name
-          locale
+          node_locale
           location {
-            latitude
-            longitude
+            lat
+            lon
           }
-          affectedArea
+          affectedArea {
+            internal {
+              content
+            }
+          }
           description {
             raw
           }
@@ -128,13 +145,11 @@ const Map = (props) => {
   }
 
   if (!isDomAvailable()) {
-
     return (
       <div className={mapClassName}>
         <p className="map-loading">Loading map...</p>
       </div>
     );
-    
   }
 
   const mapSettings = {
@@ -150,102 +165,101 @@ const Map = (props) => {
     <div className={mapClassName}>
       <MapContainer tap={false} {...mapSettings} key="map">
         {children}
-        {/* {basemap && <TileLayer {...basemap} />} */}
         <TileLayer
           url = {mapboxUrl}
           attribution="© <a href='https://www.mapbox.com/about/maps/' target='_blank' rel='noopener'>Mapbox</a> © <a href='http://www.openstreetmap.org/copyright' target='_blank' rel='noopener'>OpenStreetMap</a> <strong><a href='https://www.mapbox.com/map-feedback/' target='_blank' rel='noopener'>Improve this map</a></strong>"
           maxZoom = "20"
         />
-        <ZoomControl position="bottomright" />
-        <LayersControl position="topleft" collapsed='false'>
-          <LayersControl.Overlay checked name={t("Entry & Exit Spots")}>
-            <LayerGroup>
+        <ZoomControl key="zoom-control" position="bottomright" />
+        <LayersControl key="layer-control" position="topleft" collapsed='false'>
+          <LayersControl.Overlay key="entry-exit" checked name={t("Entry & Exit Spots")}>
+            <LayerGroup key="entry-exit-group">
             { spots.nodes
-              .filter(spot => spot.spotType.slug === "einstieg-aufstieg" && spot.locale === language)
+              .filter(spot => spot.spotType.slug === "einstieg-aufstieg" && spot.node_locale === language)
               .map(spot => {
-                const { name, location, description, slug, approximateAddress, spotType, potentiallyUsableBy } = spot;
-                const position = [location.latitude, location.longitude];
+                const { name, location, description, slug, approximateAddress, spotType, paddleCraftType } = spot;
+                const position = [location.lat, location.lon];
                 return (
                   <Marker key={slug} position={position} icon={(!!spotEinstiegAufstiegIcon) ? spotEinstiegAufstiegIcon : null}>
-                    {<MapSpotPopup name={name} location={location} description={description} slug={slug} approximateAddress={approximateAddress} spotType={spotType} potentiallyUsableBy={potentiallyUsableBy}/>}
+                    {<MapSpotPopup name={name} location={location} description={description} slug={slug} approximateAddress={approximateAddress.approximateAddress} spotType={spotType} paddleCraftType={paddleCraftType}/>}
                   </Marker>
                 );
             })}
             </LayerGroup>
           </LayersControl.Overlay>
-          <LayersControl.Overlay checked name={t("Entry Only Spots")}>
-            <LayerGroup>
+          <LayersControl.Overlay key="entry" checked name={t("Entry Only Spots")}>
+            <LayerGroup key="entry-group">
             { spots.nodes
-              .filter(spot => spot.spotType.slug === "nur-einstieg" && spot.locale === language)
+              .filter(spot => spot.spotType.slug === "nur-einstieg" && spot.node_locale === language)
               .map(spot => {
-                const { name, location, description, slug, approximateAddress, spotType, potentiallyUsableBy } = spot;
-                const position = [location.latitude, location.longitude];
+                const { name, location, description, slug, approximateAddress, spotType, paddleCraftType } = spot;
+                const position = [location.lat, location.lon];
                 return (
                   <Marker key={slug} position={position} icon={(!!spotNurEinstiegIcon) ? spotNurEinstiegIcon : null}>
-                    {<MapSpotPopup name={name} location={location} description={description} slug={slug} approximateAddress={approximateAddress} spotType={spotType} potentiallyUsableBy={potentiallyUsableBy}/>}
+                    {<MapSpotPopup name={name} location={location} description={description} slug={slug} approximateAddress={approximateAddress.approximateAddress} spotType={spotType} paddleCraftType={paddleCraftType}/>}
                   </Marker>
                 );
             })}
             </LayerGroup>
           </LayersControl.Overlay>
-          <LayersControl.Overlay checked name={t("Exit Only Spots")}>
-            <LayerGroup>
+          <LayersControl.Overlay key="exit" checked name={t("Exit Only Spots")}>
+            <LayerGroup key="exit-group">
             { spots.nodes
-              .filter(spot => spot.spotType.slug === "nur-aufstieg" && spot.locale === language)
+              .filter(spot => spot.spotType.slug === "nur-aufstieg" && spot.node_locale === language)
               .map(spot => {
-                const { name, location, description, slug, approximateAddress, spotType, potentiallyUsableBy } = spot;
-                const position = [location.latitude, location.longitude];
+                const { name, location, description, slug, approximateAddress, spotType, paddleCraftType } = spot;
+                const position = [location.lat, location.lon];
                 return (
                   <Marker key={slug} position={position} icon={(!!spotNurAufstiegIcon) ? spotNurAufstiegIcon : null}>
-                    {<MapSpotPopup name={name} location={location} description={description} slug={slug} approximateAddress={approximateAddress} spotType={spotType} potentiallyUsableBy={potentiallyUsableBy}/>}
+                    {<MapSpotPopup name={name} location={location} description={description} slug={slug} approximateAddress={approximateAddress.approximateAddress} spotType={spotType} paddleCraftType={paddleCraftType}/>}
                   </Marker>
                 );
             })}
             </LayerGroup>
           </LayersControl.Overlay>
-          <LayersControl.Overlay checked name={t("Rest Spots")}>
-            <LayerGroup>
+          <LayersControl.Overlay key="rest" checked name={t("Rest Spots")}>
+            <LayerGroup key="rest-group">
             { spots.nodes
-              .filter(spot => spot.spotType.slug === "rasthalte" && spot.locale === language)
+              .filter(spot => spot.spotType.slug === "rasthalte" && spot.node_locale === language)
               .map(spot => {
-                const { name, location, description, slug, approximateAddress, spotType, potentiallyUsableBy } = spot;
-                const position = [location.latitude, location.longitude];
+                const { name, location, description, slug, approximateAddress, spotType, paddleCraftType } = spot;
+                const position = [location.lat, location.lon];
                 return (
                   <Marker key={slug} position={position} icon={(!!spotRasthalteIcon) ? spotRasthalteIcon : null}>
-                    {<MapSpotPopup name={name} location={location} description={description} slug={slug} approximateAddress={approximateAddress} spotType={spotType} potentiallyUsableBy={potentiallyUsableBy}/>}
+                    {<MapSpotPopup name={name} location={location} description={description} slug={slug} approximateAddress={approximateAddress.approximateAddress} spotType={spotType} paddleCraftType={paddleCraftType}/>}
                   </Marker>
                 );
             })}
             </LayerGroup>
           </LayersControl.Overlay>
-          <LayersControl.Overlay checked name={t("Emergency Exit Spots")}>
-            <LayerGroup>
+          <LayersControl.Overlay key="emergency" checked name={t("Emergency Exit Spots")}>
+            <LayerGroup key="emergency-group">
             { spots.nodes
-              .filter(spot => spot.spotType.slug === "notauswasserungsstelle" && spot.locale === language)
+              .filter(spot => spot.spotType.slug === "notauswasserungsstelle" && spot.node_locale === language)
               .map(spot => {
-                const { name, location, description, slug, approximateAddress, spotType, potentiallyUsableBy } = spot;
-                const position = [location.latitude, location.longitude];
+                const { name, location, description, slug, approximateAddress, spotType, paddleCraftType } = spot;
+                const position = [location.lat, location.lon];
                 return (
                   <Marker key={slug} position={position} icon={(!!spotNotauswasserungIcon) ? spotNotauswasserungIcon : null}>
-                    {<MapSpotPopup name={name} location={location} description={description} slug={slug} approximateAddress={approximateAddress} spotType={spotType} potentiallyUsableBy={potentiallyUsableBy}/>}
+                    {<MapSpotPopup name={name} location={location} description={description} slug={slug} approximateAddress={approximateAddress.approximateAddress} spotType={spotType} paddleCraftType={paddleCraftType}/>}
                   </Marker>
                 );
             })}
             </LayerGroup>
           </LayersControl.Overlay>
-          <LayersControl.Overlay checked name={t("Waterway Event Notices")}>
-            <LayerGroup>
+          <LayersControl.Overlay key="event" checked name={t("Waterway Event Notices")}>
+            <LayerGroup key="event-group">
             { waterwayEventNotices.nodes
-              .filter(waterwayEventNotice => new Date(waterwayEventNotice.endDate) - new Date() > 0 && waterwayEventNotice.locale === language)
+              .filter(waterwayEventNotice => new Date(waterwayEventNotice.endDate) - new Date() > 0 && waterwayEventNotice.node_locale === language)
               .map(waterwayEventNotice => {
                 const { name, slug, location, affectedArea, endDate, startDate, description } = waterwayEventNotice;
-                const position = [location.latitude, location.longitude];
+                const position = [location.lat, location.lon];
                 return (
                   <div>
                     <Marker key="{slug}-marker" position={position} icon={(!!waterwayEventNoticeIcon) ? waterwayEventNoticeIcon : null}>
                       {<MapEventNoticePopup name={name} location={location} description={description} slug={slug} startDate={startDate} endDate={endDate} />}
                     </Marker>
-                    <GeoJSON key="{slug}-geojson" data={affectedArea} style={layerStyle.waterwayEventNoticeAreaStyle}>
+                    <GeoJSON key="{slug}-geojson" data={JSON.parse(affectedArea.internal.content)} style={layerStyle.waterwayEventNoticeAreaStyle}>
                       {<MapEventNoticePopup name={name} location={location} description={description} slug={slug} startDate={startDate} endDate={endDate} />}
                     </GeoJSON>
                   </div>
@@ -254,13 +268,12 @@ const Map = (props) => {
             </LayerGroup>
           </LayersControl.Overlay>
         </LayersControl>
-
             { protectedAreas.nodes
-              .filter(protectedArea => protectedArea.locale === language)
+              .filter(protectedArea => protectedArea.node_locale === language)
               .map(protectedArea => {
               const { name, geometry, protectedAreaType, slug } = protectedArea;
               return (
-                <GeoJSON key={slug} data={geometry} style={layerStyle.protectedAreaStyle}>
+                <GeoJSON key={slug} data={JSON.parse(geometry.internal.content)} style={layerStyle.protectedAreaStyle}>
                   <Popup>
                     <span className="popup-title">
                       <h1>{name}</h1>
@@ -272,22 +285,20 @@ const Map = (props) => {
             })}
 
             { obstacles.nodes
-              .filter(obstacles => obstacles.locale === language)
+              .filter(obstacles => obstacles.node_locale === language)
               .map(obstacle => {
               const { name, geometry, portageRoute, isPortagePossible, slug } = obstacle;
               return (
-                <div>
-                  <GeoJSON key={slug} data={geometry} style={layerStyle.obstacleStyle}>
+                <div>              
+                  <GeoJSON key={slug} data={JSON.parse(geometry.internal.content)} style={layerStyle.obstacleStyle}>
                     <MapObstaclePopup name={name} isPortagePossible={isPortagePossible} slug={slug}/>
                   </GeoJSON>
-                  <GeoJSON data={portageRoute} style={layerStyle.portageStyle}>
+                  {portageRoute ? <GeoJSON data={JSON.parse(portageRoute.internal.content)} style={layerStyle.portageStyle}>
                     <Popup><b><Trans>Portage route for</Trans> {name}</b></Popup>
-                  </GeoJSON>
+                  </GeoJSON>: null }
                 </div>
               )            
               })}
-          
-        
       </MapContainer>
     </div>
   );

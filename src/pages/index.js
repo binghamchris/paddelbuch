@@ -46,7 +46,7 @@ export default IndexPage;
 
 
 export const pageQuery = graphql`
-  query($language: GraphCMS_Locale!) {
+  query($language: String!) {
     locales: allLocale(
       filter: {language: {eq: $language}}
     ) {
