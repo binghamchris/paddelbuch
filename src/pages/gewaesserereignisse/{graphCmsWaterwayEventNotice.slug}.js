@@ -4,8 +4,13 @@ import Layout from "components/Layout";
 import Map from "components/Map-Complete";
 import { graphql } from "gatsby";
 import { Container, Row, Col } from "react-bootstrap";
+<<<<<<< Updated upstream:src/pages/gewaesserereignisse/{graphCmsWaterwayEventNotice.slug}.js
 import { RichText } from '@graphcms/rich-text-react-renderer';
 import { Trans, I18nextContext, useTranslation } from 'gatsby-plugin-react-i18next';
+=======
+import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
+import { Trans, I18nextContext, useTranslation } from '@herob/gatsby-plugin-react-i18next';
+>>>>>>> Stashed changes:src/pages/gewaesserereignisse/{contentfulWaterwayEventNotice.slug}.js
 import { isDomAvailable } from 'lib/util';
 import L from "leaflet";
 

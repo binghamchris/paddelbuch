@@ -4,8 +4,13 @@ import Layout from "components/Layout";
 import Map from "components/Map-Complete";
 import { graphql } from "gatsby";
 import { Container, Row, Col } from "react-bootstrap";
+<<<<<<< Updated upstream:src/pages/einstiegsorte/{graphCmsSpot.slug}.js
 import { RichText } from '@graphcms/rich-text-react-renderer';
 import { Link, Trans, I18nextContext, useTranslation } from 'gatsby-plugin-react-i18next';
+=======
+import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
+import { Link, Trans, I18nextContext, useTranslation } from '@herob/gatsby-plugin-react-i18next';
+>>>>>>> Stashed changes:src/pages/einstiegsorte/{contentfulSpot.slug}.js
 import SpotIconDarkDetailsPane from "components/SpotIcon-Dark-DetailsPane";
 import Clipboard from 'react-clipboard.js';
 
