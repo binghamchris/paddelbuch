@@ -1,5 +1,5 @@
 import React from "react";
-import { Trans, I18nextContext, Link } from '@herob/gatsby-plugin-react-i18next';
+import { Trans, I18nextContext, Link } from 'gatsby-plugin-react-i18next';
 
 const EventNoticeList = (props) => {
   

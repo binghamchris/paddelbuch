@@ -6,7 +6,7 @@ import { isDomAvailable } from "lib/util";
 import { graphql, useStaticQuery } from "gatsby";
 import * as layerStyle from 'data/layer-styles';
 import { markerStyles } from 'data/marker-styles';
-import { Trans, I18nextContext, useTranslation } from '@herob/gatsby-plugin-react-i18next';
+import { Trans, I18nextContext, useTranslation } from 'gatsby-plugin-react-i18next';
 import L from "leaflet";
 import MapSpotPopup from 'components/Map-Spot-Popup';
 import MapObstaclePopup from 'components/Map-Obstacle-Popup';

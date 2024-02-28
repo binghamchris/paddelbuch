@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, Trans } from '@herob/gatsby-plugin-react-i18next';
+import { Link, Trans } from 'gatsby-plugin-react-i18next';
 import { Popup } from "react-leaflet";
 
 const MapObstaclePopup = (props) => {

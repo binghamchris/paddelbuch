@@ -6,7 +6,7 @@ import { graphql } from "gatsby";
 import { Container, Row, Col } from "react-bootstrap";
 import L from "leaflet";
 import { isDomAvailable } from 'lib/util';
-import { useTranslation, Trans } from '@herob/gatsby-plugin-react-i18next';
+import { useTranslation, Trans } from 'gatsby-plugin-react-i18next';
 import EventNoticeList from 'components/EventNotice-List';
 
 export const pageQuery = graphql`
