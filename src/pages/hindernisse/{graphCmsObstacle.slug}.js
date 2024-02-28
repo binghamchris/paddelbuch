@@ -7,7 +7,7 @@ import { Container, Row, Col } from "react-bootstrap";
 import { RichText } from '@graphcms/rich-text-react-renderer';
 import { isDomAvailable } from 'lib/util';
 import L from "leaflet";
-import { Link, Trans, I18nextContext, useTranslation } from 'gatsby-plugin-react-i18next';
+import { Link, Trans, I18nextContext, useTranslation } from '@herob/gatsby-plugin-react-i18next';
 
 export const pageQuery = graphql`
 query ObstaclePageQuery($slug: String!, $language: GraphCMS_Locale!) {
