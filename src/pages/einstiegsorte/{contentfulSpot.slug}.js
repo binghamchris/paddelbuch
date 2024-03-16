@@ -5,7 +5,7 @@ import Map from "components/Map-Complete";
 import { graphql } from "gatsby";
 import { Container, Row, Col } from "react-bootstrap";
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
-import { Link, Trans, I18nextContext, useTranslation } from 'gatsby-plugin-react-i18next';
+import { Link, Trans, I18nextContext, useTranslation } from '@herob/gatsby-plugin-react-i18next';
 import SpotIconDarkDetailsPane from "components/SpotIcon-Dark-DetailsPane";
 import Clipboard from 'react-clipboard.js';
 

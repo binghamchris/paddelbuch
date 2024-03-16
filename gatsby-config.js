@@ -49,7 +49,7 @@ module.exports = {
       }
     },
     {
-      resolve: `gatsby-plugin-react-i18next`,
+      resolve: `@herob/gatsby-plugin-react-i18next`,
       options: {
         localeJsonSourceName: `locale`,
         languages: ['en', 'de'],
