@@ -1,7 +1,7 @@
 import React from "react";
 import { graphql, useStaticQuery } from "gatsby"
 import { Navbar, Nav, NavDropdown } from "react-bootstrap"
-import { Link, useI18next, Trans, useTranslation, I18nextContext } from '@herob/gatsby-plugin-react-i18next';
+import { Link, useI18next, Trans, useTranslation, I18nextContext } from '@herob191/gatsby-plugin-react-i18next';
 import { StaticImage } from "gatsby-plugin-image";
 import "@fontsource/fredoka";
 import "@fontsource/quicksand";
