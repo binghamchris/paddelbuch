@@ -5,7 +5,7 @@ import Map from "components/Map-Complete";
 import { graphql } from "gatsby";
 import { Container, Row, Col } from "react-bootstrap";
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
-import { Trans, I18nextContext, useTranslation } from '@herob/gatsby-plugin-react-i18next';
+import { Trans, I18nextContext, useTranslation } from '@herob191/gatsby-plugin-react-i18next';
 import { isDomAvailable } from 'lib/util';
 import L from "leaflet";
 

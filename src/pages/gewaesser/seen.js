@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet";
 import Layout from "components/Layout";
 import Container from "components/Container";
 import { graphql } from "gatsby";
-import { Link, Trans, useTranslation } from '@herob/gatsby-plugin-react-i18next';
+import { Link, Trans, useTranslation } from '@herob191/gatsby-plugin-react-i18next';
 
 export const pageQuery = graphql`
   query LakesPageQuery($language: String!) {
