@@ -6,6 +6,13 @@
   "author": {
     "name": "Chris Bingham"
   },
+  "scripts": {
+    "develop": "gatsby develop",
+    "start": "gatsby develop",
+    "build": "gatsby build",
+    "serve": "gatsby serve",
+    "clean": "gatsby clean"
+  },
   "dependencies": {
     "@contentful/rich-text-html-renderer": "^16.1.2",
     "@fontsource/fredoka": "^5.0.5",
@@ -43,5 +50,8 @@
   "keywords": [
     "Swiss Canoe"
   ],
-  "_id": "paddelbuch@0.1"
+  "_id": "paddelbuch@0.1",
+  "optionalDependencies": {
+    "@parcel/watcher-linux-x64-glibc": "^2.4.1"
+  }
 }

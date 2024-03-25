@@ -47,24 +47,6 @@ Resources:
     Properties: 
       AccessToken:
         Ref: GithubToken
-      BuildSpec: |-
-        version: 1
-        frontend:
-          phases:
-            preBuild:
-              commands:
-                - nvm use $VERSION_NODE_16
-                - npm ci
-            build:
-              commands:
-                - gatsby build
-          artifacts:
-            baseDirectory: public
-            files:
-              - '**/*'
-          cache:
-            paths:
-              - node_modules/**/*
       CustomHeaders: |-
         customHeaders:
           - pattern: '*'
@@ -126,6 +108,8 @@ Resources:
         - Name: CONTENTFUL_ENVIRONMENT
           Value:
             Ref: EnvVarContentfulEnv
+        - Name: _CUSTOM_IMAGE
+          Value: public.ecr.aws/docker/library/node:18.17.1
       Name:
         Ref: AppName
       Repository:
