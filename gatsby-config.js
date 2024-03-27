@@ -13,6 +13,9 @@ const siteMetadata = {
   siteDescription: description,
 };
 
+const api_spots_en = require("./src/api/spots_en");
+const api_spots_de = require("./src/api/spots_de");
+
 module.exports = {
   siteMetadata,
   plugins: [
@@ -87,6 +90,15 @@ module.exports = {
         accessToken: process.env.CONTENTFUL_ACCESS_TOKEN,
         environment: process.env.CONTENTFUL_ENVIRONMENT
       },
+    },
+    {
+      resolve: "gatsby-plugin-json-pages",
+      options: {
+        pages: [
+          api_spots_en,
+          api_spots_de
+        ]
+      }
     },
   ],
 };
