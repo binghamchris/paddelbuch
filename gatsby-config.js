@@ -15,6 +15,10 @@ const siteMetadata = {
 
 const api_spots_en = require("./src/api/spots_en");
 const api_spots_de = require("./src/api/spots_de");
+const api_obstacles_en = require("./src/api/obstacles_en");
+const api_obstacles_de = require("./src/api/obstacles_de");
+const api_waterwayevents_en = require("./src/api/waterwayevents_en");
+const api_waterwayevents_de = require("./src/api/waterwayevents_de");
 
 module.exports = {
   siteMetadata,
@@ -96,7 +100,11 @@ module.exports = {
       options: {
         pages: [
           api_spots_en,
-          api_spots_de
+          api_spots_de,
+          api_obstacles_en,
+          api_obstacles_de,
+          api_waterwayevents_en,
+          api_waterwayevents_de,
         ]
       }
     },
