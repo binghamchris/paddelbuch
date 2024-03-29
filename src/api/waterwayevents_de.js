@@ -2,7 +2,11 @@ const api_waterwayevents_de = {
   fileName: "api/waterwayevents-de",
   query: `
     query {
-      allContentfulWaterwayEventNotice(limit: 999, filter: {node_locale: {eq: "de"}}, sort: {slug: ASC}) {
+      allContentfulWaterwayEventNotice(
+        limit: 999, 
+        filter: {node_locale: {eq: "de"}}, 
+        sort: {slug: ASC}
+      ) {
         nodes {
           slug
           node_locale
@@ -13,6 +17,11 @@ const api_waterwayevents_de = {
           endDate
           description {
             raw
+          }
+          affectedArea {
+            internal {
+              content
+            }
           }
           spot {
             slug

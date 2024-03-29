@@ -2,7 +2,12 @@ const api_spots_en = {
   fileName: "api/spots-en",
   query: `
     query {
-      allContentfulSpot(limit: 999, filter: {rejected: {ne: true}, node_locale: {eq: "en"}}, sort: {slug: ASC}) {
+      allContentfulSpot(
+        limit: 999, 
+        filter: {rejected: {ne: true}, 
+        node_locale: {eq: "en"}}, 
+        sort: {slug: ASC}
+      ) {
         nodes {
           slug
           node_locale

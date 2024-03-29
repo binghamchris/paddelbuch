@@ -2,7 +2,11 @@ const api_obstacles_de = {
   fileName: "api/obstacles-de",
   query: `
     query {
-      allContentfulObstacle(limit: 999, filter: {node_locale: {eq: "de"}}, sort: {slug: ASC}) {
+      allContentfulObstacle(
+        limit: 999, 
+        filter: {node_locale: {eq: "de"}}, 
+        sort: {slug: ASC}
+      ) {
         nodes {
           slug
           node_locale

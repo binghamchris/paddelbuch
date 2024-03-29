@@ -1,10 +1,10 @@
-const api_waterwayevents_en = {
-  fileName: "api/waterwayevents-en",
+const api_protectedareas_en = {
+  fileName: "api/protectedareas-en",
   query: `
     query {
-      allContentfulWaterwayEventNotice(
-        limit: 999, 
-        filter: {node_locale: {eq: "en"}}, 
+      allContentfulProtectedArea(
+        limit: 999
+        filter: {node_locale: {eq: "en"}}
         sort: {slug: ASC}
       ) {
         nodes {
@@ -13,17 +13,16 @@ const api_waterwayevents_en = {
           createdAt
           updatedAt
           name
-          startDate
-          endDate
           description {
             raw
           }
-          affectedArea {
+          geometry {
             internal {
               content
             }
           }
-          spot {
+          isAreaMarked
+          protectedAreaType {
             slug
           }
           waterway {
@@ -40,9 +39,9 @@ const api_waterwayevents_en = {
     }`,
   transformer: ({
     data: {
-      allContentfulWaterwayEventNotice: { nodes },
+      allContentfulProtectedArea: { nodes },
     },
   }) => nodes,
 }
 
-module.exports = api_waterwayevents_en;
+module.exports = api_protectedareas_en;
