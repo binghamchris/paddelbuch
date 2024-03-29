@@ -18,7 +18,7 @@ export const pageQuery = graphql`
         }
       }
     }
-    page: contentfulStaticPage(menu: {eq: "About"}, node_locale: {eq: $language}, slug: {eq: $slug}) {
+    page: contentfulStaticPage(node_locale: {eq: $language}, slug: {eq: $slug}) {
       slug
       title
       pageContents {
@@ -31,7 +31,7 @@ export const pageQuery = graphql`
 
 export default function StaticPage({ data: { page } }) {
   return (
-    <Layout pageName="about">
+    <Layout pageName="opendata">
       <Helmet>
         <title>Paddel Buch - {page.title}</title>
       </Helmet>

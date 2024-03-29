@@ -22,6 +22,7 @@
     "clipboard": "^2.0.10",
     "gatsby": "^5.13.3",
     "gatsby-plugin-image": "^3.12.0",
+    "gatsby-plugin-json-pages": "^1.0.0",
     "gatsby-plugin-manifest": "^5.12.0",
     "gatsby-plugin-react-helmet": "^6.12.0",
     "gatsby-plugin-react-leaflet": "^4.0.3",
