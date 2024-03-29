@@ -122,32 +122,32 @@ export default function StaticPage({ data: {
             </tr>
             <tr>
               <td><Trans>Spots</Trans></td>
-              <td><a href="/api/spots_de.json"><Trans>German</Trans> </a></td>
-              <td><a href="/api/spots_en.json"><Trans>English</Trans> </a></td>
+              <td><a href="/api/spots-de.json"><Trans>German</Trans> </a></td>
+              <td><a href="/api/spots-en.json"><Trans>English</Trans> </a></td>
               <td>{JSON.stringify(lastUpdateSpot.nodes[0].updatedAt).replace(`"`, ``).replace(`"`, ``)}</td>
             </tr>
             <tr>
               <td><Trans>Waterway Event Notices</Trans></td>
-              <td><a href="/api/waterwayevents_de.json"><Trans>German</Trans> </a></td>
-              <td><a href="/api/waterwayevents_en.json"><Trans>English</Trans> </a></td>
+              <td><a href="/api/waterwayevents-de.json"><Trans>German</Trans> </a></td>
+              <td><a href="/api/waterwayevents-en.json"><Trans>English</Trans> </a></td>
               <td>{JSON.stringify(lastUpdateWaterwayEvent.nodes[0].updatedAt).replace(`"`, ``).replace(`"`, ``)}</td>
             </tr>
             <tr>
               <td><Trans>Obstacles</Trans></td>
-              <td><a href="/api/obstacles_de.json"><Trans>German</Trans> </a></td>
-              <td><a href="/api/obstacles_en.json"><Trans>English</Trans> </a></td>
+              <td><a href="/api/obstacles-de.json"><Trans>German</Trans> </a></td>
+              <td><a href="/api/obstacles-en.json"><Trans>English</Trans> </a></td>
               <td>{JSON.stringify(lastUpdateObstacle.nodes[0].updatedAt).replace(`"`, ``).replace(`"`, ``)}</td>
             </tr>
             <tr>
               <td><Trans>Protected Areas</Trans></td>
-              <td><a href="/api/protectedareas_de.json"><Trans>German</Trans> </a></td>
-              <td><a href="/api/protectedareas_en.json"><Trans>English</Trans> </a></td>
+              <td><a href="/api/protectedareas-de.json"><Trans>German</Trans> </a></td>
+              <td><a href="/api/protectedareas-en.json"><Trans>English</Trans> </a></td>
               <td>{JSON.stringify(lastUpdateProtectedArea.nodes[0].updatedAt).replace(`"`, ``).replace(`"`, ``)}</td>
             </tr>
             <tr>
               <td><Trans>Waterways</Trans></td>
-              <td><a href="/api/waterways_de.json"><Trans>German</Trans> </a></td>
-              <td><a href="/api/waterways_en.json"><Trans>English</Trans> </a></td>
+              <td><a href="/api/waterways-de.json"><Trans>German</Trans> </a></td>
+              <td><a href="/api/waterways-en.json"><Trans>English</Trans> </a></td>
               <td>{JSON.stringify(lastUpdateWaterway.nodes[0].updatedAt).replace(`"`, ``).replace(`"`, ``)}</td>
             </tr>
           </tbody>
@@ -166,38 +166,38 @@ export default function StaticPage({ data: {
             </tr>
             <tr>
               <td><Trans>Data Licenses Types</Trans></td>
-              <td><a href="api/datalicensetypes_de.json"><Trans>German</Trans> </a></td>
-              <td><a href="api/datalicensestypes_en.json"><Trans>English</Trans> </a></td>
+              <td><a href="/api/datalicensetypes-de.json"><Trans>German</Trans> </a></td>
+              <td><a href="/api/datalicensetypes-en.json"><Trans>English</Trans> </a></td>
               <td>{JSON.stringify(lastUpdateDataLicense.nodes[0].updatedAt).replace(`"`, ``).replace(`"`, ``)}</td>
             </tr>
             <tr>
               <td><Trans>Data Source Types</Trans></td>
-              <td><a href="api/datasourcetypes_de.json"><Trans>German</Trans> </a></td>
-              <td><a href="api/datasourcetypes_en.json"><Trans>English</Trans> </a></td>
+              <td><a href="/api/datasourcetypes-de.json"><Trans>German</Trans> </a></td>
+              <td><a href="/api/datasourcetypes-en.json"><Trans>English</Trans> </a></td>
               <td>{JSON.stringify(lastUpdateDataSource.nodes[0].updatedAt).replace(`"`, ``).replace(`"`, ``)}</td>
             </tr>
             <tr>
               <td><Trans>Obstacle Types</Trans></td>
-              <td><a href="api/obstacletypes_de.json"><Trans>German</Trans> </a></td>
-              <td><a href="api/obstacletypes_en.json"><Trans>English</Trans> </a></td>
+              <td><a href="/api/obstacletypes-de.json"><Trans>German</Trans> </a></td>
+              <td><a href="/api/obstacletypes-en.json"><Trans>English</Trans> </a></td>
               <td>{JSON.stringify(lastUpdateObstacleType.nodes[0].updatedAt).replace(`"`, ``).replace(`"`, ``)}</td>
             </tr>
             <tr>
               <td><Trans>Paddle Craft Types</Trans></td>
-              <td><a href="api/paddlecrafttypes_de.json"><Trans>German</Trans> </a></td>
-              <td><a href="api/paddlecrafttypes_en.json"><Trans>English</Trans> </a></td>
+              <td><a href="/api/paddlecrafttypes-de.json"><Trans>German</Trans> </a></td>
+              <td><a href="/api/paddlecrafttypes-en.json"><Trans>English</Trans> </a></td>
               <td>{JSON.stringify(lastUpdatePaddleCraftType.nodes[0].updatedAt).replace(`"`, ``).replace(`"`, ``)}</td>
             </tr>
             <tr>
               <td><Trans>Protected Area Types</Trans></td>
-              <td><a href="api/protectedareatypes_de.json"><Trans>German</Trans> </a></td>
-              <td><a href="api/protectedareatypes_en.json"><Trans>English</Trans> </a></td>
+              <td><a href="/api/protectedareatypes-de.json"><Trans>German</Trans> </a></td>
+              <td><a href="/api/protectedareatypes-en.json"><Trans>English</Trans> </a></td>
               <td>{JSON.stringify(lastUpdateProtectedAreaType.nodes[0].updatedAt).replace(`"`, ``).replace(`"`, ``)}</td>
             </tr>
             <tr>
               <td><Trans>Spot Types</Trans></td>
-              <td><a href="api/spottypes_de.json"><Trans>German</Trans> </a></td>
-              <td><a href="api/spottypes_en.json"><Trans>English</Trans> </a></td>
+              <td><a href="/api/spottypes-de.json"><Trans>German</Trans> </a></td>
+              <td><a href="/api/spottypes-en.json"><Trans>English</Trans> </a></td>
               <td>{JSON.stringify(lastUpdateSpotType.nodes[0].updatedAt).replace(`"`, ``).replace(`"`, ``)}</td>
             </tr>
           </tbody>
