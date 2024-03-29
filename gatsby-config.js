@@ -27,6 +27,14 @@ const api_datalicensetypes_en = require("./src/api/datalicensetypes_en");
 const api_datalicensetypes_de = require("./src/api/datalicensetypes_de");
 const api_datasourcetypes_en = require("./src/api/datasourcetypes_en");
 const api_datasourcetypes_de = require("./src/api/datasourcetypes_de");
+const api_obstacletypes_en = require("./src/api/obstacletypes_en");
+const api_obstacletypes_de = require("./src/api/obstacletypes_de");
+const api_paddlecrafttypes_en = require("./src/api/paddlecrafttypes_en");
+const api_paddlecrafttypes_de = require("./src/api/paddlecrafttypes_de");
+const api_protectedareatypes_en = require("./src/api/protectedareatypes_en");
+const api_protectedareatypes_de = require("./src/api/protectedareatypes_de");
+const api_spottypes_en = require("./src/api/spottypes_en");
+const api_spottypes_de = require("./src/api/spottypes_de");
 
 module.exports = {
   siteMetadata,
@@ -121,6 +129,14 @@ module.exports = {
           api_datalicensetypes_de,
           api_datasourcetypes_en,
           api_datasourcetypes_de,
+          api_obstacletypes_en,
+          api_obstacletypes_de,
+          api_paddlecrafttypes_en,
+          api_paddlecrafttypes_de,
+          api_protectedareatypes_en,
+          api_protectedareatypes_de,
+          api_spottypes_en,
+          api_spottypes_de,
         ]
       }
     },
