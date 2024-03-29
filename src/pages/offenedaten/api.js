@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet";
 import Layout from "components/Layout";
 import Container from "components/Container";
 import { graphql } from "gatsby";
-import { Trans, useTranslation } from '@herob191/gatsby-plugin-react-i18next';
+import { Link, Trans, useTranslation } from '@herob191/gatsby-plugin-react-i18next';
 
 export const pageQuery = graphql`
   query StaticPageQuery($language: String!) {
@@ -99,8 +99,19 @@ export default function StaticPage({ data: {
       </Helmet>
       <Container type="content">
         <h1><Trans>Data Download / API</Trans></h1>
-        
+        <p>
+          <Trans>All of Paddel Buch's data is available here for download and reuse under the terms described in the </Trans>
+          <Link to={`/offenedaten/datenlizenzen`}><Trans>Data Licensing</Trans></Link>
+          <Trans> page.</Trans>
+        </p>
+        <p>
+          <Trans>Data is published as JSON files which are updated automatically when Paddel Buch's data is changed. </Trans>
+          <Trans>German and English data is available in separate files, which can be joined using their slug fields.</Trans>
+        </p>
         <h2><Trans>Fact Tables</Trans></h2>
+        <p>
+          <Trans>These tables contain Paddel Buch's primary data and are updated most frequently.</Trans>
+        </p>
         <table>
           <tbody>
             <tr>
@@ -141,8 +152,10 @@ export default function StaticPage({ data: {
             </tr>
           </tbody>
         </table>
-
         <h2><Trans>Dimension Tables</Trans></h2>
+        <p>
+          <Trans>These tables contain dimension data referenced by entries in the fact tables via their slugs.</Trans>
+        </p>
         <table>
           <tbody>
             <tr>
@@ -188,8 +201,7 @@ export default function StaticPage({ data: {
               <td>{JSON.stringify(lastUpdateSpotType.nodes[0].updatedAt).replace(`"`, ``).replace(`"`, ``)}</td>
             </tr>
           </tbody>
-        </table>
-        
+        </table> 
       </Container>
     </Layout>
   );
