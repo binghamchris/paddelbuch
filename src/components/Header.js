@@ -113,6 +113,31 @@ const Header = () => {
               </NavDropdown.Item>
             </NavDropdown>
 
+            <NavDropdown title={t('Open Data')} id="nav-dropdown-opendata" className="link-no-style">
+              {staticPages.nodes
+                .filter(staticPage => staticPage.menu === "Open Data" && staticPage.node_locale === language)
+                .map(staticPage => {
+                  const{title, slug} = staticPage;
+                  return (
+                    <NavDropdown.Item key={slug}>
+                      <Link to={`/offenedaten/${slug}`} className="link-no-style">
+                        <Nav.Link as="span">
+                          {title}
+                        </Nav.Link>
+                      </Link>
+                    </NavDropdown.Item>
+                  )
+              })
+              }
+              <NavDropdown.Item key="api">
+                <Link to={`/offenedaten/api`} className="link-no-style">
+                  <Nav.Link as="span">
+                    <Trans>Data Download / API</Trans>
+                  </Nav.Link>
+                </Link>
+              </NavDropdown.Item>
+            </NavDropdown>
+
             <NavDropdown title={t('About')} id="nav-dropdown-about" className="link-no-style">
               {staticPages.nodes
                 .filter(staticPage => staticPage.menu === "About" && staticPage.node_locale === language)
@@ -130,7 +155,6 @@ const Header = () => {
               })
               }
             </NavDropdown>
-
 
             <NavDropdown.Divider />
             <NavDropdown title={t('Language')} id="nav-dropdown-lang" className="link-no-style languages" align="end">
