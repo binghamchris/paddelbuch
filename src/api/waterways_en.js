@@ -1,10 +1,10 @@
-const api_waterwayevents_en = {
-  fileName: "api/waterwayevents-en",
+const api_waterways_en = {
+  fileName: "api/waterways-en",
   query: `
     query {
-      allContentfulWaterwayEventNotice(
-        limit: 999, 
-        filter: {node_locale: {eq: "en"}}, 
+      allContentfulWaterway(
+        limit: 999
+        filter: {node_locale: {eq: "en"}}
         sort: {slug: ASC}
       ) {
         nodes {
@@ -13,20 +13,15 @@ const api_waterwayevents_en = {
           createdAt
           updatedAt
           name
-          startDate
-          endDate
-          description {
-            raw
-          }
-          affectedArea {
+          country
+          length
+          area
+          geometry {
             internal {
               content
             }
           }
-          spot {
-            slug
-          }
-          waterway {
+          paddlingEnvironmentType {
             slug
           }
           dataSourceType {
@@ -40,9 +35,9 @@ const api_waterwayevents_en = {
     }`,
   transformer: ({
     data: {
-      allContentfulWaterwayEventNotice: { nodes },
+      allContentfulWaterway: { nodes },
     },
   }) => nodes,
 }
 
-module.exports = api_waterwayevents_en;
+module.exports = api_waterways_en;

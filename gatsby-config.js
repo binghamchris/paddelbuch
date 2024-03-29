@@ -19,6 +19,10 @@ const api_obstacles_en = require("./src/api/obstacles_en");
 const api_obstacles_de = require("./src/api/obstacles_de");
 const api_waterwayevents_en = require("./src/api/waterwayevents_en");
 const api_waterwayevents_de = require("./src/api/waterwayevents_de");
+const api_protectedareas_en = require("./src/api/protectedareas_en");
+const api_protectedareas_de = require("./src/api/protectedareas_de");
+const api_waterways_en = require("./src/api/waterways_en");
+const api_waterways_de = require("./src/api/waterways_de");
 
 module.exports = {
   siteMetadata,
@@ -105,6 +109,10 @@ module.exports = {
           api_obstacles_de,
           api_waterwayevents_en,
           api_waterwayevents_de,
+          api_protectedareas_en,
+          api_protectedareas_de,
+          api_waterways_en,
+          api_waterways_de,
         ]
       }
     },
