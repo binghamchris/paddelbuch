@@ -1,4 +1,4 @@
-const api_protectedareas_DEen = {
+const api_protectedareas_de = {
   fileName: "api/protectedareas-de",
   query: `
     query {

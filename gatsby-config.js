@@ -23,6 +23,10 @@ const api_protectedareas_en = require("./src/api/protectedareas_en");
 const api_protectedareas_de = require("./src/api/protectedareas_de");
 const api_waterways_en = require("./src/api/waterways_en");
 const api_waterways_de = require("./src/api/waterways_de");
+const api_datalicensetypes_en = require("./src/api/datalicensetypes_en");
+const api_datalicensetypes_de = require("./src/api/datalicensetypes_de");
+const api_datasourcetypes_en = require("./src/api/datasourcetypes_en");
+const api_datasourcetypes_de = require("./src/api/datasourcetypes_de");
 
 module.exports = {
   siteMetadata,
@@ -113,6 +117,10 @@ module.exports = {
           api_protectedareas_de,
           api_waterways_en,
           api_waterways_de,
+          api_datalicensetypes_en,
+          api_datalicensetypes_de,
+          api_datasourcetypes_en,
+          api_datasourcetypes_de,
         ]
       }
     },
