@@ -13,6 +13,29 @@ const siteMetadata = {
   siteDescription: description,
 };
 
+const api_spots_en = require("./src/api/spots_en");
+const api_spots_de = require("./src/api/spots_de");
+const api_obstacles_en = require("./src/api/obstacles_en");
+const api_obstacles_de = require("./src/api/obstacles_de");
+const api_waterwayevents_en = require("./src/api/waterwayevents_en");
+const api_waterwayevents_de = require("./src/api/waterwayevents_de");
+const api_protectedareas_en = require("./src/api/protectedareas_en");
+const api_protectedareas_de = require("./src/api/protectedareas_de");
+const api_waterways_en = require("./src/api/waterways_en");
+const api_waterways_de = require("./src/api/waterways_de");
+const api_datalicensetypes_en = require("./src/api/datalicensetypes_en");
+const api_datalicensetypes_de = require("./src/api/datalicensetypes_de");
+const api_datasourcetypes_en = require("./src/api/datasourcetypes_en");
+const api_datasourcetypes_de = require("./src/api/datasourcetypes_de");
+const api_obstacletypes_en = require("./src/api/obstacletypes_en");
+const api_obstacletypes_de = require("./src/api/obstacletypes_de");
+const api_paddlecrafttypes_en = require("./src/api/paddlecrafttypes_en");
+const api_paddlecrafttypes_de = require("./src/api/paddlecrafttypes_de");
+const api_protectedareatypes_en = require("./src/api/protectedareatypes_en");
+const api_protectedareatypes_de = require("./src/api/protectedareatypes_de");
+const api_spottypes_en = require("./src/api/spottypes_en");
+const api_spottypes_de = require("./src/api/spottypes_de");
+
 module.exports = {
   siteMetadata,
   plugins: [
@@ -87,6 +110,35 @@ module.exports = {
         accessToken: process.env.CONTENTFUL_ACCESS_TOKEN,
         environment: process.env.CONTENTFUL_ENVIRONMENT
       },
+    },
+    {
+      resolve: "gatsby-plugin-json-pages",
+      options: {
+        pages: [
+          api_spots_en,
+          api_spots_de,
+          api_obstacles_en,
+          api_obstacles_de,
+          api_waterwayevents_en,
+          api_waterwayevents_de,
+          api_protectedareas_en,
+          api_protectedareas_de,
+          api_waterways_en,
+          api_waterways_de,
+          api_datalicensetypes_en,
+          api_datalicensetypes_de,
+          api_datasourcetypes_en,
+          api_datasourcetypes_de,
+          api_obstacletypes_en,
+          api_obstacletypes_de,
+          api_paddlecrafttypes_en,
+          api_paddlecrafttypes_de,
+          api_protectedareatypes_en,
+          api_protectedareatypes_de,
+          api_spottypes_en,
+          api_spottypes_de,
+        ]
+      }
     },
   ],
 };
