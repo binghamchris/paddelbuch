@@ -1,0 +1,8 @@
+{
+  "These tables contain Paddel Buch's primary data and are updated most frequently.": "Diese Tabellen beinhalten das Hauptdaten des Paddel Buch und sind am häufigsten zu aktualisiert",
+  "These tables contain dimension data referenced by entries in the fact tables via their slugs.": "Diese Tabellen beinhalten Dimensionsdaten, auf die durch Einträge in den Faktentabellen über ihre Slugs verwiesen wird.",
+  "All of Paddel Buch's data is available here for download and reuse under the terms described in the ": "Alle Daten von Paddel Buch stehen hier zum Herunterladen und zur Wiederverwendung unter den im beschriebenen Bedingungen zur Verfügung in der ",
+  " page.": " Seite.",
+  "Data is published as JSON files which are updated automatically when Paddel Buch's data is changed. ": "Die Daten werden als JSON-Dateien veröffentlicht, die automatisch aktualisiert werden, wenn die Daten von Paddel Buch geändert werden. ",
+  "German and English data is available in separate files, which can be joined using their slug fields.": "Deutsche und englische Daten stehen in separaten Dateien zur Verfügung, die über ihre slug-Felder zusammengefügt werden können."
+}
