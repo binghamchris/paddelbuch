@@ -32,5 +32,22 @@
   "Waterway Event Notices": "Absehbare Gewässerereignisse",
   "There are presently no event notices for this waterway": "Zurzeit gibt es keine Veranstaltungshinweise für diese Gewässer",
   "Event Notices": "Gewässerereignisse",
-  "Summary": "Kurzfassung"
+  "Summary": "Kurzfassung",
+  "Data Download / API": "Daten herunterladen / API",
+  "Fact Tables": "Faktentabellen",
+  "Dimension Tables": "Dimensionstabellen",
+  "Table Name": "Tabellenname",
+  "German": "Deutsch",
+  "English": "Englisch",
+  "German Download": "Auf Deutsch herunterladen",
+  "English Download": "Auf Englisch herunterladen",
+  "Obstacles": "Hindernisse",
+  "Protected Areas": "Schutzgebiete",
+  "Waterways": "Gewässer",
+  "Data Licenses Types": "Datenlizenztypen",
+  "Data Source Types": "Datenquellentypen",
+  "Obstacle Types": "Hindernistypen",
+  "Paddle Craft Types": "Paddelboot Typen",
+  "Protected Area Types": "Schutzgebietstypen",
+  "Spot Types": "Einstiegsortstypen"
 }
