@@ -11,6 +11,7 @@ import L from "leaflet";
 import MapSpotPopup from 'components/Map-Spot-Popup';
 import MapObstaclePopup from 'components/Map-Obstacle-Popup';
 import MapEventNoticePopup from 'components/Map-EventNotice-Popup';
+import MapRejectedSpotPopup from 'components/Map-RejectedSpot-Popup';
 
 const Map = (props) => {
 
@@ -26,7 +27,7 @@ const Map = (props) => {
 
   useConfigureLeaflet();
 
-  const { spots, protectedAreas, obstacles, waterwayEventNotices } = useStaticQuery(graphql`
+  const { spots, protectedAreas, obstacles, waterwayEventNotices, rejectedSpots } = useStaticQuery(graphql`
     query {
       spots: allContentfulSpot(filter: {rejected: {ne: true}}) {
         nodes {
@@ -119,6 +120,23 @@ const Map = (props) => {
           startDate
         }
       }
+      rejectedSpots: allContentfulSpot(filter: {rejected: {eq: true}}) {
+        nodes {
+          node_locale
+          name
+          approximateAddress {
+            approximateAddress
+          }
+          description {
+            raw
+          }
+          location {
+            lat
+            lon
+          }
+          slug
+        }
+      }
     }
   `);
 
@@ -134,6 +152,7 @@ const Map = (props) => {
   var spotRasthalteIcon
   var spotNotauswasserungIcon
   var waterwayEventNoticeIcon
+  var rejectedSpotIcon
 
   if (isDomAvailable()) {
     spotEinstiegAufstiegIcon = new L.icon(markerStyles.spotEinstiegAufstiegIcon)
@@ -142,6 +161,7 @@ const Map = (props) => {
     spotRasthalteIcon = new L.icon(markerStyles.spotRasthalteIcon)
     spotNotauswasserungIcon = new L.icon(markerStyles.spotNotauswasserungIcon)
     waterwayEventNoticeIcon = new L.icon(markerStyles.waterwayEventNoticeIcon)
+    rejectedSpotIcon = new L.icon(markerStyles.rejectedSpotIcon)
   }
 
   if (!isDomAvailable()) {
@@ -267,6 +287,23 @@ const Map = (props) => {
             })}
             </LayerGroup>
           </LayersControl.Overlay>
+
+          <LayersControl.Overlay key="rejected" name={t("No Entry Spots")}>
+            <LayerGroup key="rejected-group">
+            { rejectedSpots.nodes
+              .filter(rejectedSpot => rejectedSpot.node_locale === language)
+              .map(rejectedSpot => {
+                const { name, location, description, slug, approximateAddress } = rejectedSpot;
+                const position = [location.lat, location.lon];
+                return (
+                  <Marker key={slug} position={position} icon={(!!rejectedSpotIcon) ? rejectedSpotIcon : null}>
+                    {<MapRejectedSpotPopup name={name} location={location} description={description} slug={slug} approximateAddress={approximateAddress.approximateAddress}/>}
+                  </Marker>
+                );
+            })}
+            </LayerGroup>
+          </LayersControl.Overlay>
+
         </LayersControl>
             { protectedAreas.nodes
               .filter(protectedArea => protectedArea.node_locale === language)

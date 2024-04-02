@@ -54,6 +54,14 @@ export const markerStyles = {
     iconSize: [32, 53],
   },
   waterwayEventNoticeIcon: {
+    iconRetinaUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png",
+    iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png",  
+    shadowUrl: require("leaflet/dist/images/marker-shadow.png").default,
+    iconAnchor: [16, 53],
+    popupAnchor: [0, -53],
+    iconSize: [32, 53],
+  },
+  rejectedSpotIcon: {
     iconRetinaUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png",
     iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",  
     shadowUrl: require("leaflet/dist/images/marker-shadow.png").default,
