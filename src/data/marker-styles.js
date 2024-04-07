@@ -3,6 +3,8 @@ import EinstiegMarker from "assets/images/markers/startingspots-entry.svg";
 import AufstiegMarker from "assets/images/markers/otherspots-exit.svg";
 import NotauswasserungMarker from "assets/images/markers/otherspots-emergency.svg";
 import RasthalteMarker from "assets/images/markers/otherspots-rest.svg";
+import NoEntryMarker from "assets/images/markers/otherspots-noentry.svg";
+import WaterwayEventMarker from "assets/images/markers/waterwayevent.svg";
 
 export const markerStyles = {
   spotEinstiegAufstiegIcon: {
@@ -54,8 +56,16 @@ export const markerStyles = {
     iconSize: [32, 53],
   },
   waterwayEventNoticeIcon: {
-    iconRetinaUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png",
-    iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",  
+    iconRetinaUrl: WaterwayEventMarker,
+    iconUrl: WaterwayEventMarker,  
+    shadowUrl: require("leaflet/dist/images/marker-shadow.png").default,
+    iconAnchor: [16, 53],
+    popupAnchor: [0, -53],
+    iconSize: [32, 53],
+  },
+  rejectedSpotIcon: {
+    iconRetinaUrl: NoEntryMarker,
+    iconUrl: NoEntryMarker,
     shadowUrl: require("leaflet/dist/images/marker-shadow.png").default,
     iconAnchor: [16, 53],
     popupAnchor: [0, -53],

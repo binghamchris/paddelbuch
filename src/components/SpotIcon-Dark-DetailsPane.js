@@ -32,7 +32,6 @@ const SpotIconDarkDetailsPane = (props) => {
       </div>
     );
   }
-
   else if (props.slug === "nur-aufstieg") {
     return (
       <div className="spot-icon-div">
@@ -46,7 +45,6 @@ const SpotIconDarkDetailsPane = (props) => {
       </div>
     );
   }
-
   else if (props.slug === "notauswasserungsstelle") {
     return (
       <div className="spot-icon-div">
@@ -60,7 +58,6 @@ const SpotIconDarkDetailsPane = (props) => {
       </div>
     );
   }
-
   else if (props.slug === "rasthalte") {
     return (
       <div className="spot-icon-div">
@@ -74,7 +71,19 @@ const SpotIconDarkDetailsPane = (props) => {
       </div>
     );
   }
-
+  else if (props.slug === "rejected") {
+    return (
+      <div class="popup-icon-div">
+          <StaticImage
+            src="../assets/images/icons/noentry-dark.svg"
+            alt={t('No entry spot icon')}           
+            height={20}
+            className="popup-icon"
+          />
+          {t("No Entry Spot")}
+      </div>
+    );
+  }
   else {
     return (
       <div className="spot-icon-div">
