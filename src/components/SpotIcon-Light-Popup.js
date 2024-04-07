@@ -71,6 +71,19 @@ const SpotIconLightPopup = (props) => {
       </div>
     );
   }
+  else if (props.slug === "rejected") {
+    return (
+      <div class="popup-icon-div">
+          <StaticImage
+            src="../assets/images/icons/noentry-light.svg"
+            alt={t('No entry spot icon')}           
+            height={20}
+            className="popup-icon"
+          />
+          {t("No Entry Spot")}
+      </div>
+    );
+  }
   else {
     return (
       <div class="spot-icon-div">
