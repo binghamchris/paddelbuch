@@ -31,7 +31,7 @@ export const pageQuery = graphql`
 
 export default function StaticPage({ data: { page } }) {
   return (
-    <Layout pageName="opendata">
+    <Layout pageName="static">
       <Helmet>
         <title>Paddel Buch - {page.title}</title>
       </Helmet>
