@@ -94,16 +94,16 @@
   border-radius: 0 !important;
 }
 
-.leaflet-control-zoom a {
+.leaflet-control-zoom a, .leaflet-control-locate a {
   border-radius: 0 !important;
 }
 
-.leaflet-control-zoom a:hover {
+.leaflet-control-zoom a:hover, .leaflet-control-locate a:hover {
   background-color: $secondary-blue;
   color: white;
 }
 
-.leaflet-control-zoom {
+.leaflet-control-zoom, .leaflet-control-locate {
   border: 1px solid $secondary-blue !important;
   border-radius: 0 !important;
 }
