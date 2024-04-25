@@ -12,6 +12,7 @@ import MapSpotPopup from 'components/Map-Spot-Popup';
 import MapObstaclePopup from 'components/Map-Obstacle-Popup';
 import MapEventNoticePopup from 'components/Map-EventNotice-Popup';
 import MapRejectedSpotPopup from 'components/Map-RejectedSpot-Popup';
+import AddLocate from "components/Map-LocateControl";
 
 const Map = (props) => {
 
@@ -191,6 +192,7 @@ const Map = (props) => {
           maxZoom = "20"
         />
         <ZoomControl key="zoom-control" position="bottomright" />
+        <AddLocate />
         <LayersControl key="layer-control" position="topleft" collapsed='false'>
           <LayersControl.Overlay key="entry-exit" checked name={t("Entry & Exit Spots")}>
             <LayerGroup key="entry-exit-group">
@@ -303,39 +305,37 @@ const Map = (props) => {
             })}
             </LayerGroup>
           </LayersControl.Overlay>
-
         </LayersControl>
-            { protectedAreas.nodes
-              .filter(protectedArea => protectedArea.node_locale === language)
-              .map(protectedArea => {
-              const { name, geometry, protectedAreaType, slug } = protectedArea;
-              return (
-                <GeoJSON key={slug} data={JSON.parse(geometry.internal.content)} style={layerStyle.protectedAreaStyle}>
-                  <Popup>
-                    <span className="popup-title">
-                      <h1>{name}</h1>
-                    </span>
-                    {protectedAreaType.name}
-                  </Popup>
+          { protectedAreas.nodes
+            .filter(protectedArea => protectedArea.node_locale === language)
+            .map(protectedArea => {
+            const { name, geometry, protectedAreaType, slug } = protectedArea;
+            return (
+              <GeoJSON key={slug} data={JSON.parse(geometry.internal.content)} style={layerStyle.protectedAreaStyle}>
+                <Popup>
+                  <span className="popup-title">
+                    <h1>{name}</h1>
+                  </span>
+                  {protectedAreaType.name}
+                </Popup>
+              </GeoJSON>
+            )
+          })}
+          { obstacles.nodes
+            .filter(obstacles => obstacles.node_locale === language)
+            .map(obstacle => {
+            const { name, geometry, portageRoute, isPortagePossible, slug } = obstacle;
+            return (
+              <div>              
+                <GeoJSON key={slug} data={JSON.parse(geometry.internal.content)} style={layerStyle.obstacleStyle}>
+                  <MapObstaclePopup name={name} isPortagePossible={isPortagePossible} slug={slug}/>
                 </GeoJSON>
-              )              
-            })}
-
-            { obstacles.nodes
-              .filter(obstacles => obstacles.node_locale === language)
-              .map(obstacle => {
-              const { name, geometry, portageRoute, isPortagePossible, slug } = obstacle;
-              return (
-                <div>              
-                  <GeoJSON key={slug} data={JSON.parse(geometry.internal.content)} style={layerStyle.obstacleStyle}>
-                    <MapObstaclePopup name={name} isPortagePossible={isPortagePossible} slug={slug}/>
-                  </GeoJSON>
-                  {portageRoute ? <GeoJSON data={JSON.parse(portageRoute.internal.content)} style={layerStyle.portageStyle}>
-                    <Popup><b><Trans>Portage route for</Trans> {name}</b></Popup>
-                  </GeoJSON>: null }
-                </div>
-              )            
-              })}
+                {portageRoute ? <GeoJSON data={JSON.parse(portageRoute.internal.content)} style={layerStyle.portageStyle}>
+                  <Popup><b><Trans>Portage route for</Trans> {name}</b></Popup>
+                </GeoJSON>: null }
+              </div>
+            )
+          })}
       </MapContainer>
     </div>
   );
