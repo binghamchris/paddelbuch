@@ -21,7 +21,14 @@ const AddLocateLogic = () => {
       markerStyle: {
         color: "#1b1e43",
         fillColor: "#606589",
-      }
+      },
+      compassStyle: {
+        color: "#1b1e43",
+        fillColor: "#1b1e43",
+      },
+      circleStyle: {
+        fillColor: "#606589",
+      },
     }
     const locateControl = new Locate(locateOptions)
     locateControl.addTo(map)
