@@ -1,4 +1,8 @@
 .page-api {
+  table {
+    display: block !important;
+    overflow-x: scroll !important;
+  }
   table tbody tr th:nth-child(1) {
     min-width: 256px;
   }
