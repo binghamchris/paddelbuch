@@ -15,7 +15,7 @@
 
   @media screen and (min-width: 992px) {
     .map {
-      height: calc(100vh - $menu-height) !important;
+      height: calc(100svh - $menu-height) !important;
     }
   }
   @media screen and (max-width: 992px) {
