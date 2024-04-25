@@ -26,7 +26,7 @@ main {
 
 @media screen and (min-width: 992px) {
   .map {
-    height: calc(100vh - $menu-height);
+    height: calc(100svh - $menu-height);
   }
 
   .clipboard-cell {
