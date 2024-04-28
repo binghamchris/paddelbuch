@@ -82,7 +82,11 @@
   color: white;
 }
 
-.popup-btn-right {
+.popup-btn:active {
+  background-color: $green-1;
+}
+
+.popup-btn-right, .popup-btn-right a {
   float: right;
   text-decoration: none !important;
 }
