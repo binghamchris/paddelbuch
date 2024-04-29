@@ -13,7 +13,6 @@ const api_waterways_de = {
           createdAt
           updatedAt
           name
-          country
           length
           area
           geometry {
