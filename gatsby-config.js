@@ -35,6 +35,8 @@ const api_protectedareatypes_en = require("./src/api/protectedareatypes_en");
 const api_protectedareatypes_de = require("./src/api/protectedareatypes_de");
 const api_spottypes_en = require("./src/api/spottypes_en");
 const api_spottypes_de = require("./src/api/spottypes_de");
+const api_paddlingenvironmenttypes_en = require("./src/api/paddlingenvironmenttypes_en");
+const api_paddlingenvironmenttypes_de = require("./src/api/paddlingenvironmenttypes_de");
 
 module.exports = {
   siteMetadata,
@@ -137,6 +139,8 @@ module.exports = {
           api_protectedareatypes_de,
           api_spottypes_en,
           api_spottypes_de,
+          api_paddlingenvironmenttypes_en,
+          api_paddlingenvironmenttypes_de,
         ]
       }
     },
