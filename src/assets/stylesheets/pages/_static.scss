@@ -1,1 +1,44 @@
-.page-static {}
+.page-api, .page-static {
+  table {
+    display: block !important;
+    overflow-x: scroll !important;
+  }
+  table tbody tr:nth-child(even) {
+    background-color: $secondary-blue-20;
+  }
+  table tbody tr:nth-child(1) {
+    border-bottom: 2px solid $secondary-blue;
+    margin-bottom: 0.2em;
+  }
+  td {
+    padding-right: 1.5em;
+    padding-bottom: 0.4em;
+    padding-top: 0.4em;
+  }
+  th {
+    padding-right: 1.5em;
+    padding-bottom: 0.5em;
+    color: $swisscanoe-blue;
+  }
+}
+
+.page-api {
+  table tbody tr th:nth-child(1) {
+    min-width: 256px;
+  }
+  table tbody tr td:nth-child(1) {
+    min-width: 256px;
+  }
+}
+
+.page-static {
+  table tbody tr th p {
+    margin: 0;
+  }
+  table tbody tr th:nth-child(2) {
+    min-width: 410px;
+  }
+  table tbody tr td:nth-child(2) {
+    min-width: 410px;
+  }
+}
