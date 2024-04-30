@@ -51,6 +51,10 @@ Resources:
         customHeaders:
           - pattern: '*'
             headers:
+              - key: Cache-Control
+                value: max-age=21600, s-maxage=21600
+              - key: Strict-Transport-Security
+                value: max-age=31536000
               - key: X-Frame-Options
                 value: DENY
               - key: X-XSS-Protection
@@ -109,7 +113,7 @@ Resources:
           Value:
             Ref: EnvVarContentfulEnv
         - Name: _CUSTOM_IMAGE
-          Value: public.ecr.aws/docker/library/node:18.17.1
+          Value: public.ecr.aws/docker/library/node:20.12.2
       Name:
         Ref: AppName
       Repository:
