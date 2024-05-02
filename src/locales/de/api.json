@@ -4,5 +4,7 @@
   "All of Paddel Buch's data is available here for download and reuse under the terms described in the ": "Alle Daten von Paddel Buch stehen hier zum Herunterladen und zur Wiederverwendung unter den im beschriebenen Bedingungen zur Verfügung in der ",
   " page.": " Seite.",
   "Data is published as JSON files which are updated automatically when Paddel Buch's data is changed. ": "Die Daten werden als JSON-Dateien veröffentlicht, die automatisch aktualisiert werden, wenn die Daten von Paddel Buch geändert werden. ",
-  "German and English data is available in separate files, which can be joined using their slug fields.": "Deutsche und englische Daten stehen in separaten Dateien zur Verfügung, die über ihre slug-Felder zusammengefügt werden können."
+  "German and English data is available in separate files, which can be joined using their slug fields.": "Deutsche und englische Daten stehen in separaten Dateien zur Verfügung, die über ihre slug-Felder zusammengefügt werden können.",
+  "Last Update Index": "Verzeichnis der letzten Aktualisierungen",
+  "This file provides a list of all the tables and the ISO timestamp for when each was last updated.": "Diese Datei gibt eine Liste aller Tabellen zusammen mit ISO-Zeitstempel ihrer letzten Aktualisierung."
 }
