@@ -114,6 +114,13 @@ export default function StaticPage({ data: {
           <Trans>Data is published as JSON files which are updated automatically when Paddel Buch's data is changed. </Trans>
           <Trans>German and English data is available in separate files, which can be joined using their slug fields.</Trans>
         </p>
+        <h2><Trans>Last Update Index</Trans></h2>
+        <p>
+          <Trans>This file provides a list of all the tables and the ISO timestamp for when each was last updated.</Trans>
+        <p>
+        </p>
+          <a href="/api/lastUpdateIndex.json"><Trans>Last Update Index</Trans></a>
+        </p>
         <h2><Trans>Fact Tables</Trans></h2>
         <p>
           <Trans>These tables contain Paddel Buch's primary data and are updated most frequently.</Trans>
