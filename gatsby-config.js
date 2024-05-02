@@ -37,6 +37,7 @@ const api_spottypes_en = require("./src/api/spottypes_en");
 const api_spottypes_de = require("./src/api/spottypes_de");
 const api_paddlingenvironmenttypes_en = require("./src/api/paddlingenvironmenttypes_en");
 const api_paddlingenvironmenttypes_de = require("./src/api/paddlingenvironmenttypes_de");
+const api_lastUpdateIndex = require("./src/api/lastUpdateIndex");
 
 module.exports = {
   siteMetadata,
@@ -117,6 +118,7 @@ module.exports = {
       resolve: "gatsby-plugin-json-pages",
       options: {
         pages: [
+          api_lastUpdateIndex,
           api_spots_en,
           api_spots_de,
           api_obstacles_en,
