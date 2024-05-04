@@ -12,7 +12,7 @@ const AddLocateLogic = () => {
     const locateOptions = {
       position: "bottomright",
       initialZoomLevel: "14",
-      flyTo: true,
+      flyTo: false,
       showPopup: false,
       locateOptions: {
         watch: true,
