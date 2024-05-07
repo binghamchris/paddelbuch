@@ -1,6 +1,8 @@
 # Paddel Buch
 
-PaddelBuch.ch is a website which provides displays the data published in the public database of Swiss paddle sports information visually on a range of maps. 
+PaddelBuch.ch is a website which provides displays the data published in the public database of Swiss paddle sports information visually on a range of maps.
+
+More information about the technological evolution of the project can be found in the [Paddel Buch blog series](https://cloudypandas.ch/series/paddel-buch/) on Cloudy Pandas.
 
 ## Project Origin
 Paddel Buch started following a sea kayaking roundtable meeting organised by Swiss Canoe in June 2021.
