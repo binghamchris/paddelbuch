@@ -91,12 +91,22 @@ h3 {
   font-family: $font-default !important;
 }
 
-.clipboard-btn {
+.clipboard-btn, .navigate-btn {
   border: 0;
   background-color: $secondary-blue;
   color: white;
 }
 
-.clipboard-btn:active {
+.clipboard-btn:active, .navigate-btn:active {
   background-color: $green-1;
+}
+
+.navigate-btn {
+  float: right;
+  margin-top: 1em;
+}
+
+.navigate-btn a {
+  text-decoration: none;
+  color: white;
 }
