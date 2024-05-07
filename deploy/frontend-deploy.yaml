@@ -26,6 +26,7 @@ Parameters:
   EnvVarContentfulToken:
     Type: String
     Description: The API token for accessing the Contentful API during the Gatsby build process
+    NoEcho: true
   EnvVarContentfulSpace:
     Type: String
     Description: The Contentful space ID to use for accessing the Contentful API during the Gatsby build process
@@ -41,6 +42,7 @@ Parameters:
   GithubToken:
     Type: String
     Description: The GitHub personal access token to be used during the setup of the Amplify app
+    NoEcho: true
 Resources:
   PaddelBuchApp:
     Type: AWS::Amplify::App
