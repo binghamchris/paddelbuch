@@ -4,6 +4,7 @@ import { Link, Trans, useTranslation } from '@herob191/gatsby-plugin-react-i18ne
 import Clipboard from 'react-clipboard.js';
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 import { Popup } from "react-leaflet";
+import NavigateTo from "components/Navigate-Btn";
 
 const MapSpotPopup = (props) => {
 
@@ -55,6 +56,7 @@ const MapSpotPopup = (props) => {
           </tr>
         </tbody>
       </table>
+      <NavigateTo class="popup-btn" lat={`${props.location.lat}`} lon={`${props.location.lon}`}/>
       <button class="popup-btn popup-btn-right">
         <Link to={`/einstiegsorte/${props.slug}`} class="popup-btn-right">
           <Trans>More details</Trans>

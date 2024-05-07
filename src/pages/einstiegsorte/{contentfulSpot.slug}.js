@@ -8,6 +8,7 @@ import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 import { Link, Trans, I18nextContext, useTranslation } from '@herob191/gatsby-plugin-react-i18next';
 import SpotIconDarkDetailsPane from "components/SpotIcon-Dark-DetailsPane";
 import Clipboard from 'react-clipboard.js';
+import NavigateTo from "components/Navigate-Btn";
 
 export const pageQuery = graphql`
   query SpotPageQuery($slug: String!, $language: String!) {
@@ -90,7 +91,9 @@ export default function SpotDetailsPage({ data: { thisSpot } }) {
             </Map>
           </Col>
           <Col className="spot-description" xl="4" lg="5" md="12" sm="12" xs="12">
+            <NavigateTo lat={`${thisSpot.location.lat}`} lon={`${thisSpot.location.lon}`}/>
             <SpotIconDarkDetailsPane slug={thisSpot.spotType.slug} name={thisSpot.spotType.name}/>
+            
             <div className="spot-title">
               <h1>{thisSpot.name}</h1>
             </div>
@@ -148,7 +151,7 @@ export default function SpotDetailsPage({ data: { thisSpot } }) {
                 </tr>
               </tbody>
             </table>
-
+            
           </Col>
         </Row>
       </Container>
