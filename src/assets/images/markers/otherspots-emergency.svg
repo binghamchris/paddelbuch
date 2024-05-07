@@ -1,25 +1,47 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Generator: Adobe Illustrator 26.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-	 viewBox="0 0 50 82" style="enable-background:new 0 0 50 82;" xml:space="preserve">
-<style type="text/css">
-	.st0{fill:none;stroke:#000000;stroke-miterlimit:10;}
-	.st1{fill:#E693BE;stroke:#1B1E43;stroke-width:0.75;stroke-miterlimit:10;}
-	.st2{fill:none;stroke:#FFFFFF;stroke-width:2;stroke-miterlimit:10;}
-	.st3{fill:#FFFFFF;}
-</style>
-<g id="Layer_1">
-	<path class="st0" d="M5.5,43.5"/>
-	<path class="st1" d="M50,25C50,11.19,38.81,0,25,0S0,11.19,0,25c0,8.92,4.68,16.75,11.71,21.17L25,82l13.29-35.83
-		C45.32,41.75,50,33.92,50,25z"/>
-	<path class="st0" d="M24.5,51"/>
-</g>
-<g id="Layer_3">
-	<path class="st2" d="M18.71,33.59c-0.51,0.6-2.08,2.27-4.41,2.4c-2.66,0.14-4.49-1.85-4.96-2.4"/>
-	<line class="st2" x1="38.45" y1="28.8" x2="35.88" y2="40.78"/>
-	<path class="st2" d="M18.52,33.79c0.51-0.6,2.08-2.27,4.41-2.4c2.66-0.14,4.49,1.85,4.96,2.4"/>
-	<path class="st2" d="M37.24,33.78c-0.51,0.6-2.08,2.27-4.41,2.4c-2.66,0.14-4.49-1.85-4.96-2.4"/>
-	<ellipse class="st3" cx="23.18" cy="24.78" rx="2.99" ry="3.06"/>
-	<polygon class="st3" points="26.84,7.42 19.52,7.42 20.85,21.04 25.51,21.04 	"/>
-</g>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 52 84">
+  <defs>
+    <style>
+      .cls-1 {
+        stroke: #fff;
+        stroke-width: 2px;
+      }
+
+      .cls-1, .cls-2, .cls-3 {
+        stroke-miterlimit: 10;
+      }
+
+      .cls-1, .cls-3 {
+        fill: none;
+      }
+
+      .cls-2 {
+        fill: #e693be;
+        stroke: #1b1e43;
+        stroke-width: .8px;
+      }
+
+      .cls-3 {
+        stroke: #000;
+      }
+
+      .cls-4 {
+        fill: #fff;
+        stroke-width: 0px;
+      }
+    </style>
+  </defs>
+  <g id="Layer_1-2" data-name="Layer 1">
+    <path class="cls-3" d="M6.5,44.5"/>
+    <path class="cls-2" d="M51,26c0-13.8-11.2-25-25-25S1,12.2,1,26s4.7,16.8,11.7,21.2l13.3,35.8,13.3-35.8c7-4.4,11.7-12.2,11.7-21.2Z"/>
+    <path class="cls-3" d="M25.5,52"/>
+  </g>
+  <g id="Layer_3" data-name="Layer 3">
+    <path class="cls-1" d="M19.7,34.6c-.5.6-2.1,2.3-4.4,2.4-2.7.1-4.5-1.8-5-2.4"/>
+    <line class="cls-1" x1="39.5" y1="29.8" x2="36.9" y2="41.8"/>
+    <path class="cls-1" d="M19.5,34.8c.5-.6,2.1-2.3,4.4-2.4,2.7-.1,4.5,1.9,5,2.4"/>
+    <path class="cls-1" d="M38.2,34.8c-.5.6-2.1,2.3-4.4,2.4-2.7.1-4.5-1.8-5-2.4"/>
+    <ellipse class="cls-4" cx="24.2" cy="25.8" rx="3" ry="3.1"/>
+    <polygon class="cls-4" points="27.8 8.4 20.5 8.4 21.9 22 26.5 22 27.8 8.4"/>
+  </g>
 </svg>
