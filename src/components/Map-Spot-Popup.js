@@ -7,6 +7,9 @@ import { Popup } from "react-leaflet";
 import NavigateTo from "components/Navigate-Btn";
 
 const MapSpotPopup = (props) => {
+  const descriptionHtml = documentToHtmlString(JSON.parse(props.description.raw))
+  const firstParagraphIndex = descriptionHtml.indexOf('</p>') + 4
+  const descriptionFirstParagraph = (descriptionHtml.substring(0, firstParagraphIndex))
 
   const {t} = useTranslation();
 
@@ -17,7 +20,7 @@ const MapSpotPopup = (props) => {
         <h1>{props.name}</h1>
       </span>
       <div dangerouslySetInnerHTML={{ __html: 
-        documentToHtmlString(JSON.parse(props.description.raw))
+        descriptionFirstParagraph
       }} />
       <table class="popup-details-table">
         <tbody>
