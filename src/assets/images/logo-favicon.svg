@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 750 750">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #1b1e43;
+        stroke-width: 0px;
+      }
+
+      .cls-2 {
+        stroke-miterlimit: 10;
+        stroke-width: 16px;
+      }
+
+      .cls-2, .cls-3 {
+        fill: none;
+        stroke: #fff;
+      }
+
+      .cls-3 {
+        stroke-miterlimit: 10;
+        stroke-width: 16px;
+      }
+    </style>
+  </defs>
+  <g id="background">
+    <rect class="cls-1" width="753" height="753"/>
+  </g>
+  <g id="Layer_1" data-name="Layer 1">
+    <g id="Layer_2" data-name="Layer 2">
+      <ellipse class="cls-2" cx="358.3" cy="389.8" rx="60.9" ry="32.2" transform="translate(-170.7 367.5) rotate(-45)"/>
+      <path class="cls-3" d="M329.3,338c-88.7,79.6-121.6,173-133.3,214.2,39.9-11.6,109.4-37.6,176.4-97.6,88.7-79.6,121.6-173,133.3-214.2-39.9,11.6-109.4,37.6-176.4,97.6Z"/>
+      <line class="cls-3" x1="429.8" y1="433.6" x2="540.6" y2="544.4"/>
+      <line class="cls-3" x1="313.3" y1="317" x2="202" y2="205.7"/>
+      <path class="cls-3" d="M295.8,207.5c3.6-.2,14.3-.5,22.4,6.9,9.3,8.4,8.9,20.9,8.7,24.2"/>
+      <path class="cls-3" d="M358,269.6c-3.6.2-14.3.5-22.4-6.9-9.3-8.4-8.9-20.9-8.7-24.2"/>
+      <path class="cls-3" d="M540.2,450.7c.2-3.6.5-14.3-6.9-22.4-8.4-9.3-20.9-8.9-24.2-8.7"/>
+      <path class="cls-3" d="M478.1,388.5c-.2,3.6-.5,14.3,6.9,22.4,8.4,9.3,20.9,8.9,24.2,8.7"/>
+      <path class="cls-3" d="M360.2,193.4c2.3-.1,8.9-.3,14,4.3,5.8,5.2,5.6,13.1,5.4,15.2"/>
+      <path class="cls-3" d="M399,232.3c-2.3.1-8.9.3-14-4.3-5.8-5.2-5.6-13.1-5.4-15.2"/>
+      <path class="cls-3" d="M555.9,387.9c.1-2.3.3-8.9-4.3-14-5.2-5.8-13.1-5.6-15.2-5.4"/>
+      <path class="cls-3" d="M517,349c-.1,2.3-.3,8.9,4.3,14,5.2,5.8,13.1,5.6,15.2,5.4"/>
+    </g>
+  </g>
+</svg>
