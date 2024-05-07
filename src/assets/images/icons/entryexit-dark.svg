@@ -1,23 +1,34 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Generator: Adobe Illustrator 26.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-	 viewBox="0 0 50 50" style="enable-background:new 0 0 50 50;" xml:space="preserve">
-<style type="text/css">
-	.st0{fill:#1B1E43;}
-	.st1{fill:none;stroke:#1B1E43;stroke-width:4;stroke-miterlimit:10;}
-	.st2{fill:none;stroke:#1B1E43;stroke-width:2;stroke-miterlimit:10;}
-</style>
-<g>
-	<polygon class="st0" points="22.73,33 29.18,21.83 16.28,21.83 	"/>
-</g>
-<g>
-	<polygon class="st0" points="49.31,6.45 38.13,0 38.13,12.9 	"/>
-</g>
-<line class="st1" x1="22.73" y1="21.95" x2="22.73" y2="12.03"/>
-<line class="st1" x1="38.61" y1="6.07" x2="28.69" y2="6.07"/>
-<path class="st1" d="M22.73,12.03c0-3.97,1.98-5.95,5.95-5.95"/>
-<path class="st2" d="M16.28,39.43c-0.77,0.87-3.13,3.34-6.62,3.52c-4,0.21-6.75-2.72-7.45-3.52"/>
-<line class="st2" x1="45.96" y1="32.4" x2="42.09" y2="50"/>
-<path class="st2" d="M15.99,39.73c0.77-0.87,3.13-3.34,6.62-3.52c4-0.21,6.75,2.72,7.45,3.52"/>
-<path class="st2" d="M44.14,39.72c-0.77,0.87-3.13,3.34-6.62,3.52c-4,0.21-6.75-2.72-7.45-3.52"/>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 50 50">
+  <defs>
+    <style>
+      .cls-1 {
+        stroke-width: 2px;
+      }
+
+      .cls-1, .cls-2 {
+        fill: none;
+        stroke: #1b1e43;
+        stroke-miterlimit: 10;
+      }
+
+      .cls-2 {
+        stroke-width: 4px;
+      }
+
+      .cls-3 {
+        fill: #1b1e43;
+        stroke-width: 0px;
+      }
+    </style>
+  </defs>
+  <polygon class="cls-3" points="22.7 33 29.2 21.8 16.3 21.8 22.7 33"/>
+  <polygon class="cls-3" points="49.3 6.4 38.1 0 38.1 12.9 49.3 6.4"/>
+  <line class="cls-2" x1="22.7" y1="22.8" x2="22.7" y2="11.7"/>
+  <line class="cls-2" x1="39.7" y1="6.1" x2="28.2" y2="6.1"/>
+  <path class="cls-2" d="M22.7,12c0-4,2-5.9,6-5.9"/>
+  <path class="cls-1" d="M16.3,39.4c-.8.9-3.1,3.3-6.6,3.5-4,.2-6.8-2.7-7.4-3.5"/>
+  <line class="cls-1" x1="46" y1="32.4" x2="42.1" y2="50"/>
+  <path class="cls-1" d="M16,39.7c.8-.9,3.1-3.3,6.6-3.5,4-.2,6.8,2.7,7.5,3.5"/>
+  <path class="cls-1" d="M44.1,39.7c-.8.9-3.1,3.3-6.6,3.5-4,.2-6.8-2.7-7.5-3.5"/>
 </svg>

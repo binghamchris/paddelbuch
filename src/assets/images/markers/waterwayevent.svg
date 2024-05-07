@@ -1,28 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 50 82">
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 52 84">
   <defs>
     <style>
       .cls-1 {
-        fill: none;
-        stroke: #000;
-        stroke-miterlimit: 10;
-      }
-
-      .cls-2 {
         fill: #fff;
         font-family: Optima-Bold, Optima;
         font-size: 35px;
         font-weight: 700;
       }
 
+      .cls-1, .cls-2 {
+        isolation: isolate;
+      }
+
       .cls-3 {
+        fill: none;
+        stroke: #000;
+        stroke-miterlimit: 10;
+      }
+
+      .cls-4 {
         fill: #1b1e43;
         stroke-width: 0px;
       }
     </style>
   </defs>
-  <path class="cls-1" d="M5.5,43.5"/>
-  <path class="cls-3" d="M50,25C50,11.19,38.81,0,25,0S0,11.19,0,25c0,8.92,4.68,16.75,11.71,21.17l13.29,35.83,13.29-35.83c7.03-4.42,11.71-12.25,11.71-21.17Z"/>
-  <path class="cls-1" d="M24.5,51"/>
-  <text class="cls-2" transform="translate(20.14 35.32)"><tspan x="0" y="0">i</tspan></text>
+  <path class="cls-3" d="M6.5,44.5"/>
+  <path class="cls-4" d="M51,26c0-13.8-11.2-25-25-25S1,12.2,1,26s4.7,16.8,11.7,21.2l13.3,35.8,13.3-35.8c7-4.4,11.7-12.2,11.7-21.2Z"/>
+  <path class="cls-3" d="M25.5,52"/>
+  <g class="cls-2">
+    <g class="cls-2">
+      <text class="cls-1" transform="translate(21.1 36.3)"><tspan x="0" y="0">i</tspan></text>
+    </g>
+  </g>
 </svg>
