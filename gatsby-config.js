@@ -64,7 +64,10 @@ module.exports = {
         name: siteMetadata.companyName,
         short_name: siteMetadata.companyName,
         start_url: "/",
-        icon: "src/assets/images/logo-dark.svg",
+        icon: "src/assets/images/logo-favicon.svg",
+        icon_options: {
+          purpose: `any maskable`,
+        },
       },
     },
     {
