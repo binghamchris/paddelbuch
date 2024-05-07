@@ -25,9 +25,12 @@ const AddLocateLogic = () => {
       compassStyle: {
         color: "#1b1e43",
         fillColor: "#1b1e43",
+        radius: 11,
       },
       circleStyle: {
+        color: "#606589",
         fillColor: "#606589",
+        fillOpacity: 0.35,
       },
     }
     const locateControl = new Locate(locateOptions)
