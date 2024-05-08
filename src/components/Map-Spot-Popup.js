@@ -26,7 +26,7 @@ const MapSpotPopup = (props) => {
         <tbody>
           <tr>
             <th><Trans>Potentially Usable By</Trans>:</th>
-            <td>
+            <td colspan="2">
               <ul>
                 {props.paddleCraftType
                   .map(paddleCraft => {
