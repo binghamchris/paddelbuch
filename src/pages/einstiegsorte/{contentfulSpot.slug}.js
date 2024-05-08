@@ -104,7 +104,7 @@ export default function SpotDetailsPage({ data: { thisSpot } }) {
               <tbody>
                 <tr>
                   <th><Trans>Potentially Usable By</Trans>:</th>
-                  <td>
+                  <td colspan="2">
                     <ul>
                       {thisSpot.paddleCraftType
                         .map(paddleCraft => {
@@ -141,11 +141,11 @@ export default function SpotDetailsPage({ data: { thisSpot } }) {
                 </tr>
                 <tr>
                   <th><Trans>Waterway</Trans>:</th>
-                  <td><Link to={`/gewaesser/${thisSpot.waterway.slug}`}>{thisSpot.waterway.name}</Link></td>
+                  <td colspan="2"><Link to={`/gewaesser/${thisSpot.waterway.slug}`}>{thisSpot.waterway.name}</Link></td>
                 </tr>
                 <tr>
                   <th><Trans>Last Updated</Trans>:</th>
-                  <td>
+                  <td colspan="2">
                     {lastUpdateDt}
                   </td>
                 </tr>
