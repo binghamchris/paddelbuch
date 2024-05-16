@@ -57,7 +57,7 @@ module.exports = {
         path: `${__dirname}/src/assets/images`,
       },
     },
-    "gatsby-plugin-react-leaflet",
+    "@binghamchris/gatsby-plugin-react-leaflet",
     {
       resolve: "gatsby-plugin-manifest",
       options: {
