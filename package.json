@@ -14,6 +14,7 @@
     "clean": "gatsby clean"
   },
   "dependencies": {
+    "@binghamchris/gatsby-plugin-react-leaflet": "^4.0.3",
     "@contentful/rich-text-html-renderer": "^16.1.2",
     "@fontsource/fredoka": "^5.0.5",
     "@fontsource/quicksand": "^5.0.5",
@@ -25,7 +26,6 @@
     "gatsby-plugin-json-pages": "^1.0.0",
     "gatsby-plugin-manifest": "^5.12.0",
     "gatsby-plugin-react-helmet": "^6.12.0",
-    "@binghamchris/gatsby-plugin-react-leaflet": "^4.0.3",
     "gatsby-plugin-resolve-src": "^2.1.0",
     "gatsby-plugin-robots-txt": "^1.8.0",
     "gatsby-plugin-sass": "^6.12.0",
@@ -47,7 +47,7 @@
     "react-i18next": "^14.0.5",
     "react-icons": "^5.0.1",
     "react-leaflet": "^4.2.1",
-    "sass": "^1.32.13"
+    "sass": "^1.77.1"
   },
   "keywords": [
     "Swiss Canoe"
