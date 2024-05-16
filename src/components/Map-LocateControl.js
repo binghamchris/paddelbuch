@@ -14,8 +14,8 @@ const AddLocateLogic = () => {
       initialZoomLevel: "14",
       flyTo: false,
       showPopup: false,
-      enableHighAccuracy: true,
       locateOptions: {
+        watch: true,
         maxZoom: "14",
       },
       markerStyle: {
