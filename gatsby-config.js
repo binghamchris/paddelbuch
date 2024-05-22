@@ -103,7 +103,6 @@ module.exports = {
           {userAgent: 'GPTBot', disallow: '/'},
           {userAgent: 'ChatGPT-User', disallow: '/'},
           {userAgent: 'Google-Extended', disallow: '/'},
-          {userAgent: 'GoogleOther', disallow: '/'},
           {userAgent: 'anthropic-ai', disallow: '/'},
           {userAgent: 'Claude-Web', disallow: '/'},
           {userAgent: 'FacebookBot', disallow: '/'},
@@ -116,6 +115,9 @@ module.exports = {
           {userAgent: 'Diffbot', disallow: '/'},
           {userAgent: 'Bytespider', disallow: '/'},
           {userAgent: 'ImagesiftBot', disallow: '/'},
+          {userAgent: 'Applebot', disallow: '/'},
+          {userAgent: 'YouBot', disallow: '/'},
+          {userAgent: 'Twitterbot', disallow: '/'},
           /** Google research bot */
           {userAgent: 'GoogleOther', disallow: '/'},
           /** Bad bots */
