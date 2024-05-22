@@ -98,11 +98,39 @@ module.exports = {
       resolve: 'gatsby-plugin-robots-txt',
       options: {
         policy: [
+          /** AI training scrapers */
           {userAgent: 'CCbot', disallow: '/'},
           {userAgent: 'GPTBot', disallow: '/'},
           {userAgent: 'ChatGPT-User', disallow: '/'},
           {userAgent: 'Google-Extended', disallow: '/'},
-          {userAgent: 'GoogleOther', disallow: '/'}
+          {userAgent: 'anthropic-ai', disallow: '/'},
+          {userAgent: 'Claude-Web', disallow: '/'},
+          {userAgent: 'FacebookBot', disallow: '/'},
+          {userAgent: 'PiplBot', disallow: '/'},
+          {userAgent: 'cohere-ai', disallow: '/'},
+          {userAgent: 'Omgilibot', disallow: '/'},
+          {userAgent: 'Amazonbot', disallow: '/'},
+          {userAgent: 'PerplexityBot', disallow: '/'},
+          {userAgent: 'Omgili', disallow: '/'},
+          {userAgent: 'Diffbot', disallow: '/'},
+          {userAgent: 'Bytespider', disallow: '/'},
+          {userAgent: 'ImagesiftBot', disallow: '/'},
+          {userAgent: 'Applebot', disallow: '/'},
+          {userAgent: 'YouBot', disallow: '/'},
+          {userAgent: 'Twitterbot', disallow: '/'},
+          /** Google research bot */
+          {userAgent: 'GoogleOther', disallow: '/'},
+          /** Bad bots */
+          {userAgent: 'AhrefsBot', disallow: '/'},
+          {userAgent: 'PetalBot', disallow: '/'},
+          {userAgent: 'SEMrushBot', disallow: '/'},
+          {userAgent: 'Majestic', disallow: '/'},
+          {userAgent: 'DotBot', disallow: '/'},
+          {userAgent: 'niki-bot', disallow: '/'},
+          /** Other content scrapers */
+          {userAgent: 'TurnitinBot', disallow: '/'},
+          {userAgent: 'PetalBot', disallow: '/'},
+          {userAgent: 'MoodleBot', disallow: '/'},
         ]
       }
     },
