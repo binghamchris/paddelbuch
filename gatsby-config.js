@@ -115,7 +115,7 @@ module.exports = {
           {userAgent: 'Diffbot', disallow: '/'},
           {userAgent: 'Bytespider', disallow: '/'},
           {userAgent: 'ImagesiftBot', disallow: '/'},
-          {userAgent: 'Applebot', disallow: '/'},
+          {userAgent: 'Applebot-Extended', disallow: '/'},
           {userAgent: 'YouBot', disallow: '/'},
           {userAgent: 'Twitterbot', disallow: '/'},
           /** Google research bot */
