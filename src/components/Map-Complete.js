@@ -147,18 +147,18 @@ const Map = (props) => {
     mapClassName = `${mapClassName} ${className}`;
   }
 
-  var spotEinstiegAufstiegIcon
+  var spotEinstiegAusstiegIcon
   var spotNurEinstiegIcon
-  var spotNurAufstiegIcon
+  var spotNurAusstiegIcon
   var spotRasthalteIcon
   var spotNotauswasserungIcon
   var waterwayEventNoticeIcon
   var rejectedSpotIcon
 
   if (isDomAvailable()) {
-    spotEinstiegAufstiegIcon = new L.icon(markerStyles.spotEinstiegAufstiegIcon)
+    spotEinstiegAusstiegIcon = new L.icon(markerStyles.spotEinstiegAusstiegIcon)
     spotNurEinstiegIcon = new L.icon(markerStyles.spotNurEinstiegIcon)
-    spotNurAufstiegIcon = new L.icon(markerStyles.spotNurAufstiegIcon)
+    spotNurAusstiegIcon = new L.icon(markerStyles.spotNurAusstiegIcon)
     spotRasthalteIcon = new L.icon(markerStyles.spotRasthalteIcon)
     spotNotauswasserungIcon = new L.icon(markerStyles.spotNotauswasserungIcon)
     waterwayEventNoticeIcon = new L.icon(markerStyles.waterwayEventNoticeIcon)
@@ -202,7 +202,7 @@ const Map = (props) => {
                 const { name, location, description, slug, approximateAddress, spotType, paddleCraftType } = spot;
                 const position = [location.lat, location.lon];
                 return (
-                  <Marker key={slug} position={position} icon={(!!spotEinstiegAufstiegIcon) ? spotEinstiegAufstiegIcon : null}>
+                  <Marker key={slug} position={position} icon={(!!spotEinstiegAusstiegIcon) ? spotEinstiegAusstiegIcon : null}>
                     {<MapSpotPopup name={name} location={location} description={description} slug={slug} approximateAddress={approximateAddress.approximateAddress} spotType={spotType} paddleCraftType={paddleCraftType}/>}
                   </Marker>
                 );
@@ -232,7 +232,7 @@ const Map = (props) => {
                 const { name, location, description, slug, approximateAddress, spotType, paddleCraftType } = spot;
                 const position = [location.lat, location.lon];
                 return (
-                  <Marker key={slug} position={position} icon={(!!spotNurAufstiegIcon) ? spotNurAufstiegIcon : null}>
+                  <Marker key={slug} position={position} icon={(!!spotNurAusstiegIcon) ? spotNurAusstiegIcon : null}>
                     {<MapSpotPopup name={name} location={location} description={description} slug={slug} approximateAddress={approximateAddress.approximateAddress} spotType={spotType} paddleCraftType={paddleCraftType}/>}
                   </Marker>
                 );
