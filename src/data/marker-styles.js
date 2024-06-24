@@ -1,15 +1,15 @@
-import EinstiegAufstiegMarker from "assets/images/markers/startingspots-entryexit.svg";
+import EinstiegAusstiegMarker from "assets/images/markers/startingspots-entryexit.svg";
 import EinstiegMarker from "assets/images/markers/startingspots-entry.svg";
-import AufstiegMarker from "assets/images/markers/otherspots-exit.svg";
+import AusstiegMarker from "assets/images/markers/otherspots-exit.svg";
 import NotauswasserungMarker from "assets/images/markers/otherspots-emergency.svg";
 import RasthalteMarker from "assets/images/markers/otherspots-rest.svg";
 import NoEntryMarker from "assets/images/markers/otherspots-noentry.svg";
 import WaterwayEventMarker from "assets/images/markers/waterwayevent.svg";
 
 export const markerStyles = {
-  spotEinstiegAufstiegIcon: {
-    iconRetinaUrl: EinstiegAufstiegMarker,
-    iconUrl: EinstiegAufstiegMarker,  
+  spotEinstiegAusstiegIcon: {
+    iconRetinaUrl: EinstiegAusstiegMarker,
+    iconUrl: EinstiegAusstiegMarker,  
     shadowUrl: require("leaflet/dist/images/marker-shadow.png").default,
     iconAnchor: [16, 53],
     popupAnchor: [0, -53],
@@ -23,9 +23,9 @@ export const markerStyles = {
   popupAnchor: [0, -53],
   iconSize: [32, 53],
   },
-  spotNurAufstiegIcon: {
-    iconRetinaUrl: AufstiegMarker,
-    iconUrl: AufstiegMarker,  
+  spotNurAusstiegIcon: {
+    iconRetinaUrl: AusstiegMarker,
+    iconUrl: AusstiegMarker,  
     shadowUrl: require("leaflet/dist/images/marker-shadow.png").default,
     iconAnchor: [16, 53],
     popupAnchor: [0, -53],
