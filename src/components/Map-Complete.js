@@ -197,7 +197,7 @@ const Map = (props) => {
           <LayersControl.Overlay key="entry-exit" checked name={t("Entry & Exit Spots")}>
             <LayerGroup key="entry-exit-group">
             { spots.nodes
-              .filter(spot => spot.spotType.slug === "einstieg-aufstieg" && spot.node_locale === language)
+              .filter(spot => spot.spotType.slug === "einstieg-ausstieg" && spot.node_locale === language)
               .map(spot => {
                 const { name, location, description, slug, approximateAddress, spotType, paddleCraftType } = spot;
                 const position = [location.lat, location.lon];
@@ -227,7 +227,7 @@ const Map = (props) => {
           <LayersControl.Overlay key="exit" checked name={t("Exit Only Spots")}>
             <LayerGroup key="exit-group">
             { spots.nodes
-              .filter(spot => spot.spotType.slug === "nur-aufstieg" && spot.node_locale === language)
+              .filter(spot => spot.spotType.slug === "nur-ausstieg" && spot.node_locale === language)
               .map(spot => {
                 const { name, location, description, slug, approximateAddress, spotType, paddleCraftType } = spot;
                 const position = [location.lat, location.lon];
