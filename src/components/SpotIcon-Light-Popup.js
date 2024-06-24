@@ -6,7 +6,7 @@ const SpotIconLightPopup = (props) => {
 
   const {t} = useTranslation();
   
-  if (props.slug === "einstieg-aufstieg") {
+  if (props.slug === "einstieg-ausstieg") {
     return (
       <div class="popup-icon-div">
           <StaticImage
@@ -32,7 +32,7 @@ const SpotIconLightPopup = (props) => {
       </div>
     );
   }
-  else if (props.slug === "nur-aufstieg") {
+  else if (props.slug === "nur-ausstieg") {
     return (
       <div class="popup-icon-div">
           <StaticImage

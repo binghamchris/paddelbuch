@@ -213,7 +213,7 @@ export default function ObstacleDetailsPage({ data: { thisObstacle, spot, protec
                   <tr>
                     <th><Trans>Exit Spot</Trans>:</th>
                     <td>
-                      <Link to={`/einstiegsorte/${thisObstacle.spot.filter(spot => spot.spotType.slug === "nur-aufstieg")[0].slug}`}>{thisObstacle.spot.filter(spot => spot.spotType.slug === "nur-aufstieg")[0].name}</Link>
+                      <Link to={`/einstiegsorte/${thisObstacle.spot.filter(spot => spot.spotType.slug === "nur-ausstieg")[0].slug}`}>{thisObstacle.spot.filter(spot => spot.spotType.slug === "nur-ausstieg")[0].name}</Link>
                     </td>
                   </tr>
                   <tr>
