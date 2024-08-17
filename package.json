@@ -14,6 +14,7 @@
     "clean": "gatsby clean"
   },
   "dependencies": {
+    "@binghamchris/gatsby-plugin-json-pages": "^1.0.0",
     "@binghamchris/gatsby-plugin-react-leaflet": "^4.0.3",
     "@contentful/rich-text-html-renderer": "^16.1.2",
     "@fontsource/fredoka": "^5.0.5",
@@ -21,9 +22,8 @@
     "@herob191/gatsby-plugin-react-i18next": "^3.0.15",
     "bootstrap": "^5.0.2",
     "clipboard": "^2.0.10",
-    "gatsby": "^5.13.6",
+    "gatsby": "^5.13.7",
     "gatsby-plugin-image": "^3.12.0",
-    "gatsby-plugin-json-pages": "^1.0.0",
     "gatsby-plugin-manifest": "^5.12.0",
     "gatsby-plugin-react-helmet": "^6.12.0",
     "gatsby-plugin-resolve-src": "^2.1.0",
@@ -44,7 +44,7 @@
     "react-clipboard.js": "^2.0.16",
     "react-dom": "^18.3.1",
     "react-helmet": "^6.1.0",
-    "react-i18next": "^14.0.5",
+    "react-i18next": "^15.0.1",
     "react-icons": "^5.0.1",
     "react-leaflet": "^4.2.1",
     "sass": "^1.77.1"
