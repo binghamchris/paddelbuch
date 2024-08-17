@@ -160,7 +160,7 @@ module.exports = {
       },
     },
     {
-      resolve: "gatsby-plugin-json-pages",
+      resolve: "@binghamchris/gatsby-plugin-json-pages",
       options: {
         pages: [
           api_lastUpdateIndex,
