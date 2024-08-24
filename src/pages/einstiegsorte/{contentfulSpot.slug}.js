@@ -25,6 +25,7 @@ export const pageQuery = graphql`
     }
     thisSpot: contentfulSpot(node_locale: {eq: $language}, slug: {eq: $slug}) {
       name
+      rejected
       approximateAddress {
         approximateAddress
       }
@@ -51,7 +52,7 @@ export const pageQuery = graphql`
         name
       }
       slug
-      updatedAt 
+      updatedAt
     }
   }
 `;
@@ -61,6 +62,11 @@ export default function SpotDetailsPage({ data: { thisSpot } }) {
   const {t} = useTranslation();
   const context = React.useContext(I18nextContext);
   const language = context.language
+
+  const mapSettings = {
+    center: [thisSpot.location.lat, thisSpot.location.lon],
+    zoom: 16,
+  };
 
   var lastUpdateDtFormat = { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' };
   var lastUpdateDtRaw = new Date(thisSpot.updatedAt)
@@ -73,10 +79,46 @@ export default function SpotDetailsPage({ data: { thisSpot } }) {
     lastUpdateDt = new Intl.DateTimeFormat('de-DE', lastUpdateDtFormat).format(lastUpdateDtRaw)
   }
 
-  const mapSettings = {
-    center: [thisSpot.location.lat, thisSpot.location.lon],
-    zoom: 16,
-  };
+  if ( thisSpot.rejected === true ) {
+    return(
+      <Layout pageName="spot-details">
+      <Helmet>
+        <title>{t(`Paddel Buch - Spots`)} - {thisSpot.name}</title>
+      </Helmet>
+      <Container fluid className="g-0">
+        <Row className="justify-content-center g-0">
+          <Col id="map" xl="8" lg="7" md="12" sm="12" xs="12">
+            <Map {...mapSettings}>
+
+            </Map>
+          </Col>
+          <Col className="spot-description" xl="4" lg="5" md="12" sm="12" xs="12">
+            <SpotIconDarkDetailsPane slug="rejected" name={thisSpot.spotType.name}/>
+            <div>
+            <h1>{thisSpot.name}</h1>
+            </div>
+            <div>
+              <p><Trans>This spot has been removed from Paddel Buch for the follow reason:</Trans></p>
+            </div>
+            <div dangerouslySetInnerHTML={{ __html: 
+              documentToHtmlString(JSON.parse(thisSpot.description.raw))
+            }} />
+            <div>
+              <table className="spot-details-table">
+                <tbody>
+                  <th><Trans>Last Updated</Trans>:</th>
+                  <td colspan="2">
+                    {lastUpdateDt}
+                  </td>
+                </tbody>
+              </table>
+            </div>
+          </Col>
+        </Row>
+      </Container>
+    </Layout>
+    )
+  }
 
   return(
     <Layout pageName="spot-details">

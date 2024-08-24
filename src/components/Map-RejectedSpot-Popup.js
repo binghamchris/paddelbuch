@@ -18,28 +18,6 @@ const MapRejectedSpotPopup = (props) => {
       <div dangerouslySetInnerHTML={{ __html: 
         documentToHtmlString(JSON.parse(props.description.raw))
       }} />
-      <table class="popup-details-table">
-        <tbody>
-          <tr>
-            <th><Trans>GPS</Trans>:</th>
-            <td>{props.location.lat}, {props.location.lon}</td>
-            <td class="clipboard-cell-popup">
-              <Clipboard button-class="popup-btn" button-title={t(`Copy GPS to clipboard`)} data-clipboard-text={`${props.location.lat}, ${props.location.lon}`}>
-                <Trans>Copy</Trans>
-              </Clipboard>
-            </td>
-          </tr>
-          <tr>
-            <th><Trans>Approx. Address</Trans>:</th>
-            <td>{props.approximateAddress}</td>
-            <td class="clipboard-cell-popup">
-              <Clipboard button-class="popup-btn" button-title={t(`Copy approx. address to clipboard`)} data-clipboard-text={`${props.approximateAddress}`}>
-                <Trans>Copy</Trans>
-              </Clipboard>
-            </td>
-          </tr>
-        </tbody>
-      </table>
     </Popup>
   )
 }
