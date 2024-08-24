@@ -73,12 +73,12 @@ const SpotIconDarkDetailsPane = (props) => {
   }
   else if (props.slug === "rejected") {
     return (
-      <div class="popup-icon-div">
+      <div class="spot-icon-div">
           <StaticImage
             src="../assets/images/icons/noentry-dark.svg"
             alt={t('No entry spot icon')}           
             height={20}
-            className="popup-icon"
+            className="spot-icon"
           />
           {t("No Entry Spot")}
       </div>

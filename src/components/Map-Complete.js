@@ -299,7 +299,7 @@ const Map = (props) => {
                 const position = [location.lat, location.lon];
                 return (
                   <Marker key={slug} position={position} icon={(!!rejectedSpotIcon) ? rejectedSpotIcon : null}>
-                    {<MapRejectedSpotPopup name={name} location={location} description={description} slug={slug} approximateAddress={approximateAddress.approximateAddress}/>}
+                    {<MapRejectedSpotPopup name={name} description={description} slug={slug} />}
                   </Marker>
                 );
             })}
