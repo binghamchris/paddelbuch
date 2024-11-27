@@ -132,6 +132,7 @@ module.exports = {
           {userAgent: 'img2dataset', disallow: '/'},
           {userAgent: 'omgilibot', disallow: '/'},
           {userAgent: 'YouBot', disallow: '/'},
+          {userAgent: 'bedrockbot', disallow: '/'},
           /** Google research bot */
           {userAgent: 'GoogleOther', disallow: '/'},
           /** Bad bots */
