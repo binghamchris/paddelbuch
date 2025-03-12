@@ -295,7 +295,7 @@ const Map = (props) => {
             { rejectedSpots.nodes
               .filter(rejectedSpot => rejectedSpot.node_locale === language)
               .map(rejectedSpot => {
-                const { name, location, description, slug, approximateAddress } = rejectedSpot;
+                const { name, location, description, slug } = rejectedSpot;
                 const position = [location.lat, location.lon];
                 return (
                   <Marker key={slug} position={position} icon={(!!rejectedSpotIcon) ? rejectedSpotIcon : null}>

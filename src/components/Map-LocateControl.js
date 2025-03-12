@@ -1,6 +1,6 @@
 import { useEffect } from "react"
 import { useMap } from "react-leaflet"
-import Locate from "leaflet.locatecontrol"
+import { LocateControl } from "leaflet.locatecontrol"
 import "leaflet.locatecontrol/dist/L.Control.Locate.min.css"
 
 const AddLocateLogic = () => {
@@ -33,7 +33,7 @@ const AddLocateLogic = () => {
         fillOpacity: 0.35,
       },
     }
-    const locateControl = new Locate(locateOptions)
+    const locateControl = new LocateControl(locateOptions)
     locateControl.addTo(map)
   }, [map])
 

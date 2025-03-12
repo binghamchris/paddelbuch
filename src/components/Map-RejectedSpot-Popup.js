@@ -1,13 +1,9 @@
 import React from "react";
 import SpotIconLightPopup from "components/SpotIcon-Light-Popup";
-import { Trans, useTranslation } from '@herob191/gatsby-plugin-react-i18next';
-import Clipboard from 'react-clipboard.js';
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 import { Popup } from "react-leaflet";
 
 const MapRejectedSpotPopup = (props) => {
-
-  const {t} = useTranslation();
 
   return(
     <Popup key={props.slug}>
