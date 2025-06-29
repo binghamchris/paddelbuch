@@ -1,7 +1,7 @@
 {
-  "name": "paddelbuch",
-  "title": "Swiss Canoe Paddle Sports Map",
-  "description": "A Swiss Canoe paddle sports map",
+  "name": "@binghamchris/paddelbuch",
+  "title": "Swiss Paddle Sports Map",
+  "description": "A Swiss paddle sports map",
   "version": "0.1",
   "author": {
     "name": "Chris Bingham"
@@ -22,7 +22,7 @@
     "@herob191/gatsby-plugin-react-i18next": "^3.0.15",
     "bootstrap": "^5.0.2",
     "clipboard": "^2.0.10",
-    "gatsby": "^5.14.1",
+    "gatsby": "^5.14.5",
     "gatsby-plugin-image": "^3.12.0",
     "gatsby-plugin-manifest": "^5.12.0",
     "gatsby-plugin-react-helmet": "^6.12.0",
