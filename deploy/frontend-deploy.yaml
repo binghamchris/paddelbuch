@@ -115,7 +115,7 @@ Resources:
           Value:
             Ref: EnvVarContentfulEnv
         - Name: _CUSTOM_IMAGE
-          Value: public.ecr.aws/docker/library/node:20.12.2
+          Value: public.ecr.aws/docker/library/node:24.11.0
       Name:
         Ref: AppName
       Repository:
