@@ -28,15 +28,15 @@ This plan covers the complete rebuild of Paddel Buch from Gatsby to Jekyll, impl
     - **Property 18: Locale Content Filtering**
     - **Validates: Requirements 8.3**
 
-- [ ] 2. Create base layout and styling infrastructure
-  - [ ] 2.1 Create default layout template
+- [x] 2. Create base layout and styling infrastructure
+  - [x] 2.1 Create default layout template
     - Create _layouts/default.html with HTML structure, meta tags, Bootstrap grid
     - Include header, content area, and footer sections
     - Add Leaflet.js and Bootstrap CSS/JS dependencies
     - Set HTML lang attribute based on current language
     - _Requirements: 10.1, 10.2_
 
-  - [ ] 2.2 Create header include with navigation
+  - [x] 2.2 Create header include with navigation
     - Create _includes/header.html with responsive navbar
     - Implement Lakes dropdown (10 largest by area + "More lakes" link)
     - Implement Rivers dropdown (10 longest by length + "More rivers" link)
@@ -45,11 +45,11 @@ This plan covers the complete rebuild of Paddel Buch from Gatsby to Jekyll, impl
     - Implement Bootstrap collapse for mobile
     - _Requirements: 4.1, 4.2, 10.3, 10.4, 12.1, 12.2_
 
-  - [ ] 2.3 Write property test for waterway menu sorting
+  - [x] 2.3 Write property test for waterway menu sorting
     - **Property 5: Waterway Menu Sorting and Limiting**
     - **Validates: Requirements 4.1, 4.2**
 
-  - [ ] 2.4 Migrate SCSS stylesheets
+  - [x] 2.4 Migrate SCSS stylesheets
     - Copy and adapt existing SCSS from src/assets/stylesheets/
     - Configure Jekyll SASS compilation
     - Ensure responsive breakpoints work correctly

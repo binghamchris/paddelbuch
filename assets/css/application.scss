@@ -1,0 +1,136 @@
+---
+# Front matter required for Jekyll to process this file
+---
+
+@import "settings/settings";
+@import "util/util";
+@import "components/components";
+@import "pages/pages";
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: $font-default;
+  padding: 0;
+  margin: 0;
+  height: 100dvh;
+  background-color: $swisscanoe-blue;
+}
+
+.wrapper {
+  min-height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+
+main {
+  padding: 0;
+  background-color: white;
+  padding-bottom: 2em !important;
+  min-height: calc(100dvh - $menu-height)
+}
+
+@media screen and (min-width: 992px) {
+  .map {
+    height: calc(100svh - $menu-height);
+  }
+
+  .clipboard-cell {
+    padding-left: 2em;
+  }
+}
+@media screen and (max-width: 992px) {
+  .map {
+    height: 60vh;
+  }
+
+  .clipboard-cell {
+    padding-left: 3em;
+  }
+}
+
+#map {
+  padding: 0;
+}
+
+.info-pane {
+  padding-top: 2em;
+  margin-right: 1em;
+  margin-left: 1em;
+}
+
+h1 { 
+  font-family: $font-heading;
+  font-size: 1.8em;
+  color: $swisscanoe-blue;
+  padding-top: 0.4em;
+  padding-bottom: 0.2em;
+}
+
+h2 {
+  font-family: $font-heading;
+  font-size: 1.5em;
+  color: $swisscanoe-blue;
+  padding-top: 0.8em;
+}
+
+h3 {
+  font-family: $font-heading;
+  font-size: 1.3em;
+  color: $swisscanoe-blue;
+  padding-top: 0.4em;
+}
+
+.dropdown-divider {
+  background-color: $white;
+}
+
+.nav-item {
+  padding-left: 0.5em;
+}
+
+.leaflet-container {
+  font-family: $font-default !important;
+}
+
+.clipboard-btn, .navigate-btn {
+  border: 0;
+  background-color: $secondary-blue;
+  color: white;
+}
+
+.clipboard-btn:active, .navigate-btn:active {
+  background-color: $green-1;
+}
+
+.navigate-btn {
+  float: right;
+  margin-top: 0.8em;
+}
+
+.navigate-btn a {
+  text-decoration: none;
+  color: white;
+}
+
+// Link styles
+a {
+  color: $secondary-blue;
+  
+  &:hover {
+    color: $swisscanoe-blue;
+  }
+}
+
+// Responsive utilities
+.link-no-style {
+  text-decoration: none;
+  color: inherit;
+  
+  &:hover {
+    text-decoration: none;
+    color: inherit;
+  }
+}

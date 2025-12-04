@@ -1,0 +1,130 @@
+<header>
+  <nav class="navbar navbar-expand-lg navbar-dark" id="site-navbar">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="{{ '/' | relative_url }}">
+        <img src="{{ '/assets/images/logo-light.svg' | relative_url }}" 
+             alt="The Paddel Buch Logo" 
+             width="34" 
+             height="34" 
+             class="paddelbuch-logo">
+        Paddel Buch
+      </a>
+      
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      
+      <div class="collapse navbar-collapse justify-content-end" id="main-navbar">
+        <ul class="navbar-nav">
+          <!-- Lakes Dropdown -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="nav-dropdown-lakes" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              {% t nav.lakes %}
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="nav-dropdown-lakes">
+              {% assign current_locale = site.lang | default: 'de' %}
+              {% assign lakes = site.data.waterways | top_lakes_by_area: current_locale, 10 %}
+              {% for lake in lakes %}
+              <li>
+                <a class="dropdown-item" href="{{ '/gewaesser/' | append: lake.slug | append: '/' | relative_url }}">
+                  <span class="nav-link">{{ lake.name }}</span>
+                </a>
+              </li>
+              {% endfor %}
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <a class="dropdown-item" href="{{ '/gewaesser/seen' | relative_url }}">
+                  <span class="nav-link">{% t nav.more_lakes %}...</span>
+                </a>
+              </li>
+            </ul>
+          </li>
+          
+          <!-- Rivers Dropdown -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="nav-dropdown-rivers" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              {% t nav.rivers %}
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="nav-dropdown-rivers">
+              {% assign rivers = site.data.waterways | top_rivers_by_length: current_locale, 10 %}
+              {% for river in rivers %}
+              <li>
+                <a class="dropdown-item" href="{{ '/gewaesser/' | append: river.slug | append: '/' | relative_url }}">
+                  <span class="nav-link">{{ river.name }}</span>
+                </a>
+              </li>
+              {% endfor %}
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <a class="dropdown-item" href="{{ '/gewaesser/fluesse' | relative_url }}">
+                  <span class="nav-link">{% t nav.more_rivers %}...</span>
+                </a>
+              </li>
+            </ul>
+          </li>
+          
+          <!-- Open Data Dropdown -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="nav-dropdown-opendata" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              {% t nav.open_data %}
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="nav-dropdown-opendata">
+              {% assign open_data_pages = site.data.static_pages | where: "locale", current_locale | where: "menu", "offene Daten" | sort: "menuOrder" %}
+              {% for page in open_data_pages %}
+              <li>
+                <a class="dropdown-item" href="{{ '/offene-daten/' | append: page.slug | append: '/' | relative_url }}">
+                  <span class="nav-link">{{ page.title }}</span>
+                </a>
+              </li>
+              {% endfor %}
+              <li>
+                <a class="dropdown-item" href="{{ '/offene-daten/api' | relative_url }}">
+                  <span class="nav-link">{% t nav.public_database_api %}</span>
+                </a>
+              </li>
+            </ul>
+          </li>
+          
+          <!-- About Dropdown -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="nav-dropdown-about" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              {% t nav.about %}
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="nav-dropdown-about">
+              {% assign about_pages = site.data.static_pages | where: "locale", current_locale | where: "menu", "Über" | sort: "menuOrder" %}
+              {% for page in about_pages %}
+              <li>
+                <a class="dropdown-item" href="{{ '/ueber/' | append: page.slug | append: '/' | relative_url }}">
+                  <span class="nav-link">{{ page.title }}</span>
+                </a>
+              </li>
+              {% endfor %}
+            </ul>
+          </li>
+          
+          <!-- Language Switcher -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="nav-dropdown-lang" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              {% t nav.language %}
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-dropdown-lang">
+              {% for lang in site.languages %}
+              <li>
+                {% if lang == site.lang %}
+                <a class="dropdown-item active" href="#">
+                  <span class="nav-link">{{ lang | upcase }}</span>
+                </a>
+                {% else %}
+                <a class="dropdown-item" href="{% if lang == site.default_lang %}{{ page.url | relative_url }}{% else %}/{{ lang }}{{ page.url | relative_url }}{% endif %}">
+                  <span class="nav-link">{{ lang | upcase }}</span>
+                </a>
+                {% endif %}
+              </li>
+              {% endfor %}
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</header>
