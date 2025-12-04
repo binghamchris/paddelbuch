@@ -1,0 +1,66 @@
+header {
+  width: 100%;
+  color: $white;
+  background-color: $swisscanoe-blue;
+  padding-right: 1em;
+  padding-left: 0.2em;
+  
+  .container {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  ul,
+  li,
+  a {
+    display: flex;
+    align-items: center;
+  }
+
+  ul {
+    justify-content: flex-end;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  a {
+    text-decoration: none;
+    padding: 0 .5em;
+  }
+
+  p {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin: 0;
+  }
+
+  .dropdown-menu {
+    color: $white;
+    background-color: $swisscanoe-blue;
+  }
+
+  .dropdown-item:hover .nav-link{
+    color: $swisscanoe-blue !important;
+  }
+
+  .nav-link {
+    color: $white !important;
+  }
+
+  .paddelbuch-logo {
+    margin-right: 12px !important;
+    display: inline-block;
+    vertical-align:middle;
+  }
+
+  .navbar-brand {
+    font-family: $font-brand;
+    font-size: 1.6em;
+    font-weight: 300;
+  }
+
+  .navbar-nav {
+    font-size: 1.2em;
+  }
+}

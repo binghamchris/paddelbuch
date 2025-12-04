@@ -1,0 +1,182 @@
+.map {
+
+  position: relative;
+
+  &,
+  .map-base {
+    max-width: 100%;
+    height: 100%;
+    background: $blue-grey-50;
+  }
+
+}
+
+.map-loading {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  color: $blue-grey-200;
+  font-family: $font-default;
+  width: 100%;
+  height: 4em;
+  line-height: 4em;
+  text-align: center;
+  margin: auto;
+}
+
+.map-marker {
+
+  &[class*="shadow"] {
+    filter: blur(5px);
+    opacity: .7;
+  }
+
+}
+
+.popup-icon {
+  height: 20px;
+  padding-right: 10px;
+}
+
+.popup-icon img {
+  width: 20px !important;
+}
+
+.popup-icon-div {
+  border-bottom: 1px solid $secondary-blue;
+  margin-bottom: 1em;
+  padding-bottom: 1em;
+  height: 30px;
+  font-family: $font-brand;
+  font-size: 1.2em;
+  font-weight: 300;
+}
+
+.popup-details-table th {
+  width: 70px;
+  padding-right: 10px;
+}
+
+.popup-details-table ul {
+  margin-bottom: 0;
+  padding-left: 1rem;
+}
+
+.popup-details-table {
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+.popup-title h1 {
+  font-family: $font-brand;
+  font-size: 1.6em;
+  font-weight: 500;
+  color: white;
+}
+
+.popup-btn {
+  border: 1px solid $white-40pc;
+  background-color: $secondary-blue;
+  color: white;
+}
+
+.popup-btn:active {
+  background-color: $green-1;
+}
+
+.popup-btn a{
+  text-decoration: none;
+}
+
+.popup-btn-right, .popup-btn-right a {
+  float: right;
+  text-decoration: none !important;
+}
+
+.leaflet-control-layers {
+  background-color: $swisscanoe-blue !important;
+  border: 0 !important;
+  color: white !important;
+  border-radius: 0 !important;
+}
+
+.leaflet-control-zoom a, .leaflet-control-locate a {
+  border-radius: 0 !important;
+}
+
+.leaflet-control-zoom a:hover, .leaflet-control-locate a:hover {
+  background-color: $secondary-blue;
+  color: white;
+}
+
+.leaflet-control-zoom, .leaflet-control-locate {
+  border: 1px solid $secondary-blue !important;
+  border-radius: 0 !important;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 0px !important;
+  color: $white !important;
+  background-color: $swisscanoe-blue !important;
+  font-family: $font-default;
+}
+.leaflet-popup-content-wrapper a, .leaflet-popup a.leaflet-popup-close-button {
+  color: $white !important;
+}
+
+.leaflet-popup-content {
+  overflow: auto;
+}
+
+.leaflet-popup-tip {
+  background-color: $swisscanoe-blue !important;
+}
+
+.clipboard-cell-popup {
+  padding-left: 10px;
+}
+
+.clipboard-cell-popup > .clipboard-btn:hover {
+  background-color: $purple-1;
+}
+
+.clipboard-cell-popup > .clipboard-btn:active {
+  background-color: $green-1;
+}
+
+.leaflet-control-layers-overlays {
+  font-size: 1.2em;
+}
+
+.leaflet-control-layers-overlays > label {
+  margin-bottom: 5px;
+}
+
+.leaflet-control-layers-overlays input {
+  height: 1.3em;
+  width: 1.3em;
+  margin-right: 0.5em;
+}
+
+.leaflet-control-layers-list {
+  padding-left: 0.7em;
+  padding-right: 0.7em;
+  padding-top: 0.7em;
+  padding-bottom: 0.5em;
+}
+
+.obstacle-details-btn {
+  margin-top: 1.5em;
+}
+
+.popup-eventnotice-table th {
+  min-width: 130px;
+}
+
+.popup-eventnotice-table {
+  th {
+    width: 55%;
+  }
+}
