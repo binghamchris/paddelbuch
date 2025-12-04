@@ -1,0 +1,137 @@
+# German (Deutsch) - Default Language
+# Locale: de-CH
+
+# Site metadata
+site:
+  title: "Paddel Buch"
+  description: "Interaktive Karte für Schweizer Paddelsport-Enthusiasten"
+  language: "Deutsch"
+  locale: "de-CH"
+
+# Navigation
+nav:
+  spots: "Einstiegsorte"
+  lakes: "Seen"
+  rivers: "Flüsse"
+  about: "Über uns"
+  open_data: "Offene Daten"
+  public_database_api: "Öffentliche Datenbank/API"
+  language: "Sprache"
+  more_lakes: "Weitere Seen"
+  more_rivers: "Weitere Flüsse"
+
+# Spot types
+spot_types:
+  entry_exit: "Ein-/Ausstiegsorte"
+  entry_only: "Einstiegsorte"
+  exit_only: "Ausstiegsorte"
+  rest: "Rasthalte"
+  emergency: "Notauswasserungsstelle"
+  no_entry: "Kein Zutritt Ort"
+
+# Spot type icons (alt text)
+spot_icons:
+  entry_exit: "Ein-/Ausstiegsorte Symbol"
+  entry_only: "Einstiegsorte Symbol"
+  exit_only: "Ausstiegsorte Symbol"
+  rest: "Rasthalte Symbol"
+  emergency: "Notauswasserungsstelle Symbol"
+
+# Layer controls
+layers:
+  entry_exit_spots: "Ein-/Ausstiegsorte"
+  entry_only_spots: "Einstiegsorte"
+  exit_only_spots: "Ausstiegsorte"
+  rest_spots: "Rasthalte"
+  emergency_spots: "Notauswasserungsstelle"
+  no_entry_spots: "Keine Zutritt Orte"
+  event_notices: "Gewässerereignisse"
+  obstacles: "Hindernisse"
+  protected_areas: "Schutzgebiete"
+
+# Common labels
+labels:
+  spot: "Einstiegsorte"
+  more_details: "Weitere Details"
+  gps: "GPS"
+  type: "Typ"
+  approx_address: "Ungefähre Adresse"
+  waterway: "Gewässer"
+  name: "Name"
+  data_source: "Datenquelle"
+  last_updated: "Zuletzt aktualisiert"
+  yes: "Ja"
+  no: "Nein"
+  unknown: "Unbekannt"
+  summary: "Kurzfassung"
+
+# Actions
+actions:
+  copy: "Kopieren"
+  copy_gps: "GPS in der Zwischenablage kopieren"
+  copy_address: "Ungefähre Adresse in der Zwischenablage kopieren"
+  navigate: "Navigieren"
+
+# Obstacles
+obstacles:
+  title: "Hindernisse"
+  portage_route_for: "Portage-Route für"
+  portage_possible: "Portage möglich"
+  portage_distance: "Portage-Distanz"
+  portage_description: "Portage-Beschreibung"
+  exit_spot: "Ausstiegsstelle"
+  reentry_spot: "Wiedereinstiegsstelle"
+
+# Protected areas
+protected_areas:
+  title: "Schutzgebiete"
+
+# Event notices
+event_notices:
+  title: "Gewässerereignisse"
+  waterway_notices: "Absehbare Gewässerereignisse"
+  no_notices: "Zurzeit gibt es keine Veranstaltungshinweise für diese Gewässer"
+  approx_start_date: "Ungefähres Startdatum"
+  approx_end_date: "Ungefähres Enddatum"
+  affected_area: "Von einer Meldung über ein Wasserstraßenereignis betroffenes Gebiet"
+
+# Waterways
+waterways:
+  title: "Gewässer"
+  lakes: "Seen"
+  rivers: "Flüsse"
+
+# API page
+api:
+  title: "Daten herunterladen / API"
+  fact_tables: "Faktentabellen"
+  dimension_tables: "Dimensionstabellen"
+  table_name: "Tabellenname"
+  german: "Deutsch"
+  english: "Englisch"
+  german_download: "Auf Deutsch herunterladen"
+  english_download: "Auf Englisch herunterladen"
+  data_licensing: "Datenlizenzen"
+  spots: "Einstiegsorte"
+  obstacles: "Hindernisse"
+  protected_areas: "Schutzgebiete"
+  waterways: "Gewässer"
+  event_notices: "Gewässerereignisse"
+  data_license_types: "Datenlizenztypen"
+  data_source_types: "Datenquellentypen"
+  obstacle_types: "Hindernistypen"
+  paddle_craft_types: "Paddelboot Typen"
+  protected_area_types: "Schutzgebietstypen"
+  spot_types: "Einstiegsortstypen"
+  paddling_environment_types: "Paddelumgebungstypen"
+
+# Error pages
+errors:
+  not_found_title: "Seite nicht gefunden"
+  not_found_message: "Die angeforderte Seite konnte nicht gefunden werden."
+  back_home: "Zurück zur Startseite"
+
+# Date formats
+date:
+  format: "%d.%m.%Y"
+  format_long: "%d. %B %Y"

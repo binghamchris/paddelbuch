@@ -84,3 +84,7 @@ src/pages/test/*
 
 #VS Code diles
 .vscode/*
+
+_site
+.sass-cache
+.jekyll-metadata
