@@ -4,27 +4,27 @@ This plan covers the complete rebuild of Paddel Buch from Gatsby to Jekyll, impl
 
 ## Phase 1: Project Setup and Core Infrastructure
 
-- [ ] 1. Initialize Jekyll project structure
-  - [ ] 1.1 Create Jekyll project with Gemfile, _config.yml, and directory structure
+- [x] 1. Initialize Jekyll project structure
+  - [x] 1.1 Create Jekyll project with Gemfile, _config.yml, and directory structure
     - Initialize Gemfile with jekyll, jekyll-contentful-data-import, jekyll-multiple-languages-plugin
     - Create _config.yml with site metadata, collections configuration, and plugin settings
     - Create directory structure: _layouts/, _includes/, _data/, _spots/, _waterways/, _obstacles/, _notices/, assets/
     - Create .ruby-version file specifying ruby-3.3.0
     - _Requirements: 16.1, 16.3_
 
-  - [ ] 1.2 Configure Contentful data plugin
+  - [x] 1.2 Configure Contentful data plugin
     - Set up jekyll-contentful-data-import plugin configuration
     - Create content type mappings for Spot, Waterway, Obstacle, ProtectedArea, WaterwayEventNotice
     - Configure environment variables for CONTENTFUL_SPACE_ID, CONTENTFUL_ACCESS_TOKEN, CONTENTFUL_ENVIRONMENT
     - _Requirements: 1.1, 2.1-2.6_
 
-  - [ ] 1.3 Configure internationalization (i18n)
+  - [x] 1.3 Configure internationalization (i18n)
     - Set up jekyll-multiple-languages-plugin with 'de' as default and 'en' as secondary
     - Create _i18n/de.yml and _i18n/en.yml locale files with UI translations
     - Configure language switching URL structure
     - _Requirements: 8.1, 8.2, 8.3, 8.4_
 
-  - [ ] 1.4 Write property test for locale content filtering
+  - [x] 1.4 Write property test for locale content filtering
     - **Property 18: Locale Content Filtering**
     - **Validates: Requirements 8.3**
 

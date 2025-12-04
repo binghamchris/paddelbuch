@@ -11,7 +11,10 @@
     "start": "gatsby develop",
     "build": "gatsby build",
     "serve": "gatsby serve",
-    "clean": "gatsby clean"
+    "clean": "gatsby clean",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:property": "jest --testPathPattern=property"
   },
   "dependencies": {
     "@binghamchris/gatsby-plugin-json-pages": "^1.0.0",
@@ -55,5 +58,10 @@
   "_id": "paddelbuch@0.1",
   "optionalDependencies": {
     "@parcel/watcher-linux-x64-glibc": "^2.4.1"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "fast-check": "^3.22.0",
+    "@types/jest": "^29.5.12"
   }
 }
