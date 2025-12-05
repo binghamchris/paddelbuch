@@ -335,27 +335,27 @@ This plan covers the complete rebuild of Paddel Buch from Gatsby to Jekyll, impl
     - Configure collection permalink: /:menu/:slug/
     - _Requirements: 12.3, 13.5_
 
-- [ ] 20. Implement JSON API generation
-  - [ ] 20.1 Create API data generation plugin/script
+- [x] 20. Implement JSON API generation
+  - [x] 20.1 Create API data generation plugin/script
     - Generate JSON files at build time for all entity types
     - Create files: spots-{locale}.json, obstacles-{locale}.json, notices-{locale}.json, protected-areas-{locale}.json, waterways-{locale}.json
     - Sort all data by slug in ascending order
     - _Requirements: 9.1, 9.4_
 
-  - [ ] 20.2 Write property test for API data sorting
+  - [x] 20.2 Write property test for API data sorting
     - **Property 20: API Data Sorting**
     - **Validates: Requirements 9.4**
 
-  - [ ] 20.3 Generate dimension table JSON files
+  - [x] 20.3 Generate dimension table JSON files
     - Create files for: Data License Types, Data Source Types, Obstacle Types, Paddle Craft Types, Paddling Environment Types, Protected Area Types, Spot Types
     - Generate for both locales
     - _Requirements: 9.2_
 
-  - [ ] 20.4 Generate last update index
+  - [x] 20.4 Generate last update index
     - Create lastUpdateIndex.json with table names and ISO timestamps
     - _Requirements: 9.3, 9.5_
 
-  - [ ] 20.5 Create API documentation page
+  - [x] 20.5 Create API documentation page
     - Create /offene-daten/api page with download links
     - Display last updated timestamps for each table
     - Organize into Fact Tables and Dimension Tables sections

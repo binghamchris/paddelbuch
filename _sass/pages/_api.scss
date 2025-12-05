@@ -1,0 +1,66 @@
+// API Page Styles
+// Path: /offene-daten/api
+
+.api-page {
+  padding: 2rem 0;
+  
+  h1 {
+    margin-bottom: 2rem;
+  }
+  
+  h2 {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 0.5rem;
+  }
+  
+  h3 {
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  section {
+    margin-bottom: 2rem;
+  }
+  
+  .table {
+    width: 100%;
+    margin-bottom: 1rem;
+    
+    th {
+      background-color: #f8f9fa;
+      font-weight: 600;
+    }
+    
+    td, th {
+      padding: 0.75rem;
+      vertical-align: middle;
+      border-bottom: 1px solid #dee2e6;
+    }
+    
+    a {
+      color: #0066cc;
+      text-decoration: none;
+      
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+    
+    .last-updated {
+      color: #6c757d;
+      font-size: 0.9rem;
+    }
+  }
+  
+  .last-update-index {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 0.25rem;
+    
+    h3 {
+      margin-top: 0;
+    }
+  }
+}
