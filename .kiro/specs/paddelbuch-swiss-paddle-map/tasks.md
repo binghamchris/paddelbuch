@@ -386,14 +386,14 @@ This plan covers the complete rebuild of Paddel Buch from Gatsby to Jekyll, impl
 
 ## Phase 10: Dynamic Data Loading (Performance Optimization)
 
-- [ ] 23. Implement spatial tile generation
-  - [ ] 23.1 Create tile generation build script
+- [x] 23. Implement spatial tile generation
+  - [x] 23.1 Create tile generation build script
     - Divide Switzerland into grid tiles (approximately 10km x 10km)
     - Generate tile files at /api/tiles/{layer}/{locale}/{x}_{y}.json
     - Create tile index with bounds information
     - _Requirements: 15.1, 15.2, 15.3, 15.4, 15.5_
 
-  - [ ] 23.2 Write property test for tile coverage completeness
+  - [x] 23.2 Write property test for tile coverage completeness
     - **Property 24: Tile Coverage Completeness**
     - **Validates: Requirements 15.1, 15.2, 15.3**
 
