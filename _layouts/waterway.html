@@ -1,0 +1,172 @@
+---
+layout: default
+pageName: waterway-details
+---
+<!--
+  Waterway Detail Layout
+  
+  Displays a waterway detail page with bounded map (8 cols) + details panel (4 cols).
+  Shows: waterway name and list of active event notices for that waterway.
+  Map bounds are calculated from the waterway's GeoJSON geometry.
+  
+  Collection permalink: /gewaesser/:slug/
+  
+  Requirements: 4.5, 4.6, 13.2
+  Property 7: Waterway Detail Map Bounds
+-->
+
+{% assign current_locale = site.lang | default: 'de' %}
+{% assign waterway = page %}
+
+<!-- Get paddling environment type name -->
+{% assign env_type_slug = waterway.paddlingEnvironmentType_slug %}
+{% if env_type_slug %}
+  {% assign env_type = site.data.types.paddling_environment_types | where: "slug", env_type_slug | first %}
+  {% if env_type %}
+    {% if current_locale == 'en' %}
+      {% assign env_type_name = env_type.name_en %}
+    {% else %}
+      {% assign env_type_name = env_type.name_de %}
+    {% endif %}
+  {% else %}
+    {% assign env_type_name = env_type_slug %}
+  {% endif %}
+{% endif %}
+
+<div class="container-fluid">
+  <div class="row">
+    <!-- Map Column (8 cols on large screens) -->
+    <div class="col-lg-8 p-0">
+      <div id="waterway-map" class="map"></div>
+    </div>
+    
+    <!-- Details Panel (4 cols on large screens) -->
+    <div class="col-lg-4 waterway-details">
+      <!-- Waterway Type Badge -->
+      {% if env_type_name %}
+      <div class="waterway-type-badge mt-3">
+        <span class="badge bg-primary">{{ env_type_name }}</span>
+      </div>
+      {% endif %}
+      
+      <!-- Waterway Title -->
+      <h1 class="waterway-title">{{ waterway.name }}</h1>
+      
+      <!-- Waterway Details Table -->
+      <table class="waterway-details-table">
+        <tbody>
+          <!-- Area (for lakes) -->
+          {% if waterway.area and waterway.area > 0 %}
+          <tr>
+            <th>{% if current_locale == 'en' %}Area{% else %}Fläche{% endif %}</th>
+            <td>{{ waterway.area | round: 2 }} km²</td>
+          </tr>
+          {% endif %}
+          
+          <!-- Length (for rivers) -->
+          {% if waterway.length and waterway.length > 0 %}
+          <tr>
+            <th>{% if current_locale == 'en' %}Length{% else %}Länge{% endif %}</th>
+            <td>{{ waterway.length | round: 2 }} km</td>
+          </tr>
+          {% endif %}
+          
+          <!-- Last Updated Timestamp -->
+          {% if waterway.updatedAt %}
+          <tr>
+            <th>{% t labels.last_updated %}</th>
+            <td>
+              {% if current_locale == 'en' %}
+                {{ waterway.updatedAt | date: "%d/%m/%Y" }}
+              {% else %}
+                {{ waterway.updatedAt | date: "%d.%m.%Y" }}
+              {% endif %}
+            </td>
+          </tr>
+          {% endif %}
+        </tbody>
+      </table>
+      
+      <!-- Event Notices Section (Requirement 4.5, 7.5) -->
+      {% include event-list.html waterway_slug=waterway.slug %}
+    </div>
+  </div>
+</div>
+
+<!-- Map Initialization Script -->
+<script src="{{ '/assets/js/layer-styles.js' | relative_url }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  /**
+   * Waterway Detail Map Initialization
+   * 
+   * Property 7: Waterway Detail Map Bounds
+   * For any waterway with a geometry, the detail page map bounds shall be 
+   * calculated from the waterway's GeoJSON geometry.
+   * 
+   * Validates: Requirements 4.6
+   */
+  
+  // Parse waterway geometry
+  {% if waterway.geometry %}
+  var geometryData = {{ waterway.geometry | jsonify }};
+  var geometry;
+  
+  // Handle both string and object geometry
+  if (typeof geometryData === 'string') {
+    try {
+      geometry = JSON.parse(geometryData);
+    } catch (e) {
+      console.error('Failed to parse waterway geometry:', e);
+      geometry = null;
+    }
+  } else {
+    geometry = geometryData;
+  }
+  
+  // Initialize map with default Switzerland center
+  var map = L.map('waterway-map', {
+    center: [{{ site.map.center.lat }}, {{ site.map.center.lon }}],
+    zoom: {{ site.map.default_zoom }},
+    zoomControl: true
+  });
+  
+  // Add Mapbox tile layer
+  L.tileLayer('{{ site.mapbox_url | default: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" }}', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: {{ site.map.max_zoom | default: 18 }}
+  }).addTo(map);
+  
+  // Position zoom control at bottom-right
+  map.zoomControl.setPosition('bottomright');
+  
+  if (geometry) {
+    // Create GeoJSON layer for waterway
+    var waterwayLayer = L.geoJSON(geometry, {
+      style: PaddelbuchLayerStyles.getLayerStyle('waterway')
+    }).addTo(map);
+    
+    // Calculate and fit bounds from geometry (Property 7)
+    var bounds = waterwayLayer.getBounds();
+    if (bounds.isValid()) {
+      map.fitBounds(bounds, { padding: [20, 20] });
+    }
+  }
+  {% else %}
+  // No geometry - show default Switzerland view
+  var map = L.map('waterway-map', {
+    center: [{{ site.map.center.lat }}, {{ site.map.center.lon }}],
+    zoom: {{ site.map.default_zoom }},
+    zoomControl: true
+  });
+  
+  // Add Mapbox tile layer
+  L.tileLayer('{{ site.mapbox_url | default: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" }}', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: {{ site.map.max_zoom | default: 18 }}
+  }).addTo(map);
+  
+  map.zoomControl.setPosition('bottomright');
+  {% endif %}
+});
+</script>

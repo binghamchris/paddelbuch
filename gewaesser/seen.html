@@ -1,0 +1,43 @@
+---
+layout: default
+title: Seen
+pageName: lakes
+permalink: /gewaesser/seen/
+---
+<!--
+  Lakes List Page
+  
+  Displays all lakes (waterways with paddlingEnvironmentType 'see')
+  sorted alphabetically by name.
+  
+  Path: /gewaesser/seen
+  
+  Requirements: 4.3
+  Property 6: Waterway List Alphabetical Sorting
+-->
+
+{% assign current_locale = site.lang | default: 'de' %}
+{% assign lakes = site.data.waterways | lakes_alphabetically: current_locale %}
+
+<div class="container lakes-list">
+  <h2>{% t waterways.lakes %}</h2>
+  
+  <table class="table">
+    <thead>
+      <tr>
+        <th>{% t labels.name %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for lake in lakes %}
+      <tr>
+        <td>
+          <a href="{{ '/gewaesser/' | append: lake.slug | append: '/' | relative_url }}">
+            {{ lake.name }}
+          </a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

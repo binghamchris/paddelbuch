@@ -1,0 +1,303 @@
+<!--
+  Layer Control Include
+  
+  Implements Leaflet LayersControl for toggling spot types and other map layers.
+  Creates layer groups for each spot type, event notices, obstacles, and protected areas.
+  
+  Parameters:
+  - include.map_var: JavaScript variable name for the map (default: 'window.paddelbuchMap')
+  - include.locale: Current locale for filtering data (default: site.lang or 'de')
+  
+  Requirements: 2.7, 2.8, 8.3
+-->
+
+{% assign map_var = include.map_var | default: 'window.paddelbuchMap' %}
+{% assign current_locale = include.locale | default: site.lang | default: 'de' %}
+
+<!-- Include locale filter module for data filtering (Requirement 8.3) -->
+<script src="{{ '/assets/js/locale-filter.js' | relative_url }}"></script>
+<!-- Include clipboard module for copy functionality (Requirements 3.2, 3.3) -->
+<script src="{{ '/assets/js/clipboard.js' | relative_url }}"></script>
+<!-- Include spot popup module for generating popup content (Requirements 3.1-3.5) -->
+<script src="{{ '/assets/js/spot-popup.js' | relative_url }}"></script>
+
+<script>
+(function() {
+  'use strict';
+  
+  // Wait for map to be initialized
+  function initLayerControls() {
+    var map = {{ map_var }};
+    if (!map) {
+      console.warn('Map not initialized yet, retrying...');
+      setTimeout(initLayerControls, 100);
+      return;
+    }
+    
+    // Current locale for filtering
+    var currentLocale = '{{ current_locale }}';
+    
+    // Layer groups for each spot type (Requirements 2.7, 2.8)
+    var layerGroups = {
+      entryExit: L.layerGroup(),      // Entry & Exit spots (einstieg-ausstieg)
+      entryOnly: L.layerGroup(),      // Entry Only spots (nur-einstieg)
+      exitOnly: L.layerGroup(),       // Exit Only spots (nur-ausstieg)
+      rest: L.layerGroup(),           // Rest spots (rasthalte)
+      emergency: L.layerGroup(),      // Emergency spots (notauswasserungsstelle)
+      noEntry: L.layerGroup(),        // Rejected/No Entry spots
+      eventNotices: L.layerGroup(),   // Waterway event notices
+      obstacles: L.layerGroup(),      // Obstacles
+      protectedAreas: L.layerGroup()  // Protected areas
+    };
+    
+    // Localized layer names for the control panel
+    var layerLabels = {
+      {% if current_locale == 'en' %}
+      entryExit: '{{ site.data.translations.en.layers.entry_exit_spots | default: "Entry & Exit Spots" }}',
+      entryOnly: '{{ site.data.translations.en.layers.entry_only_spots | default: "Entry Only Spots" }}',
+      exitOnly: '{{ site.data.translations.en.layers.exit_only_spots | default: "Exit Only Spots" }}',
+      rest: '{{ site.data.translations.en.layers.rest_spots | default: "Rest Spots" }}',
+      emergency: '{{ site.data.translations.en.layers.emergency_spots | default: "Emergency Exit Spots" }}',
+      noEntry: '{{ site.data.translations.en.layers.no_entry_spots | default: "No Entry Spots" }}',
+      eventNotices: '{{ site.data.translations.en.layers.event_notices | default: "Event Notices" }}',
+      obstacles: '{{ site.data.translations.en.layers.obstacles | default: "Obstacles" }}',
+      protectedAreas: '{{ site.data.translations.en.layers.protected_areas | default: "Protected Areas" }}'
+      {% else %}
+      entryExit: '{{ site.data.translations.de.layers.entry_exit_spots | default: "Ein-/Ausstiegsorte" }}',
+      entryOnly: '{{ site.data.translations.de.layers.entry_only_spots | default: "Einstiegsorte" }}',
+      exitOnly: '{{ site.data.translations.de.layers.exit_only_spots | default: "Ausstiegsorte" }}',
+      rest: '{{ site.data.translations.de.layers.rest_spots | default: "Rasthalte" }}',
+      emergency: '{{ site.data.translations.de.layers.emergency_spots | default: "Notauswasserungsstelle" }}',
+      noEntry: '{{ site.data.translations.de.layers.no_entry_spots | default: "Keine Zutritt Orte" }}',
+      eventNotices: '{{ site.data.translations.de.layers.event_notices | default: "Gewässerereignisse" }}',
+      obstacles: '{{ site.data.translations.de.layers.obstacles | default: "Hindernisse" }}',
+      protectedAreas: '{{ site.data.translations.de.layers.protected_areas | default: "Schutzgebiete" }}'
+      {% endif %}
+    };
+    
+    // Map spot type slugs to layer groups
+    var spotTypeToLayerGroup = {
+      'einstieg-ausstieg': layerGroups.entryExit,
+      'nur-einstieg': layerGroups.entryOnly,
+      'nur-ausstieg': layerGroups.exitOnly,
+      'rasthalte': layerGroups.rest,
+      'notauswasserungsstelle': layerGroups.emergency
+    };
+    
+    /**
+     * Filters data by locale (Requirement 8.3)
+     * Only returns items matching the current language locale
+     * Uses the PaddelbuchLocaleFilter module if available, otherwise falls back to inline implementation.
+     * 
+     * @param {Array} items - Array of data items to filter
+     * @param {string} locale - The locale to filter by
+     * @returns {Array} Filtered items matching the locale
+     */
+    function filterByLocale(items, locale) {
+      // Use the locale filter module if available
+      if (window.PaddelbuchLocaleFilter && window.PaddelbuchLocaleFilter.filterByLocale) {
+        return window.PaddelbuchLocaleFilter.filterByLocale(items, locale);
+      }
+      
+      // Fallback implementation
+      if (!Array.isArray(items)) return [];
+      if (!locale) return items;
+      
+      return items.filter(function(item) {
+        var itemLocale = item.locale || item['locale'];
+        // Include items with matching locale, no locale, or wildcard locale
+        return itemLocale === undefined || itemLocale === null || itemLocale === locale || itemLocale === '*';
+      });
+    }
+    
+    /**
+     * Gets the appropriate layer group for a spot based on its type and rejection status
+     * 
+     * @param {Object} spot - The spot object
+     * @returns {L.LayerGroup} The layer group for this spot
+     */
+    function getLayerGroupForSpot(spot) {
+      // Rejected spots go to the noEntry layer group
+      if (spot.rejected === true || spot.rejected === 'true') {
+        return layerGroups.noEntry;
+      }
+      
+      var spotTypeSlug = spot.spotType_slug || spot.spotTypeSlug || spot.spot_type_slug;
+      
+      // Use hasOwnProperty to safely check the mapping
+      if (spotTypeSlug && Object.prototype.hasOwnProperty.call(spotTypeToLayerGroup, spotTypeSlug)) {
+        return spotTypeToLayerGroup[spotTypeSlug];
+      }
+      
+      // Default to entry/exit if unknown type
+      return layerGroups.entryExit;
+    }
+    
+    /**
+     * Creates a marker for a spot and adds it to the appropriate layer group
+     * 
+     * @param {Object} spot - The spot data object
+     */
+    function addSpotMarker(spot) {
+      if (!spot.location || (!spot.location.lat && !spot.location.lon)) {
+        return;
+      }
+      
+      var lat = spot.location.lat || spot.location.latitude;
+      var lon = spot.location.lon || spot.location.lng || spot.location.longitude;
+      
+      if (!lat || !lon) return;
+      
+      var isRejected = spot.rejected === true || spot.rejected === 'true';
+      var spotTypeSlug = spot.spotType_slug || spot.spotTypeSlug || spot.spot_type_slug;
+      
+      // Get the appropriate icon using the marker styles module
+      var icon = window.PaddelbuchMarkerStyles 
+        ? window.PaddelbuchMarkerStyles.getSpotIcon(spotTypeSlug, isRejected)
+        : L.Icon.Default.prototype;
+      
+      var marker = L.marker([lat, lon], { icon: icon });
+      
+      // Add popup content using the spot popup module (Requirements 3.1-3.5)
+      if (spot.name) {
+        var popupContent;
+        if (window.PaddelbuchSpotPopup) {
+          if (isRejected) {
+            popupContent = window.PaddelbuchSpotPopup.generateRejectedSpotPopupContent(spot, currentLocale);
+          } else {
+            popupContent = window.PaddelbuchSpotPopup.generateSpotPopupContent(spot, currentLocale);
+          }
+        } else {
+          // Fallback to simple popup if module not loaded
+          popupContent = '<strong>' + spot.name + '</strong>';
+          if (spot.description) {
+            var excerpt = spot.description.replace(/<[^>]*>/g, '').substring(0, 150);
+            if (spot.description.length > 150) excerpt += '...';
+            popupContent += '<p>' + excerpt + '</p>';
+          }
+          if (spot.slug) {
+            popupContent += '<a href="/einstiegsorte/' + spot.slug + '/">' + 
+              (currentLocale === 'en' ? 'More details' : 'Weitere Details') + '</a>';
+          }
+        }
+        marker.bindPopup(popupContent, { maxWidth: 350 });
+      }
+      
+      // Add to appropriate layer group
+      var layerGroup = getLayerGroupForSpot(spot);
+      marker.addTo(layerGroup);
+    }
+    
+    /**
+     * Creates a marker for an event notice and adds it to the event notices layer
+     * 
+     * @param {Object} notice - The event notice data object
+     */
+    function addEventNoticeMarker(notice) {
+      if (!notice.location || (!notice.location.lat && !notice.location.lon)) {
+        return;
+      }
+      
+      var lat = notice.location.lat || notice.location.latitude;
+      var lon = notice.location.lon || notice.location.lng || notice.location.longitude;
+      
+      if (!lat || !lon) return;
+      
+      // Check if notice is still active (end date in future)
+      if (notice.endDate) {
+        var endDate = new Date(notice.endDate);
+        if (endDate < new Date()) {
+          return; // Skip expired notices
+        }
+      }
+      
+      var icon = window.PaddelbuchMarkerStyles 
+        ? window.PaddelbuchMarkerStyles.getEventNoticeIcon()
+        : L.Icon.Default.prototype;
+      
+      var marker = L.marker([lat, lon], { icon: icon });
+      
+      if (notice.name) {
+        var popupContent = '<strong>' + notice.name + '</strong>';
+        if (notice.description) {
+          var excerpt = notice.description.replace(/<[^>]*>/g, '').substring(0, 150);
+          if (notice.description.length > 150) excerpt += '...';
+          popupContent += '<p>' + excerpt + '</p>';
+        }
+        if (notice.slug) {
+          popupContent += '<a href="/gewaesserereignisse/' + notice.slug + '/">' + 
+            (currentLocale === 'en' ? 'More details' : 'Weitere Details') + '</a>';
+        }
+        marker.bindPopup(popupContent);
+      }
+      
+      marker.addTo(layerGroups.eventNotices);
+      
+      // Also add affected area polygon if available
+      if (notice.affectedArea) {
+        try {
+          var geoJson = typeof notice.affectedArea === 'string' 
+            ? JSON.parse(notice.affectedArea) 
+            : notice.affectedArea;
+          
+          var areaStyle = window.PaddelbuchLayerStyles 
+            ? window.PaddelbuchLayerStyles.waterwayEventNoticeAreaStyle
+            : { color: '#ffb200', fillOpacity: 0.4 };
+          
+          var areaLayer = L.geoJSON(geoJson, { style: areaStyle });
+          areaLayer.bindPopup(marker.getPopup().getContent());
+          areaLayer.addTo(layerGroups.eventNotices);
+        } catch (e) {
+          console.warn('Failed to parse event notice affected area:', e);
+        }
+      }
+    }
+    
+    // Build overlay layers object for the control
+    // Note: noEntry layer is NOT added by default (Requirement 2.8 - unchecked by default)
+    var overlayLayers = {};
+    overlayLayers[layerLabels.entryExit] = layerGroups.entryExit;
+    overlayLayers[layerLabels.entryOnly] = layerGroups.entryOnly;
+    overlayLayers[layerLabels.exitOnly] = layerGroups.exitOnly;
+    overlayLayers[layerLabels.rest] = layerGroups.rest;
+    overlayLayers[layerLabels.emergency] = layerGroups.emergency;
+    overlayLayers[layerLabels.noEntry] = layerGroups.noEntry;
+    overlayLayers[layerLabels.eventNotices] = layerGroups.eventNotices;
+    
+    // Create the layer control (Requirement 2.7)
+    var layerControl = L.control.layers(null, overlayLayers, {
+      collapsed: true,
+      position: 'topright'
+    });
+    
+    layerControl.addTo(map);
+    
+    // Add default layers to map (all except noEntry which is unchecked by default)
+    layerGroups.entryExit.addTo(map);
+    layerGroups.entryOnly.addTo(map);
+    layerGroups.exitOnly.addTo(map);
+    layerGroups.rest.addTo(map);
+    layerGroups.emergency.addTo(map);
+    layerGroups.eventNotices.addTo(map);
+    // Note: layerGroups.noEntry is NOT added to map by default (Requirement 2.8)
+    
+    // Store layer groups and control globally for other scripts to access
+    window.paddelbuchLayerGroups = layerGroups;
+    window.paddelbuchLayerControl = layerControl;
+    window.paddelbuchFilterByLocale = filterByLocale;
+    window.paddelbuchAddSpotMarker = addSpotMarker;
+    window.paddelbuchAddEventNoticeMarker = addEventNoticeMarker;
+    window.paddelbuchCurrentLocale = currentLocale;
+    
+    console.log('Layer controls initialized for locale:', currentLocale);
+  }
+  
+  // Initialize when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initLayerControls);
+  } else {
+    // Small delay to ensure map is initialized first
+    setTimeout(initLayerControls, 50);
+  }
+})();
+</script>

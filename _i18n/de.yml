@@ -29,6 +29,11 @@ spot_types:
   emergency: "Notauswasserungsstelle"
   no_entry: "Kein Zutritt Ort"
 
+# Rejected spots
+rejected:
+  not_accessible: "Dieser Ort ist für Paddler nicht zugänglich."
+  reason: "Grund"
+
 # Spot type icons (alt text)
 spot_icons:
   entry_exit: "Ein-/Ausstiegsorte Symbol"

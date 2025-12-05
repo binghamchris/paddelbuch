@@ -57,149 +57,149 @@ This plan covers the complete rebuild of Paddel Buch from Gatsby to Jekyll, impl
 
 ## Phase 2: Map Infrastructure
 
-- [ ] 3. Implement core map functionality
-  - [ ] 3.1 Create map initialization include
+- [x] 3. Implement core map functionality
+  - [x] 3.1 Create map initialization include
     - Create _includes/map-init.html with Leaflet map setup
     - Configure Mapbox tile layer with attribution
     - Set Switzerland center (46.801111, 8.226667) and bounds
     - Add zoom controls at bottom-right position
     - _Requirements: 1.1, 1.2, 1.3, 1.4_
 
-  - [ ] 3.2 Implement locate control
+  - [x] 3.2 Implement locate control
     - Add Leaflet.locatecontrol plugin integration
     - Configure locate button for user position finding
     - _Requirements: 1.5_
 
-  - [ ] 3.3 Create marker styles JavaScript module
+  - [x] 3.3 Create marker styles JavaScript module
     - Create assets/js/marker-styles.js with Leaflet icon configurations
     - Define icons for: Entry/Exit, Entry Only, Exit Only, Rest, Emergency, No Entry, Event Notice
     - Migrate existing marker SVGs to Jekyll assets
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6_
 
-  - [ ] 3.4 Write property test for spot marker icon assignment
+  - [x] 3.4 Write property test for spot marker icon assignment
     - **Property 1: Spot Marker Icon Assignment**
     - **Validates: Requirements 2.1, 2.2, 2.3, 2.4, 2.5, 2.6**
 
-  - [ ] 3.5 Create layer styles JavaScript module
+  - [x] 3.5 Create layer styles JavaScript module
     - Create assets/js/layer-styles.js with GeoJSON styling
     - Define styles for: Lake, Protected Area (yellow/dashed), Obstacle (red), Portage Route (purple/dashed), Event Notice Area (yellow/semi-transparent)
     - _Requirements: 5.1, 5.2, 6.1, 7.2_
 
-- [ ] 4. Implement layer controls and filtering
-  - [ ] 4.1 Create layer control include
+- [x] 4. Implement layer controls and filtering
+  - [x] 4.1 Create layer control include
     - Implement Leaflet LayersControl for toggling spot types
     - Create layer groups for each spot type
     - Add event notice layer toggle
     - Add rejected spots (No Entry) layer toggle (unchecked by default)
     - _Requirements: 2.7, 2.8_
 
-  - [ ] 4.2 Implement locale-based data filtering
+  - [x] 4.2 Implement locale-based data filtering
     - Filter all map data by current language locale
     - Ensure markers and layers only show content matching locale
     - _Requirements: 8.3_
 
-- [ ] 5. Checkpoint - Verify map infrastructure
+- [x] 5. Checkpoint - Verify map infrastructure
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Phase 3: Spot Functionality
 
-- [ ] 6. Implement spot markers and popups
-  - [ ] 6.1 Create spot popup include
+- [x] 6. Implement spot markers and popups
+  - [x] 6.1 Create spot popup include
     - Create _includes/spot-popup.html with spot information display
     - Show: spot icon, name, description excerpt (first paragraph), GPS coordinates, approximate address, paddle craft types
     - Add copy buttons for GPS and address
     - Add navigation button and "More details" link
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
 
-  - [ ] 6.2 Write property test for spot popup content
+  - [x] 6.2 Write property test for spot popup content
     - **Property 2: Spot Popup Contains Required Information**
     - **Validates: Requirements 3.1**
 
-  - [ ] 6.3 Create spot icon include
+  - [x] 6.3 Create spot icon include
     - Create _includes/spot-icon.html with SVG rendering based on spot type
     - Support light (popup) and dark (detail pane) variants
     - _Requirements: 2.1-2.6_
 
-  - [ ] 6.4 Create navigate button include
+  - [x] 6.4 Create navigate button include
     - Create _includes/navigate-btn.html for external navigation
     - Open external mapping application with coordinates
     - _Requirements: 11.1_
 
-  - [ ] 6.5 Create clipboard JavaScript module
+  - [x] 6.5 Create clipboard JavaScript module
     - Create assets/js/clipboard.js for copy-to-clipboard functionality
     - Handle GPS coordinates and address copying
     - _Requirements: 3.2, 3.3, 11.2_
 
-- [ ] 7. Implement spot detail pages
-  - [ ] 7.1 Create spot detail layout
+- [x] 7. Implement spot detail pages
+  - [x] 7.1 Create spot detail layout
     - Create _layouts/spot.html with map (8 cols) + details panel (4 cols)
     - Display: full description, GPS, approximate address, waterway link, paddle craft types, last updated timestamp
     - Configure collection permalink: /einstiegsorte/:slug/
     - _Requirements: 3.6, 13.1_
 
-  - [ ] 7.2 Write property test for spot detail page content
+  - [x] 7.2 Write property test for spot detail page content
     - **Property 3: Spot Detail Page Contains Required Information**
     - **Validates: Requirements 3.6**
 
-  - [ ] 7.3 Implement rejected spot handling
+  - [x] 7.3 Implement rejected spot handling
     - Create conditional rendering for rejected spots
     - Display rejection reason instead of standard spot information
     - Use rejection icon and appropriate styling
     - _Requirements: 3.7_
 
-  - [ ] 7.4 Write property test for rejected spot display
+  - [x] 7.4 Write property test for rejected spot display
     - **Property 4: Rejected Spot Shows Rejection Reason**
     - **Validates: Requirements 3.7**
 
-  - [ ] 7.5 Create rejected spot popup include
+  - [x] 7.5 Create rejected spot popup include
     - Create _includes/rejected-popup.html for no-entry spots
     - Show name and rejection reason
     - _Requirements: 3.7_
 
-- [ ] 8. Checkpoint - Verify spot functionality
+- [x] 8. Checkpoint - Verify spot functionality
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Phase 4: Waterway Functionality
 
-- [ ] 9. Implement waterway list pages
-  - [ ] 9.1 Create lakes list page
+- [x] 9. Implement waterway list pages
+  - [x] 9.1 Create lakes list page
     - Create pages for /gewaesser/seen path
     - Query all waterways with paddlingEnvironmentType 'see'
     - Sort alphabetically by name
     - Display as linked table
     - _Requirements: 4.3_
 
-  - [ ] 9.2 Create rivers list page
+  - [x] 9.2 Create rivers list page
     - Create pages for /gewaesser/fluesse path
     - Query all waterways with paddlingEnvironmentType 'fluss'
     - Sort alphabetically by name
     - Display as linked table
     - _Requirements: 4.4_
 
-  - [ ] 9.3 Write property test for waterway list sorting
+  - [x] 9.3 Write property test for waterway list sorting
     - **Property 6: Waterway List Alphabetical Sorting**
     - **Validates: Requirements 4.3, 4.4**
 
-- [ ] 10. Implement waterway detail pages
-  - [ ] 10.1 Create waterway detail layout
+- [x] 10. Implement waterway detail pages
+  - [x] 10.1 Create waterway detail layout
     - Create _layouts/waterway.html with bounded map + details panel
     - Calculate map bounds from waterway GeoJSON geometry
     - Display waterway name and event notices list
     - Configure collection permalink: /gewaesser/:slug/
     - _Requirements: 4.5, 4.6, 13.2_
 
-  - [ ] 10.2 Write property test for waterway map bounds
+  - [x] 10.2 Write property test for waterway map bounds
     - **Property 7: Waterway Detail Map Bounds**
     - **Validates: Requirements 4.6**
 
-  - [ ] 10.3 Create event notice list include
+  - [x] 10.3 Create event notice list include
     - Create _includes/event-list.html for waterway event notices
     - Filter to show only notices affecting the waterway with future end dates
     - Display notice name (linked) and approximate end date
     - Format dates according to locale
     - _Requirements: 7.5_
 
-  - [ ] 10.4 Write property test for waterway event notice filtering
+  - [x] 10.4 Write property test for waterway event notice filtering
     - **Property 17: Waterway Event Notice List Filtering**
     - **Validates: Requirements 7.5**
 
