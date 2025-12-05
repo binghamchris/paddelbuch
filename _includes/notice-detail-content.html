@@ -1,0 +1,103 @@
+<!--
+  Event Notice Detail Content Include
+  
+  Displays the full content for an event notice on the detail page.
+  Shows: full description, start date, end date, last updated timestamp.
+  
+  Parameters:
+  - include.notice: The event notice object containing all notice data
+  
+  Requirements: 7.4
+  Property 16: Event Notice Detail Page Contains Required Information
+  
+  For any event notice, the detail page shall display the full description,
+  start date, end date, and last updated timestamp.
+-->
+
+{% assign notice = include.notice %}
+{% assign current_locale = site.lang | default: 'de' %}
+
+<!-- Event Notice Details Table (Requirement 7.4) -->
+<table class="notice-details-table">
+  <tbody>
+    <!-- Start Date (Requirement 7.4) -->
+    {% if notice.startDate %}
+    <tr>
+      <th>{% t event_notices.approx_start_date %}</th>
+      <td>
+        {% if current_locale == 'en' %}
+          {{ notice.startDate | date: "%d/%m/%Y" }}
+        {% else %}
+          {{ notice.startDate | date: "%d.%m.%Y" }}
+        {% endif %}
+      </td>
+    </tr>
+    {% endif %}
+
+    <!-- End Date (Requirement 7.4) -->
+    {% if notice.endDate %}
+    <tr>
+      <th>{% t event_notices.approx_end_date %}</th>
+      <td>
+        {% if current_locale == 'en' %}
+          {{ notice.endDate | date: "%d/%m/%Y" }}
+        {% else %}
+          {{ notice.endDate | date: "%d.%m.%Y" }}
+        {% endif %}
+      </td>
+    </tr>
+    {% endif %}
+
+    <!-- Affected Waterways -->
+    {% if notice.waterways and notice.waterways.size > 0 %}
+    <tr>
+      <th>{% t labels.waterway %}</th>
+      <td>
+        <ul class="mb-0 ps-3">
+          {% if current_locale == 'en' %}
+            {% assign waterways_data = site.data.waterways_en %}
+          {% else %}
+            {% assign waterways_data = site.data.waterways_de %}
+          {% endif %}
+          {% for waterway_slug in notice.waterways %}
+            {% assign waterway = waterways_data | where: "slug", waterway_slug | first %}
+            <li>
+              {% if waterway %}
+                <a href="{{ '/gewaesser/' | append: waterway.slug | append: '/' | relative_url }}">
+                  {{ waterway.name }}
+                </a>
+              {% else %}
+                {{ waterway_slug }}
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      </td>
+    </tr>
+    {% endif %}
+
+    <!-- Last Updated Timestamp (Requirement 7.4) -->
+    {% if notice.updatedAt %}
+    <tr>
+      <th>{% t labels.last_updated %}</th>
+      <td>
+        {% if current_locale == 'en' %}
+          {{ notice.updatedAt | date: "%d/%m/%Y" }}
+        {% else %}
+          {{ notice.updatedAt | date: "%d.%m.%Y" }}
+        {% endif %}
+      </td>
+    </tr>
+    {% endif %}
+  </tbody>
+</table>
+
+<!-- Full Description (Requirement 7.4) -->
+{% if notice.description %}
+<div class="notice-full-description mt-4">
+  <h2>{% t labels.summary %}</h2>
+  <div class="description-content">
+    {{ notice.description }}
+  </div>
+</div>
+{% endif %}
