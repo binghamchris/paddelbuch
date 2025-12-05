@@ -205,28 +205,28 @@ This plan covers the complete rebuild of Paddel Buch from Gatsby to Jekyll, impl
 
 ## Phase 5: Obstacle Functionality
 
-- [ ] 11. Implement obstacle visualization
-  - [ ] 11.1 Render obstacle GeoJSON layers
+- [x] 11. Implement obstacle visualization
+  - [x] 11.1 Render obstacle GeoJSON layers
     - Display obstacle geometries as red polygons on map
     - Apply obstacle styling from layer-styles.js
     - _Requirements: 5.1_
 
-  - [ ] 11.2 Render portage routes conditionally
+  - [x] 11.2 Render portage routes conditionally
     - Display portage route as purple dashed line when defined
     - Only render if obstacle has portageRoute data
     - _Requirements: 5.2_
 
-  - [ ] 11.3 Write property test for portage route rendering
+  - [x] 11.3 Write property test for portage route rendering
     - **Property 8: Obstacle Portage Route Conditional Rendering**
     - **Validates: Requirements 5.2**
 
-  - [ ] 11.4 Create obstacle popup include
+  - [x] 11.4 Create obstacle popup include
     - Create _includes/obstacle-popup.html
     - Display obstacle name and portage possibility status
     - Link to obstacle detail page
     - _Requirements: 5.3_
 
-  - [ ] 11.5 Write property test for obstacle popup content
+  - [x] 11.5 Write property test for obstacle popup content
     - **Property 9: Obstacle Popup Contains Required Information**
     - **Validates: Requirements 5.3**
 

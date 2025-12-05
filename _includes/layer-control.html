@@ -20,6 +20,8 @@
 <script src="{{ '/assets/js/clipboard.js' | relative_url }}"></script>
 <!-- Include spot popup module for generating popup content (Requirements 3.1-3.5) -->
 <script src="{{ '/assets/js/spot-popup.js' | relative_url }}"></script>
+<!-- Include obstacle popup module for generating obstacle popup content (Requirement 5.3) -->
+<script src="{{ '/assets/js/obstacle-popup.js' | relative_url }}"></script>
 
 <script>
 (function() {
@@ -189,6 +191,86 @@
     }
     
     /**
+     * Adds an obstacle GeoJSON layer to the obstacles layer group (Requirement 5.1)
+     * Also renders portage route if available (Requirement 5.2)
+     * 
+     * @param {Object} obstacle - The obstacle data object
+     */
+    function addObstacleLayer(obstacle) {
+      if (!obstacle.geometry) {
+        return;
+      }
+      
+      try {
+        var geoJson = typeof obstacle.geometry === 'string' 
+          ? JSON.parse(obstacle.geometry) 
+          : obstacle.geometry;
+        
+        // Get obstacle style from layer styles module (Requirement 5.1)
+        var obstacleStyle = window.PaddelbuchLayerStyles 
+          ? window.PaddelbuchLayerStyles.obstacleStyle
+          : { color: '#c40200', fillColor: '#c40200', fillOpacity: 0.8, weight: 2 };
+        
+        // Create obstacle GeoJSON layer
+        var obstacleLayer = L.geoJSON(geoJson, { style: obstacleStyle });
+        
+        // Generate popup content using the obstacle popup module
+        var popupContent;
+        if (window.PaddelbuchObstaclePopup) {
+          popupContent = window.PaddelbuchObstaclePopup.generateObstaclePopupContent(obstacle, currentLocale);
+        } else {
+          // Fallback popup content
+          popupContent = '<div class="obstacle-popup">';
+          popupContent += '<strong>' + (obstacle.name || 'Obstacle') + '</strong>';
+          
+          // Portage possibility status (Requirement 5.3)
+          var portageStatus;
+          if (obstacle.isPortagePossible === true || obstacle.isPortagePossible === 'true') {
+            portageStatus = currentLocale === 'en' ? 'Yes' : 'Ja';
+          } else if (obstacle.isPortagePossible === false || obstacle.isPortagePossible === 'false') {
+            portageStatus = currentLocale === 'en' ? 'No' : 'Nein';
+          } else {
+            portageStatus = currentLocale === 'en' ? 'Unknown' : 'Unbekannt';
+          }
+          popupContent += '<p>' + (currentLocale === 'en' ? 'Portage possible: ' : 'Umtragen möglich: ') + portageStatus + '</p>';
+          
+          if (obstacle.slug) {
+            popupContent += '<a href="/hindernisse/' + obstacle.slug + '/" class="btn btn-sm btn-primary">' + 
+              (currentLocale === 'en' ? 'More details' : 'Weitere Details') + '</a>';
+          }
+          popupContent += '</div>';
+        }
+        
+        obstacleLayer.bindPopup(popupContent, { maxWidth: 350 });
+        obstacleLayer.addTo(layerGroups.obstacles);
+        
+        // Render portage route if available (Requirement 5.2)
+        if (obstacle.portageRoute) {
+          try {
+            var portageGeoJson = typeof obstacle.portageRoute === 'string' 
+              ? JSON.parse(obstacle.portageRoute) 
+              : obstacle.portageRoute;
+            
+            // Get portage style from layer styles module
+            var portageStyle = window.PaddelbuchLayerStyles 
+              ? window.PaddelbuchLayerStyles.portageStyle
+              : { color: '#4c0561', weight: 4, dashArray: '15 9 1 9' };
+            
+            var portageLayer = L.geoJSON(portageGeoJson, { style: portageStyle });
+            
+            // Portage route shares the same popup as the obstacle
+            portageLayer.bindPopup(popupContent, { maxWidth: 350 });
+            portageLayer.addTo(layerGroups.obstacles);
+          } catch (e) {
+            console.warn('Failed to parse obstacle portage route:', e);
+          }
+        }
+      } catch (e) {
+        console.warn('Failed to parse obstacle geometry:', e);
+      }
+    }
+    
+    /**
      * Creates a marker for an event notice and adds it to the event notices layer
      * 
      * @param {Object} notice - The event notice data object
@@ -263,6 +345,7 @@
     overlayLayers[layerLabels.emergency] = layerGroups.emergency;
     overlayLayers[layerLabels.noEntry] = layerGroups.noEntry;
     overlayLayers[layerLabels.eventNotices] = layerGroups.eventNotices;
+    overlayLayers[layerLabels.obstacles] = layerGroups.obstacles;
     
     // Create the layer control (Requirement 2.7)
     var layerControl = L.control.layers(null, overlayLayers, {
@@ -279,6 +362,7 @@
     layerGroups.rest.addTo(map);
     layerGroups.emergency.addTo(map);
     layerGroups.eventNotices.addTo(map);
+    layerGroups.obstacles.addTo(map);
     // Note: layerGroups.noEntry is NOT added to map by default (Requirement 2.8)
     
     // Store layer groups and control globally for other scripts to access
@@ -287,6 +371,7 @@
     window.paddelbuchFilterByLocale = filterByLocale;
     window.paddelbuchAddSpotMarker = addSpotMarker;
     window.paddelbuchAddEventNoticeMarker = addEventNoticeMarker;
+    window.paddelbuchAddObstacleLayer = addObstacleLayer;
     window.paddelbuchCurrentLocale = currentLocale;
     
     console.log('Layer controls initialized for locale:', currentLocale);
