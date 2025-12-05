@@ -1,0 +1,83 @@
+<!--
+  Event Notice Popup Include
+  
+  Displays waterway event notice information in a Leaflet popup.
+  
+  Parameters:
+  - include.notice: The event notice object containing all notice data
+  - include.locale: Current locale (default: site.lang or 'de')
+  
+  Shows:
+  - Notice name
+  - Description excerpt (first paragraph, truncated to 150 chars)
+  - Start date (formatted according to locale)
+  - End date (formatted according to locale)
+  - "More details" link to event notice detail page
+  
+  Requirements: 7.3
+  Property 15: Event Notice Popup Contains Required Information
+  
+  For any event notice displayed on the map, the popup shall contain 
+  the notice name, description excerpt, start date, and end date.
+-->
+
+{% assign notice = include.notice %}
+{% assign current_locale = include.locale | default: site.lang | default: 'de' %}
+
+<div class="event-notice-popup">
+  <!-- Notice Name (Requirement 7.3) -->
+  <div class="event-notice-popup-header">
+    <span class="popup-title"><h1>{{ notice.name }}</h1></span>
+  </div>
+  
+  <!-- Description Excerpt - First Paragraph, truncated to 150 chars (Requirement 7.3) -->
+  {% if notice.description %}
+  <div class="event-notice-popup-description">
+    {% assign description_text = notice.description | strip_html | truncate: 150 %}
+    <p>{{ description_text }}</p>
+  </div>
+  {% endif %}
+  
+  <!-- Start Date (Requirement 7.3) -->
+  {% if notice.startDate %}
+  <div class="event-notice-popup-start-date">
+    <span class="event-notice-popup-label">
+      {% if current_locale == 'en' %}Start date{% else %}Startdatum{% endif %}:
+    </span>
+    <span class="event-notice-popup-value">
+      {% if current_locale == 'en' %}
+        {{ notice.startDate | date: "%d/%m/%Y" }}
+      {% else %}
+        {{ notice.startDate | date: "%d.%m.%Y" }}
+      {% endif %}
+    </span>
+  </div>
+  {% endif %}
+  
+  <!-- End Date (Requirement 7.3) -->
+  {% if notice.endDate %}
+  <div class="event-notice-popup-end-date">
+    <span class="event-notice-popup-label">
+      {% if current_locale == 'en' %}End date{% else %}Enddatum{% endif %}:
+    </span>
+    <span class="event-notice-popup-value">
+      {% if current_locale == 'en' %}
+        {{ notice.endDate | date: "%d/%m/%Y" }}
+      {% else %}
+        {{ notice.endDate | date: "%d.%m.%Y" }}
+      {% endif %}
+    </span>
+  </div>
+  {% endif %}
+  
+  <!-- Action Buttons -->
+  <div class="event-notice-popup-actions">
+    <!-- More Details Link (Requirement 7.3) -->
+    {% if notice.slug %}
+    <a href="{{ '/gewaesserereignisse/' | append: notice.slug | append: '/' | relative_url }}" 
+       class="btn btn-sm btn-primary event-notice-popup-details-link">
+      {% if current_locale == 'en' %}More details{% else %}Weitere Details{% endif %}
+    </a>
+    {% endif %}
+  </div>
+</div>

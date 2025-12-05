@@ -22,6 +22,8 @@
 <script src="{{ '/assets/js/spot-popup.js' | relative_url }}"></script>
 <!-- Include obstacle popup module for generating obstacle popup content (Requirement 5.3) -->
 <script src="{{ '/assets/js/obstacle-popup.js' | relative_url }}"></script>
+<!-- Include event notice popup module for generating event notice popup content (Requirements 7.1, 7.2, 7.3) -->
+<script src="{{ '/assets/js/event-notice-popup.js' | relative_url }}"></script>
 
 <script>
 (function() {
@@ -324,6 +326,12 @@
     
     /**
      * Creates a marker for an event notice and adds it to the event notices layer
+     * Also renders the affected area polygon if available (Property 14: Event Notice Dual Rendering)
+     * 
+     * Requirements: 7.1, 7.2, 7.3
+     * Property 13: Event Notice Date Filtering
+     * Property 14: Event Notice Dual Rendering
+     * Property 15: Event Notice Popup Contains Required Information
      * 
      * @param {Object} notice - The event notice data object
      */
@@ -337,11 +345,21 @@
       
       if (!lat || !lon) return;
       
-      // Check if notice is still active (end date in future)
-      if (notice.endDate) {
-        var endDate = new Date(notice.endDate);
-        if (endDate < new Date()) {
+      // Property 13: Event Notice Date Filtering
+      // Only display notices where endDate is in the future (Requirement 7.1)
+      if (window.PaddelbuchEventNoticePopup) {
+        if (!window.PaddelbuchEventNoticePopup.isDateInFuture(notice.endDate)) {
           return; // Skip expired notices
+        }
+      } else {
+        // Fallback date check if module not loaded
+        if (notice.endDate) {
+          var endDate = new Date(notice.endDate);
+          var today = new Date();
+          today.setHours(0, 0, 0, 0);
+          if (endDate < today) {
+            return; // Skip expired notices
+          }
         }
       }
       
@@ -351,23 +369,39 @@
       
       var marker = L.marker([lat, lon], { icon: icon });
       
-      if (notice.name) {
-        var popupContent = '<strong>' + notice.name + '</strong>';
+      // Property 15: Event Notice Popup Contains Required Information
+      // Generate popup content using the event notice popup module (Requirement 7.3)
+      var popupContent;
+      if (window.PaddelbuchEventNoticePopup) {
+        popupContent = window.PaddelbuchEventNoticePopup.generateEventNoticePopupContent(notice, currentLocale);
+      } else {
+        // Fallback popup content if module not loaded
+        popupContent = '<div class="event-notice-popup">';
+        popupContent += '<strong>' + (notice.name || '') + '</strong>';
         if (notice.description) {
           var excerpt = notice.description.replace(/<[^>]*>/g, '').substring(0, 150);
           if (notice.description.length > 150) excerpt += '...';
           popupContent += '<p>' + excerpt + '</p>';
         }
+        if (notice.startDate) {
+          popupContent += '<p>' + (currentLocale === 'en' ? 'Start: ' : 'Start: ') + notice.startDate + '</p>';
+        }
+        if (notice.endDate) {
+          popupContent += '<p>' + (currentLocale === 'en' ? 'End: ' : 'Ende: ') + notice.endDate + '</p>';
+        }
         if (notice.slug) {
-          popupContent += '<a href="/gewaesserereignisse/' + notice.slug + '/">' + 
+          popupContent += '<a href="/gewaesserereignisse/' + notice.slug + '/" class="btn btn-sm btn-primary">' + 
             (currentLocale === 'en' ? 'More details' : 'Weitere Details') + '</a>';
         }
-        marker.bindPopup(popupContent);
+        popupContent += '</div>';
       }
       
+      marker.bindPopup(popupContent, { maxWidth: 350 });
       marker.addTo(layerGroups.eventNotices);
       
-      // Also add affected area polygon if available
+      // Property 14: Event Notice Dual Rendering
+      // Also add affected area polygon if available (Requirement 7.2)
+      // Both marker and area should show popup on click
       if (notice.affectedArea) {
         try {
           var geoJson = typeof notice.affectedArea === 'string' 
@@ -376,10 +410,11 @@
           
           var areaStyle = window.PaddelbuchLayerStyles 
             ? window.PaddelbuchLayerStyles.waterwayEventNoticeAreaStyle
-            : { color: '#ffb200', fillOpacity: 0.4 };
+            : { color: '#ffb200', fillColor: '#ffb200', fillOpacity: 0.4, weight: 2, dashArray: '12 9' };
           
           var areaLayer = L.geoJSON(geoJson, { style: areaStyle });
-          areaLayer.bindPopup(marker.getPopup().getContent());
+          // Both marker and area show the same popup content
+          areaLayer.bindPopup(popupContent, { maxWidth: 350 });
           areaLayer.addTo(layerGroups.eventNotices);
         } catch (e) {
           console.warn('Failed to parse event notice affected area:', e);

@@ -269,33 +269,33 @@ This plan covers the complete rebuild of Paddel Buch from Gatsby to Jekyll, impl
     - **Property 12: Protected Area Popup Contains Required Information**
     - **Validates: Requirements 6.2**
 
-- [ ] 15. Implement waterway event notice functionality
-  - [ ] 15.1 Filter event notices by end date
+- [x] 15. Implement waterway event notice functionality
+  - [x] 15.1 Filter event notices by end date
     - Only display notices where endDate is in the future
     - Implement date comparison logic
     - _Requirements: 7.1_
 
-  - [ ] 15.2 Write property test for event notice date filtering
+  - [x] 15.2 Write property test for event notice date filtering
     - **Property 13: Event Notice Date Filtering**
     - **Validates: Requirements 7.1**
 
-  - [ ] 15.3 Render event notice markers and areas
+  - [x] 15.3 Render event notice markers and areas
     - Display marker at notice location
     - Display affected area as yellow semi-transparent polygon
     - Both marker and area should show popup on click
     - _Requirements: 7.2_
 
-  - [ ] 15.4 Write property test for event notice dual rendering
+  - [x] 15.4 Write property test for event notice dual rendering
     - **Property 14: Event Notice Dual Rendering**
     - **Validates: Requirements 7.2**
 
-  - [ ] 15.5 Create event notice popup include
+  - [x] 15.5 Create event notice popup include
     - Create _includes/event-popup.html
     - Display: name, description excerpt, start date, end date
     - Link to event notice detail page
     - _Requirements: 7.3_
 
-  - [ ] 15.6 Write property test for event notice popup content
+  - [x] 15.6 Write property test for event notice popup content
     - **Property 15: Event Notice Popup Contains Required Information**
     - **Validates: Requirements 7.3**
 
