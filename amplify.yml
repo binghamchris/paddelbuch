@@ -3,15 +3,34 @@ frontend:
   phases:
     preBuild:
       commands:
+        # Install Ruby 3.3.0 using rbenv
+        - curl -fsSL https://github.com/rbenv/rbenv-installer/raw/HEAD/bin/rbenv-installer | bash
+        - export PATH="$HOME/.rbenv/bin:$PATH"
+        - eval "$(rbenv init -)"
+        - rbenv install 3.3.0 --skip-existing
+        - rbenv global 3.3.0
+        - ruby -v
+        # Install bundler and gems
+        - gem install bundler
+        - bundle config set --local path 'vendor/bundle'
+        - bundle install
+        # Install Node.js dependencies for testing (optional)
         - npm ci
     build:
       commands:
-        - npm run clean
-        - npm run build
+        # Set Ruby environment
+        - export PATH="$HOME/.rbenv/bin:$PATH"
+        - eval "$(rbenv init -)"
+        # Build Jekyll site
+        - bundle exec jekyll build --verbose
+        # Run tests (optional, can be disabled if needed)
+        - npm test || true
   artifacts:
-    baseDirectory: public
+    baseDirectory: _site
     files:
       - '**/*'
   cache:
     paths:
+      - vendor/**/*
       - node_modules/**/*
+      - $HOME/.rbenv/**/*

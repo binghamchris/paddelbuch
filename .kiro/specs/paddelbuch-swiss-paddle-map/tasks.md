@@ -438,25 +438,25 @@ This plan covers the complete rebuild of Paddel Buch from Gatsby to Jekyll, impl
 
 ## Phase 11: Build and Deployment
 
-- [ ] 26. Configure AWS Amplify deployment
-  - [ ] 26.1 Update amplify.yml for Jekyll
+- [x] 26. Configure AWS Amplify deployment
+  - [x] 26.1 Update amplify.yml for Jekyll
     - Configure Ruby installation and version (ruby-3.3.0)
     - Add bundle install command
     - Configure Jekyll build command
     - Set artifacts baseDirectory to _site
     - _Requirements: 16.1, 16.3, 16.4_
 
-  - [ ] 26.2 Configure environment variables
+  - [x] 26.2 Configure environment variables
     - Document required Amplify environment variables
     - CONTENTFUL_SPACE_ID, CONTENTFUL_ACCESS_TOKEN, CONTENTFUL_ENVIRONMENT
     - MAPBOX_URL, SITE_URL
     - _Requirements: 16.3_
 
-  - [ ] 26.3 Configure Contentful webhook
+  - [x] 26.3 Configure Contentful webhook
     - Document webhook setup for automatic rebuilds on content publish
     - _Requirements: 16.2_
 
-  - [ ] 26.4 Configure cache headers
+  - [x] 26.4 Configure cache headers
     - Set appropriate cache headers for static assets
     - Configure short TTL for HTML pages
     - Configure long TTL for spatial tile files
