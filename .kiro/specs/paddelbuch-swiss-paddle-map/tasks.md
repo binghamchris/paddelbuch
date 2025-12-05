@@ -255,17 +255,17 @@ This plan covers the complete rebuild of Paddel Buch from Gatsby to Jekyll, impl
 
 ## Phase 6: Protected Areas and Event Notices
 
-- [ ] 14. Implement protected area visualization
-  - [ ] 14.1 Render protected area GeoJSON layers
+- [x] 14. Implement protected area visualization
+  - [x] 14.1 Render protected area GeoJSON layers
     - Display protected areas as yellow semi-transparent polygons with dashed borders
     - Apply protected area styling from layer-styles.js
     - _Requirements: 6.1_
 
-  - [ ] 14.2 Create protected area popup
+  - [x] 14.2 Create protected area popup
     - Display protected area name and type in popup
     - _Requirements: 6.2_
 
-  - [ ] 14.3 Write property test for protected area popup content
+  - [x] 14.3 Write property test for protected area popup content
     - **Property 12: Protected Area Popup Contains Required Information**
     - **Validates: Requirements 6.2**
 

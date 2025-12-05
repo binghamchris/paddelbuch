@@ -271,6 +271,58 @@
     }
     
     /**
+     * Adds a protected area GeoJSON layer to the protected areas layer group (Requirement 6.1)
+     * Displays protected areas as yellow semi-transparent polygons with dashed borders
+     * 
+     * @param {Object} protectedArea - The protected area data object
+     */
+    function addProtectedAreaLayer(protectedArea) {
+      if (!protectedArea.geometry) {
+        return;
+      }
+      
+      try {
+        var geoJson = typeof protectedArea.geometry === 'string' 
+          ? JSON.parse(protectedArea.geometry) 
+          : protectedArea.geometry;
+        
+        // Get protected area style from layer styles module (Requirement 6.1)
+        var protectedAreaStyle = window.PaddelbuchLayerStyles 
+          ? window.PaddelbuchLayerStyles.protectedAreaStyle
+          : { color: '#ffb200', fillColor: '#ffb200', fillOpacity: 0.6, weight: 2, dashArray: '1 10' };
+        
+        // Create protected area GeoJSON layer
+        var protectedAreaLayer = L.geoJSON(geoJson, { style: protectedAreaStyle });
+        
+        // Generate popup content (Requirement 6.2)
+        var popupContent = '<div class="protected-area-popup">';
+        popupContent += '<span class="popup-title"><h1>' + (protectedArea.name || (currentLocale === 'en' ? 'Protected Area' : 'Schutzgebiet')) + '</h1></span>';
+        
+        // Display protected area type if available
+        var typeName = null;
+        if (protectedArea.protectedAreaType_name) {
+          typeName = protectedArea.protectedAreaType_name;
+        } else if (protectedArea.protectedAreaType && protectedArea.protectedAreaType.name) {
+          typeName = protectedArea.protectedAreaType.name;
+        } else if (protectedArea.protectedAreaType_slug) {
+          // Fallback to slug if name not available
+          typeName = protectedArea.protectedAreaType_slug;
+        }
+        
+        if (typeName) {
+          popupContent += '<p>' + typeName + '</p>';
+        }
+        
+        popupContent += '</div>';
+        
+        protectedAreaLayer.bindPopup(popupContent, { maxWidth: 350 });
+        protectedAreaLayer.addTo(layerGroups.protectedAreas);
+      } catch (e) {
+        console.warn('Failed to parse protected area geometry:', e);
+      }
+    }
+    
+    /**
      * Creates a marker for an event notice and adds it to the event notices layer
      * 
      * @param {Object} notice - The event notice data object
@@ -346,6 +398,7 @@
     overlayLayers[layerLabels.noEntry] = layerGroups.noEntry;
     overlayLayers[layerLabels.eventNotices] = layerGroups.eventNotices;
     overlayLayers[layerLabels.obstacles] = layerGroups.obstacles;
+    overlayLayers[layerLabels.protectedAreas] = layerGroups.protectedAreas;
     
     // Create the layer control (Requirement 2.7)
     var layerControl = L.control.layers(null, overlayLayers, {
@@ -363,6 +416,7 @@
     layerGroups.emergency.addTo(map);
     layerGroups.eventNotices.addTo(map);
     layerGroups.obstacles.addTo(map);
+    layerGroups.protectedAreas.addTo(map);
     // Note: layerGroups.noEntry is NOT added to map by default (Requirement 2.8)
     
     // Store layer groups and control globally for other scripts to access
@@ -372,6 +426,7 @@
     window.paddelbuchAddSpotMarker = addSpotMarker;
     window.paddelbuchAddEventNoticeMarker = addEventNoticeMarker;
     window.paddelbuchAddObstacleLayer = addObstacleLayer;
+    window.paddelbuchAddProtectedAreaLayer = addProtectedAreaLayer;
     window.paddelbuchCurrentLocale = currentLocale;
     
     console.log('Layer controls initialized for locale:', currentLocale);
