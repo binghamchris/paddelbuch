@@ -487,8 +487,8 @@ This plan covers the complete rebuild of Paddel Buch from Gatsby to Jekyll, impl
 
 ## Phase 13: Migration Cleanup
 
-- [ ] 29. Remove Gatsby-specific files
-  - [ ] 29.1 Archive or remove Gatsby configuration
+- [x] 29. Remove Gatsby-specific files
+  - [x] 29.1 Archive or remove Gatsby configuration
     - Remove gatsby-config.js (after Jekyll is verified working)
     - Remove Gatsby-specific package.json dependencies
     - Remove src/pages/ Gatsby page components
@@ -496,7 +496,7 @@ This plan covers the complete rebuild of Paddel Buch from Gatsby to Jekyll, impl
     - Archive src/api/ Gatsby JSON page generators
     - _Requirements: N/A - Migration cleanup_
 
-  - [ ] 29.2 Update documentation
+  - [x] 29.2 Update documentation
     - Update README.md with Jekyll build instructions
     - Document new project structure
     - Update any deployment documentation
