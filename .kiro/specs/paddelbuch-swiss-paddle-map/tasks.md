@@ -464,19 +464,19 @@ This plan covers the complete rebuild of Paddel Buch from Gatsby to Jekyll, impl
 
 ## Phase 12: Testing Infrastructure
 
-- [ ] 27. Set up testing framework
-  - [ ] 27.1 Configure Jest for JavaScript testing
+- [x] 27. Set up testing framework
+  - [x] 27.1 Configure Jest for JavaScript testing
     - Add Jest to package.json devDependencies
     - Create jest.config.js
     - Set up test directory structure: _tests/unit/, _tests/property/, _tests/integration/
     - _Requirements: Testing Strategy_
 
-  - [ ] 27.2 Configure fast-check for property-based testing
+  - [x] 27.2 Configure fast-check for property-based testing
     - Add fast-check to package.json devDependencies
     - Configure minimum 100 iterations per property test
     - _Requirements: Testing Strategy_
 
-  - [ ] 27.3 Write unit tests for utility functions
+  - [x] 27.3 Write unit tests for utility functions
     - Test date formatting functions
     - Test coordinate validation
     - Test GeoJSON parsing
