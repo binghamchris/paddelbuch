@@ -328,8 +328,8 @@ This plan covers the complete rebuild of Paddel Buch from Gatsby to Jekyll, impl
 
 ## Phase 8: Static Content and API
 
-- [ ] 19. Implement static content pages
-  - [ ] 19.1 Create static page layout
+- [x] 19. Implement static content pages
+  - [x] 19.1 Create static page layout
     - Create _layouts/page.html for CMS-driven static pages
     - Render content from Contentful
     - Configure collection permalink: /:menu/:slug/

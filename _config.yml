@@ -51,6 +51,9 @@ collections:
   notices:
     output: true
     permalink: /gewaesserereignisse/:slug/
+  static_pages:
+    output: true
+    permalink: /:menu_slug/:slug/
 
 # Default front matter
 defaults:
@@ -76,9 +79,14 @@ defaults:
       layout: "notice"
   - scope:
       path: ""
-      type: "pages"
+      type: "static_pages"
     values:
       layout: "page"
+  - scope:
+      path: ""
+      type: "pages"
+    values:
+      layout: "default"
 
 # Multiple Languages Plugin Configuration
 languages: ["de", "en"]

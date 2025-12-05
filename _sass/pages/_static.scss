@@ -1,3 +1,104 @@
+// Static page layout styles
+// Requirements: 12.3, 13.5
+
+.page-static-page {
+  padding-top: 2rem;
+  padding-bottom: 3rem;
+}
+
+.static-page-container {
+  padding-top: 1.5rem;
+  padding-bottom: 2rem;
+}
+
+.static-page-title {
+  color: $swisscanoe-blue;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+}
+
+.static-page-content {
+  line-height: 1.7;
+  
+  h1, h2, h3, h4, h5, h6 {
+    color: $swisscanoe-blue;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+    border-bottom: 1px solid $secondary-blue-20;
+    padding-bottom: 0.5rem;
+  }
+  
+  h3 {
+    font-size: 1.25rem;
+  }
+  
+  p {
+    margin-bottom: 1rem;
+  }
+  
+  a {
+    color: $swisscanoe-blue;
+    text-decoration: underline;
+    
+    &:hover {
+      color: darken($swisscanoe-blue, 10%);
+    }
+  }
+  
+  ul, ol {
+    margin-bottom: 1rem;
+    padding-left: 1.5rem;
+    
+    li {
+      margin-bottom: 0.5rem;
+    }
+  }
+  
+  blockquote {
+    border-left: 4px solid $secondary-blue;
+    padding-left: 1rem;
+    margin-left: 0;
+    color: $text-muted;
+    font-style: italic;
+  }
+  
+  img {
+    max-width: 100%;
+    height: auto;
+    margin: 1rem 0;
+  }
+  
+  table {
+    width: 100%;
+    margin-bottom: 1rem;
+    border-collapse: collapse;
+    
+    th, td {
+      padding: 0.75rem;
+      border: 1px solid $secondary-blue-20;
+    }
+    
+    th {
+      background-color: $secondary-blue-20;
+      color: $swisscanoe-blue;
+    }
+    
+    tr:nth-child(even) {
+      background-color: rgba($secondary-blue-20, 0.5);
+    }
+  }
+}
+
+.static-page-meta {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid $secondary-blue-20;
+}
+
 .page-api, .page-static {
   table {
     display: block !important;

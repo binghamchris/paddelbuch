@@ -221,10 +221,26 @@ module Jekyll
           result['slug'] = extract_slug(entry)
           result['title'] = fields[:title]
           result['menu'] = fields[:menu]
+          # Convert menu to URL-friendly format for permalink
+          result['menu_slug'] = menu_to_slug(fields[:menu])
           result['content'] = extract_rich_text(fields[:content])
-          result['order'] = fields[:order] || 0
+          result['menuOrder'] = fields[:menu_order] || fields[:menuOrder] || fields[:order] || 0
           
           result
+        end
+        
+        private
+        
+        def menu_to_slug(menu)
+          return 'seiten' unless menu
+          case menu.downcase
+          when 'offene daten', 'open data'
+            'offene-daten'
+          when 'über', 'about'
+            'ueber'
+          else
+            menu.downcase.gsub(/\s+/, '-').gsub(/[^a-z0-9\-]/, '')
+          end
         end
       end
     end

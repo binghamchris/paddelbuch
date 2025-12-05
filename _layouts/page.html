@@ -1,0 +1,63 @@
+---
+layout: default
+pageName: static-page
+---
+<!--
+  Static Page Layout
+  
+  Displays CMS-driven static content pages from Contentful.
+  Renders the page title and content in a clean, readable format.
+  
+  Collection permalink: /:menu/:slug/
+  
+  Requirements: 12.3, 13.5
+  
+  For any static content page, the Content_System shall render the page 
+  content from Contentful CMS. URLs follow the pattern /{menu}/{slug}.
+-->
+
+{% assign current_locale = site.lang | default: 'de' %}
+{% assign static_page = page %}
+
+<div class="container static-page-container">
+  <div class="row justify-content-center">
+    <div class="col-lg-8 col-md-10">
+      <!-- Page Title -->
+      <h1 class="static-page-title">{{ static_page.title }}</h1>
+      
+      <!-- Page Content from Contentful -->
+      <div class="static-page-content">
+        {{ static_page.content }}
+      </div>
+      
+      <!-- Last Updated (if available) -->
+      {% if static_page.updatedAt %}
+      <div class="static-page-meta">
+        <small class="text-muted">
+          {% t labels.last_updated %}: 
+          <span class="last-updated-date" data-date="{{ static_page.updatedAt }}">
+            {{ static_page.updatedAt | date: "%d.%m.%Y" }}
+          </span>
+        </small>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Date formatting script for locale-aware display -->
+<script src="{{ '/assets/js/date-utils.js' | relative_url }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Format dates according to current locale
+  var locale = '{{ current_locale }}';
+  var dateElements = document.querySelectorAll('.last-updated-date');
+  
+  dateElements.forEach(function(el) {
+    var dateStr = el.getAttribute('data-date');
+    if (dateStr && window.PaddelbuchDateUtils) {
+      el.textContent = PaddelbuchDateUtils.formatDate(dateStr, locale);
+    }
+  });
+});
+</script>

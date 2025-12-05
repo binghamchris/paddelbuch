@@ -69,11 +69,11 @@
               {% t nav.open_data %}
             </a>
             <ul class="dropdown-menu" aria-labelledby="nav-dropdown-opendata">
-              {% assign open_data_pages = site.data.static_pages | where: "locale", current_locale | where: "menu", "offene Daten" | sort: "menuOrder" %}
-              {% for page in open_data_pages %}
+              {% assign open_data_pages = site.data.static_pages | where: "locale", current_locale | where: "menu_slug", "offene-daten" | sort: "menuOrder" %}
+              {% for static_page in open_data_pages %}
               <li>
-                <a class="dropdown-item" href="{{ '/offene-daten/' | append: page.slug | append: '/' | relative_url }}">
-                  <span class="nav-link">{{ page.title }}</span>
+                <a class="dropdown-item" href="{{ '/' | append: static_page.menu_slug | append: '/' | append: static_page.slug | append: '/' | relative_url }}">
+                  <span class="nav-link">{{ static_page.title }}</span>
                 </a>
               </li>
               {% endfor %}
@@ -91,11 +91,11 @@
               {% t nav.about %}
             </a>
             <ul class="dropdown-menu" aria-labelledby="nav-dropdown-about">
-              {% assign about_pages = site.data.static_pages | where: "locale", current_locale | where: "menu", "Über" | sort: "menuOrder" %}
-              {% for page in about_pages %}
+              {% assign about_pages = site.data.static_pages | where: "locale", current_locale | where: "menu_slug", "ueber" | sort: "menuOrder" %}
+              {% for static_page in about_pages %}
               <li>
-                <a class="dropdown-item" href="{{ '/ueber/' | append: page.slug | append: '/' | relative_url }}">
-                  <span class="nav-link">{{ page.title }}</span>
+                <a class="dropdown-item" href="{{ '/' | append: static_page.menu_slug | append: '/' | append: static_page.slug | append: '/' | relative_url }}">
+                  <span class="nav-link">{{ static_page.title }}</span>
                 </a>
               </li>
               {% endfor %}
