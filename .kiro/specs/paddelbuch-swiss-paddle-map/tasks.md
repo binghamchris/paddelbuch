@@ -299,14 +299,14 @@ This plan covers the complete rebuild of Paddel Buch from Gatsby to Jekyll, impl
     - **Property 15: Event Notice Popup Contains Required Information**
     - **Validates: Requirements 7.3**
 
-- [ ] 16. Implement event notice detail pages
-  - [ ] 16.1 Create event notice detail layout
+- [x] 16. Implement event notice detail pages
+  - [x] 16.1 Create event notice detail layout
     - Create _layouts/notice.html with bounded map + details panel
     - Display: full description, start date, end date, last updated timestamp
     - Configure collection permalink: /gewaesserereignisse/:slug/
     - _Requirements: 7.4, 13.4_
 
-  - [ ] 16.2 Write property test for event notice detail page content
+  - [x] 16.2 Write property test for event notice detail page content
     - **Property 16: Event Notice Detail Page Contains Required Information**
     - **Validates: Requirements 7.4**
 
