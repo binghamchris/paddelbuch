@@ -230,23 +230,23 @@ This plan covers the complete rebuild of Paddel Buch from Gatsby to Jekyll, impl
     - **Property 9: Obstacle Popup Contains Required Information**
     - **Validates: Requirements 5.3**
 
-- [ ] 12. Implement obstacle detail pages
-  - [ ] 12.1 Create obstacle detail layout
+- [x] 12. Implement obstacle detail pages
+  - [x] 12.1 Create obstacle detail layout
     - Create _layouts/obstacle.html with bounded map + details panel
     - Display: obstacle type, GPS (center of geometry), waterway link, description, last updated
     - Configure collection permalink: /hindernisse/:slug/
     - _Requirements: 5.4, 13.3_
 
-  - [ ] 12.2 Write property test for obstacle detail page content
+  - [x] 12.2 Write property test for obstacle detail page content
     - **Property 10: Obstacle Detail Page Contains Required Information**
     - **Validates: Requirements 5.4**
 
-  - [ ] 12.3 Implement portage information section
+  - [x] 12.3 Implement portage information section
     - Display portage distance, description, exit spot link, re-entry spot link
     - Only show when portage information exists
     - _Requirements: 5.5_
 
-  - [ ] 12.4 Write property test for portage information display
+  - [x] 12.4 Write property test for portage information display
     - **Property 11: Obstacle Portage Information Display**
     - **Validates: Requirements 5.5**
 

@@ -1,0 +1,170 @@
+<!--
+  Obstacle Detail Content Include
+  
+  Displays the full content for an obstacle on the detail page.
+  Shows: obstacle type, GPS (center of geometry), waterway link, description, last updated.
+  Also displays portage information when available.
+  
+  Parameters:
+  - include.obstacle: The obstacle object containing all obstacle data
+  - include.waterway: The waterway object (optional)
+  
+  Requirements: 5.4, 5.5
+  Property 10: Obstacle Detail Page Contains Required Information
+  Property 11: Obstacle Portage Information Display
+-->
+
+{% assign obstacle = include.obstacle %}
+{% assign waterway = include.waterway %}
+{% assign current_locale = site.lang | default: 'de' %}
+
+<!-- Obstacle Details Table (Requirement 5.4) -->
+<table class="obstacle-details-table">
+  <tbody>
+    <!-- GPS Coordinates (center of geometry) -->
+    {% if obstacle.centerLat and obstacle.centerLon %}
+    <tr>
+      <th>{% t labels.gps %}</th>
+      <td>
+        <span id="gps-coords">{{ obstacle.centerLat }}, {{ obstacle.centerLon }}</span>
+        <button type="button" 
+                class="btn btn-sm btn-outline-secondary copy-btn ms-2" 
+                onclick="PaddelbuchClipboard.copyGPS('{{ obstacle.centerLat }}', '{{ obstacle.centerLon }}')"
+                title="{% t actions.copy_gps %}"
+                aria-label="{% t actions.copy_gps %}">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/>
+            <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/>
+          </svg>
+        </button>
+      </td>
+    </tr>
+    {% endif %}
+
+    <!-- Waterway Link -->
+    {% if waterway %}
+    <tr>
+      <th>{% t labels.waterway %}</th>
+      <td>
+        <a href="{{ '/gewaesser/' | append: waterway.slug | append: '/' | relative_url }}">
+          {{ waterway.name }}
+        </a>
+      </td>
+    </tr>
+    {% endif %}
+
+    <!-- Portage Possible Status -->
+    <tr>
+      <th>{% t obstacles.portage_possible %}</th>
+      <td>
+        {% if obstacle.isPortagePossible == true %}
+          {% t labels.yes %}
+        {% elsif obstacle.isPortagePossible == false %}
+          {% t labels.no %}
+        {% else %}
+          {% t labels.unknown %}
+        {% endif %}
+      </td>
+    </tr>
+
+    <!-- Last Updated Timestamp -->
+    {% if obstacle.updatedAt %}
+    <tr>
+      <th>{% t labels.last_updated %}</th>
+      <td>
+        {% if current_locale == 'en' %}
+          {{ obstacle.updatedAt | date: "%d/%m/%Y" }}
+        {% else %}
+          {{ obstacle.updatedAt | date: "%d.%m.%Y" }}
+        {% endif %}
+      </td>
+    </tr>
+    {% endif %}
+  </tbody>
+</table>
+
+<!-- Navigation Button -->
+{% if obstacle.centerLat and obstacle.centerLon %}
+<div class="mt-3">
+  {% include navigate-btn.html lat=obstacle.centerLat lon=obstacle.centerLon size="md" %}
+</div>
+{% endif %}
+
+<!-- Full Description -->
+{% if obstacle.description %}
+<div class="obstacle-full-description mt-4">
+  <h2>{% t labels.summary %}</h2>
+  <div class="description-content">
+    {{ obstacle.description }}
+  </div>
+</div>
+{% endif %}
+
+<!-- Portage Information Section (Requirement 5.5) -->
+{% if obstacle.portageRoute or obstacle.portageDescription or obstacle.portageDistance %}
+<div class="portage-information mt-4">
+  <h2>{% t obstacles.portage_route_for %} {{ obstacle.name }}</h2>
+  
+  <table class="portage-details-table">
+    <tbody>
+      <!-- Portage Distance -->
+      {% if obstacle.portageDistance %}
+      <tr>
+        <th>{% t obstacles.portage_distance %}</th>
+        <td>{{ obstacle.portageDistance }} m</td>
+      </tr>
+      {% endif %}
+
+      <!-- Exit Spot Link -->
+      {% if obstacle.exitSpot_slug %}
+        {% if current_locale == 'en' %}
+          {% assign spots_data = site.data.spots_en %}
+        {% else %}
+          {% assign spots_data = site.data.spots_de %}
+        {% endif %}
+        {% assign exit_spot = spots_data | where: "slug", obstacle.exitSpot_slug | first %}
+        {% if exit_spot %}
+        <tr>
+          <th>{% t obstacles.exit_spot %}</th>
+          <td>
+            <a href="{{ '/einstiegsorte/' | append: exit_spot.slug | append: '/' | relative_url }}">
+              {{ exit_spot.name }}
+            </a>
+          </td>
+        </tr>
+        {% endif %}
+      {% endif %}
+
+      <!-- Re-entry Spot Link -->
+      {% if obstacle.reentrySpot_slug %}
+        {% if current_locale == 'en' %}
+          {% assign spots_data = site.data.spots_en %}
+        {% else %}
+          {% assign spots_data = site.data.spots_de %}
+        {% endif %}
+        {% assign reentry_spot = spots_data | where: "slug", obstacle.reentrySpot_slug | first %}
+        {% if reentry_spot %}
+        <tr>
+          <th>{% t obstacles.reentry_spot %}</th>
+          <td>
+            <a href="{{ '/einstiegsorte/' | append: reentry_spot.slug | append: '/' | relative_url }}">
+              {{ reentry_spot.name }}
+            </a>
+          </td>
+        </tr>
+        {% endif %}
+      {% endif %}
+    </tbody>
+  </table>
+
+  <!-- Portage Description -->
+  {% if obstacle.portageDescription %}
+  <div class="portage-description mt-3">
+    <h3>{% t obstacles.portage_description %}</h3>
+    <div class="description-content">
+      {{ obstacle.portageDescription }}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endif %}
