@@ -21,30 +21,20 @@
 <table class="notice-details-table">
   <tbody>
     <!-- Start Date (Requirement 7.4) -->
+    <!-- Property 19: Date Locale Formatting - using localized_date filter -->
     {% if notice.startDate %}
     <tr>
       <th>{% t event_notices.approx_start_date %}</th>
-      <td>
-        {% if current_locale == 'en' %}
-          {{ notice.startDate | date: "%d/%m/%Y" }}
-        {% else %}
-          {{ notice.startDate | date: "%d.%m.%Y" }}
-        {% endif %}
-      </td>
+      <td>{{ notice.startDate | localized_date }}</td>
     </tr>
     {% endif %}
 
     <!-- End Date (Requirement 7.4) -->
+    <!-- Property 19: Date Locale Formatting - using localized_date filter -->
     {% if notice.endDate %}
     <tr>
       <th>{% t event_notices.approx_end_date %}</th>
-      <td>
-        {% if current_locale == 'en' %}
-          {{ notice.endDate | date: "%d/%m/%Y" }}
-        {% else %}
-          {{ notice.endDate | date: "%d.%m.%Y" }}
-        {% endif %}
-      </td>
+      <td>{{ notice.endDate | localized_date }}</td>
     </tr>
     {% endif %}
 
@@ -77,16 +67,11 @@
     {% endif %}
 
     <!-- Last Updated Timestamp (Requirement 7.4) -->
+    <!-- Property 19: Date Locale Formatting - using localized_date filter -->
     {% if notice.updatedAt %}
     <tr>
       <th>{% t labels.last_updated %}</th>
-      <td>
-        {% if current_locale == 'en' %}
-          {{ notice.updatedAt | date: "%d/%m/%Y" }}
-        {% else %}
-          {{ notice.updatedAt | date: "%d.%m.%Y" }}
-        {% endif %}
-      </td>
+      <td>{{ notice.updatedAt | localized_date }}</td>
     </tr>
     {% endif %}
   </tbody>

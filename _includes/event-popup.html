@@ -39,34 +39,24 @@
   {% endif %}
   
   <!-- Start Date (Requirement 7.3) -->
+  <!-- Property 19: Date Locale Formatting - using localized_date filter -->
   {% if notice.startDate %}
   <div class="event-notice-popup-start-date">
     <span class="event-notice-popup-label">
       {% if current_locale == 'en' %}Start date{% else %}Startdatum{% endif %}:
     </span>
-    <span class="event-notice-popup-value">
-      {% if current_locale == 'en' %}
-        {{ notice.startDate | date: "%d/%m/%Y" }}
-      {% else %}
-        {{ notice.startDate | date: "%d.%m.%Y" }}
-      {% endif %}
-    </span>
+    <span class="event-notice-popup-value">{{ notice.startDate | localized_date }}</span>
   </div>
   {% endif %}
   
   <!-- End Date (Requirement 7.3) -->
+  <!-- Property 19: Date Locale Formatting - using localized_date filter -->
   {% if notice.endDate %}
   <div class="event-notice-popup-end-date">
     <span class="event-notice-popup-label">
       {% if current_locale == 'en' %}End date{% else %}Enddatum{% endif %}:
     </span>
-    <span class="event-notice-popup-value">
-      {% if current_locale == 'en' %}
-        {{ notice.endDate | date: "%d/%m/%Y" }}
-      {% else %}
-        {{ notice.endDate | date: "%d.%m.%Y" }}
-      {% endif %}
-    </span>
+    <span class="event-notice-popup-value">{{ notice.endDate | localized_date }}</span>
   </div>
   {% endif %}
   

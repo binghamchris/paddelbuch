@@ -315,14 +315,14 @@ This plan covers the complete rebuild of Paddel Buch from Gatsby to Jekyll, impl
 
 ## Phase 7: Date Formatting and Internationalization
 
-- [ ] 18. Implement locale-aware date formatting
-  - [ ] 18.1 Create date formatting utility
+- [x] 18. Implement locale-aware date formatting
+  - [x] 18.1 Create date formatting utility
     - Create assets/js/date-utils.js or Liquid filter for date formatting
     - Format dates as 'en-GB' for English locale
     - Format dates as 'de-CH' for German locale
     - _Requirements: 8.5_
 
-  - [ ] 18.2 Write property test for date locale formatting
+  - [x] 18.2 Write property test for date locale formatting
     - **Property 19: Date Locale Formatting**
     - **Validates: Requirements 8.5**
 

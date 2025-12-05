@@ -58,13 +58,8 @@
             {{ notice.name }}
           </a>
         </td>
-        <td>
-          {% if current_locale == 'en' %}
-            {{ notice.endDate | date: "%d/%m/%Y" }}
-          {% else %}
-            {{ notice.endDate | date: "%d.%m.%Y" }}
-          {% endif %}
-        </td>
+        <!-- Property 19: Date Locale Formatting - using localized_date filter -->
+        <td>{{ notice.endDate | localized_date }}</td>
       </tr>
       {% endfor %}
     </tbody>
