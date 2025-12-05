@@ -310,7 +310,7 @@ This plan covers the complete rebuild of Paddel Buch from Gatsby to Jekyll, impl
     - **Property 16: Event Notice Detail Page Contains Required Information**
     - **Validates: Requirements 7.4**
 
-- [ ] 17. Checkpoint - Verify protected areas and event notices
+- [x] 17. Checkpoint - Verify protected areas and event notices
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Phase 7: Date Formatting and Internationalization
