@@ -1,0 +1,174 @@
+---
+layout: default
+pageName: obstacle-details
+---
+<!--
+  Obstacle Detail Layout
+  
+  Displays an obstacle detail page with bounded map (8 cols) + details panel (4 cols).
+  Shows: obstacle type, GPS (center of geometry), waterway link, description, last updated.
+  Map bounds are calculated from the obstacle's GeoJSON geometry.
+  
+  Collection permalink: /hindernisse/:slug/
+  
+  Requirements: 5.4, 13.3
+  Property 10: Obstacle Detail Page Contains Required Information
+-->
+
+{% assign current_locale = site.lang | default: 'de' %}
+{% assign obstacle = page %}
+
+<!-- Get obstacle type name -->
+{% assign obstacle_type_slug = obstacle.obstacleType_slug %}
+{% if obstacle_type_slug %}
+  {% assign obstacle_type = site.data.types.obstacle_types | where: "slug", obstacle_type_slug | first %}
+  {% if obstacle_type %}
+    {% if current_locale == 'en' %}
+      {% assign obstacle_type_name = obstacle_type.name_en %}
+    {% else %}
+      {% assign obstacle_type_name = obstacle_type.name_de %}
+    {% endif %}
+  {% else %}
+    {% assign obstacle_type_name = obstacle_type_slug %}
+  {% endif %}
+{% endif %}
+
+<!-- Get waterway information -->
+{% assign waterway_slug = obstacle.waterway_slug %}
+{% if waterway_slug %}
+  {% if current_locale == 'en' %}
+    {% assign waterways_data = site.data.waterways_en %}
+  {% else %}
+    {% assign waterways_data = site.data.waterways_de %}
+  {% endif %}
+  {% assign waterway = waterways_data | where: "slug", waterway_slug | first %}
+{% endif %}
+
+<div class="container-fluid">
+  <div class="row">
+    <!-- Map Column (8 cols on large screens) -->
+    <div class="col-lg-8 p-0">
+      <div id="obstacle-map" class="map"></div>
+    </div>
+    
+    <!-- Details Panel (4 cols on large screens) -->
+    <div class="col-lg-4 obstacle-description">
+      <!-- Obstacle Type Badge -->
+      {% if obstacle_type_name %}
+      <div class="obstacle-type-badge mt-3">
+        <span class="badge bg-danger">{{ obstacle_type_name }}</span>
+      </div>
+      {% endif %}
+      
+      <!-- Obstacle Title -->
+      <h1 class="obstacle-title">{{ obstacle.name }}</h1>
+      
+      <!-- Obstacle Details Table (Requirement 5.4) -->
+      {% include obstacle-detail-content.html obstacle=obstacle waterway=waterway %}
+    </div>
+  </div>
+</div>
+
+<!-- Map Initialization Script -->
+<script src="{{ '/assets/js/layer-styles.js' | relative_url }}"></script>
+<script src="{{ '/assets/js/clipboard.js' | relative_url }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  /**
+   * Obstacle Detail Map Initialization
+   * 
+   * Property 10: Obstacle Detail Page Contains Required Information
+   * For any obstacle, the detail page shall display the obstacle type, GPS coordinates
+   * (center of geometry), waterway link, and last updated timestamp.
+   * 
+   * Validates: Requirements 5.4
+   */
+  
+  // Parse obstacle geometry
+  {% if obstacle.geometry %}
+  var geometryData = {{ obstacle.geometry | jsonify }};
+  var geometry;
+  
+  // Handle both string and object geometry
+  if (typeof geometryData === 'string') {
+    try {
+      geometry = JSON.parse(geometryData);
+    } catch (e) {
+      console.error('Failed to parse obstacle geometry:', e);
+      geometry = null;
+    }
+  } else {
+    geometry = geometryData;
+  }
+  
+  // Initialize map with default Switzerland center
+  var map = L.map('obstacle-map', {
+    center: [{{ site.map.center.lat }}, {{ site.map.center.lon }}],
+    zoom: {{ site.map.default_zoom }},
+    zoomControl: true
+  });
+  
+  // Add Mapbox tile layer
+  L.tileLayer('{{ site.mapbox_url | default: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" }}', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: {{ site.map.max_zoom | default: 18 }}
+  }).addTo(map);
+  
+  // Position zoom control at bottom-right
+  map.zoomControl.setPosition('bottomright');
+  
+  if (geometry) {
+    // Create GeoJSON layer for obstacle (red polygon)
+    var obstacleLayer = L.geoJSON(geometry, {
+      style: PaddelbuchLayerStyles.getLayerStyle('obstacle')
+    }).addTo(map);
+    
+    // Calculate and fit bounds from geometry
+    var bounds = obstacleLayer.getBounds();
+    if (bounds.isValid()) {
+      map.fitBounds(bounds, { padding: [50, 50] });
+    }
+  }
+  
+  // Parse and render portage route if exists (Requirement 5.2)
+  {% if obstacle.portageRoute %}
+  var portageRouteData = {{ obstacle.portageRoute | jsonify }};
+  var portageRoute;
+  
+  if (typeof portageRouteData === 'string') {
+    try {
+      portageRoute = JSON.parse(portageRouteData);
+    } catch (e) {
+      console.error('Failed to parse portage route:', e);
+      portageRoute = null;
+    }
+  } else {
+    portageRoute = portageRouteData;
+  }
+  
+  if (portageRoute) {
+    // Create GeoJSON layer for portage route (purple dashed line)
+    var portageLayer = L.geoJSON(portageRoute, {
+      style: PaddelbuchLayerStyles.getLayerStyle('portageRoute')
+    }).addTo(map);
+  }
+  {% endif %}
+  
+  {% else %}
+  // No geometry - show default Switzerland view
+  var map = L.map('obstacle-map', {
+    center: [{{ site.map.center.lat }}, {{ site.map.center.lon }}],
+    zoom: {{ site.map.default_zoom }},
+    zoomControl: true
+  });
+  
+  // Add Mapbox tile layer
+  L.tileLayer('{{ site.mapbox_url | default: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" }}', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: {{ site.map.max_zoom | default: 18 }}
+  }).addTo(map);
+  
+  map.zoomControl.setPosition('bottomright');
+  {% endif %}
+});
+</script>
