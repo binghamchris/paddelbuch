@@ -397,39 +397,39 @@ This plan covers the complete rebuild of Paddel Buch from Gatsby to Jekyll, impl
     - **Property 24: Tile Coverage Completeness**
     - **Validates: Requirements 15.1, 15.2, 15.3**
 
-- [ ] 24. Implement data loader module
-  - [ ] 24.1 Create data loader JavaScript module
+- [x] 24. Implement data loader module
+  - [x] 24.1 Create data loader JavaScript module
     - Create assets/js/data-loader.js for viewport-based loading
     - Implement loadDataForBounds(bounds, zoom, locale) function
     - Implement getTilesForBounds(bounds) function
     - Implement tile fetching and caching
     - _Requirements: 14.1, 14.2, 14.5_
 
-  - [ ] 24.2 Write property test for viewport data loading
+  - [x] 24.2 Write property test for viewport data loading
     - **Property 22: Viewport Data Loading Completeness**
     - **Validates: Requirements 14.1, 14.2**
 
-  - [ ] 24.3 Create spatial utilities module
+  - [x] 24.3 Create spatial utilities module
     - Create assets/js/spatial-utils.js
     - Implement bounds-to-tile coordinate conversion
     - Implement point-in-bounds checking
     - _Requirements: 14.1, 14.2_
 
-  - [ ] 24.4 Implement zoom-based layer visibility
+  - [x] 24.4 Implement zoom-based layer visibility
     - Load obstacles and protected areas only at zoom >= 12
     - Hide these layers when zoom < 12
     - _Requirements: 14.3, 14.4_
 
-  - [ ] 24.5 Write property test for zoom-based visibility
+  - [x] 24.5 Write property test for zoom-based visibility
     - **Property 23: Zoom-Based Layer Visibility**
     - **Validates: Requirements 14.3, 14.4**
 
-  - [ ] 24.6 Implement request debouncing
+  - [x] 24.6 Implement request debouncing
     - Debounce viewport change events (300ms)
     - Prevent excessive API calls during rapid pan/zoom
     - _Requirements: 14.6_
 
-  - [ ] 24.7 Write property test for data loading idempotence
+  - [x] 24.7 Write property test for data loading idempotence
     - **Property 25: Data Loading Idempotence**
     - **Validates: Requirements 14.1, 14.2**
 
