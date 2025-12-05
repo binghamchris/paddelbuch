@@ -366,8 +366,8 @@ This plan covers the complete rebuild of Paddel Buch from Gatsby to Jekyll, impl
 
 ## Phase 9: URL Generation and Routing
 
-- [ ] 22. Configure collection permalinks
-  - [ ] 22.1 Verify all URL patterns
+- [x] 22. Configure collection permalinks
+  - [x] 22.1 Verify all URL patterns
     - Spots: /einstiegsorte/{slug}
     - Waterways: /gewaesser/{slug}
     - Obstacles: /hindernisse/{slug}
@@ -375,11 +375,11 @@ This plan covers the complete rebuild of Paddel Buch from Gatsby to Jekyll, impl
     - Static pages: /{menu}/{slug}
     - _Requirements: 13.1, 13.2, 13.3, 13.4, 13.5_
 
-  - [ ] 22.2 Write property test for URL pattern generation
+  - [x] 22.2 Write property test for URL pattern generation
     - **Property 21: URL Pattern Generation**
     - **Validates: Requirements 13.1, 13.2, 13.3, 13.4, 13.5**
 
-  - [ ] 22.3 Create 404 error page
+  - [x] 22.3 Create 404 error page
     - Create 404.html with appropriate messaging
     - Style consistently with site design
     - _Requirements: 13.6_
