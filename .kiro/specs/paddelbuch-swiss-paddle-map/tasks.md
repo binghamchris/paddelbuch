@@ -250,7 +250,7 @@ This plan covers the complete rebuild of Paddel Buch from Gatsby to Jekyll, impl
     - **Property 11: Obstacle Portage Information Display**
     - **Validates: Requirements 5.5**
 
-- [ ] 13. Checkpoint - Verify obstacle functionality
+- [x] 13. Checkpoint - Verify obstacle functionality
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Phase 6: Protected Areas and Event Notices
