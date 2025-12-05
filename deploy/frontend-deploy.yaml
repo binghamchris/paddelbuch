@@ -22,17 +22,20 @@ Parameters:
       - PULL_REQUEST
   EnvVarMapboxUrl:
     Type: String
-    Description: The URL for the MapBox map style to be used during the Gatsby build process
+    Description: The URL for the MapBox map style to be used during the Jekyll build process
   EnvVarContentfulToken:
     Type: String
-    Description: The API token for accessing the Contentful API during the Gatsby build process
+    Description: The API token for accessing the Contentful API during the Jekyll build process
     NoEcho: true
   EnvVarContentfulSpace:
     Type: String
-    Description: The Contentful space ID to use for accessing the Contentful API during the Gatsby build process
+    Description: The Contentful space ID to use for accessing the Contentful API during the Jekyll build process
   EnvVarContentfulEnv:
     Type: String
-    Description: The Contentful environment ID for accessing the Contentful API during the Gatsby build process
+    Description: The Contentful environment ID for accessing the Contentful API during the Jekyll build process
+  EnvVarSiteUrl:
+    Type: String
+    Description: The production site URL for Jekyll build
   GithubRepoUrl:
     Type: String
     Description: The URL of the GitHub repo to be deployed
@@ -51,10 +54,31 @@ Resources:
         Ref: GithubToken
       CustomHeaders: |-
         customHeaders:
+          # HTML pages - short TTL for content freshness (5 minutes)
+          - pattern: '*.html'
+            headers:
+              - key: Cache-Control
+                value: public, max-age=300, s-maxage=300, must-revalidate
+          # Spatial tile JSON files - long TTL (7 days) as they only change on rebuild
+          - pattern: '/api/tiles/**/*.json'
+            headers:
+              - key: Cache-Control
+                value: public, max-age=604800, s-maxage=604800, immutable
+          # API JSON files - medium TTL (6 hours)
+          - pattern: '/api/*.json'
+            headers:
+              - key: Cache-Control
+                value: public, max-age=21600, s-maxage=21600
+          # Static assets (CSS, JS, images) - long TTL (30 days)
+          - pattern: '/assets/**/*'
+            headers:
+              - key: Cache-Control
+                value: public, max-age=2592000, s-maxage=2592000, immutable
+          # Default for all other files
           - pattern: '*'
             headers:
               - key: Cache-Control
-                value: max-age=21600, s-maxage=21600
+                value: public, max-age=21600, s-maxage=21600
               - key: Strict-Transport-Security
                 value: max-age=31536000
               - key: X-Frame-Options
@@ -102,7 +126,7 @@ Resources:
         Ref: AppDescription
       EnableBranchAutoDeletion: False
       EnvironmentVariables: 
-        - Name: GATSBY_MAPBOX_URL
+        - Name: MAPBOX_URL
           Value:
             Ref: EnvVarMapboxUrl
         - Name: CONTENTFUL_ACCESS_TOKEN
@@ -114,8 +138,11 @@ Resources:
         - Name: CONTENTFUL_ENVIRONMENT
           Value:
             Ref: EnvVarContentfulEnv
+        - Name: SITE_URL
+          Value:
+            Ref: EnvVarSiteUrl
         - Name: _CUSTOM_IMAGE
-          Value: public.ecr.aws/docker/library/node:24.11.0
+          Value: public.ecr.aws/amazonlinux/amazonlinux:2023
       Name:
         Ref: AppName
       Repository:
