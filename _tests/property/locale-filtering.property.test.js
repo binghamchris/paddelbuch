@@ -205,14 +205,17 @@ describe('Locale Content Filtering - Property 18', () => {
         (items, locale) => {
           const filtered = filterByLocale(items, locale);
           
-          // Get indices of filtered items in original array
-          const originalIndices = filtered.map(filteredItem => 
-            items.findIndex(item => item.slug === filteredItem.slug)
-          );
+          // Build a list of items that should be included, preserving order
+          const expectedFiltered = items.filter(item => matchesLocale(item, locale));
           
-          // Indices should be in ascending order (preserving original order)
-          for (let i = 1; i < originalIndices.length; i++) {
-            if (originalIndices[i] <= originalIndices[i - 1]) {
+          // Check that filtered items match expected items in order
+          if (filtered.length !== expectedFiltered.length) {
+            return false;
+          }
+          
+          // Compare each item by reference (same object)
+          for (let i = 0; i < filtered.length; i++) {
+            if (filtered[i] !== expectedFiltered[i]) {
               return false;
             }
           }

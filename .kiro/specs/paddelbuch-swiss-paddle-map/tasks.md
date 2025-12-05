@@ -361,7 +361,7 @@ This plan covers the complete rebuild of Paddel Buch from Gatsby to Jekyll, impl
     - Organize into Fact Tables and Dimension Tables sections
     - _Requirements: 9.1, 9.2, 9.3_
 
-- [ ] 21. Checkpoint - Verify static content and API
+- [x] 21. Checkpoint - Verify static content and API
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Phase 9: URL Generation and Routing
