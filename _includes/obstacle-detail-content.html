@@ -68,16 +68,11 @@
     </tr>
 
     <!-- Last Updated Timestamp -->
+    <!-- Property 19: Date Locale Formatting - using localized_date filter -->
     {% if obstacle.updatedAt %}
     <tr>
       <th>{% t labels.last_updated %}</th>
-      <td>
-        {% if current_locale == 'en' %}
-          {{ obstacle.updatedAt | date: "%d/%m/%Y" }}
-        {% else %}
-          {{ obstacle.updatedAt | date: "%d.%m.%Y" }}
-        {% endif %}
-      </td>
+      <td>{{ obstacle.updatedAt | localized_date }}</td>
     </tr>
     {% endif %}
   </tbody>

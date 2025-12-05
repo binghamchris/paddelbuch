@@ -70,14 +70,10 @@
   {% endif %}
 
   <!-- Last Updated Timestamp -->
+  <!-- Property 19: Date Locale Formatting - using localized_date filter -->
   {% if spot.updatedAt %}
   <div class="mt-3 text-muted small">
-    {% t labels.last_updated %}:
-    {% if current_locale == 'en' %}
-      {{ spot.updatedAt | date: "%d/%m/%Y" }}
-    {% else %}
-      {{ spot.updatedAt | date: "%d.%m.%Y" }}
-    {% endif %}
+    {% t labels.last_updated %}: {{ spot.updatedAt | localized_date }}
   </div>
   {% endif %}
 </div>

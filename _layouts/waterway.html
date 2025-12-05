@@ -72,16 +72,11 @@ pageName: waterway-details
           {% endif %}
           
           <!-- Last Updated Timestamp -->
+          <!-- Property 19: Date Locale Formatting - using localized_date filter -->
           {% if waterway.updatedAt %}
           <tr>
             <th>{% t labels.last_updated %}</th>
-            <td>
-              {% if current_locale == 'en' %}
-                {{ waterway.updatedAt | date: "%d/%m/%Y" }}
-              {% else %}
-                {{ waterway.updatedAt | date: "%d.%m.%Y" }}
-              {% endif %}
-            </td>
+            <td>{{ waterway.updatedAt | localized_date }}</td>
           </tr>
           {% endif %}
         </tbody>

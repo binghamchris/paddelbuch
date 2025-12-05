@@ -52,28 +52,124 @@ module Jekyll
     
     # Format date according to locale
     # Usage: {{ page.date | localized_date }}
-    def localized_date(date, format = nil)
+    # Usage with format: {{ page.date | localized_date: 'long' }}
+    # 
+    # Property 19: Date Locale Formatting
+    # For any date displayed in the application, the format shall match the current locale:
+    # 'en-GB' format for English locale (DD/MM/YYYY), 'de-CH' format for German locale (DD.MM.YYYY)
+    #
+    # Requirements: 8.5
+    # - Format dates as 'en-GB' for English locale
+    # - Format dates as 'de-CH' for German locale
+    def localized_date(date, format_type = nil)
       return '' unless date
       
       site = @context.registers[:site]
       lang = site.config['lang'] || site.config['default_lang'] || 'de'
       
       # Parse date if string
-      date = Date.parse(date.to_s) if date.is_a?(String)
+      date = parse_date_value(date)
+      return '' unless date
       
-      # Get format from config or use default
-      if format.nil?
-        format = case lang
-                 when 'de' then '%d.%m.%Y'
-                 when 'en' then '%d/%m/%Y'
-                 else '%Y-%m-%d'
-                 end
-      end
+      # Get format based on locale and format type
+      format = get_date_format(lang, format_type)
       
       date.strftime(format)
-    rescue ArgumentError
+    rescue ArgumentError, TypeError
       date.to_s
     end
+
+    # Format date with time according to locale
+    # Usage: {{ page.date | localized_datetime }}
+    #
+    # Property 19: Date Locale Formatting
+    # Requirements: 8.5
+    def localized_datetime(date, format_type = nil)
+      return '' unless date
+      
+      site = @context.registers[:site]
+      lang = site.config['lang'] || site.config['default_lang'] || 'de'
+      
+      # Parse date if string
+      date = parse_datetime_value(date)
+      return '' unless date
+      
+      # Get format based on locale and format type
+      format = get_datetime_format(lang, format_type)
+      
+      date.strftime(format)
+    rescue ArgumentError, TypeError
+      date.to_s
+    end
+
+    private
+
+    # Parse a date value into a Date object
+    def parse_date_value(date)
+      return date if date.is_a?(Date)
+      return date.to_date if date.is_a?(Time) || date.is_a?(DateTime)
+      return Date.parse(date.to_s) if date.is_a?(String)
+      nil
+    rescue ArgumentError
+      nil
+    end
+
+    # Parse a date value into a Time object (preserves time component)
+    def parse_datetime_value(date)
+      return date if date.is_a?(Time)
+      return date.to_time if date.is_a?(DateTime)
+      return Time.parse(date.to_s) if date.is_a?(String)
+      return date.to_time if date.is_a?(Date)
+      nil
+    rescue ArgumentError
+      nil
+    end
+
+    # Get date format string based on locale and format type
+    # Property 19: Date Locale Formatting
+    def get_date_format(lang, format_type)
+      formats = {
+        'de' => {
+          nil => '%d.%m.%Y',           # Default: DD.MM.YYYY (de-CH format)
+          'short' => '%d.%m.%Y',       # DD.MM.YYYY
+          'long' => '%d. %B %Y',       # DD. Month YYYY
+          'iso' => '%Y-%m-%d'          # YYYY-MM-DD
+        },
+        'en' => {
+          nil => '%d/%m/%Y',           # Default: DD/MM/YYYY (en-GB format)
+          'short' => '%d/%m/%Y',       # DD/MM/YYYY
+          'long' => '%d %B %Y',        # DD Month YYYY
+          'iso' => '%Y-%m-%d'          # YYYY-MM-DD
+        }
+      }
+      
+      locale_formats = formats[lang] || formats['de']
+      locale_formats[format_type] || locale_formats[nil]
+    end
+
+    # Get datetime format string based on locale and format type
+    # Property 19: Date Locale Formatting
+    def get_datetime_format(lang, format_type)
+      formats = {
+        'de' => {
+          nil => '%d.%m.%Y %H:%M',           # Default: DD.MM.YYYY HH:MM
+          'short' => '%d.%m.%Y %H:%M',       # DD.MM.YYYY HH:MM
+          'long' => '%d. %B %Y, %H:%M Uhr',  # DD. Month YYYY, HH:MM Uhr
+          'iso' => '%Y-%m-%dT%H:%M:%S'       # ISO 8601
+        },
+        'en' => {
+          nil => '%d/%m/%Y %H:%M',           # Default: DD/MM/YYYY HH:MM
+          'short' => '%d/%m/%Y %H:%M',       # DD/MM/YYYY HH:MM
+          'long' => '%d %B %Y, %H:%M',       # DD Month YYYY, HH:MM
+          'iso' => '%Y-%m-%dT%H:%M:%S'       # ISO 8601
+        }
+      }
+      
+      locale_formats = formats[lang] || formats['de']
+      locale_formats[format_type] || locale_formats[nil]
+    end
+
+    public
     
     # Check if content matches current locale
     # Usage: {% if item | matches_locale: site.lang %}
