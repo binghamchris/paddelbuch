@@ -1,0 +1,114 @@
+---
+layout: default
+pageName: spot-details
+---
+<!--
+  Spot Detail Layout
+  
+  Displays a spot detail page with map (8 cols) + details panel (4 cols).
+  Shows: full description, GPS, approximate address, waterway link, 
+  paddle craft types, and last updated timestamp.
+  
+  Collection permalink: /einstiegsorte/:slug/
+  
+  Requirements: 3.6, 13.1
+-->
+
+{% assign current_locale = site.lang | default: 'de' %}
+{% assign spot = page %}
+{% assign spot_type_slug = spot.spotType_slug | default: spot.spot_type_slug %}
+{% assign is_rejected = spot.rejected %}
+
+<!-- Get spot type name -->
+{% assign spot_type = site.data.types.spot_types | where: "slug", spot_type_slug | first %}
+{% if spot_type %}
+  {% if current_locale == 'en' %}
+    {% assign spot_type_name = spot_type.name_en %}
+  {% else %}
+    {% assign spot_type_name = spot_type.name_de %}
+  {% endif %}
+{% else %}
+  {% assign spot_type_name = spot_type_slug %}
+{% endif %}
+
+<!-- Get waterway information -->
+{% assign waterway_slug = spot.waterway_slug %}
+{% if waterway_slug %}
+  {% if current_locale == 'en' %}
+    {% assign waterways_data = site.data.waterways_en %}
+  {% else %}
+    {% assign waterways_data = site.data.waterways_de %}
+  {% endif %}
+  {% assign waterway = waterways_data | where: "slug", waterway_slug | first %}
+{% endif %}
+
+<div class="container-fluid">
+  <div class="row">
+    <!-- Map Column (8 cols on large screens) -->
+    <div class="col-lg-8 p-0">
+      <div id="spot-map" class="map"></div>
+    </div>
+    
+    <!-- Details Panel (4 cols on large screens) -->
+    <div class="col-lg-4 spot-description">
+      <!-- Spot Icon and Type -->
+      <div class="spot-icon-div d-flex align-items-center">
+        {% include spot-icon.html type=spot_type_slug rejected=is_rejected variant="dark" size=20 %}
+        <span class="ms-2">{{ spot_type_name }}</span>
+      </div>
+      
+      <!-- Spot Title -->
+      <h1 class="spot-title">{{ spot.name }}</h1>
+      
+      {% if is_rejected %}
+        <!-- Rejected Spot: Show rejection reason (Requirement 3.7) -->
+        {% include rejected-spot-content.html spot=spot %}
+      {% else %}
+        <!-- Normal Spot: Show standard information (Requirement 3.6) -->
+        {% include spot-detail-content.html spot=spot waterway=waterway %}
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Map Initialization Script -->
+<script src="{{ '/assets/js/marker-styles.js' | relative_url }}"></script>
+<script src="{{ '/assets/js/layer-styles.js' | relative_url }}"></script>
+<script src="{{ '/assets/js/clipboard.js' | relative_url }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize map centered on spot location
+  {% assign lat = spot.location.lat | default: spot.location.latitude %}
+  {% assign lon = spot.location.lon | default: spot.location.lng | default: spot.location.longitude %}
+  
+  {% if lat and lon %}
+  var spotLat = {{ lat }};
+  var spotLon = {{ lon }};
+  
+  var map = L.map('spot-map', {
+    center: [spotLat, spotLon],
+    zoom: 15,
+    zoomControl: true
+  });
+  
+  // Add Mapbox tile layer
+  L.tileLayer('{{ site.mapbox_url | default: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" }}', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: 18
+  }).addTo(map);
+  
+  // Position zoom control at bottom-right
+  map.zoomControl.setPosition('bottomright');
+  
+  // Add spot marker
+  var spotType = '{{ spot_type_slug }}';
+  var isRejected = {{ is_rejected | default: false }};
+  var markerIcon = PaddelbuchMarkers.getMarkerIcon(spotType, isRejected);
+  
+  var marker = L.marker([spotLat, spotLon], { icon: markerIcon }).addTo(map);
+  
+  // Add popup with spot name
+  marker.bindPopup('<strong>{{ spot.name | escape }}</strong>');
+  {% endif %}
+});
+</script>

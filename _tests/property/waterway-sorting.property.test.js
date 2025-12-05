@@ -7,6 +7,12 @@
  * Property: For any set of waterways marked for menu display, lakes shall be sorted 
  * by area descending and limited to 10, and rivers shall be sorted by length descending 
  * and limited to 10.
+ * 
+ * **Feature: paddelbuch-swiss-paddle-map, Property 6: Waterway List Alphabetical Sorting**
+ * **Validates: Requirements 4.3, 4.4**
+ * 
+ * Property: For any list of waterways (lakes or rivers), the items shall be sorted 
+ * alphabetically by name in ascending order.
  */
 
 const fc = require('fast-check');
@@ -44,6 +50,34 @@ function sortWaterwaysAlphabetically(waterways) {
   return [...waterways].sort((a, b) => 
     (a.name || '').toLowerCase().localeCompare((b.name || '').toLowerCase())
   );
+}
+
+/**
+ * Get all lakes for a locale, sorted alphabetically by name
+ * Lakes are waterways with paddlingEnvironmentType_slug == "see"
+ * Implements Property 6: Waterway List Alphabetical Sorting
+ * Validates: Requirements 4.3
+ */
+function lakesAlphabetically(waterways, locale) {
+  if (!Array.isArray(waterways) || waterways.length === 0) return [];
+  
+  return waterways
+    .filter(w => w.locale === locale && w.paddlingEnvironmentType_slug === 'see')
+    .sort((a, b) => (a.name || '').toLowerCase().localeCompare((b.name || '').toLowerCase()));
+}
+
+/**
+ * Get all rivers for a locale, sorted alphabetically by name
+ * Rivers are waterways with paddlingEnvironmentType_slug == "fluss"
+ * Implements Property 6: Waterway List Alphabetical Sorting
+ * Validates: Requirements 4.4
+ */
+function riversAlphabetically(waterways, locale) {
+  if (!Array.isArray(waterways) || waterways.length === 0) return [];
+  
+  return waterways
+    .filter(w => w.locale === locale && w.paddlingEnvironmentType_slug === 'fluss')
+    .sort((a, b) => (a.name || '').toLowerCase().localeCompare((b.name || '').toLowerCase()));
 }
 
 // Arbitraries for generating test data
@@ -416,6 +450,264 @@ describe('Waterway Menu Sorting and Limiting - Property 5', () => {
             const lakes = topLakesByArea(waterways, 'de');
             // Should not throw and should return results
             return lakes.length === Math.min(waterways.length, 10);
+          }
+        ),
+        { numRuns: 100 }
+      );
+    });
+  });
+});
+
+/**
+ * Property 6: Waterway List Alphabetical Sorting
+ * 
+ * **Feature: paddelbuch-swiss-paddle-map, Property 6: Waterway List Alphabetical Sorting**
+ * **Validates: Requirements 4.3, 4.4**
+ * 
+ * Property: For any list of waterways (lakes or rivers), the items shall be sorted 
+ * alphabetically by name in ascending order.
+ */
+describe('Waterway List Alphabetical Sorting - Property 6', () => {
+  
+  describe('Lakes list page (sorted alphabetically)', () => {
+    test('lakes are sorted alphabetically by name (ascending, case-insensitive)', () => {
+      fc.assert(
+        fc.property(
+          waterwaysArrayArb,
+          localeArb,
+          (waterways, locale) => {
+            const lakes = lakesAlphabetically(waterways, locale);
+            
+            // Check that lakes are sorted alphabetically
+            for (let i = 1; i < lakes.length; i++) {
+              const prevName = (lakes[i - 1].name || '').toLowerCase();
+              const currName = (lakes[i].name || '').toLowerCase();
+              if (prevName.localeCompare(currName) > 0) {
+                return false; // Not in alphabetical order
+              }
+            }
+            return true;
+          }
+        ),
+        { numRuns: 100 }
+      );
+    });
+
+    test('lakes list only contains waterways with paddlingEnvironmentType_slug "see"', () => {
+      fc.assert(
+        fc.property(
+          waterwaysArrayArb,
+          localeArb,
+          (waterways, locale) => {
+            const lakes = lakesAlphabetically(waterways, locale);
+            return lakes.every(lake => lake.paddlingEnvironmentType_slug === 'see');
+          }
+        ),
+        { numRuns: 100 }
+      );
+    });
+
+    test('lakes list only contains waterways matching the locale', () => {
+      fc.assert(
+        fc.property(
+          waterwaysArrayArb,
+          localeArb,
+          (waterways, locale) => {
+            const lakes = lakesAlphabetically(waterways, locale);
+            return lakes.every(lake => lake.locale === locale);
+          }
+        ),
+        { numRuns: 100 }
+      );
+    });
+
+    test('lakes list includes all lakes for the locale (no limit)', () => {
+      fc.assert(
+        fc.property(
+          waterwaysArrayArb,
+          localeArb,
+          (waterways, locale) => {
+            const lakes = lakesAlphabetically(waterways, locale);
+            const expectedCount = waterways.filter(w => 
+              w.locale === locale && w.paddlingEnvironmentType_slug === 'see'
+            ).length;
+            return lakes.length === expectedCount;
+          }
+        ),
+        { numRuns: 100 }
+      );
+    });
+
+    test('lakes list sorting is idempotent', () => {
+      fc.assert(
+        fc.property(
+          waterwaysArrayArb,
+          localeArb,
+          (waterways, locale) => {
+            const sortedOnce = lakesAlphabetically(waterways, locale);
+            const sortedTwice = lakesAlphabetically(sortedOnce, locale);
+            
+            return sortedOnce.length === sortedTwice.length &&
+                   sortedOnce.every((item, i) => item.slug === sortedTwice[i].slug);
+          }
+        ),
+        { numRuns: 100 }
+      );
+    });
+  });
+
+  describe('Rivers list page (sorted alphabetically)', () => {
+    test('rivers are sorted alphabetically by name (ascending, case-insensitive)', () => {
+      fc.assert(
+        fc.property(
+          waterwaysArrayArb,
+          localeArb,
+          (waterways, locale) => {
+            const rivers = riversAlphabetically(waterways, locale);
+            
+            // Check that rivers are sorted alphabetically
+            for (let i = 1; i < rivers.length; i++) {
+              const prevName = (rivers[i - 1].name || '').toLowerCase();
+              const currName = (rivers[i].name || '').toLowerCase();
+              if (prevName.localeCompare(currName) > 0) {
+                return false; // Not in alphabetical order
+              }
+            }
+            return true;
+          }
+        ),
+        { numRuns: 100 }
+      );
+    });
+
+    test('rivers list only contains waterways with paddlingEnvironmentType_slug "fluss"', () => {
+      fc.assert(
+        fc.property(
+          waterwaysArrayArb,
+          localeArb,
+          (waterways, locale) => {
+            const rivers = riversAlphabetically(waterways, locale);
+            return rivers.every(river => river.paddlingEnvironmentType_slug === 'fluss');
+          }
+        ),
+        { numRuns: 100 }
+      );
+    });
+
+    test('rivers list only contains waterways matching the locale', () => {
+      fc.assert(
+        fc.property(
+          waterwaysArrayArb,
+          localeArb,
+          (waterways, locale) => {
+            const rivers = riversAlphabetically(waterways, locale);
+            return rivers.every(river => river.locale === locale);
+          }
+        ),
+        { numRuns: 100 }
+      );
+    });
+
+    test('rivers list includes all rivers for the locale (no limit)', () => {
+      fc.assert(
+        fc.property(
+          waterwaysArrayArb,
+          localeArb,
+          (waterways, locale) => {
+            const rivers = riversAlphabetically(waterways, locale);
+            const expectedCount = waterways.filter(w => 
+              w.locale === locale && w.paddlingEnvironmentType_slug === 'fluss'
+            ).length;
+            return rivers.length === expectedCount;
+          }
+        ),
+        { numRuns: 100 }
+      );
+    });
+
+    test('rivers list sorting is idempotent', () => {
+      fc.assert(
+        fc.property(
+          waterwaysArrayArb,
+          localeArb,
+          (waterways, locale) => {
+            const sortedOnce = riversAlphabetically(waterways, locale);
+            const sortedTwice = riversAlphabetically(sortedOnce, locale);
+            
+            return sortedOnce.length === sortedTwice.length &&
+                   sortedOnce.every((item, i) => item.slug === sortedTwice[i].slug);
+          }
+        ),
+        { numRuns: 100 }
+      );
+    });
+  });
+
+  describe('Edge cases for list pages', () => {
+    test('empty waterways array returns empty result for lakes list', () => {
+      fc.assert(
+        fc.property(
+          localeArb,
+          (locale) => {
+            const lakes = lakesAlphabetically([], locale);
+            return lakes.length === 0;
+          }
+        ),
+        { numRuns: 100 }
+      );
+    });
+
+    test('empty waterways array returns empty result for rivers list', () => {
+      fc.assert(
+        fc.property(
+          localeArb,
+          (locale) => {
+            const rivers = riversAlphabetically([], locale);
+            return rivers.length === 0;
+          }
+        ),
+        { numRuns: 100 }
+      );
+    });
+
+    test('null/undefined waterways returns empty result for list pages', () => {
+      fc.assert(
+        fc.property(
+          localeArb,
+          (locale) => {
+            const lakesNull = lakesAlphabetically(null, locale);
+            const lakesUndefined = lakesAlphabetically(undefined, locale);
+            const riversNull = riversAlphabetically(null, locale);
+            const riversUndefined = riversAlphabetically(undefined, locale);
+            
+            return lakesNull.length === 0 && 
+                   lakesUndefined.length === 0 &&
+                   riversNull.length === 0 &&
+                   riversUndefined.length === 0;
+          }
+        ),
+        { numRuns: 100 }
+      );
+    });
+
+    test('waterways with empty names are handled correctly', () => {
+      fc.assert(
+        fc.property(
+          fc.array(
+            fc.record({
+              slug: fc.string({ minLength: 1, maxLength: 50 }),
+              name: fc.oneof(fc.constant(''), fc.constant(null), fc.constant(undefined), fc.string({ minLength: 1, maxLength: 100 })),
+              locale: fc.constant('de'),
+              paddlingEnvironmentType_slug: fc.constant('see'),
+              showInMenu: fc.boolean(),
+              area: fc.option(fc.float({ min: 0, max: 1000000, noNaN: true }), { nil: undefined })
+            }),
+            { minLength: 1, maxLength: 20 }
+          ),
+          (waterways) => {
+            // Should not throw
+            const lakes = lakesAlphabetically(waterways, 'de');
+            return Array.isArray(lakes);
           }
         ),
         { numRuns: 100 }

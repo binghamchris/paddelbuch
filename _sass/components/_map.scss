@@ -180,3 +180,141 @@
     width: 55%;
   }
 }
+
+/* Spot Popup Styles */
+.spot-popup {
+  min-width: 250px;
+  max-width: 350px;
+}
+
+.spot-popup-header {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid $secondary-blue;
+  margin-bottom: 0.75em;
+  padding-bottom: 0.75em;
+}
+
+.spot-popup-header .spot-icon {
+  margin-right: 0.5em;
+  flex-shrink: 0;
+}
+
+.spot-popup-name {
+  font-family: $font-brand;
+  font-size: 1.1em;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.spot-popup-description {
+  margin-bottom: 0.75em;
+  font-size: 0.9em;
+  line-height: 1.4;
+}
+
+.spot-popup-description p {
+  margin-bottom: 0;
+}
+
+.spot-popup-gps,
+.spot-popup-address,
+.spot-popup-craft-types {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 0.5em;
+  font-size: 0.9em;
+}
+
+.spot-popup-label {
+  font-weight: 500;
+  margin-right: 0.5em;
+  white-space: nowrap;
+}
+
+.spot-popup-value {
+  flex: 1;
+  word-break: break-word;
+}
+
+.spot-popup .copy-btn {
+  margin-left: 0.5em;
+  padding: 0.15em 0.35em;
+  border-color: $white-40pc;
+  flex-shrink: 0;
+}
+
+.spot-popup .copy-btn:hover {
+  background-color: $purple-1;
+  border-color: $purple-1;
+}
+
+.spot-popup .copy-btn.copy-success {
+  background-color: $green-1;
+  border-color: $green-1;
+}
+
+.spot-popup .copy-btn.copy-error {
+  background-color: $danger-red;
+  border-color: $danger-red;
+}
+
+.spot-popup-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1em;
+  padding-top: 0.75em;
+  border-top: 1px solid $secondary-blue;
+}
+
+.spot-popup-actions .navigate-btn {
+  border-color: $white-40pc;
+}
+
+.spot-popup-actions .navigate-btn:hover {
+  background-color: $purple-1;
+  border-color: $purple-1;
+  color: $white;
+}
+
+.spot-popup-details-link {
+  background-color: $secondary-blue;
+  border-color: $secondary-blue;
+}
+
+.spot-popup-details-link:hover {
+  background-color: $purple-1;
+  border-color: $purple-1;
+}
+
+.navigate-icon {
+  margin-right: 0.25em;
+}
+
+/* Rejected Spot Popup Styles (Requirement 3.7) */
+.rejected-spot-popup {
+  .spot-popup-warning {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.75em;
+    font-size: 0.9em;
+    font-weight: 500;
+  }
+
+  .spot-popup-rejection-reason {
+    margin-bottom: 0.75em;
+    font-size: 0.9em;
+    line-height: 1.4;
+
+    .spot-popup-label {
+      display: block;
+      margin-bottom: 0.25em;
+    }
+
+    p {
+      margin-bottom: 0;
+      color: rgba($white, 0.9);
+    }
+  }
+}

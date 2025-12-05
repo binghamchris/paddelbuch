@@ -29,6 +29,11 @@ spot_types:
   emergency: "Emergency Exit Spots"
   no_entry: "No Entry Spot"
 
+# Rejected spots
+rejected:
+  not_accessible: "This location is not accessible for paddlers."
+  reason: "Reason"
+
 # Spot type icons (alt text)
 spot_icons:
   entry_exit: "Entry and exit spot icon"

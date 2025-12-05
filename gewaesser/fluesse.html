@@ -1,0 +1,43 @@
+---
+layout: default
+title: Flüsse
+pageName: rivers
+permalink: /gewaesser/fluesse/
+---
+<!--
+  Rivers List Page
+  
+  Displays all rivers (waterways with paddlingEnvironmentType 'fluss')
+  sorted alphabetically by name.
+  
+  Path: /gewaesser/fluesse
+  
+  Requirements: 4.4
+  Property 6: Waterway List Alphabetical Sorting
+-->
+
+{% assign current_locale = site.lang | default: 'de' %}
+{% assign rivers = site.data.waterways | rivers_alphabetically: current_locale %}
+
+<div class="container rivers-list">
+  <h2>{% t waterways.rivers %}</h2>
+  
+  <table class="table">
+    <thead>
+      <tr>
+        <th>{% t labels.name %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for river in rivers %}
+      <tr>
+        <td>
+          <a href="{{ '/gewaesser/' | append: river.slug | append: '/' | relative_url }}">
+            {{ river.name }}
+          </a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

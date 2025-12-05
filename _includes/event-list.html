@@ -1,0 +1,75 @@
+<!--
+  Event Notice List Include
+  
+  Displays a list of active waterway event notices for a specific waterway.
+  Filters to show only notices affecting the waterway with future end dates.
+  
+  Parameters:
+  - include.waterway_slug: The slug of the waterway to filter notices for
+  
+  Requirements: 7.5
+  Property 17: Waterway Event Notice List Filtering
+  
+  For any waterway detail page, the event notice list shall contain only notices 
+  that affect that waterway AND have an end date in the future.
+-->
+
+{% assign waterway_slug = include.waterway_slug %}
+{% assign current_locale = site.lang | default: 'de' %}
+{% assign today = 'now' | date: '%Y-%m-%d' %}
+
+<!-- Get notices data based on locale -->
+{% if current_locale == 'en' %}
+  {% assign all_notices = site.data.notices_en %}
+{% else %}
+  {% assign all_notices = site.data.notices_de %}
+{% endif %}
+
+<!-- Filter notices: must affect this waterway AND have future end date -->
+{% assign active_notices = "" | split: "" %}
+{% for notice in all_notices %}
+  {% assign notice_end_date = notice.endDate | date: '%Y-%m-%d' %}
+  {% if notice_end_date >= today %}
+    {% for ww_slug in notice.waterways %}
+      {% if ww_slug == waterway_slug %}
+        {% assign active_notices = active_notices | push: notice %}
+        {% break %}
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+{% endfor %}
+
+<div class="event-notices-section mt-4">
+  <h2>{% t event_notices.waterway_notices %}</h2>
+  
+  {% if active_notices.size > 0 %}
+  <table class="table event-notices-table">
+    <thead>
+      <tr>
+        <th>{% t labels.name %}</th>
+        <th>{% t event_notices.approx_end_date %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for notice in active_notices %}
+      <tr>
+        <td>
+          <a href="{{ '/gewaesserereignisse/' | append: notice.slug | append: '/' | relative_url }}">
+            {{ notice.name }}
+          </a>
+        </td>
+        <td>
+          {% if current_locale == 'en' %}
+            {{ notice.endDate | date: "%d/%m/%Y" }}
+          {% else %}
+            {{ notice.endDate | date: "%d.%m.%Y" }}
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="text-muted">{% t event_notices.no_notices %}</p>
+  {% endif %}
+</div>

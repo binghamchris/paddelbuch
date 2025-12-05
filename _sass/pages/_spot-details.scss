@@ -64,4 +64,44 @@
     padding-left: 1rem;
   }
 
+  // Rejected spot styling (Requirement 3.7)
+  .rejected-spot-content {
+    .alert-warning {
+      background-color: rgba($warning-yellow, 0.15);
+      border-color: $warning-yellow;
+      color: darken($warning-yellow, 30%);
+    }
+
+    .rejection-reason {
+      h2 {
+        font-size: 1.2rem;
+        color: $swisscanoe-blue;
+        margin-bottom: 0.75rem;
+      }
+
+      .rejection-description {
+        color: $swisscanoe-blue;
+        line-height: 1.6;
+      }
+    }
+  }
+
+  // Full description section
+  .spot-full-description {
+    h2 {
+      font-size: 1.2rem;
+      color: $swisscanoe-blue;
+      margin-bottom: 0.75rem;
+    }
+
+    .description-content {
+      color: $swisscanoe-blue;
+      line-height: 1.6;
+
+      p {
+        margin-bottom: 1rem;
+      }
+    }
+  }
+
 }
