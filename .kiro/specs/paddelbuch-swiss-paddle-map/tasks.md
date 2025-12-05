@@ -433,7 +433,7 @@ This plan covers the complete rebuild of Paddel Buch from Gatsby to Jekyll, impl
     - **Property 25: Data Loading Idempotence**
     - **Validates: Requirements 14.1, 14.2**
 
-- [ ] 25. Checkpoint - Verify dynamic data loading
+- [x] 25. Checkpoint - Verify dynamic data loading
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Phase 11: Build and Deployment

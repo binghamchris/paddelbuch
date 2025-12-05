@@ -36,11 +36,15 @@ const localeConfig = {
  * @returns {Date|null} Parsed Date object or null if invalid
  */
 function parseDate(dateValue) {
-  if (!dateValue) return null;
+  // Handle null/undefined explicitly - don't use !dateValue as 0 is a valid timestamp
+  if (dateValue === null || dateValue === undefined) return null;
   
   if (dateValue instanceof Date) {
     return isNaN(dateValue.getTime()) ? null : dateValue;
   }
+  
+  // Handle empty strings
+  if (dateValue === '') return null;
   
   const date = new Date(dateValue);
   return isNaN(date.getTime()) ? null : date;
