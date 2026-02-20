@@ -669,3 +669,137 @@ RSpec.describe 'Contentful Sync Properties' do
     end
   end
 end
+
+# frozen_string_literal: true
+
+RSpec.describe 'Contentful Sync Properties (continued)' do
+  # Feature: contentful-sync-integration, Property 9: Post-sync cache persistence
+  # **Validates: Requirements 4.1, 4.2, 5.2**
+  describe 'Property 9: Post-sync cache persistence' do
+    let(:tmpdir) { Dir.mktmpdir }
+    let(:site_source) { tmpdir }
+    let(:data_dir) { File.join(tmpdir, '_data') }
+
+    before do
+      FileUtils.mkdir_p(File.join(data_dir, 'types'))
+    end
+
+    around do |example|
+      saved_env = %w[CONTENTFUL_SPACE_ID CONTENTFUL_ACCESS_TOKEN CONTENTFUL_ENVIRONMENT CONTENTFUL_FORCE_SYNC].map do |key|
+        [key, ENV[key]]
+      end.to_h
+      example.run
+    ensure
+      saved_env.each { |key, val| val.nil? ? ENV.delete(key) : ENV[key] = val }
+      FileUtils.remove_entry(tmpdir) if Dir.exist?(tmpdir)
+    end
+
+    def build_mock_site(force_config: false)
+      site = double('site')
+      allow(site).to receive(:source).and_return(site_source)
+      allow(site).to receive(:config).and_return({ 'force_contentful_sync' => force_config })
+      allow(site).to receive(:data).and_return({})
+      site
+    end
+
+    def build_mock_client(new_token)
+      client = double('Contentful::Client')
+      entries = double('entries')
+      allow(entries).to receive(:map).and_return([])
+      allow(client).to receive(:entries).and_return(entries)
+
+      sync_page = double('sync_page')
+      allow(sync_page).to receive(:items).and_return([double('item')])
+      allow(sync_page).to receive(:next_page?).and_return(false)
+      allow(sync_page).to receive(:next_sync_url).and_return(
+        "https://cdn.contentful.com/spaces/test/sync?sync_token=#{new_token}"
+      )
+      sync = double('sync')
+      allow(sync).to receive(:first_page).and_return(sync_page)
+      allow(client).to receive(:sync).and_return(sync)
+
+      client
+    end
+
+    it 'updates cache metadata with new sync token, timestamp, space_id, and environment after any successful sync' do
+      property_of {
+        Rantly {
+          sync_type = choose(:initial, :incremental, :forced)
+          new_token = sized(range(10, 40)) { string(:alpha) }
+          space_id = sized(range(5, 15)) { string(:alpha) }
+          environment = choose('master', 'staging', 'development', 'preview')
+
+          {
+            sync_type: sync_type,
+            new_token: new_token,
+            space_id: space_id,
+            environment: environment
+          }
+        }
+      }.check(100) { |data|
+        before_time = Time.now
+
+        ENV['CONTENTFUL_SPACE_ID'] = data[:space_id]
+        ENV['CONTENTFUL_ACCESS_TOKEN'] = 'test_token'
+        ENV['CONTENTFUL_ENVIRONMENT'] = data[:environment]
+        ENV.delete('CONTENTFUL_FORCE_SYNC')
+
+        force_config = false
+
+        case data[:sync_type]
+        when :initial
+          # No cache file → triggers initial/full sync
+          cache_path = File.join(data_dir, '.contentful_sync_cache.yml')
+          File.delete(cache_path) if File.exist?(cache_path)
+        when :incremental
+          # Valid cache with matching config → triggers incremental sync (items > 0 means changes)
+          cache = CacheMetadata.new(data_dir)
+          cache.sync_token = 'old_token_to_be_replaced'
+          cache.last_sync_at = '2020-01-01T00:00:00+00:00'
+          cache.space_id = data[:space_id]
+          cache.environment = data[:environment]
+          cache.save
+        when :forced
+          # Valid cache but force sync enabled
+          cache = CacheMetadata.new(data_dir)
+          cache.sync_token = 'old_token_to_be_replaced'
+          cache.last_sync_at = '2020-01-01T00:00:00+00:00'
+          cache.space_id = data[:space_id]
+          cache.environment = data[:environment]
+          cache.save
+          ENV['CONTENTFUL_FORCE_SYNC'] = 'true'
+        end
+
+        site = build_mock_site(force_config: force_config)
+        mock_client = build_mock_client(data[:new_token])
+
+        fetcher = Jekyll::ContentfulFetcher.new
+        allow(fetcher).to receive(:client).and_return(mock_client)
+
+        fetcher.generate(site)
+
+        after_time = Time.now
+
+        # Load the cache metadata and verify all fields
+        persisted_cache = CacheMetadata.new(data_dir)
+        loaded = persisted_cache.load
+        expect(loaded).to be true
+
+        expect(persisted_cache.sync_token).to eq(data[:new_token])
+        expect(persisted_cache.space_id).to eq(data[:space_id])
+        expect(persisted_cache.environment).to eq(data[:environment])
+
+        # Verify last_sync_at is a valid ISO 8601 timestamp and is recent
+        # Note: iso8601 truncates to whole seconds, so we floor before_time
+        expect(persisted_cache.last_sync_at).not_to be_nil
+        parsed_time = Time.iso8601(persisted_cache.last_sync_at)
+        expect(parsed_time).to be >= Time.at(before_time.to_i)
+        expect(parsed_time).to be <= after_time
+
+        # Clean up for next iteration
+        cache_path = File.join(data_dir, '.contentful_sync_cache.yml')
+        File.delete(cache_path) if File.exist?(cache_path)
+      }
+    end
+  end
+end
