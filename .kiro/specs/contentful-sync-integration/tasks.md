@@ -102,7 +102,7 @@ Replace the `jekyll-contentful-data-import` gem with a custom Jekyll Generator p
     - **Property 6: Data file YAML round-trip**
     - **Validates: Requirements 9.8**
 
-  - [~] 6.5 Write unit tests for ContentfulMappers
+  - [x] 6.5 Write unit tests for ContentfulMappers
     - Test each mapper method with sample Contentful entry doubles
     - Test missing fields, nil references, rich text conversion
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 2.10_
