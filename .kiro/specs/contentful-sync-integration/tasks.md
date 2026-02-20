@@ -82,7 +82,7 @@ Replace the `jekyll-contentful-data-import` gem with a custom Jekyll Generator p
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 6. Refactor ContentfulMappers module
-  - [~] 6.1 Refactor contentful_mappers.rb to standalone module
+  - [x] 6.1 Refactor contentful_mappers.rb to standalone module
     - Rewrite `_plugins/contentful_mappers.rb` as a standalone `ContentfulMappers` module (no `Base` class inheritance)
     - Convert each mapper class to a module method: `map_spot`, `map_waterway`, `map_obstacle`, `map_protected_area`, `map_event_notice`, `map_type`, `map_static_page`
     - Implement `safe_field(entry, field_name)` helper that rescues Contentful errors and returns nil

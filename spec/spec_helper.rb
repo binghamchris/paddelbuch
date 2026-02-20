@@ -5,9 +5,8 @@ require 'jekyll'
 require 'contentful'
 
 # Require plugin files from _plugins/ directory
-# Some plugins may depend on gems or classes not available in the test environment
-# (e.g., contentful_mappers.rb depends on jekyll-contentful-data-import Base class
-# until it is refactored). We load what we can and skip the rest gracefully.
+# Some plugins may depend on gems or classes not available in the test environment.
+# We load what we can and skip the rest gracefully.
 Dir[File.join(File.dirname(__FILE__), '..', '_plugins', '*.rb')].sort.each do |file|
   begin
     require file
