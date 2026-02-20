@@ -1351,5 +1351,35 @@ RSpec.describe ContentfulMappers do
       expect(ContentfulMappers.render_rich_text(content)).to eq('<p><u>term</u></p>')
     end
   end
+
+  # --- Fix checking: multiple simultaneous marks ---
+
+  describe 'Fix checking: multiple simultaneous marks' do
+    it 'nests bold and code marks' do
+      content = [{ 'nodeType' => 'paragraph', 'content' => [
+        { 'nodeType' => 'text', 'value' => 'term', 'marks' => [{ 'type' => 'bold' }, { 'type' => 'code' }] }
+      ] }]
+      result = ContentfulMappers.render_rich_text(content)
+      expect(result).to eq('<p><code><strong>term</strong></code></p>')
+    end
+
+    it 'nests italic and underline marks' do
+      content = [{ 'nodeType' => 'paragraph', 'content' => [
+        { 'nodeType' => 'text', 'value' => 'note', 'marks' => [{ 'type' => 'italic' }, { 'type' => 'underline' }] }
+      ] }]
+      result = ContentfulMappers.render_rich_text(content)
+      expect(result).to eq('<p><u><em>note</em></u></p>')
+    end
+
+    it 'nests all four mark types' do
+      content = [{ 'nodeType' => 'paragraph', 'content' => [
+        { 'nodeType' => 'text', 'value' => 'all', 'marks' => [
+          { 'type' => 'bold' }, { 'type' => 'italic' }, { 'type' => 'underline' }, { 'type' => 'code' }
+        ] }
+      ] }]
+      result = ContentfulMappers.render_rich_text(content)
+      expect(result).to eq('<p><code><u><em><strong>all</strong></em></u></code></p>')
+    end
+  end
 end
 
