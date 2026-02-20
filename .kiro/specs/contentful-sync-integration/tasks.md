@@ -145,7 +145,7 @@ Replace the `jekyll-contentful-data-import` gem with a custom Jekyll Generator p
     - **Property 9: Post-sync cache persistence**
     - **Validates: Requirements 4.1, 4.2, 5.2**
 
-  - [~] 8.6 Write property test: Content type to file path mapping
+  - [x] 8.6 Write property test: Content type to file path mapping
     - **Property 11: Content type to file path mapping**
     - **Validates: Requirements 1.7, 1.8, 9.1, 9.2, 9.3, 9.4, 9.5, 9.6, 9.7**
 

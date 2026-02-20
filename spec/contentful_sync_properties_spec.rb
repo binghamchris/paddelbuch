@@ -803,3 +803,207 @@ RSpec.describe 'Contentful Sync Properties (continued)' do
     end
   end
 end
+
+# frozen_string_literal: true
+
+RSpec.describe 'Contentful Sync Properties (Property 11)' do
+  # Feature: contentful-sync-integration, Property 11: Content type to file path mapping
+  # **Validates: Requirements 1.7, 1.8, 9.1, 9.2, 9.3, 9.4, 9.5, 9.6, 9.7**
+  describe 'Property 11: Content type to file path mapping' do
+    let(:tmpdir) { Dir.mktmpdir }
+    let(:site_source) { tmpdir }
+    let(:data_dir) { File.join(tmpdir, '_data') }
+
+    # All 13 content types with their expected filenames and mapper methods
+    CONTENT_TYPE_MAP = {
+      'spot'                    => { filename: 'spots',                            mapper: :map_spot },
+      'waterway'                => { filename: 'waterways',                        mapper: :map_waterway },
+      'obstacle'                => { filename: 'obstacles',                        mapper: :map_obstacle },
+      'protectedArea'           => { filename: 'protected_areas',                  mapper: :map_protected_area },
+      'waterwayEventNotice'     => { filename: 'notices',                          mapper: :map_event_notice },
+      'spotType'                => { filename: 'types/spot_types',                 mapper: :map_type },
+      'obstacleType'            => { filename: 'types/obstacle_types',             mapper: :map_type },
+      'paddleCraftType'         => { filename: 'types/paddle_craft_types',         mapper: :map_type },
+      'paddlingEnvironmentType' => { filename: 'types/paddling_environment_types', mapper: :map_type },
+      'protectedAreaType'       => { filename: 'types/protected_area_types',       mapper: :map_type },
+      'dataSourceType'          => { filename: 'types/data_source_types',          mapper: :map_type },
+      'dataLicenseType'         => { filename: 'types/data_license_types',         mapper: :map_type },
+      'staticPage'              => { filename: 'static_pages',                     mapper: :map_static_page }
+    }.freeze
+
+    ALL_CONTENT_TYPE_KEYS = CONTENT_TYPE_MAP.keys.freeze
+
+    before do
+      FileUtils.mkdir_p(File.join(data_dir, 'types'))
+    end
+
+    around do |example|
+      saved_env = %w[CONTENTFUL_SPACE_ID CONTENTFUL_ACCESS_TOKEN CONTENTFUL_ENVIRONMENT CONTENTFUL_FORCE_SYNC].map do |key|
+        [key, ENV[key]]
+      end.to_h
+      example.run
+    ensure
+      saved_env.each { |key, val| val.nil? ? ENV.delete(key) : ENV[key] = val }
+      FileUtils.remove_entry(tmpdir) if Dir.exist?(tmpdir)
+    end
+
+    def build_mock_site
+      site = double('site')
+      allow(site).to receive(:source).and_return(site_source)
+      allow(site).to receive(:config).and_return({})
+      @site_data = {}
+      allow(site).to receive(:data).and_return(@site_data)
+      site
+    end
+
+    def build_mock_entry(slug_value)
+      entry = double("Entry-#{slug_value}")
+      sys = {
+        id: slug_value,
+        locale: 'de',
+        created_at: Time.now,
+        updated_at: Time.now
+      }
+      allow(entry).to receive(:sys).and_return(sys)
+      allow(entry).to receive(:respond_to?).with(anything).and_return(false)
+      allow(entry).to receive(:respond_to?).with(:slug).and_return(true)
+      allow(entry).to receive(:slug).and_return(slug_value)
+      # For type entries that need name_de/name_en/name
+      allow(entry).to receive(:respond_to?).with(:name_de).and_return(true)
+      allow(entry).to receive(:name_de).and_return("Name DE #{slug_value}")
+      allow(entry).to receive(:respond_to?).with(:name_en).and_return(true)
+      allow(entry).to receive(:name_en).and_return("Name EN #{slug_value}")
+      allow(entry).to receive(:respond_to?).with(:name).and_return(true)
+      allow(entry).to receive(:name).and_return("Name #{slug_value}")
+      entry
+    end
+
+    def build_mock_client(selected_types, entries_per_type)
+      client = double('Contentful::Client')
+
+      # For each content type, set up entries response
+      ALL_CONTENT_TYPE_KEYS.each do |ct|
+        if selected_types.include?(ct)
+          slugs = entries_per_type[ct]
+          mock_entries = slugs.map { |s| build_mock_entry(s) }
+          allow(client).to receive(:entries)
+            .with(hash_including(content_type: ct))
+            .and_return(mock_entries)
+        else
+          allow(client).to receive(:entries)
+            .with(hash_including(content_type: ct))
+            .and_return([])
+        end
+      end
+
+      # Sync setup for initial sync
+      sync_page = double('sync_page')
+      allow(sync_page).to receive(:items).and_return([double('item')])
+      allow(sync_page).to receive(:next_page?).and_return(false)
+      allow(sync_page).to receive(:next_sync_url).and_return(
+        'https://cdn.contentful.com/spaces/test/sync?sync_token=prop11_token'
+      )
+      sync = double('sync')
+      allow(sync).to receive(:first_page).and_return(sync_page)
+      allow(client).to receive(:sync).and_return(sync)
+
+      client
+    end
+
+    it 'writes each content type to the correct file path and updates site.data accordingly' do
+      property_of {
+        Rantly {
+          # Select a random non-empty subset of content types (at least 1, up to all 13)
+          count = range(1, ALL_CONTENT_TYPE_KEYS.length)
+          selected = ALL_CONTENT_TYPE_KEYS.sample(count)
+
+          # For each selected type, generate 1-3 entry slugs
+          entries_per_type = {}
+          selected.each do |ct|
+            num_entries = range(1, 3)
+            entries_per_type[ct] = Array.new(num_entries) { |i| "#{ct.downcase}-slug-#{i}-#{rand(1000)}" }
+          end
+
+          { selected: selected, entries_per_type: entries_per_type }
+        }
+      }.check(100) { |data|
+        selected_types = data[:selected]
+        entries_per_type = data[:entries_per_type]
+
+        ENV['CONTENTFUL_SPACE_ID'] = 'test_space'
+        ENV['CONTENTFUL_ACCESS_TOKEN'] = 'test_token'
+        ENV['CONTENTFUL_ENVIRONMENT'] = 'master'
+        ENV.delete('CONTENTFUL_FORCE_SYNC')
+
+        # Remove any existing cache to trigger full sync
+        cache_path = File.join(data_dir, '.contentful_sync_cache.yml')
+        File.delete(cache_path) if File.exist?(cache_path)
+
+        site = build_mock_site
+        mock_client = build_mock_client(selected_types, entries_per_type)
+
+        fetcher = Jekyll::ContentfulFetcher.new
+        allow(fetcher).to receive(:client).and_return(mock_client)
+
+        fetcher.generate(site)
+
+        # Verify each of the 13 content types
+        ALL_CONTENT_TYPE_KEYS.each do |ct|
+          config = CONTENT_TYPE_MAP[ct]
+          filename = config[:filename]
+          filepath = File.join(data_dir, "#{filename}.yml")
+
+          # 1. The YAML file must exist
+          expect(File.exist?(filepath)).to be(true),
+            "Expected file #{filepath} to exist for content type '#{ct}'"
+
+          # 2. Read back the file and verify content
+          file_data = YAML.safe_load(File.read(filepath), permitted_classes: [Time, Date])
+
+          if selected_types.include?(ct)
+            slugs = entries_per_type[ct]
+            expect(file_data.length).to eq(slugs.length),
+              "Expected #{slugs.length} entries in #{filepath} for '#{ct}', got #{file_data.length}"
+
+            file_slugs = file_data.map { |d| d['slug'] }
+            slugs.each do |slug|
+              expect(file_slugs).to include(slug),
+                "Expected slug '#{slug}' in #{filepath} for content type '#{ct}'"
+            end
+          else
+            expect(file_data).to eq([]),
+              "Expected empty array in #{filepath} for non-selected content type '#{ct}'"
+          end
+
+          # 3. Verify site.data is updated at the correct key path
+          keys = filename.split('/')
+          if keys.length == 1
+            site_value = @site_data[keys[0]]
+            expect(site_value).not_to be_nil,
+              "Expected site.data['#{keys[0]}'] to be set for content type '#{ct}'"
+            expect(site_value.length).to eq(file_data.length),
+              "Expected site.data['#{keys[0]}'] to have #{file_data.length} entries for '#{ct}'"
+          else
+            parent = keys[0]
+            child = keys[1]
+            expect(@site_data).to have_key(parent),
+              "Expected site.data to have key '#{parent}' for content type '#{ct}'"
+            expect(@site_data[parent]).to have_key(child),
+              "Expected site.data['#{parent}'] to have key '#{child}' for content type '#{ct}'"
+            site_value = @site_data[parent][child]
+            expect(site_value.length).to eq(file_data.length),
+              "Expected site.data['#{parent}']['#{child}'] to have #{file_data.length} entries for '#{ct}'"
+          end
+        end
+
+        # Clean up files for next iteration
+        CONTENT_TYPE_MAP.each_value do |config|
+          fp = File.join(data_dir, "#{config[:filename]}.yml")
+          File.delete(fp) if File.exist?(fp)
+        end
+        File.delete(cache_path) if File.exist?(cache_path)
+        @site_data.clear
+      }
+    end
+  end
+end
