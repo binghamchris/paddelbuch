@@ -3,7 +3,7 @@
 ## 1. Add mark-to-tag mapping and marks processing to render_rich_text
 
 - [x] 1.1 Add a `MARK_TAG_MAP` constant to the `ContentfulMappers` module mapping Contentful mark types to HTML tag names: `'code' => 'code'`, `'bold' => 'strong'`, `'italic' => 'em'`, `'underline' => 'u'`
-- [-] 1.2 Update the `when 'text'` clause in `render_rich_text` to extract the marks array from the node and wrap the text value in the corresponding HTML tags for each mark, nesting tags for multiple marks, and leaving unmarked text unchanged
+- [x] 1.2 Update the `when 'text'` clause in `render_rich_text` to extract the marks array from the node and wrap the text value in the corresponding HTML tags for each mark, nesting tags for multiple marks, and leaving unmarked text unchanged
 
 ## 2. Write exploratory tests to confirm the bug on unfixed code
 
