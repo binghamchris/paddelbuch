@@ -878,6 +878,68 @@ RSpec.describe ContentfulMappers do
     end
   end
 
+  # --- Fix checking: table rendering correctness (PBT-fix) ---
+
+  describe 'Fix checking: table rendering correctness' do
+    it '[PBT-fix] renders correct HTML table tags for any random table structure' do
+      # **Validates: Requirements 2.1, 2.2, 2.3, 2.4**
+      property_of {
+        num_rows = range(1, 5)
+        total_td = 0
+        total_th = 0
+        cell_texts = []
+
+        rows = Array.new(num_rows) do
+          num_cells = range(1, 4)
+          cells = Array.new(num_cells) do
+            cell_type = boolean ? 'table-cell' : 'table-header-cell'
+            text = sized(range(1, 20)) { string(:alpha) }
+            cell_texts << text
+            if cell_type == 'table-cell'
+              total_td += 1
+            else
+              total_th += 1
+            end
+            {
+              'nodeType' => cell_type,
+              'content' => [
+                { 'nodeType' => 'paragraph', 'content' => [{ 'nodeType' => 'text', 'value' => text }] }
+              ]
+            }
+          end
+          { 'nodeType' => 'table-row', 'content' => cells }
+        end
+
+        content = [{ 'nodeType' => 'table', 'content' => rows }]
+        [content, num_rows, total_td, total_th, cell_texts]
+      }.check(100) { |content, num_rows, td_count, th_count, cell_texts|
+        result = ContentfulMappers.render_rich_text(content)
+
+        # Exactly 1 <table> and 1 </table>
+        expect(result.scan('<table>').length).to eq(1), "Expected 1 <table>, got #{result.scan('<table>').length}"
+        expect(result.scan('</table>').length).to eq(1), "Expected 1 </table>, got #{result.scan('</table>').length}"
+
+        # Number of <tr> tags equals number of rows
+        expect(result.scan('<tr>').length).to eq(num_rows), "Expected #{num_rows} <tr>, got #{result.scan('<tr>').length}"
+
+        # Number of <td> tags equals number of table-cell nodes
+        expect(result.scan('<td>').length).to eq(td_count), "Expected #{td_count} <td>, got #{result.scan('<td>').length}"
+
+        # Number of <th> tags equals number of table-header-cell nodes
+        expect(result.scan('<th>').length).to eq(th_count), "Expected #{th_count} <th>, got #{result.scan('<th>').length}"
+
+        # Output starts with <table> and ends with </table>
+        expect(result).to start_with('<table>'), "Expected output to start with <table>"
+        expect(result).to end_with('</table>'), "Expected output to end with </table>"
+
+        # Each cell's text content appears in the output
+        cell_texts.each do |text|
+          expect(result).to include(text), "Expected output to include cell text '#{text}'"
+        end
+      }
+    end
+  end
+
   # --- Nil reference handling ---
 
   describe 'nil reference handling' do
