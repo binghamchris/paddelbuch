@@ -69,7 +69,7 @@ Replace the `jekyll-contentful-data-import` gem with a custom Jekyll Generator p
     - **Property 4: Sync error triggers full fetch fallback**
     - **Validates: Requirements 3.4**
 
-  - [~] 4.4 Write property test: Sync page iteration completeness
+  - [x] 4.4 Write property test: Sync page iteration completeness
     - **Property 12: Sync page iteration completeness**
     - **Validates: Requirements 3.7, 3.8**
 

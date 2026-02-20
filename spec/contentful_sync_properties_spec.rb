@@ -96,6 +96,56 @@ RSpec.describe 'Contentful Sync Properties' do
     end
   end
 
+  # Feature: contentful-sync-integration, Property 12: Sync page iteration completeness
+  # **Validates: Requirements 3.7, 3.8**
+  describe 'Property 12: Sync page iteration completeness' do
+    let(:checker) { Class.new { include SyncChecker; public :collect_all_pages, :extract_sync_token }.new }
+
+    it 'collects items from all pages and extracts token from final page' do
+      property_of {
+        Rantly {
+          num_pages = range(1, 5)
+          pages = Array.new(num_pages) { range(0, 10) }
+          token = sized(range(10, 30)) { string(:alpha) }
+          { pages: pages, token: token }
+        }
+      }.check(100) { |data|
+        pages_data = data[:pages]
+        final_token = data[:token]
+
+        mock_pages = pages_data.map.with_index do |item_count, idx|
+          page = double("page_#{idx}")
+          items = Array.new(item_count) { double('item') }
+          allow(page).to receive(:items).and_return(items)
+          is_last = (idx == pages_data.length - 1)
+          allow(page).to receive(:next_page?).and_return(!is_last)
+          if is_last
+            allow(page).to receive(:next_sync_url).and_return(
+              "https://cdn.contentful.com/spaces/test/sync?sync_token=#{final_token}"
+            )
+          end
+          page
+        end
+
+        # Chain next_page calls
+        mock_pages.each_with_index do |page, idx|
+          unless idx == mock_pages.length - 1
+            allow(page).to receive(:next_page).and_return(mock_pages[idx + 1])
+          end
+        end
+
+        sync = double('sync')
+        allow(sync).to receive(:first_page).and_return(mock_pages.first)
+
+        items, last_page = checker.collect_all_pages(sync)
+        expect(items.length).to eq(pages_data.sum)
+
+        extracted_token = checker.extract_sync_token(last_page)
+        expect(extracted_token).to eq(final_token)
+      }
+    end
+  end
+
   # Feature: contentful-sync-integration, Property 10: Cache validation rejects incomplete metadata
   # **Validates: Requirements 4.6**
   describe 'Property 10: Cache validation rejects incomplete metadata' do
