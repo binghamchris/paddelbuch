@@ -19,7 +19,7 @@
   - Mark task complete when test is written, run, and failure is documented
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7_
 
-- [~] 2. Write preservation property tests (BEFORE implementing fix)
+- [x] 2. Write preservation property tests (BEFORE implementing fix)
   - **Property 2: Preservation** - German Locale Links Have No Locale Prefix
   - **IMPORTANT**: Follow observation-first methodology
   - **GOAL**: Capture baseline behavior of German (default locale) links on UNFIXED code, then assert it is preserved
