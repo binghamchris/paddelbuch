@@ -112,9 +112,9 @@ map:
 # Contentful Configuration (loaded from environment variables)
 contentful:
   spaces:
-    - space: ENV_CONTENTFUL_SPACE_ID
-      access_token: ENV_CONTENTFUL_ACCESS_TOKEN
-      environment: ENV_CONTENTFUL_ENVIRONMENT
+    - space: ""
+      access_token: ""
+      environment: "master"
       cda_query:
         locale: "*"
       all_entries: true

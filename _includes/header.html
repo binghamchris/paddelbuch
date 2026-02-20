@@ -69,7 +69,11 @@
               {% t nav.open_data %}
             </a>
             <ul class="dropdown-menu" aria-labelledby="nav-dropdown-opendata">
-              {% assign open_data_pages = site.data.static_pages | where: "locale", current_locale | where: "menu_slug", "offene-daten" | sort: "menuOrder" %}
+              {% if site.data.static_pages %}
+                {% assign open_data_pages = site.data.static_pages | where: "locale", current_locale | where: "menu_slug", "offene-daten" | sort: "menuOrder" %}
+              {% else %}
+                {% assign open_data_pages = "" | split: "" %}
+              {% endif %}
               {% for static_page in open_data_pages %}
               <li>
                 <a class="dropdown-item" href="{{ '/' | append: static_page.menu_slug | append: '/' | append: static_page.slug | append: '/' | relative_url }}">
@@ -91,7 +95,11 @@
               {% t nav.about %}
             </a>
             <ul class="dropdown-menu" aria-labelledby="nav-dropdown-about">
-              {% assign about_pages = site.data.static_pages | where: "locale", current_locale | where: "menu_slug", "ueber" | sort: "menuOrder" %}
+              {% if site.data.static_pages %}
+                {% assign about_pages = site.data.static_pages | where: "locale", current_locale | where: "menu_slug", "ueber" | sort: "menuOrder" %}
+              {% else %}
+                {% assign about_pages = "" | split: "" %}
+              {% endif %}
               {% for static_page in about_pages %}
               <li>
                 <a class="dropdown-item" href="{{ '/' | append: static_page.menu_slug | append: '/' | append: static_page.slug | append: '/' | relative_url }}">
