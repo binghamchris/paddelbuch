@@ -14,7 +14,7 @@
 - [x] 2.1 Fix `resolve_field` or `map_static_page` in `_plugins/contentful_mappers.rb` to handle rich text fields that are not wrapped in a plain `{ locale_sym: value }` Hash. Ensure `resolve_field` returns the rich text object/value instead of nil when `fields[field_name]` is not a Hash (e.g., pass it through directly, or handle the case where the value is a rich text document object).
   - File: `_plugins/contentful_mappers.rb`
   - Acceptance: `map_static_page` returns non-empty HTML in `content` for entries with rich text content fields
-- [~] 2.2 Verify that existing mappers (`map_spot`, `map_obstacle`, `map_event_notice`) still produce correct rich text HTML for their `description` fields after the change.
+- [x] 2.2 Verify that existing mappers (`map_spot`, `map_obstacle`, `map_event_notice`) still produce correct rich text HTML for their `description` fields after the change.
   - Run: `source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.1 && bundle exec rspec spec/contentful_mappers_spec.rb`
   - Acceptance: All existing mapper tests pass
 
