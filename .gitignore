@@ -93,5 +93,6 @@ docs/reference
 
 # Contentful generated data files
 _data/*.yml
+_data/*/*.yml
 !_data/navigation.yml
 !_data/site.yml
