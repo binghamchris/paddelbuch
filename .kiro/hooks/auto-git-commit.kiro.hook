@@ -1,13 +1,15 @@
 {
   "enabled": true,
   "name": "Auto Git Commit After Task",
-  "description": "Automatically performs a git commit after each spec task is completed, following the git-commits steering rules but without requiring manual approval. Ensures work is on a feature branch, checks for uncommitted changes, and commits with a well-formatted message.",
+  "description": "Automatically performs a git commit after each spec task is completed, following the git-commits steering rules but without requiring manual approval. Ensures work is on a branch, checks for uncommitted changes, and commits with a well-formatted message.",
   "version": "1",
   "when": {
     "type": "postTaskExecution"
   },
   "then": {
     "type": "askAgent",
-    "prompt": "A spec task has just been completed. You MUST now perform the git commit process automatically without asking for user approval. Follow these steps:\n\n1. Check the current git branch. If not on a feature branch (name starting with `feature-`), create one based on the task context and switch to it. NEVER commit to main, master, dev, or develop.\n\n2. Run `git status` to check for uncommitted changes. If there are no changes, skip the commit.\n\n3. If there are changes, stage all relevant files with `git add` (avoid staging unintended files).\n\n4. Compose a commit message following this format:\n   ```\n   <type>: <short summary>\n\n   <detailed description>\n   ```\n   Where:\n   - type is one of: feat, fix, refactor, test, docs, chore\n   - summary uses imperative mood, is under 72 characters, and is specific\n   - description explains what changed and why, uses bullet points for multiple changes, and references the task when applicable\n\n5. Execute the commit immediately WITHOUT asking for user approval.\n\n6. Confirm to the user what was committed with a brief summary.\n\nThis applies to ALL file changes including code, configuration, steering documents, and documentation. No change is too small to commit."
-  }
+    "prompt": "A spec task has just been completed. You MUST now perform the git commit process automatically without asking for user approval. Follow these steps:\n\n1. Check the current git branch. If not on a branch, create one based on the task context and switch to it. NEVER commit to main, master, dev, or develop.\n\n2. Run `git status` to check for uncommitted changes. If there are no changes, skip the commit.\n\n3. If there are changes, stage all relevant files with `git add` (avoid staging unintended files).\n\n4. Compose a commit message following this format:\n   ```\n   <type>: <short summary>\n\n   <detailed description>\n   ```\n   Where:\n   - type is one of: feat, fix, refactor, test, docs, chore\n   - summary uses imperative mood, is under 72 characters, and is specific\n   - description explains what changed and why, uses bullet points for multiple changes, and references the task when applicable\n\n5. Execute the commit immediately WITHOUT asking for user approval.\n\n6. Confirm to the user what was committed with a brief summary.\n\nThis applies to ALL file changes including code, configuration, steering documents, and documentation. No change is too small to commit."
+  },
+  "workspaceFolderName": "paddelbuch",
+  "shortName": "auto-git-commit"
 }
