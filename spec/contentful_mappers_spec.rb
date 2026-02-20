@@ -529,6 +529,44 @@ RSpec.describe ContentfulMappers do
 
       expect(result['menu_slug']).to eq('seiten')
     end
+
+    it 'handles rich text content as Hash with content key' do
+      rich_text = { 'content' => [{ 'nodeType' => 'paragraph', 'content' => [{ 'nodeType' => 'text', 'value' => 'Hello' }] }] }
+      fields = build_fields(slug: 'test', title: 'Test', content: rich_text)
+      entry = build_entry(fields)
+      result = ContentfulMappers.map_static_page(entry, fields, 'de')
+      expect(result['content']).to eq('<p>Hello</p>')
+    end
+
+    it 'handles rich text content as object with .content method' do
+      rt_object = Object.new
+      rt_object.define_singleton_method(:content) { [{ 'nodeType' => 'paragraph', 'content' => [{ 'nodeType' => 'text', 'value' => 'Object content' }] }] }
+      fields = build_fields(slug: 'test', title: 'Test')
+      fields[:content] = { en: rt_object }
+      entry = build_entry(fields)
+      result = ContentfulMappers.map_static_page(entry, fields, 'de')
+      expect(result['content']).to eq('<p>Object content</p>')
+    end
+
+    it 'handles nil content field gracefully' do
+      fields = build_fields(slug: 'test', title: 'Test')
+      entry = build_entry(fields)
+      result = ContentfulMappers.map_static_page(entry, fields, 'de')
+      expect(result['content']).to be_nil
+    end
+
+    it 'resolves content for both de and en locales' do
+      de_rt = { 'content' => [{ 'nodeType' => 'paragraph', 'content' => [{ 'nodeType' => 'text', 'value' => 'German content' }] }] }
+      en_rt = { 'content' => [{ 'nodeType' => 'paragraph', 'content' => [{ 'nodeType' => 'text', 'value' => 'English content' }] }] }
+      fields = build_fields(slug: 'test', title: { de: 'Test DE', en: 'Test EN' })
+      fields[:content] = { de: de_rt, en: en_rt }
+      entry = build_entry(fields)
+
+      de_result = ContentfulMappers.map_static_page(entry, fields, 'de')
+      en_result = ContentfulMappers.map_static_page(entry, fields, 'en')
+      expect(de_result['content']).to eq('<p>German content</p>')
+      expect(en_result['content']).to eq('<p>English content</p>')
+    end
   end
 
   # --- Bug exploration: content mapping failure for non-Hash locale wrappers ---
