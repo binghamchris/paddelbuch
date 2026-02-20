@@ -38,7 +38,7 @@ Replace the `jekyll-contentful-data-import` gem with a custom Jekyll Generator p
     - **Property 5: Cache metadata YAML round-trip**
     - **Validates: Requirements 4.5, 4.6**
 
-  - [~] 2.3 Write property test: Cache validation rejects incomplete metadata
+  - [x] 2.3 Write property test: Cache validation rejects incomplete metadata
     - **Property 10: Cache validation rejects incomplete metadata**
     - **Validates: Requirements 4.6**
 
