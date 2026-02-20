@@ -11,7 +11,7 @@
 
 ## Task 2: Implement the fix in `render_rich_text`
 
-- [~] 2.1 Add four `when` clauses to the `case node_type` statement in `render_rich_text` in `_plugins/contentful_mappers.rb`:
+- [x] 2.1 Add four `when` clauses to the `case node_type` statement in `render_rich_text` in `_plugins/contentful_mappers.rb`:
   - `when 'table'` → `"<table>#{render_rich_text(node_content)}</table>"`
   - `when 'table-row'` → `"<tr>#{render_rich_text(node_content)}</tr>"`
   - `when 'table-cell'` → `"<td>#{render_rich_text(node_content)}</td>"`

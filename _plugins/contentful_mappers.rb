@@ -124,6 +124,14 @@ module ContentfulMappers
         "<h2>#{render_rich_text(node_content)}</h2>"
       when 'heading-3'
         "<h3>#{render_rich_text(node_content)}</h3>"
+      when 'table'
+        "<table>#{render_rich_text(node_content)}</table>"
+      when 'table-row'
+        "<tr>#{render_rich_text(node_content)}</tr>"
+      when 'table-cell'
+        "<td>#{render_rich_text(node_content)}</td>"
+      when 'table-header-cell'
+        "<th>#{render_rich_text(node_content)}</th>"
       else
         render_rich_text(node_content) if node_content
       end
