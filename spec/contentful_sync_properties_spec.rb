@@ -416,4 +416,34 @@ RSpec.describe 'Contentful Sync Properties' do
       }
     end
   end
+
+  # Feature: contentful-sync-integration, Property 6: Data file YAML round-trip
+  # **Validates: Requirements 9.8**
+  describe 'Property 6: Data file YAML round-trip' do
+    it 'round-trips mapper output through YAML dump/safe_load' do
+      property_of {
+        Rantly {
+          num_entries = range(1, 5)
+          Array.new(num_entries) {
+            {
+              'slug' => sized(range(3, 20)) { string(:alpha) },
+              'name' => sized(range(3, 20)) { string(:alpha) },
+              'confirmed' => choose(true, false),
+              'count' => range(0, 1000),
+              'description' => choose(nil, sized(range(5, 30)) { string(:alpha) }),
+              'tags' => Array.new(range(0, 3)) { sized(range(3, 10)) { string(:alpha) } },
+              'locale' => choose('de', 'en'),
+              'createdAt' => Time.now.iso8601,
+              'updatedAt' => Time.now.iso8601
+            }
+          }
+        }
+      }.check(100) { |data|
+        yaml_str = YAML.dump(data)
+        loaded = YAML.safe_load(yaml_str, permitted_classes: [Time, Date])
+        expect(loaded).to eq(data)
+      }
+    end
+  end
 end
+
