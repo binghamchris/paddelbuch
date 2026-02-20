@@ -175,49 +175,11 @@ RSpec.describe 'Contentful Sync Properties' do
 
     BASE_KEYS = %w[locale createdAt updatedAt].freeze
 
-    # Map of mapper method to the Contentful entry fields it accesses
-    MAPPER_ENTRY_FIELDS = {
-      map_spot: %i[slug name description location approximate_address country confirmed rejected
-                   waterway spot_type paddling_environment_type paddle_craft_types
-                   event_notices obstacles data_source_type data_license_type],
-      map_waterway: %i[slug name length area geometry show_in_menu
-                       paddling_environment_type data_source_type data_license_type],
-      map_obstacle: %i[slug name description geometry portage_route portage_distance
-                       portage_description is_portage_necessary is_portage_possible
-                       obstacle_type waterway spots],
-      map_protected_area: %i[slug name geometry is_area_marked protected_area_type],
-      map_event_notice: %i[slug name description location affected_area start_date end_date waterways],
-      map_type: %i[slug name_de name_en name],
-      map_static_page: %i[slug title menu content menu_order]
-    }.freeze
-
-    def build_mock_entry(fields_with_values, sys_overrides = {})
-      entry = double('Entry')
-      sys = {
-        id: 'test-id',
-        locale: 'de',
-        created_at: Time.now,
-        updated_at: Time.now
-      }.merge(sys_overrides)
-      allow(entry).to receive(:sys).and_return(sys)
-
-      # Default: respond_to? returns false for anything
-      allow(entry).to receive(:respond_to?).with(anything).and_return(false)
-
-      # Override for specific fields
-      fields_with_values.each do |field_name, value|
-        allow(entry).to receive(:respond_to?).with(field_name).and_return(true)
-        allow(entry).to receive(field_name).and_return(value)
-      end
-
-      entry
-    end
-
     def build_reference(slug)
-      ref = double('Reference')
+      ref = double("Ref:#{slug}")
       allow(ref).to receive(:respond_to?).with(anything).and_return(false)
-      allow(ref).to receive(:respond_to?).with(:slug).and_return(true)
-      allow(ref).to receive(:slug).and_return(slug)
+      allow(ref).to receive(:respond_to?).with(:fields_with_locales).and_return(true)
+      allow(ref).to receive(:fields_with_locales).and_return({ slug: { en: slug } })
       allow(ref).to receive(:sys).and_return({ id: slug })
       ref
     end
@@ -245,12 +207,38 @@ RSpec.describe 'Contentful Sync Properties' do
       (0...len).map { ('a'..'z').to_a.sample }.join
     end
 
+    # Build a fields_with_locales hash from simple key-value pairs
+    def build_fields(hash)
+      result = {}
+      hash.each do |key, value|
+        if value.is_a?(Hash) && value.keys.all? { |k| k.is_a?(Symbol) && k.to_s.length == 2 }
+          result[key] = value
+        else
+          result[key] = { en: value }
+        end
+      end
+      result
+    end
+
+    def build_mock_entry(fields_hash, sys_overrides = {})
+      fields = build_fields(fields_hash)
+      entry = double('Entry')
+      sys = {
+        id: 'test-id',
+        created_at: Time.now,
+        updated_at: Time.now
+      }.merge(sys_overrides)
+      allow(entry).to receive(:sys).and_return(sys)
+      allow(entry).to receive(:fields_with_locales).and_return(fields)
+      entry
+    end
+
     def generate_field_values_for(mapper_name)
       fields = {}
       case mapper_name
       when :map_spot
         fields[:slug] = random_string(rand(3..20))
-        fields[:name] = random_string(rand(3..20))
+        fields[:name] = { de: random_string(rand(3..20)), en: random_string(rand(3..20)) }
         fields[:description] = random_string(rand(5..30))
         fields[:location] = build_location(rand * 180 - 90, rand * 360 - 180)
         fields[:approximate_address] = random_string(rand(5..30))
@@ -260,14 +248,14 @@ RSpec.describe 'Contentful Sync Properties' do
         fields[:waterway] = build_reference('waterway-slug')
         fields[:spot_type] = build_reference('spot-type-slug')
         fields[:paddling_environment_type] = build_reference('env-type-slug')
-        fields[:paddle_craft_types] = [build_reference('kayak'), build_reference('sup')]
+        fields[:paddle_craft_type] = [build_reference('kayak'), build_reference('sup')]
         fields[:event_notices] = [build_reference('notice-1')]
         fields[:obstacles] = [build_reference('obstacle-1')]
         fields[:data_source_type] = build_reference('source-slug')
         fields[:data_license_type] = build_reference('license-slug')
       when :map_waterway
         fields[:slug] = random_string(rand(3..20))
-        fields[:name] = random_string(rand(3..20))
+        fields[:name] = { de: random_string(rand(3..20)), en: random_string(rand(3..20)) }
         fields[:length] = rand * 100
         fields[:area] = rand * 500
         fields[:geometry] = build_geometry
@@ -277,7 +265,7 @@ RSpec.describe 'Contentful Sync Properties' do
         fields[:data_license_type] = build_reference('license-slug')
       when :map_obstacle
         fields[:slug] = random_string(rand(3..20))
-        fields[:name] = random_string(rand(3..20))
+        fields[:name] = { de: random_string(rand(3..20)), en: random_string(rand(3..20)) }
         fields[:description] = random_string(rand(5..30))
         fields[:geometry] = build_geometry
         fields[:portage_route] = build_geometry
@@ -290,13 +278,13 @@ RSpec.describe 'Contentful Sync Properties' do
         fields[:spots] = [build_reference('spot-1'), build_reference('spot-2')]
       when :map_protected_area
         fields[:slug] = random_string(rand(3..20))
-        fields[:name] = random_string(rand(3..20))
+        fields[:name] = { de: random_string(rand(3..20)), en: random_string(rand(3..20)) }
         fields[:geometry] = build_geometry
         fields[:is_area_marked] = [true, false].sample
         fields[:protected_area_type] = build_reference('protected-area-type-slug')
       when :map_event_notice
         fields[:slug] = random_string(rand(3..20))
-        fields[:name] = random_string(rand(3..20))
+        fields[:name] = { de: random_string(rand(3..20)), en: random_string(rand(3..20)) }
         fields[:description] = random_string(rand(5..30))
         fields[:location] = build_location(rand * 180 - 90, rand * 360 - 180)
         fields[:affected_area] = build_geometry
@@ -305,12 +293,10 @@ RSpec.describe 'Contentful Sync Properties' do
         fields[:waterways] = [build_reference('waterway-1')]
       when :map_type
         fields[:slug] = random_string(rand(3..20))
-        fields[:name_de] = random_string(rand(3..20))
-        fields[:name_en] = random_string(rand(3..20))
-        fields[:name] = random_string(rand(3..20))
+        fields[:name] = { de: random_string(rand(3..20)), en: random_string(rand(3..20)) }
       when :map_static_page
         fields[:slug] = random_string(rand(3..20))
-        fields[:title] = random_string(rand(3..20))
+        fields[:title] = { de: random_string(rand(3..20)), en: random_string(rand(3..20)) }
         fields[:menu] = ['Offene Daten', 'Über', 'Info'].sample
         fields[:content] = random_string(rand(5..30))
         fields[:menu_order] = rand(0..10)
@@ -318,7 +304,7 @@ RSpec.describe 'Contentful Sync Properties' do
       fields
     end
 
-    it 'produces a hash containing all required fields plus base fields for any content type' do
+    it 'produces hashes containing all required fields plus base fields for any content type' do
       mapper_names = MAPPER_REQUIRED_KEYS.keys
 
       property_of {
@@ -331,12 +317,15 @@ RSpec.describe 'Contentful Sync Properties' do
         field_values = generate_field_values_for(mapper_name)
         entry = build_mock_entry(field_values)
 
-        result = ContentfulMappers.send(mapper_name, entry)
+        # flatten_entry produces per-locale rows with base keys included
+        results = ContentfulMappers.flatten_entry(entry, mapper_name)
 
         expected_keys = MAPPER_REQUIRED_KEYS[mapper_name] + BASE_KEYS
-        expected_keys.each do |key|
-          expect(result).to have_key(key),
-            "Expected mapper #{mapper_name} result to have key '#{key}', but it was missing. Keys present: #{result.keys}"
+        results.each do |result|
+          expected_keys.each do |key|
+            expect(result).to have_key(key),
+              "Expected mapper #{mapper_name} result to have key '#{key}', but it was missing. Keys present: #{result.keys}"
+          end
         end
       }
     end
@@ -356,28 +345,29 @@ RSpec.describe 'Contentful Sync Properties' do
       }.check(100) { |data|
         mapper_name = data[:mapper_name]
 
-        # Build entry with NO fields responding - only sys
+        # Build entry with NO fields — only sys
         entry = double('Entry')
         allow(entry).to receive(:sys).and_return({
           id: 'fallback-id',
-          locale: 'de',
           created_at: Time.now,
           updated_at: Time.now
         })
-        allow(entry).to receive(:respond_to?).with(anything).and_return(false)
+        allow(entry).to receive(:fields_with_locales).and_return({})
 
         # Should not raise
-        result = ContentfulMappers.send(mapper_name, entry)
+        results = ContentfulMappers.flatten_entry(entry, mapper_name)
 
-        # Should still have all keys
+        # Should still have all keys in each locale row
         expected_keys = MAPPER_REQUIRED_KEYS[mapper_name] + BASE_KEYS
-        expected_keys.each do |key|
-          expect(result).to have_key(key),
-            "Expected mapper #{mapper_name} result to have key '#{key}' even with all fields missing. Keys present: #{result.keys}"
-        end
+        results.each do |result|
+          expected_keys.each do |key|
+            expect(result).to have_key(key),
+              "Expected mapper #{mapper_name} result to have key '#{key}' even with all fields missing. Keys present: #{result.keys}"
+          end
 
-        # Slug should fall back to sys[:id]
-        expect(result['slug']).to eq('fallback-id')
+          # Slug should fall back to sys[:id]
+          expect(result['slug']).to eq('fallback-id')
+        end
       }
     end
   end
@@ -495,9 +485,8 @@ RSpec.describe 'Contentful Sync Properties' do
 
     def build_mock_client
       client = double('Contentful::Client')
-      entries = double('entries')
-      allow(entries).to receive(:map).and_return([])
-      allow(client).to receive(:entries).and_return(entries)
+      # Return real empty arrays so flat_map works natively
+      allow(client).to receive(:entries).and_return([])
 
       sync_page = double('sync_page')
       allow(sync_page).to receive(:items).and_return([])
@@ -525,7 +514,6 @@ RSpec.describe 'Contentful Sync Properties' do
         ENV['CONTENTFUL_ACCESS_TOKEN'] = 'test_token'
         ENV['CONTENTFUL_ENVIRONMENT'] = 'master'
 
-        # Enable force sync via the randomly chosen method
         ENV.delete('CONTENTFUL_FORCE_SYNC')
         force_config = false
         case data[:force_method]
@@ -543,12 +531,10 @@ RSpec.describe 'Contentful Sync Properties' do
         fetcher = Jekyll::ContentfulFetcher.new
         allow(fetcher).to receive(:client).and_return(mock_client)
 
-        # Key assertion: full fetch must happen regardless of cache state
         expect(fetcher).to receive(:fetch_and_write_content).and_call_original
 
         fetcher.generate(site)
 
-        # Clean up cache for next iteration
         cache_path = File.join(data_dir, '.contentful_sync_cache.yml')
         File.delete(cache_path) if File.exist?(cache_path)
       }
@@ -586,9 +572,7 @@ RSpec.describe 'Contentful Sync Properties' do
 
     def build_mock_client
       client = double('Contentful::Client')
-      entries = double('entries')
-      allow(entries).to receive(:map).and_return([])
-      allow(client).to receive(:entries).and_return(entries)
+      allow(client).to receive(:entries).and_return([])
 
       sync_page = double('sync_page')
       allow(sync_page).to receive(:items).and_return([])
@@ -611,7 +595,6 @@ RSpec.describe 'Contentful Sync Properties' do
           current_space = sized(range(5, 15)) { string(:alpha) }
           current_env   = choose('master', 'staging', 'development', 'preview')
 
-          # Ensure at least one field differs
           mismatch_type = choose(:space_only, :env_only, :both)
           case mismatch_type
           when :space_only
@@ -634,13 +617,11 @@ RSpec.describe 'Contentful Sync Properties' do
           }
         }
       }.check(100) { |data|
-        # Set current ENV credentials
         ENV['CONTENTFUL_SPACE_ID'] = data[:current_space]
         ENV['CONTENTFUL_ACCESS_TOKEN'] = 'test_token'
         ENV['CONTENTFUL_ENVIRONMENT'] = data[:current_env]
         ENV.delete('CONTENTFUL_FORCE_SYNC')
 
-        # Write a valid cache with different space_id/environment
         cache = CacheMetadata.new(data_dir)
         cache.sync_token = 'cached_sync_token_abc'
         cache.last_sync_at = Time.now.iso8601
@@ -654,15 +635,11 @@ RSpec.describe 'Contentful Sync Properties' do
         fetcher = Jekyll::ContentfulFetcher.new
         allow(fetcher).to receive(:client).and_return(mock_client)
 
-        # Full fetch must happen due to config mismatch
         expect(fetcher).to receive(:fetch_and_write_content).and_call_original
-
-        # The stored sync token must NOT be used for incremental sync
         expect(fetcher).not_to receive(:check_for_changes)
 
         fetcher.generate(site)
 
-        # Clean up cache for next iteration
         cache_path = File.join(data_dir, '.contentful_sync_cache.yml')
         File.delete(cache_path) if File.exist?(cache_path)
       }
@@ -704,9 +681,7 @@ RSpec.describe 'Contentful Sync Properties (continued)' do
 
     def build_mock_client(new_token)
       client = double('Contentful::Client')
-      entries = double('entries')
-      allow(entries).to receive(:map).and_return([])
-      allow(client).to receive(:entries).and_return(entries)
+      allow(client).to receive(:entries).and_return([])
 
       sync_page = double('sync_page')
       allow(sync_page).to receive(:items).and_return([double('item')])
@@ -748,11 +723,9 @@ RSpec.describe 'Contentful Sync Properties (continued)' do
 
         case data[:sync_type]
         when :initial
-          # No cache file → triggers initial/full sync
           cache_path = File.join(data_dir, '.contentful_sync_cache.yml')
           File.delete(cache_path) if File.exist?(cache_path)
         when :incremental
-          # Valid cache with matching config → triggers incremental sync (items > 0 means changes)
           cache = CacheMetadata.new(data_dir)
           cache.sync_token = 'old_token_to_be_replaced'
           cache.last_sync_at = '2020-01-01T00:00:00+00:00'
@@ -760,7 +733,6 @@ RSpec.describe 'Contentful Sync Properties (continued)' do
           cache.environment = data[:environment]
           cache.save
         when :forced
-          # Valid cache but force sync enabled
           cache = CacheMetadata.new(data_dir)
           cache.sync_token = 'old_token_to_be_replaced'
           cache.last_sync_at = '2020-01-01T00:00:00+00:00'
@@ -780,7 +752,6 @@ RSpec.describe 'Contentful Sync Properties (continued)' do
 
         after_time = Time.now
 
-        # Load the cache metadata and verify all fields
         persisted_cache = CacheMetadata.new(data_dir)
         loaded = persisted_cache.load
         expect(loaded).to be true
@@ -789,14 +760,11 @@ RSpec.describe 'Contentful Sync Properties (continued)' do
         expect(persisted_cache.space_id).to eq(data[:space_id])
         expect(persisted_cache.environment).to eq(data[:environment])
 
-        # Verify last_sync_at is a valid ISO 8601 timestamp and is recent
-        # Note: iso8601 truncates to whole seconds, so we floor before_time
         expect(persisted_cache.last_sync_at).not_to be_nil
         parsed_time = Time.iso8601(persisted_cache.last_sync_at)
         expect(parsed_time).to be >= Time.at(before_time.to_i)
         expect(parsed_time).to be <= after_time
 
-        # Clean up for next iteration
         cache_path = File.join(data_dir, '.contentful_sync_cache.yml')
         File.delete(cache_path) if File.exist?(cache_path)
       }
@@ -814,7 +782,6 @@ RSpec.describe 'Contentful Sync Properties (Property 11)' do
     let(:site_source) { tmpdir }
     let(:data_dir) { File.join(tmpdir, '_data') }
 
-    # All 13 content types with their expected filenames and mapper methods
     CONTENT_TYPE_MAP = {
       'spot'                    => { filename: 'spots',                            mapper: :map_spot },
       'waterway'                => { filename: 'waterways',                        mapper: :map_waterway },
@@ -860,28 +827,22 @@ RSpec.describe 'Contentful Sync Properties (Property 11)' do
       entry = double("Entry-#{slug_value}")
       sys = {
         id: slug_value,
-        locale: 'de',
         created_at: Time.now,
         updated_at: Time.now
       }
       allow(entry).to receive(:sys).and_return(sys)
-      allow(entry).to receive(:respond_to?).with(anything).and_return(false)
-      allow(entry).to receive(:respond_to?).with(:slug).and_return(true)
-      allow(entry).to receive(:slug).and_return(slug_value)
-      # For type entries that need name_de/name_en/name
-      allow(entry).to receive(:respond_to?).with(:name_de).and_return(true)
-      allow(entry).to receive(:name_de).and_return("Name DE #{slug_value}")
-      allow(entry).to receive(:respond_to?).with(:name_en).and_return(true)
-      allow(entry).to receive(:name_en).and_return("Name EN #{slug_value}")
-      allow(entry).to receive(:respond_to?).with(:name).and_return(true)
-      allow(entry).to receive(:name).and_return("Name #{slug_value}")
+      # fields_with_locales with slug and name (needed by all mappers)
+      allow(entry).to receive(:fields_with_locales).and_return({
+        slug: { en: slug_value },
+        name: { de: "Name DE #{slug_value}", en: "Name EN #{slug_value}" },
+        title: { de: "Title DE #{slug_value}", en: "Title EN #{slug_value}" }
+      })
       entry
     end
 
     def build_mock_client(selected_types, entries_per_type)
       client = double('Contentful::Client')
 
-      # For each content type, set up entries response
       ALL_CONTENT_TYPE_KEYS.each do |ct|
         if selected_types.include?(ct)
           slugs = entries_per_type[ct]
@@ -896,7 +857,6 @@ RSpec.describe 'Contentful Sync Properties (Property 11)' do
         end
       end
 
-      # Sync setup for initial sync
       sync_page = double('sync_page')
       allow(sync_page).to receive(:items).and_return([double('item')])
       allow(sync_page).to receive(:next_page?).and_return(false)
@@ -911,13 +871,13 @@ RSpec.describe 'Contentful Sync Properties (Property 11)' do
     end
 
     it 'writes each content type to the correct file path and updates site.data accordingly' do
+      num_locales = ContentfulMappers::LOCALES.length
+
       property_of {
         Rantly {
-          # Select a random non-empty subset of content types (at least 1, up to all 13)
           count = range(1, ALL_CONTENT_TYPE_KEYS.length)
           selected = ALL_CONTENT_TYPE_KEYS.sample(count)
 
-          # For each selected type, generate 1-3 entry slugs
           entries_per_type = {}
           selected.each do |ct|
             num_entries = range(1, 3)
@@ -935,7 +895,6 @@ RSpec.describe 'Contentful Sync Properties (Property 11)' do
         ENV['CONTENTFUL_ENVIRONMENT'] = 'master'
         ENV.delete('CONTENTFUL_FORCE_SYNC')
 
-        # Remove any existing cache to trigger full sync
         cache_path = File.join(data_dir, '.contentful_sync_cache.yml')
         File.delete(cache_path) if File.exist?(cache_path)
 
@@ -947,25 +906,24 @@ RSpec.describe 'Contentful Sync Properties (Property 11)' do
 
         fetcher.generate(site)
 
-        # Verify each of the 13 content types
         ALL_CONTENT_TYPE_KEYS.each do |ct|
           config = CONTENT_TYPE_MAP[ct]
           filename = config[:filename]
           filepath = File.join(data_dir, "#{filename}.yml")
 
-          # 1. The YAML file must exist
           expect(File.exist?(filepath)).to be(true),
             "Expected file #{filepath} to exist for content type '#{ct}'"
 
-          # 2. Read back the file and verify content
           file_data = YAML.safe_load(File.read(filepath), permitted_classes: [Time, Date])
 
           if selected_types.include?(ct)
             slugs = entries_per_type[ct]
-            expect(file_data.length).to eq(slugs.length),
-              "Expected #{slugs.length} entries in #{filepath} for '#{ct}', got #{file_data.length}"
+            # Each entry produces num_locales rows (de + en)
+            expected_count = slugs.length * num_locales
+            expect(file_data.length).to eq(expected_count),
+              "Expected #{expected_count} entries in #{filepath} for '#{ct}', got #{file_data.length}"
 
-            file_slugs = file_data.map { |d| d['slug'] }
+            file_slugs = file_data.map { |d| d['slug'] }.uniq
             slugs.each do |slug|
               expect(file_slugs).to include(slug),
                 "Expected slug '#{slug}' in #{filepath} for content type '#{ct}'"
@@ -975,7 +933,7 @@ RSpec.describe 'Contentful Sync Properties (Property 11)' do
               "Expected empty array in #{filepath} for non-selected content type '#{ct}'"
           end
 
-          # 3. Verify site.data is updated at the correct key path
+          # Verify site.data is updated at the correct key path
           keys = filename.split('/')
           if keys.length == 1
             site_value = @site_data[keys[0]]
@@ -1054,13 +1012,12 @@ RSpec.describe 'Contentful Sync Properties (Property 13)' do
           { scenario: scenario }
         }
       }.check(100) { |data|
-        # Clear both credentials first
         ENV.delete('CONTENTFUL_SPACE_ID')
         ENV.delete('CONTENTFUL_ACCESS_TOKEN')
 
         case data[:scenario]
         when :both_missing
-          # Neither ENV var set — already cleared above
+          # Neither ENV var set
         when :space_id_missing_only
           ENV['CONTENTFUL_ACCESS_TOKEN'] = 'valid_token'
         when :access_token_missing_only
@@ -1079,13 +1036,10 @@ RSpec.describe 'Contentful Sync Properties (Property 13)' do
         site = build_mock_site
         fetcher = Jekyll::ContentfulFetcher.new
 
-        # No exception should be raised
         expect { fetcher.generate(site) }.not_to raise_error
 
-        # Contentful::Client.new should never be called (no client creation)
         expect(Contentful::Client).not_to receive(:new)
 
-        # No YAML data files should be written to the data directory
         yml_files = Dir.glob(File.join(data_dir, '**', '*.yml'))
         expect(yml_files).to be_empty,
           "Expected no YAML files in #{data_dir} when credentials are missing, but found: #{yml_files}"

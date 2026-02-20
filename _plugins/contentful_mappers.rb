@@ -1,19 +1,35 @@
 # Custom mappers for Contentful entries
 # Transforms Contentful entries into Jekyll-friendly data structures (hashes)
 # Each mapper is a module method that takes a Contentful entry and returns a hash
+#
+# When entries are fetched with locale: '*', fields are accessed via
+# entry.fields_with_locales which returns { field_name: { locale: value } }.
+# The flatten_entry method produces one hash per locale so downstream consumers
+# (ApiGenerator, templates, LocaleFilter) receive rows with a plain 'locale' field.
 
 module ContentfulMappers
+  LOCALES = %w[de en].freeze
+
   module_function
 
-  # Safely access a field on a Contentful entry, returning nil on errors
-  def safe_field(entry, field_name)
-    entry.respond_to?(field_name) ? entry.send(field_name) : nil
-  rescue StandardError
-    nil
+  # ---------------------------------------------------------------------------
+  # Locale-aware field helpers
+  # ---------------------------------------------------------------------------
+
+  # Resolve a field value for a given locale from the fields_with_locales hash.
+  # Falls back through the fallback chain: de -> en (Contentful default locale).
+  def resolve_field(fields, field_name, locale)
+    locale_sym = locale.to_sym
+    field_hash = fields[field_name]
+    return nil unless field_hash.is_a?(Hash)
+
+    # Try requested locale first, then fall back to :en (the space default)
+    field_hash[locale_sym] || field_hash[:en]
   end
 
-  def extract_slug(entry)
-    safe_field(entry, :slug) || entry.sys[:id]
+  def extract_slug(fields, entry)
+    slug = resolve_field(fields, :slug, 'en')
+    slug || entry.sys[:id]
   end
 
   def extract_location(location_field)
@@ -23,7 +39,16 @@ module ContentfulMappers
 
   def extract_reference_slug(ref)
     return nil unless ref
-    safe_field(ref, :slug) || ref.sys[:id]
+    if ref.respond_to?(:fields_with_locales)
+      fwl = ref.fields_with_locales
+      slug_hash = fwl[:slug]
+      slug = slug_hash[:en] || slug_hash.values.first if slug_hash.is_a?(Hash)
+      slug || ref.sys[:id]
+    elsif ref.respond_to?(:slug)
+      ref.slug rescue ref.sys[:id]
+    else
+      ref.sys[:id] rescue nil
+    end
   end
 
   def extract_reference_slugs(refs)
@@ -76,109 +101,125 @@ module ContentfulMappers
     end.compact.join
   end
 
-  def base_fields(entry)
+  # ---------------------------------------------------------------------------
+  # Entry flattening — produces one hash per locale from a locale: '*' entry
+  # ---------------------------------------------------------------------------
+
+  # Flatten a single Contentful entry (fetched with locale: '*') into an array
+  # of per-locale hashes using the specified mapper method.
+  def flatten_entry(entry, mapper_method)
+    fields = entry.fields_with_locales
+    sys = entry.sys
+
+    LOCALES.map do |locale|
+      base = {
+        'locale' => locale,
+        'createdAt' => sys[:created_at]&.iso8601,
+        'updatedAt' => sys[:updated_at]&.iso8601
+      }
+      mapped = send(mapper_method, entry, fields, locale)
+      base.merge(mapped)
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # Content type mappers
+  # Each receives (entry, fields, locale) where fields = entry.fields_with_locales
+  # ---------------------------------------------------------------------------
+
+  def map_spot(entry, fields, locale)
     {
-      'locale' => entry.sys[:locale] || safe_field(entry, :locale),
-      'createdAt' => entry.sys[:created_at]&.iso8601,
-      'updatedAt' => entry.sys[:updated_at]&.iso8601
+      'slug' => extract_slug(fields, entry),
+      'name' => resolve_field(fields, :name, locale),
+      'description' => extract_rich_text_html(resolve_field(fields, :description, locale)),
+      'location' => extract_location(resolve_field(fields, :location, locale)),
+      'approximateAddress' => resolve_field(fields, :approximate_address, locale),
+      'country' => resolve_field(fields, :country, locale),
+      'confirmed' => resolve_field(fields, :confirmed, locale) || false,
+      'rejected' => resolve_field(fields, :rejected, locale) || false,
+      'waterway_slug' => extract_reference_slug(resolve_field(fields, :waterway, locale)),
+      'spotType_slug' => extract_reference_slug(resolve_field(fields, :spot_type, locale)),
+      'paddlingEnvironmentType_slug' => extract_reference_slug(resolve_field(fields, :paddling_environment_type, locale)),
+      'paddleCraftTypes' => extract_reference_slugs(resolve_field(fields, :paddle_craft_type, locale)),
+      'eventNotices' => extract_reference_slugs(resolve_field(fields, :event_notices, locale)),
+      'obstacles' => extract_reference_slugs(resolve_field(fields, :obstacles, locale)),
+      'dataSourceType_slug' => extract_reference_slug(resolve_field(fields, :data_source_type, locale)),
+      'dataLicenseType_slug' => extract_reference_slug(resolve_field(fields, :data_license_type, locale))
     }
   end
 
-  # --- Content type mappers ---
-
-  def map_spot(entry)
-    base_fields(entry).merge(
-      'slug' => extract_slug(entry),
-      'name' => safe_field(entry, :name),
-      'description' => extract_rich_text_html(safe_field(entry, :description)),
-      'location' => extract_location(safe_field(entry, :location)),
-      'approximateAddress' => safe_field(entry, :approximate_address),
-      'country' => safe_field(entry, :country),
-      'confirmed' => safe_field(entry, :confirmed) || false,
-      'rejected' => safe_field(entry, :rejected) || false,
-      'waterway_slug' => extract_reference_slug(safe_field(entry, :waterway)),
-      'spotType_slug' => extract_reference_slug(safe_field(entry, :spot_type)),
-      'paddlingEnvironmentType_slug' => extract_reference_slug(safe_field(entry, :paddling_environment_type)),
-      'paddleCraftTypes' => extract_reference_slugs(safe_field(entry, :paddle_craft_types)),
-      'eventNotices' => extract_reference_slugs(safe_field(entry, :event_notices)),
-      'obstacles' => extract_reference_slugs(safe_field(entry, :obstacles)),
-      'dataSourceType_slug' => extract_reference_slug(safe_field(entry, :data_source_type)),
-      'dataLicenseType_slug' => extract_reference_slug(safe_field(entry, :data_license_type))
-    )
+  def map_waterway(entry, fields, locale)
+    {
+      'slug' => extract_slug(fields, entry),
+      'name' => resolve_field(fields, :name, locale),
+      'length' => resolve_field(fields, :length, locale),
+      'area' => resolve_field(fields, :area, locale),
+      'geometry' => resolve_field(fields, :geometry, locale)&.to_json,
+      'showInMenu' => resolve_field(fields, :show_in_menu, locale) || false,
+      'paddlingEnvironmentType_slug' => extract_reference_slug(resolve_field(fields, :paddling_environment_type, locale)),
+      'dataSourceType_slug' => extract_reference_slug(resolve_field(fields, :data_source_type, locale)),
+      'dataLicenseType_slug' => extract_reference_slug(resolve_field(fields, :data_license_type, locale))
+    }
   end
 
-  def map_waterway(entry)
-    base_fields(entry).merge(
-      'slug' => extract_slug(entry),
-      'name' => safe_field(entry, :name),
-      'length' => safe_field(entry, :length),
-      'area' => safe_field(entry, :area),
-      'geometry' => safe_field(entry, :geometry)&.to_json,
-      'showInMenu' => safe_field(entry, :show_in_menu) || false,
-      'paddlingEnvironmentType_slug' => extract_reference_slug(safe_field(entry, :paddling_environment_type)),
-      'dataSourceType_slug' => extract_reference_slug(safe_field(entry, :data_source_type)),
-      'dataLicenseType_slug' => extract_reference_slug(safe_field(entry, :data_license_type))
-    )
+  def map_obstacle(entry, fields, locale)
+    {
+      'slug' => extract_slug(fields, entry),
+      'name' => resolve_field(fields, :name, locale),
+      'description' => extract_rich_text_html(resolve_field(fields, :description, locale)),
+      'geometry' => resolve_field(fields, :geometry, locale)&.to_json,
+      'portageRoute' => resolve_field(fields, :portage_route, locale)&.to_json,
+      'portageDistance' => resolve_field(fields, :portage_distance, locale),
+      'portageDescription' => extract_rich_text_html(resolve_field(fields, :portage_description, locale)),
+      'isPortageNecessary' => resolve_field(fields, :is_portage_necessary, locale) || false,
+      'isPortagePossible' => resolve_field(fields, :is_portage_possible, locale) || false,
+      'obstacleType_slug' => extract_reference_slug(resolve_field(fields, :obstacle_type, locale)),
+      'waterway_slug' => extract_reference_slug(resolve_field(fields, :waterway, locale)),
+      'spots' => extract_reference_slugs(resolve_field(fields, :spots, locale))
+    }
   end
 
-  def map_obstacle(entry)
-    base_fields(entry).merge(
-      'slug' => extract_slug(entry),
-      'name' => safe_field(entry, :name),
-      'description' => extract_rich_text_html(safe_field(entry, :description)),
-      'geometry' => safe_field(entry, :geometry)&.to_json,
-      'portageRoute' => safe_field(entry, :portage_route)&.to_json,
-      'portageDistance' => safe_field(entry, :portage_distance),
-      'portageDescription' => extract_rich_text_html(safe_field(entry, :portage_description)),
-      'isPortageNecessary' => safe_field(entry, :is_portage_necessary) || false,
-      'isPortagePossible' => safe_field(entry, :is_portage_possible) || false,
-      'obstacleType_slug' => extract_reference_slug(safe_field(entry, :obstacle_type)),
-      'waterway_slug' => extract_reference_slug(safe_field(entry, :waterway)),
-      'spots' => extract_reference_slugs(safe_field(entry, :spots))
-    )
+  def map_protected_area(entry, fields, locale)
+    {
+      'slug' => extract_slug(fields, entry),
+      'name' => resolve_field(fields, :name, locale),
+      'geometry' => resolve_field(fields, :geometry, locale)&.to_json,
+      'isAreaMarked' => resolve_field(fields, :is_area_marked, locale) || false,
+      'protectedAreaType_slug' => extract_reference_slug(resolve_field(fields, :protected_area_type, locale))
+    }
   end
 
-  def map_protected_area(entry)
-    base_fields(entry).merge(
-      'slug' => extract_slug(entry),
-      'name' => safe_field(entry, :name),
-      'geometry' => safe_field(entry, :geometry)&.to_json,
-      'isAreaMarked' => safe_field(entry, :is_area_marked) || false,
-      'protectedAreaType_slug' => extract_reference_slug(safe_field(entry, :protected_area_type))
-    )
+  def map_event_notice(entry, fields, locale)
+    {
+      'slug' => extract_slug(fields, entry),
+      'name' => resolve_field(fields, :name, locale),
+      'description' => extract_rich_text_html(resolve_field(fields, :description, locale)),
+      'location' => extract_location(resolve_field(fields, :location, locale)),
+      'affectedArea' => resolve_field(fields, :affected_area, locale)&.to_json,
+      'startDate' => resolve_field(fields, :start_date, locale)&.iso8601,
+      'endDate' => resolve_field(fields, :end_date, locale)&.iso8601,
+      'waterways' => extract_reference_slugs(resolve_field(fields, :waterways, locale))
+    }
   end
 
-  def map_event_notice(entry)
-    base_fields(entry).merge(
-      'slug' => extract_slug(entry),
-      'name' => safe_field(entry, :name),
-      'description' => extract_rich_text_html(safe_field(entry, :description)),
-      'location' => extract_location(safe_field(entry, :location)),
-      'affectedArea' => safe_field(entry, :affected_area)&.to_json,
-      'startDate' => safe_field(entry, :start_date)&.iso8601,
-      'endDate' => safe_field(entry, :end_date)&.iso8601,
-      'waterways' => extract_reference_slugs(safe_field(entry, :waterways))
-    )
+  def map_type(entry, fields, locale)
+    {
+      'slug' => extract_slug(fields, entry),
+      'name_de' => resolve_field(fields, :name, 'de'),
+      'name_en' => resolve_field(fields, :name, 'en')
+    }
   end
 
-  def map_type(entry)
-    base_fields(entry).merge(
-      'slug' => extract_slug(entry),
-      'name_de' => safe_field(entry, :name_de) || safe_field(entry, :name),
-      'name_en' => safe_field(entry, :name_en) || safe_field(entry, :name)
-    )
-  end
-
-  def map_static_page(entry)
-    menu = safe_field(entry, :menu)
-    base_fields(entry).merge(
-      'slug' => extract_slug(entry),
-      'title' => safe_field(entry, :title),
+  def map_static_page(entry, fields, locale)
+    menu = resolve_field(fields, :menu, locale)
+    {
+      'slug' => extract_slug(fields, entry),
+      'title' => resolve_field(fields, :title, locale),
       'menu' => menu,
       'menu_slug' => menu_to_slug(menu),
-      'content' => extract_rich_text_html(safe_field(entry, :content)),
-      'menuOrder' => safe_field(entry, :menu_order) || 0
-    )
+      'content' => extract_rich_text_html(resolve_field(fields, :content, locale)),
+      'menuOrder' => resolve_field(fields, :menu_order, locale) || 0
+    }
   end
 
   def menu_to_slug(menu)

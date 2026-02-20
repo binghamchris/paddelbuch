@@ -447,16 +447,16 @@ RSpec.describe Jekyll::ContentfulFetcher do
       fetcher.send(:fetch_and_write_content)
     end
 
-    it 'calls correct mapper for each content type' do
+    it 'calls flatten_entry for each content type entry' do
       mock_entry = double('Entry')
-      allow(mock_entry).to receive(:respond_to?).and_return(true)
-      allow(mock_entry).to receive(:sys).and_return({ id: 'e1', locale: 'de', created_at: Time.now, updated_at: Time.now })
+      allow(mock_entry).to receive(:sys).and_return({ id: 'e1', created_at: Time.now, updated_at: Time.now })
+      allow(mock_entry).to receive(:fields_with_locales).and_return({ slug: { en: 'test' } })
 
       # Stub all fetches to return one entry
       allow(mock_client).to receive(:entries).and_return([mock_entry])
 
       Jekyll::ContentfulFetcher::CONTENT_TYPES.each do |_ct, config|
-        expect(ContentfulMappers).to receive(:send).with(config[:mapper], mock_entry).and_return({ 'slug' => 'test' })
+        expect(ContentfulMappers).to receive(:flatten_entry).with(mock_entry, config[:mapper]).and_return([{ 'slug' => 'test', 'locale' => 'de' }])
       end
 
       fetcher.send(:fetch_and_write_content)
@@ -484,8 +484,9 @@ RSpec.describe Jekyll::ContentfulFetcher do
 
     it 'logs entry count per content type' do
       mock_entry = double('Entry')
+      allow(mock_entry).to receive(:sys).and_return({ id: 'e1', created_at: Time.now, updated_at: Time.now })
+      allow(mock_entry).to receive(:fields_with_locales).and_return({ slug: { en: 'test' } })
       allow(mock_client).to receive(:entries).and_return([mock_entry, mock_entry])
-      allow(ContentfulMappers).to receive(:send).and_return({ 'slug' => 'test' })
 
       expect(Jekyll.logger).to receive(:info).with('Contentful:', /Fetched 2 spot entries/).at_least(:once)
       fetcher.send(:fetch_and_write_content)

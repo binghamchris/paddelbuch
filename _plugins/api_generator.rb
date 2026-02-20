@@ -138,11 +138,17 @@ module Jekyll
       data = resolve_data_key(data_key)
       return [] unless data
 
-      # For dimension tables, transform to include locale-specific name
+      # For dimension tables, transform to include locale-specific name.
+      # Deduplicate by slug since locale:'*' flattening produces one row
+      # per locale but dimension tables are locale-independent.
       if data.is_a?(Array)
-        data.map do |item|
-          {
-            'slug' => item['slug'],
+        seen = {}
+        data.each_with_object([]) do |item, result|
+          slug = item['slug']
+          next if seen[slug]
+          seen[slug] = true
+          result << {
+            'slug' => slug,
             'name' => item["name_#{locale}"] || item['name'],
             'createdAt' => item['createdAt'],
             'updatedAt' => item['updatedAt']

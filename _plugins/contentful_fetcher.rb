@@ -129,8 +129,8 @@ module Jekyll
       CONTENT_TYPES.each do |content_type, config|
         begin
           entries = fetch_entries(content_type)
-          data = entries.map { |entry| ContentfulMappers.send(config[:mapper], entry) }
-          Jekyll.logger.info 'Contentful:', "Fetched #{data.size} #{content_type} entries"
+          data = entries.flat_map { |entry| ContentfulMappers.flatten_entry(entry, config[:mapper]) }
+          Jekyll.logger.info 'Contentful:', "Fetched #{entries.size} #{content_type} entries"
           write_yaml(config[:filename], data)
         rescue Contentful::Error => e
           Jekyll.logger.warn 'Contentful:', "Error fetching #{content_type}: #{e.message} — skipping"
