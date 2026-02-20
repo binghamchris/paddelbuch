@@ -88,3 +88,10 @@ src/pages/test/*
 _site
 .sass-cache
 .jekyll-metadata
+
+docs/reference
+
+# Contentful generated data files
+_data/*.yml
+!_data/navigation.yml
+!_data/site.yml
