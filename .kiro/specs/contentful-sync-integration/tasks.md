@@ -162,7 +162,7 @@ Replace the `jekyll-contentful-data-import` gem with a custom Jekyll Generator p
 - [x] 9. Checkpoint - Ensure all ContentfulFetcher tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 10. Integration wiring and data file output verification
+- [x] 10. Integration wiring and data file output verification
   - [x] 10.1 Verify data file output compatibility with downstream generators
     - Ensure `_data/spots.yml` structure is compatible with `ApiGenerator` and `TileGenerator`
     - Ensure all 13 content types write to correct file paths per the CONTENT_TYPES mapping
@@ -175,7 +175,7 @@ Replace the `jekyll-contentful-data-import` gem with a custom Jekyll Generator p
     - Verify downstream generators can read the written data
     - _Requirements: 1.7, 1.8, 9.1, 9.2, 9.3, 9.4, 9.5, 9.6, 9.7_
 
-- [~] 11. Final checkpoint - Ensure all tests pass
+- [x] 11. Final checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Notes
