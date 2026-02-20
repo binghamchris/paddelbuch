@@ -713,6 +713,131 @@ RSpec.describe ContentfulMappers do
     end
   end
 
+  # --- Bug exploration: table node types not rendered as HTML table elements ---
+
+  describe '.render_rich_text table node handling' do
+    it 'renders a simple table with one row and one table-cell' do
+      content = [
+        {
+          'nodeType' => 'table',
+          'content' => [
+            {
+              'nodeType' => 'table-row',
+              'content' => [
+                {
+                  'nodeType' => 'table-cell',
+                  'content' => [
+                    { 'nodeType' => 'paragraph', 'content' => [{ 'nodeType' => 'text', 'value' => 'Cell text' }] }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+      result = ContentfulMappers.render_rich_text(content)
+
+      expect(result).to include('<table>')
+      expect(result).to include('</table>')
+      expect(result).to include('<tr>')
+      expect(result).to include('</tr>')
+      expect(result).to include('<td>')
+      expect(result).to include('</td>')
+      expect(result).to include('<p>Cell text</p>')
+    end
+
+    it 'renders a table with table-header-cell nodes' do
+      content = [
+        {
+          'nodeType' => 'table',
+          'content' => [
+            {
+              'nodeType' => 'table-row',
+              'content' => [
+                {
+                  'nodeType' => 'table-header-cell',
+                  'content' => [
+                    { 'nodeType' => 'paragraph', 'content' => [{ 'nodeType' => 'text', 'value' => 'Header 1' }] }
+                  ]
+                },
+                {
+                  'nodeType' => 'table-header-cell',
+                  'content' => [
+                    { 'nodeType' => 'paragraph', 'content' => [{ 'nodeType' => 'text', 'value' => 'Header 2' }] }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+      result = ContentfulMappers.render_rich_text(content)
+
+      expect(result).to include('<table>')
+      expect(result).to include('<th>')
+      expect(result).to include('</th>')
+      expect(result).to include('<p>Header 1</p>')
+      expect(result).to include('<p>Header 2</p>')
+    end
+
+    it 'renders a multi-row table' do
+      content = [
+        {
+          'nodeType' => 'table',
+          'content' => [
+            {
+              'nodeType' => 'table-row',
+              'content' => [
+                { 'nodeType' => 'table-cell', 'content' => [{ 'nodeType' => 'paragraph', 'content' => [{ 'nodeType' => 'text', 'value' => 'R1C1' }] }] },
+                { 'nodeType' => 'table-cell', 'content' => [{ 'nodeType' => 'paragraph', 'content' => [{ 'nodeType' => 'text', 'value' => 'R1C2' }] }] }
+              ]
+            },
+            {
+              'nodeType' => 'table-row',
+              'content' => [
+                { 'nodeType' => 'table-cell', 'content' => [{ 'nodeType' => 'paragraph', 'content' => [{ 'nodeType' => 'text', 'value' => 'R2C1' }] }] },
+                { 'nodeType' => 'table-cell', 'content' => [{ 'nodeType' => 'paragraph', 'content' => [{ 'nodeType' => 'text', 'value' => 'R2C2' }] }] }
+              ]
+            }
+          ]
+        }
+      ]
+      result = ContentfulMappers.render_rich_text(content)
+
+      expect(result).to include('<table>')
+      expect(result.scan('<tr>').length).to eq(2)
+      expect(result.scan('<td>').length).to eq(4)
+      expect(result).to include('<p>R1C1</p>')
+      expect(result).to include('<p>R2C2</p>')
+    end
+
+    it 'renders a mixed document with paragraphs before and after a table' do
+      content = [
+        { 'nodeType' => 'paragraph', 'content' => [{ 'nodeType' => 'text', 'value' => 'Before table' }] },
+        {
+          'nodeType' => 'table',
+          'content' => [
+            {
+              'nodeType' => 'table-row',
+              'content' => [
+                { 'nodeType' => 'table-cell', 'content' => [{ 'nodeType' => 'paragraph', 'content' => [{ 'nodeType' => 'text', 'value' => 'Cell' }] }] }
+              ]
+            }
+          ]
+        },
+        { 'nodeType' => 'paragraph', 'content' => [{ 'nodeType' => 'text', 'value' => 'After table' }] }
+      ]
+      result = ContentfulMappers.render_rich_text(content)
+
+      expect(result).to include('<p>Before table</p>')
+      expect(result).to include('<p>After table</p>')
+      expect(result).to include('<table>')
+      expect(result).to include('<tr>')
+      expect(result).to include('<td>')
+      expect(result).to include('<p>Cell</p>')
+    end
+  end
+
   # --- Nil reference handling ---
 
   describe 'nil reference handling' do
