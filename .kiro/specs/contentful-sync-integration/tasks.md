@@ -110,7 +110,7 @@ Replace the `jekyll-contentful-data-import` gem with a custom Jekyll Generator p
 - [x] 7. Checkpoint - Ensure Mapper tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 8. Implement ContentfulFetcher generator
+- [x] 8. Implement ContentfulFetcher generator
   - [x] 8.1 Create ContentfulFetcher generator
     - Create `_plugins/contentful_fetcher.rb`
     - Register as `Jekyll::Generator` with `priority :highest`
@@ -159,7 +159,7 @@ Replace the `jekyll-contentful-data-import` gem with a custom Jekyll Generator p
     - Test environment mismatch detection and logging
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 5.1, 5.2, 5.3, 6.1, 6.2, 6.3, 7.1, 7.2, 7.3, 7.4, 7.5_
 
-- [~] 9. Checkpoint - Ensure all ContentfulFetcher tests pass
+- [x] 9. Checkpoint - Ensure all ContentfulFetcher tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 10. Integration wiring and data file output verification
