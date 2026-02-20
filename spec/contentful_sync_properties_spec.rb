@@ -445,5 +445,114 @@ RSpec.describe 'Contentful Sync Properties' do
       }
     end
   end
+
+  # Feature: contentful-sync-integration, Property 7: Force sync overrides cache state
+  # **Validates: Requirements 5.1, 5.2, 5.3**
+  describe 'Property 7: Force sync overrides cache state' do
+    let(:tmpdir) { Dir.mktmpdir }
+    let(:site_source) { tmpdir }
+    let(:data_dir) { File.join(tmpdir, '_data') }
+
+    before do
+      FileUtils.mkdir_p(File.join(data_dir, 'types'))
+    end
+
+    around do |example|
+      saved_env = %w[CONTENTFUL_SPACE_ID CONTENTFUL_ACCESS_TOKEN CONTENTFUL_ENVIRONMENT CONTENTFUL_FORCE_SYNC].map do |key|
+        [key, ENV[key]]
+      end.to_h
+      example.run
+    ensure
+      saved_env.each { |key, val| val.nil? ? ENV.delete(key) : ENV[key] = val }
+      FileUtils.remove_entry(tmpdir) if Dir.exist?(tmpdir)
+    end
+
+    def build_mock_site(force_config: false)
+      site = double('site')
+      allow(site).to receive(:source).and_return(site_source)
+      allow(site).to receive(:config).and_return({ 'force_contentful_sync' => force_config })
+      allow(site).to receive(:data).and_return({})
+      site
+    end
+
+    def setup_cache(state, cache_dir)
+      case state
+      when :valid
+        cache = CacheMetadata.new(cache_dir)
+        cache.sync_token = 'valid_token_abc123'
+        cache.last_sync_at = Time.now.iso8601
+        cache.space_id = 'test_space'
+        cache.environment = 'master'
+        cache.save
+      when :invalid
+        cache_path = File.join(cache_dir, '.contentful_sync_cache.yml')
+        File.write(cache_path, YAML.dump({ 'sync_token' => 'token_only' }))
+      when :missing
+        cache_path = File.join(cache_dir, '.contentful_sync_cache.yml')
+        File.delete(cache_path) if File.exist?(cache_path)
+      end
+    end
+
+    def build_mock_client
+      client = double('Contentful::Client')
+      entries = double('entries')
+      allow(entries).to receive(:map).and_return([])
+      allow(client).to receive(:entries).and_return(entries)
+
+      sync_page = double('sync_page')
+      allow(sync_page).to receive(:items).and_return([])
+      allow(sync_page).to receive(:next_page?).and_return(false)
+      allow(sync_page).to receive(:next_sync_url).and_return(
+        'https://cdn.contentful.com/spaces/test/sync?sync_token=new_token_xyz'
+      )
+      sync = double('sync')
+      allow(sync).to receive(:first_page).and_return(sync_page)
+      allow(client).to receive(:sync).and_return(sync)
+
+      client
+    end
+
+    it 'performs a full content fetch regardless of cache state when force sync is enabled' do
+      property_of {
+        Rantly {
+          {
+            cache_state: choose(:valid, :invalid, :missing),
+            force_method: choose(:env_var, :config_option)
+          }
+        }
+      }.check(100) { |data|
+        ENV['CONTENTFUL_SPACE_ID'] = 'test_space'
+        ENV['CONTENTFUL_ACCESS_TOKEN'] = 'test_token'
+        ENV['CONTENTFUL_ENVIRONMENT'] = 'master'
+
+        # Enable force sync via the randomly chosen method
+        ENV.delete('CONTENTFUL_FORCE_SYNC')
+        force_config = false
+        case data[:force_method]
+        when :env_var
+          ENV['CONTENTFUL_FORCE_SYNC'] = 'true'
+        when :config_option
+          force_config = true
+        end
+
+        setup_cache(data[:cache_state], data_dir)
+
+        site = build_mock_site(force_config: force_config)
+        mock_client = build_mock_client
+
+        fetcher = Jekyll::ContentfulFetcher.new
+        allow(fetcher).to receive(:client).and_return(mock_client)
+
+        # Key assertion: full fetch must happen regardless of cache state
+        expect(fetcher).to receive(:fetch_and_write_content).and_call_original
+
+        fetcher.generate(site)
+
+        # Clean up cache for next iteration
+        cache_path = File.join(data_dir, '.contentful_sync_cache.yml')
+        File.delete(cache_path) if File.exist?(cache_path)
+      }
+    end
+  end
 end
 

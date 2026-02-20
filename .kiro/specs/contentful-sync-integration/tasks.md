@@ -133,7 +133,7 @@ Replace the `jekyll-contentful-data-import` gem with a custom Jekyll Generator p
     - Log content type name and entry count during fetch
     - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5_
 
-  - [~] 8.3 Write property test: Force sync overrides cache state
+  - [x] 8.3 Write property test: Force sync overrides cache state
     - **Property 7: Force sync overrides cache state**
     - **Validates: Requirements 5.1, 5.2, 5.3**
 
