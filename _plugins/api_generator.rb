@@ -185,13 +185,9 @@ module Jekyll
     end
 
     def add_static_file(dir, filename)
-      # Create a static file entry so Jekyll includes it in the build
-      @site.static_files << Jekyll::StaticFile.new(
-        @site,
-        @site.dest,
-        '/api',
-        filename
-      )
+      # No-op: files are written directly to the output directory by the generator.
+      # Registering them as StaticFile would cause Jekyll to try to copy them
+      # from source, which fails during multi-language builds.
     end
   end
 end

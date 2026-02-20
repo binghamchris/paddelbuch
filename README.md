@@ -75,7 +75,20 @@ paddelbuch/
 
 ### Environment Variables
 
-Create a `.env.development` file with:
+Environment variables are loaded automatically from `.env` files by the `_plugins/env_loader.rb` plugin. The file loaded depends on `JEKYLL_ENV`:
+
+| `JEKYLL_ENV`   | File loaded          | Default? |
+|----------------|----------------------|----------|
+| `development`  | `.env.development`   | Yes      |
+| `production`   | `.env.production`    | No       |
+
+Copy `.env.example` to `.env.development` and fill in your values:
+
+```bash
+cp .env.example .env.development
+```
+
+Required variables:
 
 ```bash
 CONTENTFUL_SPACE_ID=your_space_id
@@ -84,6 +97,8 @@ CONTENTFUL_ENVIRONMENT=master
 MAPBOX_URL=your_mapbox_tile_url
 SITE_URL=http://localhost:4000
 ```
+
+System environment variables always take priority over `.env` file values.
 
 ### Installation
 
@@ -98,7 +113,7 @@ npm install
 ### Running Locally
 
 ```bash
-# Start Jekyll development server
+# Start Jekyll development server (loads .env.development)
 source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.1 && bundle exec jekyll serve
 ```
 
@@ -107,7 +122,8 @@ The site will be available at `http://localhost:4000`
 ### Building for Production
 
 ```bash
-source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.1 && bundle exec jekyll build
+# Test a production build locally (loads .env.production)
+source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.1 && JEKYLL_ENV=production bundle exec jekyll build
 ```
 
 The built site will be in the `_site/` directory.
