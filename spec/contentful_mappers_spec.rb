@@ -547,7 +547,7 @@ RSpec.describe ContentfulMappers do
         slug: 'about-us',
         title: 'Über uns',
         menu: 'Über',
-        content: { 'content' => [{ 'nodeType' => 'paragraph', 'content' => [{ 'nodeType' => 'text', 'value' => 'About page content.' }] }] },
+        page_contents: { 'content' => [{ 'nodeType' => 'paragraph', 'content' => [{ 'nodeType' => 'text', 'value' => 'About page content.' }] }] },
         menu_order: 2
       )
       entry = build_entry(fields)
@@ -580,7 +580,7 @@ RSpec.describe ContentfulMappers do
 
     it 'handles rich text content as Hash with content key' do
       rich_text = { 'content' => [{ 'nodeType' => 'paragraph', 'content' => [{ 'nodeType' => 'text', 'value' => 'Hello' }] }] }
-      fields = build_fields(slug: 'test', title: 'Test', content: rich_text)
+      fields = build_fields(slug: 'test', title: 'Test', page_contents: rich_text)
       entry = build_entry(fields)
       result = ContentfulMappers.map_static_page(entry, fields, 'de')
       expect(result['content']).to eq('<p>Hello</p>')
@@ -603,7 +603,7 @@ RSpec.describe ContentfulMappers do
         ]
       }
       rich_text = { 'raw' => JSON.generate(raw_doc) }
-      fields = build_fields(slug: 'projekt', title: { de: 'Das Projekt', en: 'The Project' }, content: { de: rich_text, en: rich_text })
+      fields = build_fields(slug: 'projekt', title: { de: 'Das Projekt', en: 'The Project' }, page_contents: { de: rich_text, en: rich_text })
       entry = build_entry(fields)
 
       result = ContentfulMappers.map_static_page(entry, fields, 'de')
@@ -617,7 +617,7 @@ RSpec.describe ContentfulMappers do
       rt_object = Object.new
       rt_object.define_singleton_method(:content) { [{ 'nodeType' => 'paragraph', 'content' => [{ 'nodeType' => 'text', 'value' => 'Object content' }] }] }
       fields = build_fields(slug: 'test', title: 'Test')
-      fields[:content] = { en: rt_object }
+      fields[:page_contents] = { en: rt_object }
       entry = build_entry(fields)
       result = ContentfulMappers.map_static_page(entry, fields, 'de')
       expect(result['content']).to eq('<p>Object content</p>')
@@ -634,7 +634,7 @@ RSpec.describe ContentfulMappers do
       de_rt = { 'content' => [{ 'nodeType' => 'paragraph', 'content' => [{ 'nodeType' => 'text', 'value' => 'German content' }] }] }
       en_rt = { 'content' => [{ 'nodeType' => 'paragraph', 'content' => [{ 'nodeType' => 'text', 'value' => 'English content' }] }] }
       fields = build_fields(slug: 'test', title: { de: 'Test DE', en: 'Test EN' })
-      fields[:content] = { de: de_rt, en: en_rt }
+      fields[:page_contents] = { de: de_rt, en: en_rt }
       entry = build_entry(fields)
 
       de_result = ContentfulMappers.map_static_page(entry, fields, 'de')
@@ -676,8 +676,8 @@ RSpec.describe ContentfulMappers do
       end
 
       fields = build_fields(slug: 'datenlizenzen', title: 'Datenlizenzen', menu: 'Offene Daten')
-      # Inject the non-Hash locale wrapper directly for the :content field
-      fields[:content] = locale_wrapper
+      # Inject the non-Hash locale wrapper directly for the :page_contents field
+      fields[:page_contents] = locale_wrapper
 
       entry = build_entry(fields)
       result = ContentfulMappers.map_static_page(entry, fields, 'de')
@@ -701,7 +701,7 @@ RSpec.describe ContentfulMappers do
 
       # Wrap in a proper Hash locale wrapper — this SHOULD pass resolve_field's guard
       fields = build_fields(slug: 'projekt', title: 'Das Projekt', menu: 'Über')
-      fields[:content] = { en: rt_object }
+      fields[:page_contents] = { en: rt_object }
 
       entry = build_entry(fields)
       result = ContentfulMappers.map_static_page(entry, fields, 'de')
