@@ -1,0 +1,120 @@
+<!--
+  Detail Map Layers Include
+  
+  Loads the full data pipeline (spots, obstacles, protected areas, event notices)
+  onto a detail page map. Reuses the same layer-control, data-loader, and 
+  zoom-layer-manager modules as the main map.
+  
+  Prerequisites:
+  - Leaflet must be loaded
+  - The detail page must set window.paddelbuchMap before this include runs
+  
+  Parameters:
+  - include.locale: Current locale (default: site.lang or 'de')
+-->
+
+{% assign current_locale = include.locale | default: site.lang | default: 'de' %}
+
+<!-- Layer control: creates layer groups, popups, and global add* functions -->
+{% include layer-control.html locale=current_locale %}
+
+<!-- Marker and layer style modules -->
+<script src="{{ '/assets/js/marker-styles.js' | relative_url }}"></script>
+<script src="{{ '/assets/js/layer-styles.js' | relative_url }}"></script>
+
+<!-- Data loading pipeline -->
+<script src="{{ '/assets/js/spatial-utils.js' | relative_url }}"></script>
+<script src="{{ '/assets/js/data-loader.js' | relative_url }}"></script>
+<script src="{{ '/assets/js/zoom-layer-manager.js' | relative_url }}"></script>
+
+<!-- Bootstrap: load tile data and populate layer groups -->
+<script>
+(function() {
+  'use strict';
+
+  var loadedSlugs = {
+    spots: new Set(),
+    notices: new Set(),
+    obstacles: new Set(),
+    protected: new Set()
+  };
+
+  function populateLayers(data) {
+    if (data.spots) {
+      data.spots.forEach(function(spot) {
+        if (spot.slug && loadedSlugs.spots.has(spot.slug)) return;
+        if (spot.slug) loadedSlugs.spots.add(spot.slug);
+        window.paddelbuchAddSpotMarker(spot);
+      });
+    }
+    if (data.notices) {
+      data.notices.forEach(function(notice) {
+        if (notice.slug && loadedSlugs.notices.has(notice.slug)) return;
+        if (notice.slug) loadedSlugs.notices.add(notice.slug);
+        window.paddelbuchAddEventNoticeMarker(notice);
+      });
+    }
+    if (data.obstacles) {
+      data.obstacles.forEach(function(obstacle) {
+        if (obstacle.slug && loadedSlugs.obstacles.has(obstacle.slug)) return;
+        if (obstacle.slug) loadedSlugs.obstacles.add(obstacle.slug);
+        window.paddelbuchAddObstacleLayer(obstacle);
+      });
+    }
+    if (data.protected) {
+      data.protected.forEach(function(area) {
+        if (area.slug && loadedSlugs.protected.has(area.slug)) return;
+        if (area.slug) loadedSlugs.protected.add(area.slug);
+        window.paddelbuchAddProtectedAreaLayer(area);
+      });
+    }
+  }
+
+  function initDetailMapData() {
+    var map = window.paddelbuchMap;
+    var layerGroups = window.paddelbuchLayerGroups;
+
+    if (!map || !layerGroups) {
+      setTimeout(initDetailMapData, 100);
+      return;
+    }
+
+    var locale = window.paddelbuchCurrentLocale || '{{ current_locale }}';
+
+    // Initial data load for the current viewport
+    var bounds = PaddelbuchSpatialUtils.leafletBoundsToObject(map.getBounds());
+    var zoom = map.getZoom();
+
+    PaddelbuchDataLoader.loadDataForBounds(bounds, zoom, locale)
+      .then(function(data) {
+        populateLayers(data);
+      })
+      .catch(function(err) {
+        console.warn('Detail map data load failed:', err);
+      });
+
+    // Load more data on pan/zoom
+    map.on('moveend', function() {
+      var newBounds = PaddelbuchSpatialUtils.leafletBoundsToObject(map.getBounds());
+      var newZoom = map.getZoom();
+
+      PaddelbuchDataLoader.loadDataForBoundsDebounced(newBounds, newZoom, locale, function(err, data) {
+        if (err) {
+          console.warn('Detail map data load on move failed:', err);
+          return;
+        }
+        populateLayers(data);
+      });
+    });
+
+    // Zoom-based layer visibility for obstacles/protected areas
+    PaddelbuchZoomLayerManager.initZoomLayerManager(map, layerGroups, { locale: locale });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initDetailMapData);
+  } else {
+    setTimeout(initDetailMapData, 100);
+  }
+})();
+</script>

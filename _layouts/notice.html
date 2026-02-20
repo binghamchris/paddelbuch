@@ -8,14 +8,12 @@ pageName: notice-details
   Displays an event notice detail page with bounded map (8 cols) + details panel (4 cols).
   Shows: full description, start date, end date, last updated timestamp.
   Map bounds are calculated from the event notice's affected area GeoJSON geometry.
+  All data layers (spots, obstacles, protected areas, event notices) are loaded.
   
   Collection permalink: /gewaesserereignisse/:slug/
   
   Requirements: 7.4, 13.4
   Property 16: Event Notice Detail Page Contains Required Information
-  
-  For any event notice, the detail page shall display the full description,
-  start date, end date, and last updated timestamp.
 -->
 
 {% assign current_locale = site.lang | default: 'de' %}
@@ -48,22 +46,13 @@ pageName: notice-details
 <script src="{{ '/assets/js/layer-styles.js' | relative_url }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  /**
-   * Event Notice Detail Map Initialization
-   * 
-   * Property 16: Event Notice Detail Page Contains Required Information
-   * For any event notice, the detail page shall display the full description,
-   * start date, end date, and last updated timestamp.
-   * 
-   * Validates: Requirements 7.4
-   */
+  var map;
   
   // Parse affected area geometry
   {% if notice.affectedArea %}
   var geometryData = {{ notice.affectedArea | jsonify }};
   var geometry;
   
-  // Handle both string and object geometry
   if (typeof geometryData === 'string') {
     try {
       geometry = JSON.parse(geometryData);
@@ -75,29 +64,25 @@ document.addEventListener('DOMContentLoaded', function() {
     geometry = geometryData;
   }
   
-  // Initialize map with default Switzerland center
-  var map = L.map('notice-map', {
+  map = L.map('notice-map', {
     center: [{{ site.map.center.lat }}, {{ site.map.center.lon }}],
     zoom: {{ site.map.default_zoom }},
     zoomControl: true
   });
   
-  // Add Mapbox tile layer
   L.tileLayer('{{ site.mapbox_url }}', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     maxZoom: {{ site.map.max_zoom | default: 18 }}
   }).addTo(map);
   
-  // Position zoom control at bottom-right
   map.zoomControl.setPosition('bottomright');
   
   if (geometry) {
-    // Create GeoJSON layer for affected area (yellow semi-transparent polygon)
+    // Render affected area polygon (yellow semi-transparent)
     var affectedAreaLayer = L.geoJSON(geometry, {
       style: PaddelbuchLayerStyles.getLayerStyle('eventNoticeArea')
     }).addTo(map);
     
-    // Calculate and fit bounds from geometry
     var bounds = affectedAreaLayer.getBounds();
     if (bounds.isValid()) {
       map.fitBounds(bounds, { padding: [50, 50] });
@@ -112,7 +97,6 @@ document.addEventListener('DOMContentLoaded', function() {
   var noticeLat = {{ lat }};
   var noticeLon = {{ lon }};
   
-  // Create event notice marker icon
   var eventIcon = L.icon({
     iconUrl: '{{ "/assets/images/markers/waterwayevent.svg" | relative_url }}',
     iconSize: [32, 32],
@@ -120,10 +104,9 @@ document.addEventListener('DOMContentLoaded', function() {
     popupAnchor: [0, -32]
   });
   
-  var marker = L.marker([noticeLat, noticeLon], { icon: eventIcon }).addTo(map);
-  marker.bindPopup('<strong>{{ notice.name | escape }}</strong>');
+  L.marker([noticeLat, noticeLon], { icon: eventIcon }).addTo(map)
+    .bindPopup('<strong>{{ notice.name | escape }}</strong>');
   
-  // If no affected area geometry, center on marker
   {% unless notice.affectedArea %}
   map.setView([noticeLat, noticeLon], 14);
   {% endunless %}
@@ -131,21 +114,17 @@ document.addEventListener('DOMContentLoaded', function() {
   {% endif %}
   
   {% else %}
-  // No affected area geometry - check for location
+  // No affected area — fall back to location or default view
   {% if notice.location %}
   {% assign lat = notice.location.lat | default: notice.location.latitude %}
   {% assign lon = notice.location.lon | default: notice.location.lng | default: notice.location.longitude %}
   {% if lat and lon %}
-  var noticeLat = {{ lat }};
-  var noticeLon = {{ lon }};
-  
-  var map = L.map('notice-map', {
-    center: [noticeLat, noticeLon],
+  map = L.map('notice-map', {
+    center: [{{ lat }}, {{ lon }}],
     zoom: 14,
     zoomControl: true
   });
   
-  // Add Mapbox tile layer
   L.tileLayer('{{ site.mapbox_url }}', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     maxZoom: {{ site.map.max_zoom | default: 18 }}
@@ -153,7 +132,6 @@ document.addEventListener('DOMContentLoaded', function() {
   
   map.zoomControl.setPosition('bottomright');
   
-  // Create event notice marker icon
   var eventIcon = L.icon({
     iconUrl: '{{ "/assets/images/markers/waterwayevent.svg" | relative_url }}',
     iconSize: [32, 32],
@@ -161,11 +139,10 @@ document.addEventListener('DOMContentLoaded', function() {
     popupAnchor: [0, -32]
   });
   
-  var marker = L.marker([noticeLat, noticeLon], { icon: eventIcon }).addTo(map);
-  marker.bindPopup('<strong>{{ notice.name | escape }}</strong>');
+  L.marker([{{ lat }}, {{ lon }}], { icon: eventIcon }).addTo(map)
+    .bindPopup('<strong>{{ notice.name | escape }}</strong>');
   {% else %}
-  // No location - show default Switzerland view
-  var map = L.map('notice-map', {
+  map = L.map('notice-map', {
     center: [{{ site.map.center.lat }}, {{ site.map.center.lon }}],
     zoom: {{ site.map.default_zoom }},
     zoomControl: true
@@ -179,8 +156,7 @@ document.addEventListener('DOMContentLoaded', function() {
   map.zoomControl.setPosition('bottomright');
   {% endif %}
   {% else %}
-  // No location - show default Switzerland view
-  var map = L.map('notice-map', {
+  map = L.map('notice-map', {
     center: [{{ site.map.center.lat }}, {{ site.map.center.lon }}],
     zoom: {{ site.map.default_zoom }},
     zoomControl: true
@@ -194,5 +170,11 @@ document.addEventListener('DOMContentLoaded', function() {
   map.zoomControl.setPosition('bottomright');
   {% endif %}
   {% endif %}
+  
+  // Store map globally so the data layer pipeline can find it
+  window.paddelbuchMap = map;
 });
 </script>
+
+<!-- Load all data layers (spots, obstacles, protected areas, event notices) -->
+{% include detail-map-layers.html locale=current_locale %}

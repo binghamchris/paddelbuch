@@ -8,6 +8,7 @@ pageName: obstacle-details
   Displays an obstacle detail page with bounded map (8 cols) + details panel (4 cols).
   Shows: obstacle type, GPS (center of geometry), waterway link, description, last updated.
   Map bounds are calculated from the obstacle's GeoJSON geometry.
+  All data layers (spots, obstacles, protected areas, event notices) are loaded.
   
   Collection permalink: /hindernisse/:slug/
   
@@ -74,22 +75,11 @@ pageName: obstacle-details
 <script src="{{ '/assets/js/clipboard.js' | relative_url }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  /**
-   * Obstacle Detail Map Initialization
-   * 
-   * Property 10: Obstacle Detail Page Contains Required Information
-   * For any obstacle, the detail page shall display the obstacle type, GPS coordinates
-   * (center of geometry), waterway link, and last updated timestamp.
-   * 
-   * Validates: Requirements 5.4
-   */
-  
   // Parse obstacle geometry
   {% if obstacle.geometry %}
   var geometryData = {{ obstacle.geometry | jsonify }};
   var geometry;
   
-  // Handle both string and object geometry
   if (typeof geometryData === 'string') {
     try {
       geometry = JSON.parse(geometryData);
@@ -100,6 +90,9 @@ document.addEventListener('DOMContentLoaded', function() {
   } else {
     geometry = geometryData;
   }
+  {% else %}
+  var geometry = null;
+  {% endif %}
   
   // Initialize map with default Switzerland center
   var map = L.map('obstacle-map', {
@@ -108,29 +101,27 @@ document.addEventListener('DOMContentLoaded', function() {
     zoomControl: true
   });
   
-  // Add Mapbox tile layer
+  // Add tile layer
   L.tileLayer('{{ site.mapbox_url }}', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     maxZoom: {{ site.map.max_zoom | default: 18 }}
   }).addTo(map);
   
-  // Position zoom control at bottom-right
   map.zoomControl.setPosition('bottomright');
   
   if (geometry) {
-    // Create GeoJSON layer for obstacle (red polygon)
+    // Render obstacle polygon (red)
     var obstacleLayer = L.geoJSON(geometry, {
       style: PaddelbuchLayerStyles.getLayerStyle('obstacle')
     }).addTo(map);
     
-    // Calculate and fit bounds from geometry
     var bounds = obstacleLayer.getBounds();
     if (bounds.isValid()) {
       map.fitBounds(bounds, { padding: [50, 50] });
     }
   }
   
-  // Parse and render portage route if exists (Requirement 5.2)
+  // Render portage route if exists (Requirement 5.2)
   {% if obstacle.portageRoute %}
   var portageRouteData = {{ obstacle.portageRoute | jsonify }};
   var portageRoute;
@@ -147,28 +138,16 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   if (portageRoute) {
-    // Create GeoJSON layer for portage route (purple dashed line)
-    var portageLayer = L.geoJSON(portageRoute, {
+    L.geoJSON(portageRoute, {
       style: PaddelbuchLayerStyles.getLayerStyle('portageRoute')
     }).addTo(map);
   }
   {% endif %}
   
-  {% else %}
-  // No geometry - show default Switzerland view
-  var map = L.map('obstacle-map', {
-    center: [{{ site.map.center.lat }}, {{ site.map.center.lon }}],
-    zoom: {{ site.map.default_zoom }},
-    zoomControl: true
-  });
-  
-  // Add Mapbox tile layer
-  L.tileLayer('{{ site.mapbox_url }}', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    maxZoom: {{ site.map.max_zoom | default: 18 }}
-  }).addTo(map);
-  
-  map.zoomControl.setPosition('bottomright');
-  {% endif %}
+  // Store map globally so the data layer pipeline can find it
+  window.paddelbuchMap = map;
 });
 </script>
+
+<!-- Load all data layers (spots, obstacles, protected areas, event notices) -->
+{% include detail-map-layers.html locale=current_locale %}
