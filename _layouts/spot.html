@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Add spot marker
   var spotType = '{{ spot_type_slug }}';
   var isRejected = {{ is_rejected | default: false }};
-  var markerIcon = PaddelbuchMarkers.getMarkerIcon(spotType, isRejected);
+  var markerIcon = PaddelbuchMarkerStyles.getSpotIcon(spotType, isRejected);
   
   var marker = L.marker([spotLat, spotLon], { icon: markerIcon }).addTo(map);
   
