@@ -6,7 +6,7 @@ Replace the `jekyll-contentful-data-import` gem with a custom Jekyll Generator p
 
 ## Tasks
 
-- [ ] 1. Update Gemfile and add SSL patch
+- [x] 1. Update Gemfile and add SSL patch
   - [x] 1.1 Update Gemfile with new dependencies
     - Remove `jekyll-contentful-data-import` gem from `:jekyll_plugins` group
     - Add `contentful` gem (~> 2.17) to main dependencies
@@ -27,7 +27,7 @@ Replace the `jekyll-contentful-data-import` gem with a custom Jekyll Generator p
     - _Requirements: 10.4, 10.5_
 
 - [ ] 2. Implement CacheMetadata class
-  - [~] 2.1 Create CacheMetadata class
+  - [x] 2.1 Create CacheMetadata class
     - Create `_plugins/cache_metadata.rb`
     - Implement `initialize(data_dir)`, `load`, `save`, `valid?`, and `matches_config?` methods
     - Store sync_token, last_sync_at, space_id, environment as YAML in `_data/.contentful_sync_cache.yml`
