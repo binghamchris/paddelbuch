@@ -20,6 +20,12 @@
   Requirements: 3.1, 3.2, 3.3, 3.4, 3.5
 -->
 
+{% if site.lang != site.default_lang %}
+  {% assign locale_prefix = '/' | append: site.lang %}
+{% else %}
+  {% assign locale_prefix = '' %}
+{% endif %}
+
 {% assign spot = include.spot %}
 {% assign current_locale = include.locale | default: site.lang | default: 'de' %}
 {% assign spot_type_slug = spot.spotType_slug | default: spot.spot_type_slug %}
@@ -110,7 +116,7 @@
     
     <!-- More Details Link (Requirement 3.5) -->
     {% if spot.slug %}
-    <a href="{{ '/einstiegsorte/' | append: spot.slug | append: '/' | relative_url }}" 
+    <a href="{{ locale_prefix | append: '/einstiegsorte/' | append: spot.slug | append: '/' | relative_url }}" 
        class="btn btn-sm btn-primary spot-popup-details-link">
       {% t labels.more_details %}
     </a>
