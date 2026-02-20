@@ -59,7 +59,7 @@ module Jekyll
 
       # Ensure required fields are set
       doc.data['slug'] = slug
-      doc.data['title'] = entry['name'] || slug
+      doc.data['title'] = entry['name'] || entry['title'] || slug
 
       # For static_pages, build permalink from menu_slug + slug
       if collection.label == 'static_pages' && entry['menu_slug']
