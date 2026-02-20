@@ -42,7 +42,7 @@ Replace the `jekyll-contentful-data-import` gem with a custom Jekyll Generator p
     - **Property 10: Cache validation rejects incomplete metadata**
     - **Validates: Requirements 4.6**
 
-  - [~] 2.4 Write unit tests for CacheMetadata
+  - [x] 2.4 Write unit tests for CacheMetadata
     - Test load/save cycle, valid?, matches_config?
     - Test missing file handling, corrupted YAML, missing fields
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6_
