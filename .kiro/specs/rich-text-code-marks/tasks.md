@@ -19,7 +19,7 @@
 
 ## 4. Write preservation tests
 
-- [~] 4.1 Add unit tests verifying unmarked text nodes render identically to the original behavior (plain text)
+- [x] 4.1 Add unit tests verifying unmarked text nodes render identically to the original behavior (plain text)
 - [~] 4.2 [PBT-preservation] Add a property-based test that generates random document structures with NO marks and verifies the output matches the original rendering (no mark tags appear, all text content preserved) `spec/contentful_mappers_spec.rb` **Validates: Property 2**
 - [~] 4.3 Verify existing table and non-table PBT tests still pass after the fix
 

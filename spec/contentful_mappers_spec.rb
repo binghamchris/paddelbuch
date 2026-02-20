@@ -1496,5 +1496,63 @@ RSpec.describe ContentfulMappers do
       }
     end
   end
+
+  # --- Preservation: unmarked text renders as plain text ---
+
+  describe 'Preservation: unmarked text renders as plain text' do
+    it 'renders text with empty marks array as plain text in a paragraph' do
+      content = [{ 'nodeType' => 'paragraph', 'content' => [
+        { 'nodeType' => 'text', 'value' => 'Hello world', 'marks' => [] }
+      ] }]
+      expect(ContentfulMappers.render_rich_text(content)).to eq('<p>Hello world</p>')
+    end
+
+    it 'renders text without marks key as plain text in a paragraph' do
+      content = [{ 'nodeType' => 'paragraph', 'content' => [
+        { 'nodeType' => 'text', 'value' => 'No marks key' }
+      ] }]
+      expect(ContentfulMappers.render_rich_text(content)).to eq('<p>No marks key</p>')
+    end
+
+    it 'renders unmarked text in a heading as plain text' do
+      content = [{ 'nodeType' => 'heading-1', 'content' => [
+        { 'nodeType' => 'text', 'value' => 'Title', 'marks' => [] }
+      ] }]
+      expect(ContentfulMappers.render_rich_text(content)).to eq('<h1>Title</h1>')
+    end
+
+    it 'renders unmarked text in a hyperlink as plain text' do
+      content = [{ 'nodeType' => 'paragraph', 'content' => [
+        { 'nodeType' => 'hyperlink', 'data' => { 'uri' => 'https://example.com' }, 'content' => [
+          { 'nodeType' => 'text', 'value' => 'link text', 'marks' => [] }
+        ] }
+      ] }]
+      expect(ContentfulMappers.render_rich_text(content)).to eq('<p><a href="https://example.com">link text</a></p>')
+    end
+
+    it 'renders unmarked text in a table cell as plain text' do
+      content = [{ 'nodeType' => 'table', 'content' => [
+        { 'nodeType' => 'table-row', 'content' => [
+          { 'nodeType' => 'table-cell', 'content' => [
+            { 'nodeType' => 'paragraph', 'content' => [
+              { 'nodeType' => 'text', 'value' => 'cell value', 'marks' => [] }
+            ] }
+          ] }
+        ] }
+      ] }]
+      expect(ContentfulMappers.render_rich_text(content)).to eq('<table><tr><td><p>cell value</p></td></tr></table>')
+    end
+
+    it 'renders unmarked text in a list item as plain text' do
+      content = [{ 'nodeType' => 'unordered-list', 'content' => [
+        { 'nodeType' => 'list-item', 'content' => [
+          { 'nodeType' => 'paragraph', 'content' => [
+            { 'nodeType' => 'text', 'value' => 'item text', 'marks' => [] }
+          ] }
+        ] }
+      ] }]
+      expect(ContentfulMappers.render_rich_text(content)).to eq('<ul><li><p>item text</p></li></ul>')
+    end
+  end
 end
 
