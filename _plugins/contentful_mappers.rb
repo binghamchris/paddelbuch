@@ -10,6 +10,13 @@
 module ContentfulMappers
   LOCALES = %w[de en].freeze
 
+  MARK_TAG_MAP = {
+    'code' => 'code',
+    'bold' => 'strong',
+    'italic' => 'em',
+    'underline' => 'u'
+  }.freeze
+
   module_function
 
   # ---------------------------------------------------------------------------
