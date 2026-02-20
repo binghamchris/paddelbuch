@@ -78,5 +78,48 @@ RSpec.describe Jekyll::CollectionGenerator do
         expect(doc.data['title']).to eq('Datenlizenzen')
       end
     end
+
+    it 'preserves title for static page entry without name field' do
+      Dir.mktmpdir do |tmpdir|
+        site = build_site(tmpdir)
+        collection = build_collection(site)
+        entry = { 'slug' => 'projekt', 'title' => 'Das Projekt', 'menu_slug' => 'ueber', 'locale' => 'de' }
+        generator = Jekyll::CollectionGenerator.new
+        doc = generator.send(:create_document, site, collection, entry, 'projekt')
+        expect(doc.data['title']).to eq('Das Projekt')
+      end
+    end
+
+    it 'falls back to slug when entry has neither name nor title' do
+      Dir.mktmpdir do |tmpdir|
+        site, collection = build_site_with_collection(tmpdir, 'spots')
+        entry = { 'slug' => 'unknown-spot', 'locale' => 'de' }
+        generator = Jekyll::CollectionGenerator.new
+        doc = generator.send(:create_document, site, collection, entry, 'unknown-spot')
+        expect(doc.data['title']).to eq('unknown-spot')
+      end
+    end
+
+    it 'generates permalink from menu_slug and slug for static pages' do
+      Dir.mktmpdir do |tmpdir|
+        site = build_site(tmpdir)
+        collection = build_collection(site)
+        entry = { 'slug' => 'datenlizenzen', 'title' => 'Datenlizenzen', 'menu_slug' => 'offene-daten', 'locale' => 'de' }
+        generator = Jekyll::CollectionGenerator.new
+        doc = generator.send(:create_document, site, collection, entry, 'datenlizenzen')
+        expect(doc.data['permalink']).to eq('/offene-daten/datenlizenzen/')
+      end
+    end
+
+    it 'does not set permalink when menu_slug is missing' do
+      Dir.mktmpdir do |tmpdir|
+        site = build_site(tmpdir)
+        collection = build_collection(site)
+        entry = { 'slug' => 'orphan-page', 'title' => 'Orphan', 'locale' => 'de' }
+        generator = Jekyll::CollectionGenerator.new
+        doc = generator.send(:create_document, site, collection, entry, 'orphan-page')
+        expect(doc.data['permalink']).to be_nil
+      end
+    end
   end
 end
