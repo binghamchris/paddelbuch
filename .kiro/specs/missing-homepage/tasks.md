@@ -9,4 +9,4 @@
   - [x] 2.1 Build the site with Jekyll and confirm `_site/index.html` is generated
   - [x] 2.2 Verify the generated `_site/index.html` contains the `page-home` body class, map container, and Switzerland coordinates (46.801111, 8.226667)
   - [x] 2.3 Verify existing pages (`_site/404.html`, `_site/gewaesser/seen/index.html`, `_site/gewaesser/fluesse/index.html`) are still generated correctly
-  - [~] 2.4 Verify the English locale homepage is generated at `_site/en/index.html`
+  - [-] 2.4 Verify the English locale homepage is generated at `_site/en/index.html`
