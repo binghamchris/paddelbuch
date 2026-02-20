@@ -554,5 +554,118 @@ RSpec.describe 'Contentful Sync Properties' do
       }
     end
   end
-end
 
+  # Feature: contentful-sync-integration, Property 8: Configuration mismatch triggers full sync
+  # **Validates: Requirements 6.1, 6.2**
+  describe 'Property 8: Configuration mismatch triggers full sync' do
+    let(:tmpdir) { Dir.mktmpdir }
+    let(:site_source) { tmpdir }
+    let(:data_dir) { File.join(tmpdir, '_data') }
+
+    before do
+      FileUtils.mkdir_p(File.join(data_dir, 'types'))
+    end
+
+    around do |example|
+      saved_env = %w[CONTENTFUL_SPACE_ID CONTENTFUL_ACCESS_TOKEN CONTENTFUL_ENVIRONMENT CONTENTFUL_FORCE_SYNC].map do |key|
+        [key, ENV[key]]
+      end.to_h
+      example.run
+    ensure
+      saved_env.each { |key, val| val.nil? ? ENV.delete(key) : ENV[key] = val }
+      FileUtils.remove_entry(tmpdir) if Dir.exist?(tmpdir)
+    end
+
+    def build_mock_site
+      site = double('site')
+      allow(site).to receive(:source).and_return(site_source)
+      allow(site).to receive(:config).and_return({})
+      allow(site).to receive(:data).and_return({})
+      site
+    end
+
+    def build_mock_client
+      client = double('Contentful::Client')
+      entries = double('entries')
+      allow(entries).to receive(:map).and_return([])
+      allow(client).to receive(:entries).and_return(entries)
+
+      sync_page = double('sync_page')
+      allow(sync_page).to receive(:items).and_return([])
+      allow(sync_page).to receive(:next_page?).and_return(false)
+      allow(sync_page).to receive(:next_sync_url).and_return(
+        'https://cdn.contentful.com/spaces/test/sync?sync_token=new_token_xyz'
+      )
+      sync = double('sync')
+      allow(sync).to receive(:first_page).and_return(sync_page)
+      allow(client).to receive(:sync).and_return(sync)
+
+      client
+    end
+
+    it 'performs a full sync when space_id or environment differs from cache' do
+      property_of {
+        Rantly {
+          cached_space = sized(range(5, 15)) { string(:alpha) }
+          cached_env   = choose('master', 'staging', 'development', 'preview')
+          current_space = sized(range(5, 15)) { string(:alpha) }
+          current_env   = choose('master', 'staging', 'development', 'preview')
+
+          # Ensure at least one field differs
+          mismatch_type = choose(:space_only, :env_only, :both)
+          case mismatch_type
+          when :space_only
+            current_space = current_space + '_diff' if current_space == cached_space
+            current_env = cached_env
+          when :env_only
+            current_space = cached_space
+            current_env = current_env + '_diff' if current_env == cached_env
+          when :both
+            current_space = current_space + '_diff' if current_space == cached_space
+            current_env = current_env + '_diff' if current_env == cached_env
+          end
+
+          {
+            cached_space: cached_space,
+            cached_env: cached_env,
+            current_space: current_space,
+            current_env: current_env,
+            mismatch_type: mismatch_type
+          }
+        }
+      }.check(100) { |data|
+        # Set current ENV credentials
+        ENV['CONTENTFUL_SPACE_ID'] = data[:current_space]
+        ENV['CONTENTFUL_ACCESS_TOKEN'] = 'test_token'
+        ENV['CONTENTFUL_ENVIRONMENT'] = data[:current_env]
+        ENV.delete('CONTENTFUL_FORCE_SYNC')
+
+        # Write a valid cache with different space_id/environment
+        cache = CacheMetadata.new(data_dir)
+        cache.sync_token = 'cached_sync_token_abc'
+        cache.last_sync_at = Time.now.iso8601
+        cache.space_id = data[:cached_space]
+        cache.environment = data[:cached_env]
+        cache.save
+
+        site = build_mock_site
+        mock_client = build_mock_client
+
+        fetcher = Jekyll::ContentfulFetcher.new
+        allow(fetcher).to receive(:client).and_return(mock_client)
+
+        # Full fetch must happen due to config mismatch
+        expect(fetcher).to receive(:fetch_and_write_content).and_call_original
+
+        # The stored sync token must NOT be used for incremental sync
+        expect(fetcher).not_to receive(:check_for_changes)
+
+        fetcher.generate(site)
+
+        # Clean up cache for next iteration
+        cache_path = File.join(data_dir, '.contentful_sync_cache.yml')
+        File.delete(cache_path) if File.exist?(cache_path)
+      }
+    end
+  end
+end

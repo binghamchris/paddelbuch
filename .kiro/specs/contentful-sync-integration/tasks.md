@@ -137,7 +137,7 @@ Replace the `jekyll-contentful-data-import` gem with a custom Jekyll Generator p
     - **Property 7: Force sync overrides cache state**
     - **Validates: Requirements 5.1, 5.2, 5.3**
 
-  - [~] 8.4 Write property test: Configuration mismatch triggers full sync
+  - [x] 8.4 Write property test: Configuration mismatch triggers full sync
     - **Property 8: Configuration mismatch triggers full sync**
     - **Validates: Requirements 6.1, 6.2**
 
