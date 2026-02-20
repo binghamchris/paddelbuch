@@ -2,7 +2,7 @@
 
 ## Task 1: Add missing script includes to map-init.html
 - [x] 1.1 Add `<script>` tags for `marker-styles.js` and `layer-styles.js` after the `{% include layer-control.html %}` line in `_includes/map-init.html`
-- [~] 1.2 Add `<script>` tags for `spatial-utils.js`, `data-loader.js`, and `zoom-layer-manager.js` after the style scripts (in dependency order)
+- [x] 1.2 Add `<script>` tags for `spatial-utils.js`, `data-loader.js`, and `zoom-layer-manager.js` after the style scripts (in dependency order)
 
 ## Task 2: Create map data initialization code
 - [~] 2.1 Add initialization script block in `_includes/map-init.html` after the module script tags that waits for `window.paddelbuchMap` and `window.paddelbuchLayerGroups` to be available
