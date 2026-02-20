@@ -2,6 +2,7 @@
  * Marker Styles Module
  * 
  * Defines Leaflet icon configurations for each spot type and event notices.
+ * Icons are created lazily on first use to avoid requiring Leaflet at load time.
  * 
  * Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6
  * 
@@ -30,8 +31,23 @@
     shadowAnchor: [12, 41]
   };
 
+  // Icon URL configs (no Leaflet dependency)
+  var iconUrls = {
+    spotEinstiegAusstieg: basePath + 'startingspots-entryexit.svg',
+    spotNurEinstieg: basePath + 'startingspots-entry.svg',
+    spotNurAusstieg: basePath + 'otherspots-exit.svg',
+    spotRasthalte: basePath + 'otherspots-rest.svg',
+    spotNotauswasserung: basePath + 'otherspots-emergency.svg',
+    rejectedSpot: basePath + 'otherspots-noentry.svg',
+    waterwayEventNotice: basePath + 'waterwayevent.svg'
+  };
+
+  // Cache for lazily created L.Icon instances
+  var iconCache = {};
+
   /**
-   * Creates a Leaflet icon with the specified image URL
+   * Creates a Leaflet icon with the specified image URL.
+   * Requires Leaflet (L) to be available at call time.
    * @param {string} iconUrl - URL to the marker icon image
    * @returns {L.Icon} Leaflet icon instance
    */
@@ -49,29 +65,28 @@
   }
 
   /**
-   * Marker style definitions
+   * Gets or creates a cached Leaflet icon for the given key.
+   * @param {string} key - Icon key from iconUrls
+   * @returns {L.Icon} Leaflet icon instance
+   */
+  function getOrCreateIcon(key) {
+    if (!iconCache[key]) {
+      iconCache[key] = createIcon(iconUrls[key]);
+    }
+    return iconCache[key];
+  }
+
+  /**
+   * Lazy marker styles accessor — creates icons on first access.
    */
   var markerStyles = {
-    // Entry & Exit spot (einstieg-ausstieg)
-    spotEinstiegAusstiegIcon: createIcon(basePath + 'startingspots-entryexit.svg'),
-    
-    // Entry Only spot (nur-einstieg)
-    spotNurEinstiegIcon: createIcon(basePath + 'startingspots-entry.svg'),
-    
-    // Exit Only spot (nur-ausstieg)
-    spotNurAusstiegIcon: createIcon(basePath + 'otherspots-exit.svg'),
-    
-    // Rest spot (rasthalte)
-    spotRasthalteIcon: createIcon(basePath + 'otherspots-rest.svg'),
-    
-    // Emergency Exit spot (notauswasserungsstelle)
-    spotNotauswasserungIcon: createIcon(basePath + 'otherspots-emergency.svg'),
-    
-    // Rejected/No Entry spot
-    rejectedSpotIcon: createIcon(basePath + 'otherspots-noentry.svg'),
-    
-    // Waterway Event Notice marker
-    waterwayEventNoticeIcon: createIcon(basePath + 'waterwayevent.svg')
+    get spotEinstiegAusstiegIcon() { return getOrCreateIcon('spotEinstiegAusstieg'); },
+    get spotNurEinstiegIcon() { return getOrCreateIcon('spotNurEinstieg'); },
+    get spotNurAusstiegIcon() { return getOrCreateIcon('spotNurAusstieg'); },
+    get spotRasthalteIcon() { return getOrCreateIcon('spotRasthalte'); },
+    get spotNotauswasserungIcon() { return getOrCreateIcon('spotNotauswasserung'); },
+    get rejectedSpotIcon() { return getOrCreateIcon('rejectedSpot'); },
+    get waterwayEventNoticeIcon() { return getOrCreateIcon('waterwayEventNotice'); }
   };
 
   /**
