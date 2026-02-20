@@ -7,35 +7,43 @@ require 'spec_helper'
 # **Validates: Requirements 9.1, 9.2, 9.3, 9.4, 9.5, 9.6, 9.7**
 
 RSpec.describe 'Data file output compatibility' do
-  # --- Test helpers (same pattern as contentful_mappers_spec.rb) ---
+  # --- Test helpers (locale: '*' / fields_with_locales pattern) ---
 
   def build_sys(overrides = {})
     {
       id: 'test-id',
-      locale: 'de',
       created_at: Time.parse('2025-01-10T08:30:00Z'),
       updated_at: Time.parse('2025-01-15T10:00:00Z')
     }.merge(overrides)
   end
 
-  def build_entry(fields = {}, sys_overrides = {})
+  # Build a fields_with_locales hash from simple key-value pairs.
+  # Values can be plain (stored under :en) or locale hashes like { de: 'x', en: 'y' }
+  def build_fields(hash)
+    result = {}
+    hash.each do |key, value|
+      if value.is_a?(Hash) && value.keys.all? { |k| k.is_a?(Symbol) && k.to_s.length == 2 }
+        result[key] = value
+      else
+        result[key] = { en: value }
+      end
+    end
+    result
+  end
+
+  def build_entry(fields_hash = {}, sys_overrides = {})
+    fields = build_fields(fields_hash)
     entry = double('Entry')
     allow(entry).to receive(:sys).and_return(build_sys(sys_overrides))
-    allow(entry).to receive(:respond_to?).with(anything).and_return(false)
-
-    fields.each do |name, value|
-      allow(entry).to receive(:respond_to?).with(name).and_return(true)
-      allow(entry).to receive(name).and_return(value)
-    end
-
+    allow(entry).to receive(:fields_with_locales).and_return(fields)
     entry
   end
 
   def build_reference(slug)
     ref = double("Ref:#{slug}")
     allow(ref).to receive(:respond_to?).with(anything).and_return(false)
-    allow(ref).to receive(:respond_to?).with(:slug).and_return(true)
-    allow(ref).to receive(:slug).and_return(slug)
+    allow(ref).to receive(:respond_to?).with(:fields_with_locales).and_return(true)
+    allow(ref).to receive(:fields_with_locales).and_return({ slug: { en: slug } })
     allow(ref).to receive(:sys).and_return({ id: slug })
     ref
   end
@@ -53,14 +61,19 @@ RSpec.describe 'Data file output compatibility' do
     geo
   end
 
+  # Helper: call flatten_entry and return the first (de) locale row
+  def flatten_first(entry, mapper)
+    ContentfulMappers.flatten_entry(entry, mapper).first
+  end
+
   # =========================================================================
   # 1. Spot data structure compatibility
   # =========================================================================
   describe 'Spot data structure compatibility with ApiGenerator and TileGenerator' do
     let(:spot_entry) do
-      build_entry({
+      build_entry(
         slug: 'thunersee-spiez',
-        name: { 'de' => 'Thunersee Spiez', 'en' => 'Lake Thun Spiez' },
+        name: { de: 'Thunersee Spiez', en: 'Lake Thun Spiez' },
         description: { 'content' => [{ 'nodeType' => 'paragraph', 'content' => [{ 'nodeType' => 'text', 'value' => 'A spot.' }] }] },
         location: build_location(46.6863, 7.6803),
         approximate_address: 'Seestrasse, 3700 Spiez',
@@ -70,17 +83,16 @@ RSpec.describe 'Data file output compatibility' do
         waterway: build_reference('thunersee'),
         spot_type: build_reference('launch-point'),
         paddling_environment_type: build_reference('lake'),
-        paddle_craft_types: [build_reference('kayak'), build_reference('sup')],
+        paddle_craft_type: [build_reference('kayak'), build_reference('sup')],
         event_notices: [],
         obstacles: [],
         data_source_type: build_reference('community'),
         data_license_type: build_reference('cc-by-sa')
-      })
+      )
     end
 
-    let(:spot) { ContentfulMappers.map_spot(spot_entry) }
+    let(:spot) { flatten_first(spot_entry, :map_spot) }
 
-    # Keys required by ApiGenerator (filters by locale, excludes rejected, sorts by slug)
     it 'has slug for ApiGenerator sorting' do
       expect(spot).to have_key('slug')
       expect(spot['slug']).to be_a(String)
@@ -99,7 +111,6 @@ RSpec.describe 'Data file output compatibility' do
       expect(spot).to have_key('updatedAt')
     end
 
-    # Keys required by TileGenerator
     it 'has location with lat/lon for TileGenerator spatial tiling' do
       expect(spot).to have_key('location')
       expect(spot['location']).to have_key('lat')
@@ -127,7 +138,6 @@ RSpec.describe 'Data file output compatibility' do
       expect(spot).to have_key('name')
     end
 
-    # Additional keys from the task spec
     it 'has waterway_slug' do
       expect(spot).to have_key('waterway_slug')
     end
@@ -146,9 +156,9 @@ RSpec.describe 'Data file output compatibility' do
   # =========================================================================
   describe 'Waterway data structure compatibility' do
     let(:waterway_entry) do
-      build_entry({
+      build_entry(
         slug: 'thunersee',
-        name: { 'de' => 'Thunersee', 'en' => 'Lake Thun' },
+        name: { de: 'Thunersee', en: 'Lake Thun' },
         length: 17.5,
         area: 48.4,
         geometry: build_geometry('{"type":"Polygon","coordinates":[[7.0,46.0]]}'),
@@ -156,10 +166,10 @@ RSpec.describe 'Data file output compatibility' do
         paddling_environment_type: build_reference('lake'),
         data_source_type: build_reference('official'),
         data_license_type: build_reference('cc-by-sa')
-      })
+      )
     end
 
-    let(:waterway) { ContentfulMappers.map_waterway(waterway_entry) }
+    let(:waterway) { flatten_first(waterway_entry, :map_waterway) }
 
     %w[slug name locale length area geometry showInMenu createdAt updatedAt].each do |key|
       it "has '#{key}' key" do
@@ -173,7 +183,7 @@ RSpec.describe 'Data file output compatibility' do
   # =========================================================================
   describe 'Obstacle data structure compatibility' do
     let(:obstacle_entry) do
-      build_entry({
+      build_entry(
         slug: 'weir-munsingen',
         name: 'Wehr Münsingen',
         description: { 'content' => [{ 'nodeType' => 'paragraph', 'content' => [{ 'nodeType' => 'text', 'value' => 'A weir.' }] }] },
@@ -184,12 +194,11 @@ RSpec.describe 'Data file output compatibility' do
         obstacle_type: build_reference('weir'),
         waterway: build_reference('aare'),
         spots: [build_reference('spot-1')]
-      })
+      )
     end
 
-    let(:obstacle) { ContentfulMappers.map_obstacle(obstacle_entry) }
+    let(:obstacle) { flatten_first(obstacle_entry, :map_obstacle) }
 
-    # Keys required by TileGenerator: geometry (JSON string), slug, name, portageRoute, isPortagePossible, obstacleType_slug
     %w[slug name locale geometry portageRoute isPortagePossible obstacleType_slug createdAt updatedAt].each do |key|
       it "has '#{key}' key" do
         expect(obstacle).to have_key(key)
@@ -206,18 +215,17 @@ RSpec.describe 'Data file output compatibility' do
   # =========================================================================
   describe 'Protected area data structure compatibility' do
     let(:pa_entry) do
-      build_entry({
+      build_entry(
         slug: 'nature-reserve',
         name: 'Naturschutzgebiet',
         geometry: build_geometry('{"type":"Polygon","coordinates":[[7.6,46.7]]}'),
         is_area_marked: true,
         protected_area_type: build_reference('nature-reserve')
-      })
+      )
     end
 
-    let(:pa) { ContentfulMappers.map_protected_area(pa_entry) }
+    let(:pa) { flatten_first(pa_entry, :map_protected_area) }
 
-    # Keys required by TileGenerator: geometry (JSON string), slug, name, protectedAreaType_slug
     %w[slug name locale geometry protectedAreaType_slug createdAt updatedAt].each do |key|
       it "has '#{key}' key" do
         expect(pa).to have_key(key)
@@ -239,7 +247,7 @@ RSpec.describe 'Data file output compatibility' do
       end_date = double('EndDate')
       allow(end_date).to receive(:iso8601).and_return('2025-03-31T23:59:59Z')
 
-      build_entry({
+      build_entry(
         slug: 'flood-warning',
         name: 'Hochwasserwarnung',
         description: { 'content' => [{ 'nodeType' => 'paragraph', 'content' => [{ 'nodeType' => 'text', 'value' => 'Flooding.' }] }] },
@@ -248,12 +256,11 @@ RSpec.describe 'Data file output compatibility' do
         start_date: start_date,
         end_date: end_date,
         waterways: [build_reference('aare')]
-      })
+      )
     end
 
-    let(:notice) { ContentfulMappers.map_event_notice(notice_entry) }
+    let(:notice) { flatten_first(notice_entry, :map_event_notice) }
 
-    # Keys required by TileGenerator: location, slug, name, description, startDate, endDate, affectedArea
     %w[slug name locale location description startDate endDate affectedArea waterways createdAt updatedAt].each do |key|
       it "has '#{key}' key" do
         expect(notice).to have_key(key)
@@ -271,16 +278,14 @@ RSpec.describe 'Data file output compatibility' do
   # =========================================================================
   describe 'Type data structure compatibility' do
     let(:type_entry) do
-      build_entry({
+      build_entry(
         slug: 'launch-point',
-        name_de: 'Einstiegsort',
-        name_en: 'Launch Point'
-      })
+        name: { de: 'Einstiegsort', en: 'Launch Point' }
+      )
     end
 
-    let(:type_data) { ContentfulMappers.map_type(type_entry) }
+    let(:type_data) { flatten_first(type_entry, :map_type) }
 
-    # Keys required by ApiGenerator dimension tables: slug, name_de, name_en, createdAt, updatedAt
     %w[slug name_de name_en locale createdAt updatedAt].each do |key|
       it "has '#{key}' key" do
         expect(type_data).to have_key(key)
@@ -322,7 +327,6 @@ RSpec.describe 'Data file output compatibility' do
   describe 'File path correctness' do
     let(:content_types) { Jekyll::ContentfulFetcher::CONTENT_TYPES }
 
-    # Fact tables expected by ApiGenerator
     {
       'spot'                  => 'spots',
       'waterway'              => 'waterways',
@@ -335,7 +339,6 @@ RSpec.describe 'Data file output compatibility' do
       end
     end
 
-    # Dimension tables expected by ApiGenerator (types/ prefix)
     {
       'spotType'                 => 'types/spot_types',
       'obstacleType'             => 'types/obstacle_types',
@@ -354,7 +357,6 @@ RSpec.describe 'Data file output compatibility' do
       expect(content_types['staticPage'][:filename]).to eq('static_pages')
     end
 
-    # Verify filenames match ApiGenerator's data_key references
     it 'fact table filenames match ApiGenerator FACT_TABLES data_keys' do
       api_fact_keys = Jekyll::ApiGenerator::FACT_TABLES.values.map { |c| c[:data_key] }
       fetcher_fact_filenames = %w[spot waterway obstacle protectedArea waterwayEventNotice].map { |ct| content_types[ct][:filename] }
@@ -387,7 +389,6 @@ RSpec.describe 'Data file output compatibility' do
       FileUtils.rm_rf(tmpdir)
     end
 
-    # Instantiate the fetcher and call write_yaml via send (private method)
     let(:fetcher) do
       f = Jekyll::ContentfulFetcher.new
       f.instance_variable_set(:@site, site)
@@ -408,7 +409,6 @@ RSpec.describe 'Data file output compatibility' do
 
     it 'ApiGenerator can resolve top-level data keys written by fetcher' do
       fetcher.send(:write_yaml, 'spots', [{ 'slug' => 'a', 'locale' => 'de' }])
-      # Simulate ApiGenerator's resolve_data_key for 'spots'
       keys = 'spots'.split('/')
       resolved = data_hash
       keys.each { |k| resolved = resolved[k] }
@@ -417,7 +417,6 @@ RSpec.describe 'Data file output compatibility' do
 
     it 'ApiGenerator can resolve nested data keys written by fetcher' do
       fetcher.send(:write_yaml, 'types/spot_types', [{ 'slug' => 'x' }])
-      # Simulate ApiGenerator's resolve_data_key for 'types/spot_types'
       keys = 'types/spot_types'.split('/')
       resolved = data_hash
       keys.each { |k| resolved = resolved[k] }

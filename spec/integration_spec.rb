@@ -70,13 +70,11 @@ RSpec.describe 'Integration: Contentful fetch pipeline' do
     allow(mock_client).to receive(:sync).with(initial: true).and_return(sync_obj)
   end
 
+  # ── Mock Contentful entry builders (locale: '*' / fields_with_locales) ──
 
-  # ── Mock Contentful entry builders ──────────────────────────────────
-
-  def build_sys(id:, locale: 'de', created: '2025-01-10T08:30:00Z', updated: '2025-01-10T08:30:00Z')
+  def build_sys(id:, created: '2025-01-10T08:30:00Z', updated: '2025-01-10T08:30:00Z')
     {
       id: id,
-      locale: locale,
       created_at: Time.parse(created),
       updated_at: Time.parse(updated)
     }
@@ -91,69 +89,87 @@ RSpec.describe 'Integration: Contentful fetch pipeline' do
 
   def build_reference(slug:)
     ref = double("Ref:#{slug}")
-    allow(ref).to receive(:respond_to?).and_return(true)
-    allow(ref).to receive(:slug).and_return(slug)
+    allow(ref).to receive(:respond_to?).with(anything).and_return(false)
+    allow(ref).to receive(:respond_to?).with(:fields_with_locales).and_return(true)
+    allow(ref).to receive(:fields_with_locales).and_return({ slug: { en: slug } })
     allow(ref).to receive(:sys).and_return({ id: slug })
     ref
   end
 
-  def build_spot_entry(slug:, name:, lat:, lon:, locale: 'de', confirmed: true, rejected: false,
+  # Build a fields_with_locales hash. Values can be plain (stored under :en)
+  # or locale hashes like { de: 'x', en: 'y' }.
+  def build_fields(hash)
+    result = {}
+    hash.each do |key, value|
+      if value.is_a?(Hash) && value.keys.all? { |k| k.is_a?(Symbol) && k.to_s.length == 2 }
+        result[key] = value
+      else
+        result[key] = { en: value }
+      end
+    end
+    result
+  end
+
+  def build_spot_entry(slug:, name:, lat:, lon:, confirmed: true, rejected: false,
                        spot_type_slug: 'launch-point', waterway_slug: 'thunersee')
+    # name should be a hash like { de: '...', en: '...' }
+    name_hash = name.is_a?(Hash) ? name : { en: name }
+
+    fields = build_fields(
+      slug: slug,
+      name: name_hash,
+      description: nil,
+      location: build_location(lat: lat, lon: lon),
+      approximate_address: 'Seestrasse, 3700 Spiez',
+      country: 'CH',
+      confirmed: confirmed,
+      rejected: rejected,
+      waterway: build_reference(slug: waterway_slug),
+      spot_type: build_reference(slug: spot_type_slug),
+      paddling_environment_type: build_reference(slug: 'lake'),
+      paddle_craft_type: [build_reference(slug: 'kayak'), build_reference(slug: 'sup')],
+      event_notices: [],
+      obstacles: [],
+      data_source_type: build_reference(slug: 'community'),
+      data_license_type: build_reference(slug: 'cc-by-sa')
+    )
+
     entry = double("SpotEntry:#{slug}")
-    sys = build_sys(id: slug, locale: locale)
-    location = build_location(lat: lat, lon: lon)
-    spot_type_ref = build_reference(slug: spot_type_slug)
-    waterway_ref  = build_reference(slug: waterway_slug)
-
-    allow(entry).to receive(:sys).and_return(sys)
-    allow(entry).to receive(:respond_to?).and_return(true)
-    allow(entry).to receive(:slug).and_return(slug)
-    allow(entry).to receive(:name).and_return(name)
-    allow(entry).to receive(:description).and_return(nil)
-    allow(entry).to receive(:location).and_return(location)
-    allow(entry).to receive(:approximate_address).and_return('Seestrasse, 3700 Spiez')
-    allow(entry).to receive(:country).and_return('CH')
-    allow(entry).to receive(:confirmed).and_return(confirmed)
-    allow(entry).to receive(:rejected).and_return(rejected)
-    allow(entry).to receive(:waterway).and_return(waterway_ref)
-    allow(entry).to receive(:spot_type).and_return(spot_type_ref)
-    allow(entry).to receive(:paddling_environment_type).and_return(build_reference(slug: 'lake'))
-    allow(entry).to receive(:paddle_craft_types).and_return([build_reference(slug: 'kayak'), build_reference(slug: 'sup')])
-    allow(entry).to receive(:event_notices).and_return([])
-    allow(entry).to receive(:obstacles).and_return([])
-    allow(entry).to receive(:data_source_type).and_return(build_reference(slug: 'community'))
-    allow(entry).to receive(:data_license_type).and_return(build_reference(slug: 'cc-by-sa'))
+    allow(entry).to receive(:sys).and_return(build_sys(id: slug))
+    allow(entry).to receive(:fields_with_locales).and_return(fields)
     entry
   end
 
-  def build_waterway_entry(slug:, name:, locale: 'de')
+  def build_waterway_entry(slug:, name:)
+    name_hash = name.is_a?(Hash) ? name : { en: name }
+
+    fields = build_fields(
+      slug: slug,
+      name: name_hash,
+      length: 17.5,
+      area: 48.4,
+      geometry: nil,
+      show_in_menu: true,
+      paddling_environment_type: build_reference(slug: 'lake'),
+      data_source_type: build_reference(slug: 'official'),
+      data_license_type: build_reference(slug: 'cc-by-sa')
+    )
+
     entry = double("WaterwayEntry:#{slug}")
-    sys = build_sys(id: slug, locale: locale)
-
-    allow(entry).to receive(:sys).and_return(sys)
-    allow(entry).to receive(:respond_to?).and_return(true)
-    allow(entry).to receive(:slug).and_return(slug)
-    allow(entry).to receive(:name).and_return(name)
-    allow(entry).to receive(:length).and_return(17.5)
-    allow(entry).to receive(:area).and_return(48.4)
-    allow(entry).to receive(:geometry).and_return(nil)
-    allow(entry).to receive(:show_in_menu).and_return(true)
-    allow(entry).to receive(:paddling_environment_type).and_return(build_reference(slug: 'lake'))
-    allow(entry).to receive(:data_source_type).and_return(build_reference(slug: 'official'))
-    allow(entry).to receive(:data_license_type).and_return(build_reference(slug: 'cc-by-sa'))
+    allow(entry).to receive(:sys).and_return(build_sys(id: slug))
+    allow(entry).to receive(:fields_with_locales).and_return(fields)
     entry
   end
 
-  def build_type_entry(slug:, name_de:, name_en:, locale: 'de')
-    entry = double("TypeEntry:#{slug}")
-    sys = build_sys(id: slug, locale: locale)
+  def build_type_entry(slug:, name_de:, name_en:)
+    fields = build_fields(
+      slug: slug,
+      name: { de: name_de, en: name_en }
+    )
 
-    allow(entry).to receive(:sys).and_return(sys)
-    allow(entry).to receive(:respond_to?).and_return(true)
-    allow(entry).to receive(:slug).and_return(slug)
-    allow(entry).to receive(:name_de).and_return(name_de)
-    allow(entry).to receive(:name_en).and_return(name_en)
-    allow(entry).to receive(:name).and_return(name_de)
+    entry = double("TypeEntry:#{slug}")
+    allow(entry).to receive(:sys).and_return(build_sys(id: slug))
+    allow(entry).to receive(:fields_with_locales).and_return(fields)
     entry
   end
 
@@ -175,13 +191,13 @@ RSpec.describe 'Integration: Contentful fetch pipeline' do
     let(:spot_entry) do
       build_spot_entry(
         slug: 'thunersee-spiez',
-        name: { 'de' => 'Thunersee Spiez', 'en' => 'Lake Thun Spiez' },
+        name: { de: 'Thunersee Spiez', en: 'Lake Thun Spiez' },
         lat: 46.6863, lon: 7.6803
       )
     end
 
     let(:waterway_entry) do
-      build_waterway_entry(slug: 'thunersee', name: { 'de' => 'Thunersee', 'en' => 'Lake Thun' })
+      build_waterway_entry(slug: 'thunersee', name: { de: 'Thunersee', en: 'Lake Thun' })
     end
 
     let(:spot_type_entry) do
@@ -204,55 +220,62 @@ RSpec.describe 'Integration: Contentful fetch pipeline' do
       expect(File.exist?(File.join(data_dir, 'types', 'spot_types.yml'))).to be true
     end
 
-    it 'writes correct spot data to YAML' do
+    it 'writes correct spot data to YAML (2 locale rows per entry)' do
       fetcher.generate(site)
 
       spots = YAML.safe_load(File.read(File.join(data_dir, 'spots.yml')), permitted_classes: [Time])
       expect(spots).to be_an(Array)
-      expect(spots.size).to eq(1)
+      expect(spots.size).to eq(2) # de + en
 
-      spot = spots.first
-      expect(spot['slug']).to eq('thunersee-spiez')
-      expect(spot['location']['lat']).to eq(46.6863)
-      expect(spot['location']['lon']).to eq(7.6803)
-      expect(spot['confirmed']).to be true
-      expect(spot['rejected']).to be false
-      expect(spot['waterway_slug']).to eq('thunersee')
-      expect(spot['spotType_slug']).to eq('launch-point')
-      expect(spot['paddleCraftTypes']).to eq(%w[kayak sup])
+      de_spot = spots.find { |s| s['locale'] == 'de' }
+      en_spot = spots.find { |s| s['locale'] == 'en' }
+
+      expect(de_spot['slug']).to eq('thunersee-spiez')
+      expect(de_spot['name']).to eq('Thunersee Spiez')
+      expect(de_spot['location']['lat']).to eq(46.6863)
+      expect(de_spot['location']['lon']).to eq(7.6803)
+      expect(de_spot['confirmed']).to be true
+      expect(de_spot['rejected']).to be false
+      expect(de_spot['waterway_slug']).to eq('thunersee')
+      expect(de_spot['spotType_slug']).to eq('launch-point')
+      expect(de_spot['paddleCraftTypes']).to eq(%w[kayak sup])
+
+      expect(en_spot['slug']).to eq('thunersee-spiez')
+      expect(en_spot['name']).to eq('Lake Thun Spiez')
     end
 
-    it 'writes correct waterway data to YAML' do
+    it 'writes correct waterway data to YAML (2 locale rows per entry)' do
       fetcher.generate(site)
 
       waterways = YAML.safe_load(File.read(File.join(data_dir, 'waterways.yml')), permitted_classes: [Time])
       expect(waterways).to be_an(Array)
-      expect(waterways.size).to eq(1)
+      expect(waterways.size).to eq(2) # de + en
 
-      ww = waterways.first
-      expect(ww['slug']).to eq('thunersee')
-      expect(ww['length']).to eq(17.5)
-      expect(ww['showInMenu']).to be true
+      de_ww = waterways.find { |w| w['locale'] == 'de' }
+      expect(de_ww['slug']).to eq('thunersee')
+      expect(de_ww['name']).to eq('Thunersee')
+      expect(de_ww['length']).to eq(17.5)
+      expect(de_ww['showInMenu']).to be true
     end
 
-    it 'writes correct type data to YAML' do
+    it 'writes correct type data to YAML (2 locale rows per entry)' do
       fetcher.generate(site)
 
       types = YAML.safe_load(File.read(File.join(data_dir, 'types', 'spot_types.yml')), permitted_classes: [Time])
       expect(types).to be_an(Array)
-      expect(types.size).to eq(1)
+      expect(types.size).to eq(2) # de + en
 
-      t = types.first
-      expect(t['slug']).to eq('launch-point')
-      expect(t['name_de']).to eq('Einstiegsort')
-      expect(t['name_en']).to eq('Launch Point')
+      de_type = types.find { |t| t['locale'] == 'de' }
+      expect(de_type['slug']).to eq('launch-point')
+      expect(de_type['name_de']).to eq('Einstiegsort')
+      expect(de_type['name_en']).to eq('Launch Point')
     end
 
     it 'populates site.data with the transformed data' do
       fetcher.generate(site)
 
       expect(site_data['spots']).to be_an(Array)
-      expect(site_data['spots'].size).to eq(1)
+      expect(site_data['spots'].size).to eq(2) # de + en
       expect(site_data['spots'].first['slug']).to eq('thunersee-spiez')
 
       expect(site_data['waterways']).to be_an(Array)
@@ -307,9 +330,8 @@ RSpec.describe 'Integration: Contentful fetch pipeline' do
     let(:spot_entry) do
       build_spot_entry(
         slug: 'brienzersee-boenigen',
-        name: { 'de' => 'Brienzersee Bönigen', 'en' => 'Lake Brienz Boenigen' },
+        name: { de: 'Brienzersee Bönigen', en: 'Lake Brienz Boenigen' },
         lat: 46.6930, lon: 7.9020,
-        locale: 'de',
         confirmed: true, rejected: false,
         spot_type_slug: 'launch-point', waterway_slug: 'brienzersee'
       )
@@ -335,7 +357,6 @@ RSpec.describe 'Integration: Contentful fetch pipeline' do
       fetcher.generate(site)
       api_generator.generate(site)
 
-      # ApiGenerator writes to site.dest/api/
       de_file = File.join(dest_dir, 'api', 'spots-de.json')
       expect(File.exist?(de_file)).to be true
 
@@ -380,12 +401,10 @@ RSpec.describe 'Integration: Contentful fetch pipeline' do
 
   describe 'TileGenerator consumes fetcher output' do
     let(:spot_entry) do
-      # Swiss coordinates within Switzerland bounds (lat 45.8-47.8, lon 5.9-10.5)
       build_spot_entry(
         slug: 'thunersee-spiez',
-        name: { 'de' => 'Thunersee Spiez' },
-        lat: 46.6863, lon: 7.6803,
-        locale: 'de'
+        name: { de: 'Thunersee Spiez', en: 'Lake Thun Spiez' },
+        lat: 46.6863, lon: 7.6803
       )
     end
 
@@ -402,13 +421,11 @@ RSpec.describe 'Integration: Contentful fetch pipeline' do
       fetcher.generate(site)
       tile_generator.generate(site)
 
-      # TileGenerator writes tile index to dest/api/tiles/spots/<locale>/index.json
       index_file = File.join(dest_dir, 'api', 'tiles', 'spots', 'de', 'index.json')
       expect(File.exist?(index_file)).to be true
 
       index = JSON.parse(File.read(index_file))
       expect(index['layer']).to eq('spots')
-      # At least one tile should have data (our spot is within Swiss bounds)
       non_empty_tiles = index['tiles'].select { |t| t['count'] > 0 }
       expect(non_empty_tiles.size).to be >= 1
     end
@@ -417,12 +434,10 @@ RSpec.describe 'Integration: Contentful fetch pipeline' do
       fetcher.generate(site)
       tile_generator.generate(site)
 
-      # Find the tile file that contains our spot
       tiles_dir = File.join(dest_dir, 'api', 'tiles', 'spots', 'de')
       tile_files = Dir.glob(File.join(tiles_dir, '*.json')).reject { |f| f.end_with?('index.json') }
       expect(tile_files.size).to be >= 1
 
-      # At least one tile file should contain our spot
       found = tile_files.any? do |tf|
         tile_data = JSON.parse(File.read(tf))
         tile_data['data']&.any? { |d| d['slug'] == 'thunersee-spiez' }
@@ -437,28 +452,17 @@ RSpec.describe 'Integration: Contentful fetch pipeline' do
   # ═══════════════════════════════════════════════════════════════════
 
   describe 'End-to-end: Fetcher → ApiGenerator pipeline' do
-    let(:spot_de) do
+    let(:spot_entry) do
       build_spot_entry(
         slug: 'vierwaldstaettersee-luzern',
-        name: { 'de' => 'Vierwaldstättersee Luzern', 'en' => 'Lake Lucerne' },
+        name: { de: 'Vierwaldstättersee Luzern', en: 'Lake Lucerne' },
         lat: 47.0502, lon: 8.3093,
-        locale: 'de',
-        confirmed: true, rejected: false
-      )
-    end
-
-    let(:spot_en) do
-      build_spot_entry(
-        slug: 'vierwaldstaettersee-luzern',
-        name: { 'de' => 'Vierwaldstättersee Luzern', 'en' => 'Lake Lucerne' },
-        lat: 47.0502, lon: 8.3093,
-        locale: 'en',
         confirmed: true, rejected: false
       )
     end
 
     let(:waterway_entry) do
-      build_waterway_entry(slug: 'vierwaldstaettersee', name: { 'de' => 'Vierwaldstättersee', 'en' => 'Lake Lucerne' }, locale: 'de')
+      build_waterway_entry(slug: 'vierwaldstaettersee', name: { de: 'Vierwaldstättersee', en: 'Lake Lucerne' })
     end
 
     let(:spot_type_entry) do
@@ -471,7 +475,7 @@ RSpec.describe 'Integration: Contentful fetch pipeline' do
 
     before do
       stub_entries_for(
-        'spot'         => [spot_de, spot_en],
+        'spot'         => [spot_entry],
         'waterway'     => [waterway_entry],
         'spotType'     => [spot_type_entry],
         'obstacleType' => [obstacle_type_entry]
@@ -482,7 +486,7 @@ RSpec.describe 'Integration: Contentful fetch pipeline' do
       fetcher.generate(site)
       api_generator.generate(site)
 
-      # DE spots
+      # DE spots — one entry produces one de row
       de_spots = JSON.parse(File.read(File.join(dest_dir, 'api', 'spots-de.json')))
       expect(de_spots.size).to eq(1)
       expect(de_spots.first['slug']).to eq('vierwaldstaettersee-luzern')
@@ -521,14 +525,13 @@ RSpec.describe 'Integration: Contentful fetch pipeline' do
     it 'rejected spots are excluded from API output' do
       rejected_spot = build_spot_entry(
         slug: 'rejected-spot',
-        name: { 'de' => 'Rejected' },
+        name: { de: 'Rejected', en: 'Rejected' },
         lat: 46.5, lon: 7.5,
-        locale: 'de',
         confirmed: false, rejected: true
       )
 
       stub_entries_for(
-        'spot'     => [spot_de, rejected_spot],
+        'spot'     => [spot_entry, rejected_spot],
         'waterway' => [waterway_entry],
         'spotType' => [spot_type_entry],
         'obstacleType' => [obstacle_type_entry]

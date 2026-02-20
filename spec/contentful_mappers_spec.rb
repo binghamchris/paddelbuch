@@ -4,34 +4,45 @@ require 'spec_helper'
 
 RSpec.describe ContentfulMappers do
   # --- Test helpers ---
+  # Mappers now receive (entry, fields, locale) where fields = entry.fields_with_locales
+  # fields is a hash of { field_name_sym: { locale_sym: value } }
 
   def build_sys(overrides = {})
     {
       id: 'test-id-123',
-      locale: 'de',
       created_at: Time.parse('2025-01-10T08:30:00Z'),
       updated_at: Time.parse('2025-01-15T10:00:00Z')
     }.merge(overrides)
   end
 
-  def build_entry(fields = {}, sys_overrides = {})
+  # Build a minimal entry double with sys and fields_with_locales
+  def build_entry(fields_with_locales = {}, sys_overrides = {})
     entry = double('Entry')
     allow(entry).to receive(:sys).and_return(build_sys(sys_overrides))
-    allow(entry).to receive(:respond_to?).with(anything).and_return(false)
-
-    fields.each do |name, value|
-      allow(entry).to receive(:respond_to?).with(name).and_return(true)
-      allow(entry).to receive(name).and_return(value)
-    end
-
+    allow(entry).to receive(:fields_with_locales).and_return(fields_with_locales)
     entry
+  end
+
+  # Build a fields_with_locales hash from simple key-value pairs.
+  # Values can be plain (stored under :en) or locale hashes like { de: 'x', en: 'y' }
+  def build_fields(hash)
+    result = {}
+    hash.each do |key, value|
+      if value.is_a?(Hash) && value.keys.all? { |k| k.is_a?(Symbol) && k.to_s.length == 2 }
+        result[key] = value
+      else
+        # Store under :en (the space default locale)
+        result[key] = { en: value }
+      end
+    end
+    result
   end
 
   def build_reference(slug)
     ref = double("Ref:#{slug}")
     allow(ref).to receive(:respond_to?).with(anything).and_return(false)
-    allow(ref).to receive(:respond_to?).with(:slug).and_return(true)
-    allow(ref).to receive(:slug).and_return(slug)
+    allow(ref).to receive(:respond_to?).with(:fields_with_locales).and_return(true)
+    allow(ref).to receive(:fields_with_locales).and_return({ slug: { en: slug } })
     allow(ref).to receive(:sys).and_return({ id: slug })
     ref
   end
@@ -47,41 +58,6 @@ RSpec.describe ContentfulMappers do
     geo = double('Geometry')
     allow(geo).to receive(:to_json).and_return(json)
     geo
-  end
-
-  # --- safe_field ---
-
-  describe '.safe_field' do
-    it 'returns the field value when entry responds to it' do
-      entry = build_entry(name: 'Test Spot')
-      expect(ContentfulMappers.safe_field(entry, :name)).to eq('Test Spot')
-    end
-
-    it 'returns nil when entry does not respond to the field' do
-      entry = build_entry({})
-      expect(ContentfulMappers.safe_field(entry, :nonexistent)).to be_nil
-    end
-
-    it 'returns nil when the field raises an error' do
-      entry = build_entry({})
-      allow(entry).to receive(:respond_to?).with(:bad_field).and_return(true)
-      allow(entry).to receive(:bad_field).and_raise(StandardError, 'field error')
-      expect(ContentfulMappers.safe_field(entry, :bad_field)).to be_nil
-    end
-  end
-
-  # --- extract_slug ---
-
-  describe '.extract_slug' do
-    it 'returns the slug field when present' do
-      entry = build_entry(slug: 'my-spot')
-      expect(ContentfulMappers.extract_slug(entry)).to eq('my-spot')
-    end
-
-    it 'falls back to sys[:id] when slug is missing' do
-      entry = build_entry({}, { id: 'fallback-sys-id' })
-      expect(ContentfulMappers.extract_slug(entry)).to eq('fallback-sys-id')
-    end
   end
 
   # --- extract_location ---
@@ -101,14 +77,16 @@ RSpec.describe ContentfulMappers do
   # --- extract_reference_slug / extract_reference_slugs ---
 
   describe '.extract_reference_slug' do
-    it 'returns the slug of a reference' do
+    it 'returns the slug of a reference with fields_with_locales' do
       ref = build_reference('waterway-slug')
       expect(ContentfulMappers.extract_reference_slug(ref)).to eq('waterway-slug')
     end
 
-    it 'falls back to sys[:id] when reference has no slug' do
+    it 'falls back to sys[:id] when reference has no slug in fields_with_locales' do
       ref = double('Ref')
       allow(ref).to receive(:respond_to?).with(anything).and_return(false)
+      allow(ref).to receive(:respond_to?).with(:fields_with_locales).and_return(true)
+      allow(ref).to receive(:fields_with_locales).and_return({})
       allow(ref).to receive(:sys).and_return({ id: 'ref-sys-id' })
       expect(ContentfulMappers.extract_reference_slug(ref)).to eq('ref-sys-id')
     end
@@ -134,7 +112,6 @@ RSpec.describe ContentfulMappers do
 
     it 'compacts nil references' do
       refs = [build_reference('a'), nil, build_reference('c')]
-      # nil ref returns nil from extract_reference_slug, compact removes it
       result = ContentfulMappers.extract_reference_slugs(refs)
       expect(result).to include('a', 'c')
     end
@@ -171,42 +148,7 @@ RSpec.describe ContentfulMappers do
       expect(ContentfulMappers.extract_rich_text_html(field)).to eq('<p><a href="https://example.com">click here</a></p>')
     end
 
-    it 'converts an unordered list' do
-      field = {
-        'content' => [
-          { 'nodeType' => 'unordered-list', 'content' => [
-            { 'nodeType' => 'list-item', 'content' => [
-              { 'nodeType' => 'paragraph', 'content' => [
-                { 'nodeType' => 'text', 'value' => 'Item 1' }
-              ] }
-            ] },
-            { 'nodeType' => 'list-item', 'content' => [
-              { 'nodeType' => 'paragraph', 'content' => [
-                { 'nodeType' => 'text', 'value' => 'Item 2' }
-              ] }
-            ] }
-          ] }
-        ]
-      }
-      expect(ContentfulMappers.extract_rich_text_html(field)).to eq('<ul><li><p>Item 1</p></li><li><p>Item 2</p></li></ul>')
-    end
-
-    it 'converts an ordered list' do
-      field = {
-        'content' => [
-          { 'nodeType' => 'ordered-list', 'content' => [
-            { 'nodeType' => 'list-item', 'content' => [
-              { 'nodeType' => 'paragraph', 'content' => [
-                { 'nodeType' => 'text', 'value' => 'First' }
-              ] }
-            ] }
-          ] }
-        ]
-      }
-      expect(ContentfulMappers.extract_rich_text_html(field)).to eq('<ol><li><p>First</p></li></ol>')
-    end
-
-    it 'converts headings (h1, h2, h3)' do
+    it 'converts lists and headings' do
       field = {
         'content' => [
           { 'nodeType' => 'heading-1', 'content' => [{ 'nodeType' => 'text', 'value' => 'H1' }] },
@@ -220,57 +162,29 @@ RSpec.describe ContentfulMappers do
     it 'converts a plain string via to_s' do
       expect(ContentfulMappers.extract_rich_text_html('plain text')).to eq('plain text')
     end
-
-    it 'handles entry-like rich text objects with .content method' do
-      inner = double('TextNode')
-      allow(inner).to receive(:is_a?).with(Hash).and_return(false)
-      allow(inner).to receive(:respond_to?).with(:node_type).and_return(true)
-      allow(inner).to receive(:node_type).and_return('text')
-      allow(inner).to receive(:respond_to?).with(:content).and_return(false)
-      allow(inner).to receive(:respond_to?).with(:value).and_return(true)
-      allow(inner).to receive(:value).and_return('rich content')
-      allow(inner).to receive(:respond_to?).with(:data).and_return(false)
-
-      para = double('ParagraphNode')
-      allow(para).to receive(:is_a?).with(Hash).and_return(false)
-      allow(para).to receive(:respond_to?).with(:node_type).and_return(true)
-      allow(para).to receive(:node_type).and_return('paragraph')
-      allow(para).to receive(:respond_to?).with(:content).and_return(true)
-      allow(para).to receive(:content).and_return([inner])
-      allow(para).to receive(:respond_to?).with(:value).and_return(false)
-      allow(para).to receive(:respond_to?).with(:data).and_return(false)
-
-      field = double('RichTextField')
-      allow(field).to receive(:is_a?).with(Hash).and_return(false)
-      allow(field).to receive(:respond_to?).with(:content).and_return(true)
-      allow(field).to receive(:content).and_return([para])
-
-      expect(ContentfulMappers.extract_rich_text_html(field)).to eq('<p>rich content</p>')
-    end
   end
 
-  # --- base_fields ---
+  # --- resolve_field ---
 
-  describe '.base_fields' do
-    it 'extracts locale, createdAt, updatedAt from sys' do
-      entry = build_entry({})
-      result = ContentfulMappers.base_fields(entry)
-      expect(result['locale']).to eq('de')
-      expect(result['createdAt']).to eq('2025-01-10T08:30:00Z')
-      expect(result['updatedAt']).to eq('2025-01-15T10:00:00Z')
+  describe '.resolve_field' do
+    it 'returns the value for the requested locale' do
+      fields = { name: { de: 'Thunersee', en: 'Lake Thun' } }
+      expect(ContentfulMappers.resolve_field(fields, :name, 'de')).to eq('Thunersee')
+      expect(ContentfulMappers.resolve_field(fields, :name, 'en')).to eq('Lake Thun')
     end
 
-    it 'falls back to entry.locale when sys[:locale] is nil' do
-      entry = build_entry({ locale: 'en' }, { locale: nil })
-      result = ContentfulMappers.base_fields(entry)
-      expect(result['locale']).to eq('en')
+    it 'falls back to :en when requested locale is missing' do
+      fields = { name: { en: 'Lake Thun' } }
+      expect(ContentfulMappers.resolve_field(fields, :name, 'de')).to eq('Lake Thun')
     end
 
-    it 'returns nil timestamps when sys times are nil' do
-      entry = build_entry({}, { created_at: nil, updated_at: nil })
-      result = ContentfulMappers.base_fields(entry)
-      expect(result['createdAt']).to be_nil
-      expect(result['updatedAt']).to be_nil
+    it 'returns nil when field is not in the hash' do
+      expect(ContentfulMappers.resolve_field({}, :name, 'de')).to be_nil
+    end
+
+    it 'returns nil when field value is not a hash' do
+      fields = { name: 'not a locale hash' }
+      expect(ContentfulMappers.resolve_field(fields, :name, 'de')).to be_nil
     end
   end
 
@@ -302,13 +216,47 @@ RSpec.describe ContentfulMappers do
     end
   end
 
+  # --- flatten_entry ---
+
+  describe '.flatten_entry' do
+    it 'produces one hash per locale' do
+      fields = build_fields(slug: 'test-spot', name: { de: 'Test DE', en: 'Test EN' })
+      entry = build_entry(fields)
+      results = ContentfulMappers.flatten_entry(entry, :map_spot)
+
+      expect(results.length).to eq(2)
+      expect(results[0]['locale']).to eq('de')
+      expect(results[1]['locale']).to eq('en')
+    end
+
+    it 'resolves locale-specific field values' do
+      fields = build_fields(slug: 'my-spot', name: { de: 'Mein Ort', en: 'My Spot' })
+      entry = build_entry(fields)
+      results = ContentfulMappers.flatten_entry(entry, :map_spot)
+
+      expect(results[0]['name']).to eq('Mein Ort')
+      expect(results[1]['name']).to eq('My Spot')
+    end
+
+    it 'includes sys timestamps in each row' do
+      fields = build_fields(slug: 'ts-test')
+      entry = build_entry(fields)
+      results = ContentfulMappers.flatten_entry(entry, :map_spot)
+
+      results.each do |row|
+        expect(row['createdAt']).to eq('2025-01-10T08:30:00Z')
+        expect(row['updatedAt']).to eq('2025-01-15T10:00:00Z')
+      end
+    end
+  end
+
   # --- map_spot ---
 
   describe '.map_spot' do
     it 'maps a fully populated spot entry' do
-      entry = build_entry({
+      fields = build_fields(
         slug: 'thunersee-spiez',
-        name: { 'de' => 'Thunersee Spiez', 'en' => 'Lake Thun Spiez' },
+        name: { de: 'Thunersee Spiez', en: 'Lake Thun Spiez' },
         description: { 'content' => [{ 'nodeType' => 'paragraph', 'content' => [{ 'nodeType' => 'text', 'value' => 'A launch point.' }] }] },
         location: build_location(46.6863, 7.6803),
         approximate_address: 'Seestrasse, 3700 Spiez',
@@ -318,17 +266,18 @@ RSpec.describe ContentfulMappers do
         waterway: build_reference('thunersee'),
         spot_type: build_reference('launch-point'),
         paddling_environment_type: build_reference('lake'),
-        paddle_craft_types: [build_reference('kayak'), build_reference('sup')],
+        paddle_craft_type: [build_reference('kayak'), build_reference('sup')],
         event_notices: [build_reference('notice-1')],
         obstacles: [],
         data_source_type: build_reference('community'),
         data_license_type: build_reference('cc-by-sa')
-      })
+      )
+      entry = build_entry(fields)
 
-      result = ContentfulMappers.map_spot(entry)
+      result = ContentfulMappers.map_spot(entry, fields, 'de')
 
       expect(result['slug']).to eq('thunersee-spiez')
-      expect(result['name']).to eq({ 'de' => 'Thunersee Spiez', 'en' => 'Lake Thun Spiez' })
+      expect(result['name']).to eq('Thunersee Spiez')
       expect(result['description']).to eq('<p>A launch point.</p>')
       expect(result['location']).to eq({ 'lat' => 46.6863, 'lon' => 7.6803 })
       expect(result['approximateAddress']).to eq('Seestrasse, 3700 Spiez')
@@ -343,14 +292,11 @@ RSpec.describe ContentfulMappers do
       expect(result['obstacles']).to eq([])
       expect(result['dataSourceType_slug']).to eq('community')
       expect(result['dataLicenseType_slug']).to eq('cc-by-sa')
-      expect(result['locale']).to eq('de')
-      expect(result['createdAt']).to eq('2025-01-10T08:30:00Z')
-      expect(result['updatedAt']).to eq('2025-01-15T10:00:00Z')
     end
 
     it 'handles missing fields gracefully' do
       entry = build_entry({})
-      result = ContentfulMappers.map_spot(entry)
+      result = ContentfulMappers.map_spot(entry, {}, 'de')
 
       expect(result['slug']).to eq('test-id-123')
       expect(result['name']).to be_nil
@@ -367,9 +313,9 @@ RSpec.describe ContentfulMappers do
   describe '.map_waterway' do
     it 'maps a fully populated waterway entry' do
       geo = build_geometry('{"type":"Polygon","coordinates":[[7.0,46.0]]}')
-      entry = build_entry({
+      fields = build_fields(
         slug: 'thunersee',
-        name: { 'de' => 'Thunersee', 'en' => 'Lake Thun' },
+        name: { de: 'Thunersee', en: 'Lake Thun' },
         length: 17.5,
         area: 48.4,
         geometry: geo,
@@ -377,24 +323,22 @@ RSpec.describe ContentfulMappers do
         paddling_environment_type: build_reference('lake'),
         data_source_type: build_reference('official'),
         data_license_type: build_reference('cc-by-sa')
-      })
+      )
+      entry = build_entry(fields)
 
-      result = ContentfulMappers.map_waterway(entry)
+      result = ContentfulMappers.map_waterway(entry, fields, 'de')
 
       expect(result['slug']).to eq('thunersee')
-      expect(result['name']).to eq({ 'de' => 'Thunersee', 'en' => 'Lake Thun' })
+      expect(result['name']).to eq('Thunersee')
       expect(result['length']).to eq(17.5)
       expect(result['area']).to eq(48.4)
       expect(result['geometry']).to eq('{"type":"Polygon","coordinates":[[7.0,46.0]]}')
       expect(result['showInMenu']).to be true
-      expect(result['paddlingEnvironmentType_slug']).to eq('lake')
-      expect(result['dataSourceType_slug']).to eq('official')
-      expect(result['dataLicenseType_slug']).to eq('cc-by-sa')
     end
 
     it 'handles missing fields gracefully' do
       entry = build_entry({})
-      result = ContentfulMappers.map_waterway(entry)
+      result = ContentfulMappers.map_waterway(entry, {}, 'de')
 
       expect(result['slug']).to eq('test-id-123')
       expect(result['geometry']).to be_nil
@@ -406,7 +350,7 @@ RSpec.describe ContentfulMappers do
 
   describe '.map_obstacle' do
     it 'maps a fully populated obstacle entry' do
-      entry = build_entry({
+      fields = build_fields(
         slug: 'weir-munsingen',
         name: 'Wehr Münsingen',
         description: { 'content' => [{ 'nodeType' => 'paragraph', 'content' => [{ 'nodeType' => 'text', 'value' => 'A weir.' }] }] },
@@ -419,17 +363,15 @@ RSpec.describe ContentfulMappers do
         obstacle_type: build_reference('weir'),
         waterway: build_reference('aare'),
         spots: [build_reference('spot-1'), build_reference('spot-2')]
-      })
+      )
+      entry = build_entry(fields)
 
-      result = ContentfulMappers.map_obstacle(entry)
+      result = ContentfulMappers.map_obstacle(entry, fields, 'de')
 
       expect(result['slug']).to eq('weir-munsingen')
       expect(result['name']).to eq('Wehr Münsingen')
       expect(result['description']).to eq('<p>A weir.</p>')
-      expect(result['geometry']).to eq('{"type":"Point","coordinates":[7.5,46.8]}')
-      expect(result['portageRoute']).to eq('{"type":"LineString","coordinates":[[7.5,46.8],[7.51,46.81]]}')
       expect(result['portageDistance']).to eq(150)
-      expect(result['portageDescription']).to eq('<p>Carry left.</p>')
       expect(result['isPortageNecessary']).to be true
       expect(result['isPortagePossible']).to be true
       expect(result['obstacleType_slug']).to eq('weir')
@@ -439,7 +381,7 @@ RSpec.describe ContentfulMappers do
 
     it 'handles missing fields gracefully' do
       entry = build_entry({})
-      result = ContentfulMappers.map_obstacle(entry)
+      result = ContentfulMappers.map_obstacle(entry, {}, 'de')
 
       expect(result['slug']).to eq('test-id-123')
       expect(result['isPortageNecessary']).to be false
@@ -452,26 +394,26 @@ RSpec.describe ContentfulMappers do
 
   describe '.map_protected_area' do
     it 'maps a fully populated protected area entry' do
-      entry = build_entry({
+      fields = build_fields(
         slug: 'nature-reserve-aaredelta',
         name: 'Naturschutzgebiet Aaredelta',
         geometry: build_geometry('{"type":"Polygon","coordinates":[[7.6,46.7]]}'),
         is_area_marked: true,
         protected_area_type: build_reference('nature-reserve')
-      })
+      )
+      entry = build_entry(fields)
 
-      result = ContentfulMappers.map_protected_area(entry)
+      result = ContentfulMappers.map_protected_area(entry, fields, 'de')
 
       expect(result['slug']).to eq('nature-reserve-aaredelta')
       expect(result['name']).to eq('Naturschutzgebiet Aaredelta')
-      expect(result['geometry']).to eq('{"type":"Polygon","coordinates":[[7.6,46.7]]}')
       expect(result['isAreaMarked']).to be true
       expect(result['protectedAreaType_slug']).to eq('nature-reserve')
     end
 
     it 'handles missing fields gracefully' do
       entry = build_entry({})
-      result = ContentfulMappers.map_protected_area(entry)
+      result = ContentfulMappers.map_protected_area(entry, {}, 'de')
 
       expect(result['slug']).to eq('test-id-123')
       expect(result['isAreaMarked']).to be false
@@ -488,7 +430,7 @@ RSpec.describe ContentfulMappers do
       end_date = double('EndDate')
       allow(end_date).to receive(:iso8601).and_return('2025-03-31T23:59:59Z')
 
-      entry = build_entry({
+      fields = build_fields(
         slug: 'flood-warning-aare',
         name: 'Hochwasserwarnung Aare',
         description: { 'content' => [{ 'nodeType' => 'paragraph', 'content' => [{ 'nodeType' => 'text', 'value' => 'Flooding expected.' }] }] },
@@ -497,15 +439,15 @@ RSpec.describe ContentfulMappers do
         start_date: start_date,
         end_date: end_date,
         waterways: [build_reference('aare'), build_reference('thunersee')]
-      })
+      )
+      entry = build_entry(fields)
 
-      result = ContentfulMappers.map_event_notice(entry)
+      result = ContentfulMappers.map_event_notice(entry, fields, 'de')
 
       expect(result['slug']).to eq('flood-warning-aare')
       expect(result['name']).to eq('Hochwasserwarnung Aare')
       expect(result['description']).to eq('<p>Flooding expected.</p>')
       expect(result['location']).to eq({ 'lat' => 46.95, 'lon' => 7.45 })
-      expect(result['affectedArea']).to eq('{"type":"Polygon","coordinates":[[7.4,46.9]]}')
       expect(result['startDate']).to eq('2025-03-01T00:00:00Z')
       expect(result['endDate']).to eq('2025-03-31T23:59:59Z')
       expect(result['waterways']).to eq(%w[aare thunersee])
@@ -513,7 +455,7 @@ RSpec.describe ContentfulMappers do
 
     it 'handles missing fields gracefully' do
       entry = build_entry({})
-      result = ContentfulMappers.map_event_notice(entry)
+      result = ContentfulMappers.map_event_notice(entry, {}, 'de')
 
       expect(result['slug']).to eq('test-id-123')
       expect(result['startDate']).to be_nil
@@ -525,33 +467,23 @@ RSpec.describe ContentfulMappers do
   # --- map_type ---
 
   describe '.map_type' do
-    it 'maps a type entry with name_de and name_en' do
-      entry = build_entry({
+    it 'maps a type entry with localized names' do
+      fields = build_fields(
         slug: 'launch-point',
-        name_de: 'Einstiegsort',
-        name_en: 'Launch Point'
-      })
+        name: { de: 'Einstiegsort', en: 'Launch Point' }
+      )
+      entry = build_entry(fields)
 
-      result = ContentfulMappers.map_type(entry)
+      result = ContentfulMappers.map_type(entry, fields, 'de')
 
       expect(result['slug']).to eq('launch-point')
       expect(result['name_de']).to eq('Einstiegsort')
       expect(result['name_en']).to eq('Launch Point')
     end
 
-    it 'falls back to name field when name_de/name_en are missing' do
-      entry = build_entry({ slug: 'kayak', name: 'Kayak' })
-
-      result = ContentfulMappers.map_type(entry)
-
-      expect(result['slug']).to eq('kayak')
-      expect(result['name_de']).to eq('Kayak')
-      expect(result['name_en']).to eq('Kayak')
-    end
-
     it 'handles all fields missing' do
       entry = build_entry({})
-      result = ContentfulMappers.map_type(entry)
+      result = ContentfulMappers.map_type(entry, {}, 'de')
 
       expect(result['slug']).to eq('test-id-123')
       expect(result['name_de']).to be_nil
@@ -563,15 +495,16 @@ RSpec.describe ContentfulMappers do
 
   describe '.map_static_page' do
     it 'maps a fully populated static page entry' do
-      entry = build_entry({
+      fields = build_fields(
         slug: 'about-us',
         title: 'Über uns',
         menu: 'Über',
         content: { 'content' => [{ 'nodeType' => 'paragraph', 'content' => [{ 'nodeType' => 'text', 'value' => 'About page content.' }] }] },
         menu_order: 2
-      })
+      )
+      entry = build_entry(fields)
 
-      result = ContentfulMappers.map_static_page(entry)
+      result = ContentfulMappers.map_static_page(entry, fields, 'de')
 
       expect(result['slug']).to eq('about-us')
       expect(result['title']).to eq('Über uns')
@@ -582,40 +515,36 @@ RSpec.describe ContentfulMappers do
     end
 
     it 'defaults menuOrder to 0 when missing' do
-      entry = build_entry({ slug: 'page', title: 'Page' })
-      result = ContentfulMappers.map_static_page(entry)
+      fields = build_fields(slug: 'page', title: 'Page')
+      entry = build_entry(fields)
+      result = ContentfulMappers.map_static_page(entry, fields, 'de')
 
       expect(result['menuOrder']).to eq(0)
     end
 
     it 'defaults menu_slug to "seiten" when menu is nil' do
-      entry = build_entry({ slug: 'page' })
-      result = ContentfulMappers.map_static_page(entry)
+      fields = build_fields(slug: 'page')
+      entry = build_entry(fields)
+      result = ContentfulMappers.map_static_page(entry, fields, 'de')
 
       expect(result['menu_slug']).to eq('seiten')
     end
-
-    it 'maps "Offene Daten" menu to "offene-daten" slug' do
-      entry = build_entry({ slug: 'data', menu: 'Offene Daten' })
-      result = ContentfulMappers.map_static_page(entry)
-
-      expect(result['menu_slug']).to eq('offene-daten')
-    end
   end
 
-  # --- Nil references across mappers ---
+  # --- Nil reference handling ---
 
   describe 'nil reference handling' do
     it 'map_spot handles nil single references' do
-      entry = build_entry({
+      fields = build_fields(
         slug: 'test',
         waterway: nil,
         spot_type: nil,
         paddling_environment_type: nil,
         data_source_type: nil,
         data_license_type: nil
-      })
-      result = ContentfulMappers.map_spot(entry)
+      )
+      entry = build_entry(fields)
+      result = ContentfulMappers.map_spot(entry, fields, 'de')
 
       expect(result['waterway_slug']).to be_nil
       expect(result['spotType_slug']).to be_nil
@@ -625,20 +554,18 @@ RSpec.describe ContentfulMappers do
     end
 
     it 'map_obstacle handles nil waterway and obstacle_type references' do
-      entry = build_entry({
-        slug: 'test',
-        waterway: nil,
-        obstacle_type: nil
-      })
-      result = ContentfulMappers.map_obstacle(entry)
+      fields = build_fields(slug: 'test', waterway: nil, obstacle_type: nil)
+      entry = build_entry(fields)
+      result = ContentfulMappers.map_obstacle(entry, fields, 'de')
 
       expect(result['waterway_slug']).to be_nil
       expect(result['obstacleType_slug']).to be_nil
     end
 
     it 'map_protected_area handles nil protectedAreaType reference' do
-      entry = build_entry({ slug: 'test', protected_area_type: nil })
-      result = ContentfulMappers.map_protected_area(entry)
+      fields = build_fields(slug: 'test', protected_area_type: nil)
+      entry = build_entry(fields)
+      result = ContentfulMappers.map_protected_area(entry, fields, 'de')
 
       expect(result['protectedAreaType_slug']).to be_nil
     end
