@@ -21,6 +21,12 @@
   the notice name, description excerpt, start date, and end date.
 -->
 
+{% if site.lang != site.default_lang %}
+  {% assign locale_prefix = '/' | append: site.lang %}
+{% else %}
+  {% assign locale_prefix = '' %}
+{% endif %}
+
 {% assign notice = include.notice %}
 {% assign current_locale = include.locale | default: site.lang | default: 'de' %}
 
@@ -64,7 +70,7 @@
   <div class="event-notice-popup-actions">
     <!-- More Details Link (Requirement 7.3) -->
     {% if notice.slug %}
-    <a href="{{ '/gewaesserereignisse/' | append: notice.slug | append: '/' | relative_url }}" 
+    <a href="{{ locale_prefix | append: '/gewaesserereignisse/' | append: notice.slug | append: '/' | relative_url }}" 
        class="btn btn-sm btn-primary event-notice-popup-details-link">
       {% if current_locale == 'en' %}More details{% else %}Weitere Details{% endif %}
     </a>
