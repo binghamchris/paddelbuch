@@ -531,6 +531,75 @@ RSpec.describe ContentfulMappers do
     end
   end
 
+  # --- Bug exploration: content mapping failure for non-Hash locale wrappers ---
+
+  describe '.map_static_page content mapping bug exploration' do
+    # Simulates a Contentful SDK object that wraps locale values but is NOT a plain Hash.
+    # It responds to [] with locale keys, but is_a?(Hash) returns false.
+    # This is the scenario that triggers the bug in resolve_field.
+    let(:rich_text_document) do
+      {
+        'content' => [
+          { 'nodeType' => 'paragraph', 'content' => [
+            { 'nodeType' => 'text', 'value' => 'This is static page content.' }
+          ] }
+        ]
+      }
+    end
+
+    it 'BUG EXPLORATION: returns nil content when locale wrapper is not a plain Hash' do
+      # Create a locale wrapper object that responds to [] but is NOT is_a?(Hash)
+      # This simulates how the Contentful SDK may return rich text fields
+      locale_wrapper = Object.new
+      locale_wrapper.define_singleton_method(:[]) do |key|
+        rich_text = {
+          'content' => [
+            { 'nodeType' => 'paragraph', 'content' => [
+              { 'nodeType' => 'text', 'value' => 'This is static page content.' }
+            ] }
+          ]
+        }
+        key == :en ? rich_text : nil
+      end
+
+      fields = build_fields(slug: 'datenlizenzen', title: 'Datenlizenzen', menu: 'Offene Daten')
+      # Inject the non-Hash locale wrapper directly for the :content field
+      fields[:content] = locale_wrapper
+
+      entry = build_entry(fields)
+      result = ContentfulMappers.map_static_page(entry, fields, 'de')
+
+      # We EXPECT this to produce non-empty HTML content, but the bug causes nil
+      expect(result['content']).to_not be_nil
+      expect(result['content']).to_not be_empty
+      expect(result['content']).to include('This is static page content.')
+    end
+
+    it 'BUG EXPLORATION: object-style rich text in a proper Hash locale wrapper works' do
+      # Create a rich text object that responds to .content (object-style)
+      rt_object = Object.new
+      rt_object.define_singleton_method(:content) do
+        [
+          { 'nodeType' => 'paragraph', 'content' => [
+            { 'nodeType' => 'text', 'value' => 'Object-style rich text.' }
+          ] }
+        ]
+      end
+
+      # Wrap in a proper Hash locale wrapper — this SHOULD pass resolve_field's guard
+      fields = build_fields(slug: 'projekt', title: 'Das Projekt', menu: 'Über')
+      fields[:content] = { en: rt_object }
+
+      entry = build_entry(fields)
+      result = ContentfulMappers.map_static_page(entry, fields, 'de')
+
+      # This should work because the locale wrapper IS a Hash
+      expect(result['content']).to_not be_nil
+      expect(result['content']).to_not be_empty
+      expect(result['content']).to include('Object-style rich text.')
+    end
+  end
+
   # --- Nil reference handling ---
 
   describe 'nil reference handling' do
