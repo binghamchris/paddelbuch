@@ -49,6 +49,6 @@
 
 ## Task 6: Run Full Test Suite and Verify
 
-- [~] 6.1 Run the full RSpec test suite to verify all existing and new tests pass.
+- [x] 6.1 Run the full RSpec test suite to verify all existing and new tests pass.
   - Run: `source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.1 && bundle exec rspec`
   - Acceptance: All tests pass, zero failures
