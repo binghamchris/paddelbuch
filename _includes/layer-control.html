@@ -40,6 +40,7 @@
     
     // Current locale for filtering
     var currentLocale = '{{ current_locale }}';
+    var localePrefix = (currentLocale !== 'de') ? '/' + currentLocale : '';
     
     // Layer groups for each spot type (Requirements 2.7, 2.8)
     var layerGroups = {
@@ -180,7 +181,7 @@
             popupContent += '<p>' + excerpt + '</p>';
           }
           if (spot.slug) {
-            popupContent += '<a href="/einstiegsorte/' + spot.slug + '/">' + 
+            popupContent += '<a href="' + localePrefix + '/einstiegsorte/' + spot.slug + '/">' + 
               (currentLocale === 'en' ? 'More details' : 'Weitere Details') + '</a>';
           }
         }
@@ -237,7 +238,7 @@
           popupContent += '<p>' + (currentLocale === 'en' ? 'Portage possible: ' : 'Umtragen möglich: ') + portageStatus + '</p>';
           
           if (obstacle.slug) {
-            popupContent += '<a href="/hindernisse/' + obstacle.slug + '/" class="btn btn-sm btn-primary">' + 
+            popupContent += '<a href="' + localePrefix + '/hindernisse/' + obstacle.slug + '/" class="btn btn-sm btn-primary">' + 
               (currentLocale === 'en' ? 'More details' : 'Weitere Details') + '</a>';
           }
           popupContent += '</div>';
@@ -390,7 +391,7 @@
           popupContent += '<p>' + (currentLocale === 'en' ? 'End: ' : 'Ende: ') + notice.endDate + '</p>';
         }
         if (notice.slug) {
-          popupContent += '<a href="/gewaesserereignisse/' + notice.slug + '/" class="btn btn-sm btn-primary">' + 
+          popupContent += '<a href="' + localePrefix + '/gewaesserereignisse/' + notice.slug + '/" class="btn btn-sm btn-primary">' + 
             (currentLocale === 'en' ? 'More details' : 'Weitere Details') + '</a>';
         }
         popupContent += '</div>';

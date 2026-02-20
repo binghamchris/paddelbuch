@@ -147,6 +147,7 @@
   function generateSpotPopupContent(spot, locale) {
     locale = locale || 'de';
     var labels = getLabels(locale);
+    var localePrefix = (locale !== 'de') ? '/' + locale : '';
     var html = [];
     
     var isRejected = spot.rejected === true || spot.rejected === 'true';
@@ -226,7 +227,7 @@
     
     // More details link (Requirement 3.5)
     if (spot.slug) {
-      html.push('<a href="/einstiegsorte/' + escapeHtml(spot.slug) + '/" ');
+      html.push('<a href="' + localePrefix + '/einstiegsorte/' + escapeHtml(spot.slug) + '/" ');
       html.push('class="btn btn-sm btn-primary spot-popup-details-link">');
       html.push(labels.moreDetails);
       html.push('</a>');
@@ -248,6 +249,7 @@
   function generateRejectedSpotPopupContent(spot, locale) {
     locale = locale || 'de';
     var labels = getLabels(locale);
+    var localePrefix = (locale !== 'de') ? '/' + locale : '';
     var html = [];
     
     var iconPath = getIconPath(null, true, 'light');
@@ -271,7 +273,7 @@
     // More details link
     if (spot.slug) {
       html.push('<div class="spot-popup-actions">');
-      html.push('<a href="/einstiegsorte/' + escapeHtml(spot.slug) + '/" ');
+      html.push('<a href="' + localePrefix + '/einstiegsorte/' + escapeHtml(spot.slug) + '/" ');
       html.push('class="btn btn-sm btn-primary spot-popup-details-link">');
       html.push(labels.moreDetails);
       html.push('</a>');
