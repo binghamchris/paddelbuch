@@ -15,6 +15,12 @@
   Requirements: 5.3
 -->
 
+{% if site.lang != site.default_lang %}
+  {% assign locale_prefix = '/' | append: site.lang %}
+{% else %}
+  {% assign locale_prefix = '' %}
+{% endif %}
+
 {% assign obstacle = include.obstacle %}
 {% assign current_locale = include.locale | default: site.lang | default: 'de' %}
 
@@ -47,7 +53,7 @@
   <!-- More Details Link (Requirement 5.3) -->
   {% if obstacle.slug %}
   <div class="obstacle-popup-actions">
-    <a href="{{ '/hindernisse/' | append: obstacle.slug | append: '/' | relative_url }}" 
+    <a href="{{ locale_prefix | append: '/hindernisse/' | append: obstacle.slug | append: '/' | relative_url }}" 
        class="btn btn-sm btn-primary obstacle-popup-details-link">
       {% if current_locale == 'en' %}
         More details

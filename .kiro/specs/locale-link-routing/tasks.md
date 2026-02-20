@@ -53,7 +53,7 @@
     - _Preservation: German locale links remain unchanged (locale_prefix is empty)_
     - _Requirements: 1.1, 2.1, 2.8, 3.1_
 
-  - [~] 3.2 Add locale prefix logic and update links in `_includes/obstacle-popup.html`
+  - [x] 3.2 Add locale prefix logic and update links in `_includes/obstacle-popup.html`
     - Add locale prefix computation at the top of the file
     - Prepend `locale_prefix` to the "More details" link (`/hindernisse/`)
     - _Bug_Condition: isBugCondition(input) where input.currentLocale != input.defaultLocale AND linkHref does not start with "/en/"_
