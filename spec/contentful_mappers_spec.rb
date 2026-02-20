@@ -1619,5 +1619,82 @@ RSpec.describe ContentfulMappers do
       }
     end
   end
+
+  # --- Integration: original bug scenario - code marks in table ---
+
+  describe 'Integration: original bug scenario - code marks in table' do
+    it 'renders code-marked field names in a data schema table through extract_rich_text_html' do
+      # Simulates the /en/offene-daten/daten-schema/ page content
+      doc = {
+        'nodeType' => 'document',
+        'data' => {},
+        'content' => [
+          { 'nodeType' => 'paragraph', 'data' => {}, 'content' => [
+            { 'nodeType' => 'text', 'value' => 'The following table describes the data schema:', 'marks' => [], 'data' => {} }
+          ] },
+          { 'nodeType' => 'table', 'data' => {}, 'content' => [
+            { 'nodeType' => 'table-row', 'data' => {}, 'content' => [
+              { 'nodeType' => 'table-header-cell', 'data' => {}, 'content' => [
+                { 'nodeType' => 'paragraph', 'data' => {}, 'content' => [
+                  { 'nodeType' => 'text', 'value' => 'Field', 'marks' => [{ 'type' => 'bold' }], 'data' => {} }
+                ] }
+              ] },
+              { 'nodeType' => 'table-header-cell', 'data' => {}, 'content' => [
+                { 'nodeType' => 'paragraph', 'data' => {}, 'content' => [
+                  { 'nodeType' => 'text', 'value' => 'Description', 'marks' => [{ 'type' => 'bold' }], 'data' => {} }
+                ] }
+              ] }
+            ] },
+            { 'nodeType' => 'table-row', 'data' => {}, 'content' => [
+              { 'nodeType' => 'table-cell', 'data' => {}, 'content' => [
+                { 'nodeType' => 'paragraph', 'data' => {}, 'content' => [
+                  { 'nodeType' => 'text', 'value' => 'slug', 'marks' => [{ 'type' => 'code' }], 'data' => {} }
+                ] }
+              ] },
+              { 'nodeType' => 'table-cell', 'data' => {}, 'content' => [
+                { 'nodeType' => 'paragraph', 'data' => {}, 'content' => [
+                  { 'nodeType' => 'text', 'value' => 'Unique identifier for the spot', 'marks' => [], 'data' => {} }
+                ] }
+              ] }
+            ] },
+            { 'nodeType' => 'table-row', 'data' => {}, 'content' => [
+              { 'nodeType' => 'table-cell', 'data' => {}, 'content' => [
+                { 'nodeType' => 'paragraph', 'data' => {}, 'content' => [
+                  { 'nodeType' => 'text', 'value' => 'name', 'marks' => [{ 'type' => 'code' }], 'data' => {} }
+                ] }
+              ] },
+              { 'nodeType' => 'table-cell', 'data' => {}, 'content' => [
+                { 'nodeType' => 'paragraph', 'data' => {}, 'content' => [
+                  { 'nodeType' => 'text', 'value' => 'Display name of the spot', 'marks' => [], 'data' => {} }
+                ] }
+              ] }
+            ] }
+          ] }
+        ]
+      }
+
+      field = { 'raw' => JSON.generate(doc) }
+      result = ContentfulMappers.extract_rich_text_html(field)
+
+      # Verify the intro paragraph
+      expect(result).to include('<p>The following table describes the data schema:</p>')
+
+      # Verify table structure
+      expect(result).to include('<table>')
+      expect(result).to include('</table>')
+
+      # Verify header cells have bold marks
+      expect(result).to include('<th><p><strong>Field</strong></p></th>')
+      expect(result).to include('<th><p><strong>Description</strong></p></th>')
+
+      # THE KEY ASSERTIONS: code-marked field names render with <code> tags
+      expect(result).to include('<code>slug</code>')
+      expect(result).to include('<code>name</code>')
+
+      # Verify unmarked description text is plain
+      expect(result).to include('Unique identifier for the spot')
+      expect(result).to include('Display name of the spot')
+    end
+  end
 end
 

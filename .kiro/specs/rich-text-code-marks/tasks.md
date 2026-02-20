@@ -25,4 +25,4 @@
 
 ## 5. Integration test
 
-- [~] 5.1 Add an integration test simulating the original bug scenario: a rich text document with code-marked field names inside a table, rendered through `extract_rich_text_html`, verifying `<code>` tags appear in the output
+- [x] 5.1 Add an integration test simulating the original bug scenario: a rich text document with code-marked field names inside a table, rendered through `extract_rich_text_html`, verifying `<code>` tags appear in the output
