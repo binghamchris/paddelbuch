@@ -21,6 +21,6 @@
 - [x] 5.1 Create `_tests/property/map-layers-preservation.property.test.js` that verifies: map-init.html still contains map initialization with Switzerland center/bounds/zoom, layer-control.html still creates all 9 layer groups, and noEntry layer is not added to map by default `Property 2`
 
 ## Task 6: Verify fix end-to-end
-- [~] 6.1 Build the Jekyll site and verify the rendered `_site/index.html` contains all five script tags in correct dependency order
-- [~] 6.2 Verify the rendered HTML contains initialization code that references `PaddelbuchDataLoader` and `PaddelbuchZoomLayerManager`
-- [~] 6.3 Run the full test suite to confirm all existing tests still pass
+- [x] 6.1 Build the Jekyll site and verify the rendered `_site/index.html` contains all five script tags in correct dependency order
+- [x] 6.2 Verify the rendered HTML contains initialization code that references `PaddelbuchDataLoader` and `PaddelbuchZoomLayerManager`
+- [-] 6.3 Run the full test suite to confirm all existing tests still pass
