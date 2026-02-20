@@ -149,7 +149,7 @@ Replace the `jekyll-contentful-data-import` gem with a custom Jekyll Generator p
     - **Property 11: Content type to file path mapping**
     - **Validates: Requirements 1.7, 1.8, 9.1, 9.2, 9.3, 9.4, 9.5, 9.6, 9.7**
 
-  - [~] 8.7 Write property test: Missing credentials graceful skip
+  - [x] 8.7 Write property test: Missing credentials graceful skip
     - **Property 13: Missing credentials graceful skip**
     - **Validates: Requirements 1.3**
 

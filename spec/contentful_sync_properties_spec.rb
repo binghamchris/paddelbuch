@@ -1007,3 +1007,89 @@ RSpec.describe 'Contentful Sync Properties (Property 11)' do
     end
   end
 end
+
+# frozen_string_literal: true
+
+RSpec.describe 'Contentful Sync Properties (Property 13)' do
+  # Feature: contentful-sync-integration, Property 13: Missing credentials graceful skip
+  # **Validates: Requirements 1.3**
+  describe 'Property 13: Missing credentials graceful skip' do
+    let(:tmpdir) { Dir.mktmpdir }
+    let(:site_source) { tmpdir }
+    let(:data_dir) { File.join(tmpdir, '_data') }
+
+    before do
+      FileUtils.mkdir_p(data_dir)
+    end
+
+    around do |example|
+      saved_env = %w[CONTENTFUL_SPACE_ID CONTENTFUL_ACCESS_TOKEN CONTENTFUL_ENVIRONMENT CONTENTFUL_FORCE_SYNC].map do |key|
+        [key, ENV[key]]
+      end.to_h
+      example.run
+    ensure
+      saved_env.each { |key, val| val.nil? ? ENV.delete(key) : ENV[key] = val }
+      FileUtils.remove_entry(tmpdir) if Dir.exist?(tmpdir)
+    end
+
+    def build_mock_site
+      site = double('site')
+      allow(site).to receive(:source).and_return(site_source)
+      allow(site).to receive(:config).and_return({})
+      allow(site).to receive(:data).and_return({})
+      site
+    end
+
+    it 'logs a warning and returns without exception for any combination of missing credentials' do
+      property_of {
+        Rantly {
+          scenario = choose(
+            :both_missing,
+            :space_id_missing_only,
+            :access_token_missing_only,
+            :space_id_empty,
+            :access_token_empty,
+            :both_empty
+          )
+          { scenario: scenario }
+        }
+      }.check(100) { |data|
+        # Clear both credentials first
+        ENV.delete('CONTENTFUL_SPACE_ID')
+        ENV.delete('CONTENTFUL_ACCESS_TOKEN')
+
+        case data[:scenario]
+        when :both_missing
+          # Neither ENV var set — already cleared above
+        when :space_id_missing_only
+          ENV['CONTENTFUL_ACCESS_TOKEN'] = 'valid_token'
+        when :access_token_missing_only
+          ENV['CONTENTFUL_SPACE_ID'] = 'valid_space'
+        when :space_id_empty
+          ENV['CONTENTFUL_SPACE_ID'] = ''
+          ENV['CONTENTFUL_ACCESS_TOKEN'] = 'valid_token'
+        when :access_token_empty
+          ENV['CONTENTFUL_SPACE_ID'] = 'valid_space'
+          ENV['CONTENTFUL_ACCESS_TOKEN'] = ''
+        when :both_empty
+          ENV['CONTENTFUL_SPACE_ID'] = ''
+          ENV['CONTENTFUL_ACCESS_TOKEN'] = ''
+        end
+
+        site = build_mock_site
+        fetcher = Jekyll::ContentfulFetcher.new
+
+        # No exception should be raised
+        expect { fetcher.generate(site) }.not_to raise_error
+
+        # Contentful::Client.new should never be called (no client creation)
+        expect(Contentful::Client).not_to receive(:new)
+
+        # No YAML data files should be written to the data directory
+        yml_files = Dir.glob(File.join(data_dir, '**', '*.yml'))
+        expect(yml_files).to be_empty,
+          "Expected no YAML files in #{data_dir} when credentials are missing, but found: #{yml_files}"
+      }
+    end
+  end
+end
