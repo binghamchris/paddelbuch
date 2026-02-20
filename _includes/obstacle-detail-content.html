@@ -18,6 +18,12 @@
 {% assign waterway = include.waterway %}
 {% assign current_locale = site.lang | default: 'de' %}
 
+{% if site.lang != site.default_lang %}
+  {% assign locale_prefix = '/' | append: site.lang %}
+{% else %}
+  {% assign locale_prefix = '' %}
+{% endif %}
+
 <!-- Obstacle Details Table (Requirement 5.4) -->
 <table class="obstacle-details-table">
   <tbody>
@@ -46,7 +52,7 @@
     <tr>
       <th>{% t labels.waterway %}</th>
       <td>
-        <a href="{{ '/gewaesser/' | append: waterway.slug | append: '/' | relative_url }}">
+        <a href="{{ locale_prefix | append: '/gewaesser/' | append: waterway.slug | append: '/' | relative_url }}">
           {{ waterway.name }}
         </a>
       </td>
@@ -122,7 +128,7 @@
         <tr>
           <th>{% t obstacles.exit_spot %}</th>
           <td>
-            <a href="{{ '/einstiegsorte/' | append: exit_spot.slug | append: '/' | relative_url }}">
+            <a href="{{ locale_prefix | append: '/einstiegsorte/' | append: exit_spot.slug | append: '/' | relative_url }}">
               {{ exit_spot.name }}
             </a>
           </td>
@@ -142,7 +148,7 @@
         <tr>
           <th>{% t obstacles.reentry_spot %}</th>
           <td>
-            <a href="{{ '/einstiegsorte/' | append: reentry_spot.slug | append: '/' | relative_url }}">
+            <a href="{{ locale_prefix | append: '/einstiegsorte/' | append: reentry_spot.slug | append: '/' | relative_url }}">
               {{ reentry_spot.name }}
             </a>
           </td>
