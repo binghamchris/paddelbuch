@@ -20,7 +20,7 @@ Replace the `jekyll-contentful-data-import` gem with a custom Jekyll Generator p
     - Maintain `VERIFY_PEER` mode while disabling CRL checking
     - _Requirements: 8.1, 8.2_
 
-  - [~] 1.3 Set up RSpec test infrastructure
+  - [x] 1.3 Set up RSpec test infrastructure
     - Create `spec/spec_helper.rb` with RSpec and Rantly configuration
     - Create `.rspec` config file
     - Ensure test suite runs with `bundle exec rspec`
