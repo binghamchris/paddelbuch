@@ -940,6 +940,130 @@ RSpec.describe ContentfulMappers do
     end
   end
 
+  # --- Preservation: non-table rendering unchanged ---
+
+  describe 'Preservation: non-table rendering unchanged' do
+    # **Validates: Requirements 3.1, 3.2, 3.3, 3.4, 3.5, 3.6**
+
+    # Mapping from node types to their expected HTML tags
+    NODE_TAG_MAP = {
+      'paragraph'      => %w[<p> </p>],
+      'heading-1'      => %w[<h1> </h1>],
+      'heading-2'      => %w[<h2> </h2>],
+      'heading-3'      => %w[<h3> </h3>],
+      'unordered-list'  => %w[<ul> </ul>],
+      'ordered-list'    => %w[<ol> </ol>]
+    }.freeze
+
+    it '[PBT-preservation] non-table documents render correct HTML with no table tags' do
+      property_of {
+        num_nodes = range(1, 5)
+        # Track which node types and text values we generate
+        expected_types = []
+        expected_texts = []
+
+        nodes = Array.new(num_nodes) do
+          node_kind = choose('paragraph', 'heading-1', 'heading-2', 'heading-3',
+                             'unordered-list', 'ordered-list', 'hyperlink-in-paragraph')
+
+          case node_kind
+          when 'paragraph'
+            text = sized(range(1, 15)) { string(:alpha) }
+            expected_types << 'paragraph'
+            expected_texts << text
+            { 'nodeType' => 'paragraph', 'content' => [{ 'nodeType' => 'text', 'value' => text }] }
+
+          when 'heading-1', 'heading-2', 'heading-3'
+            text = sized(range(1, 15)) { string(:alpha) }
+            expected_types << node_kind
+            expected_texts << text
+            { 'nodeType' => node_kind, 'content' => [{ 'nodeType' => 'text', 'value' => text }] }
+
+          when 'unordered-list', 'ordered-list'
+            num_items = range(1, 3)
+            items = Array.new(num_items) do
+              item_text = sized(range(1, 15)) { string(:alpha) }
+              expected_texts << item_text
+              {
+                'nodeType' => 'list-item',
+                'content' => [
+                  { 'nodeType' => 'paragraph', 'content' => [{ 'nodeType' => 'text', 'value' => item_text }] }
+                ]
+              }
+            end
+            expected_types << node_kind
+            { 'nodeType' => node_kind, 'content' => items }
+
+          when 'hyperlink-in-paragraph'
+            link_text = sized(range(1, 15)) { string(:alpha) }
+            href = "https://#{sized(range(3, 10)) { string(:alpha) }}.com"
+            expected_types << 'hyperlink-in-paragraph'
+            expected_texts << link_text
+            {
+              'nodeType' => 'paragraph',
+              'content' => [
+                {
+                  'nodeType' => 'hyperlink',
+                  'data' => { 'uri' => href },
+                  'content' => [{ 'nodeType' => 'text', 'value' => link_text }]
+                }
+              ]
+            }
+          end
+        end
+
+        [nodes, expected_types, expected_texts]
+      }.check(100) { |nodes, expected_types, expected_texts|
+        result = ContentfulMappers.render_rich_text(nodes)
+
+        # No table tags should appear in non-table documents
+        expect(result).not_to include('<table>'), "Non-table document should not contain <table>"
+        expect(result).not_to include('</table>'), "Non-table document should not contain </table>"
+        expect(result).not_to include('<tr>'), "Non-table document should not contain <tr>"
+        expect(result).not_to include('</tr>'), "Non-table document should not contain </tr>"
+        expect(result).not_to include('<td>'), "Non-table document should not contain <td>"
+        expect(result).not_to include('</td>'), "Non-table document should not contain </td>"
+        expect(result).not_to include('<th>'), "Non-table document should not contain <th>"
+        expect(result).not_to include('</th>'), "Non-table document should not contain </th>"
+
+        # All generated text content appears in the output
+        expected_texts.each do |text|
+          expect(result).to include(text), "Expected output to include text '#{text}'"
+        end
+
+        # Verify correct HTML tags for each node type present
+        expected_types.each do |node_type|
+          case node_type
+          when 'paragraph'
+            expect(result).to include('<p>'), "Expected <p> tag for paragraph node"
+            expect(result).to include('</p>'), "Expected </p> tag for paragraph node"
+          when 'heading-1'
+            expect(result).to include('<h1>'), "Expected <h1> tag for heading-1 node"
+            expect(result).to include('</h1>'), "Expected </h1> tag for heading-1 node"
+          when 'heading-2'
+            expect(result).to include('<h2>'), "Expected <h2> tag for heading-2 node"
+            expect(result).to include('</h2>'), "Expected </h2> tag for heading-2 node"
+          when 'heading-3'
+            expect(result).to include('<h3>'), "Expected <h3> tag for heading-3 node"
+            expect(result).to include('</h3>'), "Expected </h3> tag for heading-3 node"
+          when 'unordered-list'
+            expect(result).to include('<ul>'), "Expected <ul> tag for unordered-list node"
+            expect(result).to include('</ul>'), "Expected </ul> tag for unordered-list node"
+            expect(result).to include('<li>'), "Expected <li> tag for list items"
+          when 'ordered-list'
+            expect(result).to include('<ol>'), "Expected <ol> tag for ordered-list node"
+            expect(result).to include('</ol>'), "Expected </ol> tag for ordered-list node"
+            expect(result).to include('<li>'), "Expected <li> tag for list items"
+          when 'hyperlink-in-paragraph'
+            expect(result).to include('<a href='), "Expected <a> tag for hyperlink node"
+            expect(result).to include('</a>'), "Expected </a> tag for hyperlink node"
+            expect(result).to include('<p>'), "Expected <p> wrapper for hyperlink paragraph"
+          end
+        end
+      }
+    end
+  end
+
   # --- Nil reference handling ---
 
   describe 'nil reference handling' do
