@@ -111,7 +111,7 @@
     - _Preservation: German locale links remain unchanged_
     - _Requirements: 1.2, 2.2, 2.8, 3.1_
 
-  - [~] 3.8 Add locale prefix logic and update links in `_includes/event-list.html`
+  - [x] 3.8 Add locale prefix logic and update links in `_includes/event-list.html`
     - Add locale prefix computation at the top of the file
     - Prepend `locale_prefix` to event notice links (`/gewaesserereignisse/`)
     - _Bug_Condition: isBugCondition(input) where input.currentLocale != input.defaultLocale AND linkHref does not start with "/en/"_
