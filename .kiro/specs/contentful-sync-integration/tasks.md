@@ -107,7 +107,7 @@ Replace the `jekyll-contentful-data-import` gem with a custom Jekyll Generator p
     - Test missing fields, nil references, rich text conversion
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 2.10_
 
-- [~] 7. Checkpoint - Ensure Mapper tests pass
+- [-] 7. Checkpoint - Ensure Mapper tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 8. Implement ContentfulFetcher generator
