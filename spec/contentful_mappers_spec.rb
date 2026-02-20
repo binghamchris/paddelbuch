@@ -162,6 +162,54 @@ RSpec.describe ContentfulMappers do
     it 'converts a plain string via to_s' do
       expect(ContentfulMappers.extract_rich_text_html('plain text')).to eq('plain text')
     end
+
+    context 'with Contentful raw JSON format' do
+      it 'parses a raw JSON document with paragraphs' do
+        field = {
+          'raw' => '{"nodeType":"document","data":{},"content":[{"nodeType":"paragraph","data":{},"content":[{"nodeType":"text","value":"Page content here.","marks":[],"data":{}}]}]}'
+        }
+        expect(ContentfulMappers.extract_rich_text_html(field)).to eq('<p>Page content here.</p>')
+      end
+
+      it 'parses a raw JSON document with multiple paragraphs' do
+        doc = {
+          'nodeType' => 'document',
+          'content' => [
+            { 'nodeType' => 'paragraph', 'content' => [{ 'nodeType' => 'text', 'value' => 'First paragraph.' }] },
+            { 'nodeType' => 'paragraph', 'content' => [{ 'nodeType' => 'text', 'value' => 'Second paragraph.' }] }
+          ]
+        }
+        field = { 'raw' => JSON.generate(doc) }
+        expect(ContentfulMappers.extract_rich_text_html(field)).to eq('<p>First paragraph.</p><p>Second paragraph.</p>')
+      end
+
+      it 'parses a raw JSON document with headings and links' do
+        doc = {
+          'nodeType' => 'document',
+          'content' => [
+            { 'nodeType' => 'heading-2', 'content' => [{ 'nodeType' => 'text', 'value' => 'Section Title' }] },
+            { 'nodeType' => 'paragraph', 'content' => [
+              { 'nodeType' => 'text', 'value' => 'Visit ' },
+              { 'nodeType' => 'hyperlink', 'data' => { 'uri' => 'https://example.com' }, 'content' => [
+                { 'nodeType' => 'text', 'value' => 'our site' }
+              ] }
+            ] }
+          ]
+        }
+        field = { 'raw' => JSON.generate(doc) }
+        expect(ContentfulMappers.extract_rich_text_html(field)).to eq('<h2>Section Title</h2><p>Visit <a href="https://example.com">our site</a></p>')
+      end
+
+      it 'returns nil for invalid raw JSON' do
+        field = { 'raw' => 'not valid json{{{' }
+        expect(ContentfulMappers.extract_rich_text_html(field)).to be_nil
+      end
+
+      it 'returns nil when raw JSON has no content array' do
+        field = { 'raw' => '{"nodeType":"document"}' }
+        expect(ContentfulMappers.extract_rich_text_html(field)).to be_nil
+      end
+    end
   end
 
   # --- resolve_field ---
@@ -536,6 +584,33 @@ RSpec.describe ContentfulMappers do
       entry = build_entry(fields)
       result = ContentfulMappers.map_static_page(entry, fields, 'de')
       expect(result['content']).to eq('<p>Hello</p>')
+    end
+
+    it 'handles rich text content in Contentful raw JSON format' do
+      raw_doc = {
+        'nodeType' => 'document',
+        'data' => {},
+        'content' => [
+          { 'nodeType' => 'paragraph', 'data' => {}, 'content' => [
+            { 'nodeType' => 'text', 'value' => 'Willkommen auf der Seite.', 'marks' => [], 'data' => {} }
+          ] },
+          { 'nodeType' => 'heading-2', 'data' => {}, 'content' => [
+            { 'nodeType' => 'text', 'value' => 'Abschnitt', 'marks' => [], 'data' => {} }
+          ] },
+          { 'nodeType' => 'paragraph', 'data' => {}, 'content' => [
+            { 'nodeType' => 'text', 'value' => 'Mehr Inhalt hier.', 'marks' => [], 'data' => {} }
+          ] }
+        ]
+      }
+      rich_text = { 'raw' => JSON.generate(raw_doc) }
+      fields = build_fields(slug: 'projekt', title: { de: 'Das Projekt', en: 'The Project' }, content: { de: rich_text, en: rich_text })
+      entry = build_entry(fields)
+
+      result = ContentfulMappers.map_static_page(entry, fields, 'de')
+      expect(result['content']).to include('<p>Willkommen auf der Seite.</p>')
+      expect(result['content']).to include('<h2>Abschnitt</h2>')
+      expect(result['content']).to include('<p>Mehr Inhalt hier.</p>')
+      expect(result['title']).to eq('Das Projekt')
     end
 
     it 'handles rich text content as object with .content method' do

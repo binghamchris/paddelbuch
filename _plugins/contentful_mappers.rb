@@ -71,7 +71,23 @@ module ContentfulMappers
 
   def extract_rich_text_html(field)
     return nil unless field
-    if field.is_a?(Hash) && field['content']
+
+    if field.is_a?(Hash) && field['raw']
+      # Contentful rich text with 'raw' JSON string — parse and render the document
+      begin
+        doc = JSON.parse(field['raw'])
+        if doc.is_a?(Hash) && doc['nodeType'] == 'document' && doc['content']
+          render_rich_text(doc['content'])
+        elsif doc.is_a?(Hash) && doc['content']
+          render_rich_text(doc['content'])
+        else
+          nil
+        end
+      rescue JSON::ParserError => e
+        Jekyll.logger.warn 'ContentfulMappers:', "Failed to parse rich text JSON: #{e.message}"
+        nil
+      end
+    elsif field.is_a?(Hash) && field['content']
       render_rich_text(field['content'])
     elsif field.respond_to?(:content)
       render_rich_text(field.content)
