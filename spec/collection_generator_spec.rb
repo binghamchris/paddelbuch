@@ -122,4 +122,54 @@ RSpec.describe Jekyll::CollectionGenerator do
       end
     end
   end
+
+  # **Validates: Requirements 2.2**
+  # Property 2 — For any static page entry with a `title` field, `create_document`
+  # SHALL set `data['title']` to the entry's title, not the slug.
+  describe '#create_document title logic (PBT)' do
+    it 'correctly resolves title for random combinations of name/title/neither across collection types' do
+      property_of {
+        Rantly {
+          collection_type = choose('static_pages', 'spots', 'waterways', 'obstacles', 'notices')
+          has_name = choose(true, false)
+          has_title = choose(true, false)
+          slug = sized(range(3, 15)) { string(:alpha) }.downcase
+          name_val = has_name ? sized(range(3, 20)) { string(:alpha) } : nil
+          title_val = has_title ? sized(range(3, 20)) { string(:alpha) } : nil
+
+          {
+            collection_type: collection_type,
+            slug: slug,
+            name_val: name_val,
+            title_val: title_val
+          }
+        }
+      }.check(100) { |data|
+        Dir.mktmpdir do |tmpdir|
+          config = Jekyll.configuration(
+            'source' => tmpdir,
+            'destination' => File.join(tmpdir, '_site'),
+            'collections' => { data[:collection_type] => { 'output' => true } }
+          )
+          site = Jekyll::Site.new(config)
+          collection = site.collections[data[:collection_type]]
+          FileUtils.mkdir_p(File.join(site.source, collection.relative_directory))
+
+          entry = { 'slug' => data[:slug], 'locale' => 'de' }
+          entry['name'] = data[:name_val] if data[:name_val]
+          entry['title'] = data[:title_val] if data[:title_val]
+          entry['menu_slug'] = 'test-menu' if data[:collection_type] == 'static_pages'
+
+          generator = Jekyll::CollectionGenerator.new
+          doc = generator.send(:create_document, site, collection, entry, data[:slug])
+
+          # The expected title logic: name || title || slug
+          expected_title = data[:name_val] || data[:title_val] || data[:slug]
+          expect(doc.data['title']).to eq(expected_title),
+            "For collection=#{data[:collection_type]}, name=#{data[:name_val].inspect}, title=#{data[:title_val].inspect}, slug=#{data[:slug]}: expected title=#{expected_title.inspect}, got=#{doc.data['title'].inspect}"
+        end
+      }
+    end
+  end
 end
+
