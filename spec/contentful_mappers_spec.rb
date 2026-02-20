@@ -1415,5 +1415,45 @@ RSpec.describe ContentfulMappers do
       expect(result).not_to include('strikethrough')
     end
   end
+
+  # --- Fix checking: marked text in various containers ---
+
+  describe 'Fix checking: marked text in various containers' do
+    it 'renders code-marked text inside a paragraph' do
+      content = [{ 'nodeType' => 'paragraph', 'content' => [
+        { 'nodeType' => 'text', 'value' => 'slug', 'marks' => [{ 'type' => 'code' }] }
+      ] }]
+      expect(ContentfulMappers.render_rich_text(content)).to eq('<p><code>slug</code></p>')
+    end
+
+    it 'renders bold-marked text inside a heading' do
+      content = [{ 'nodeType' => 'heading-2', 'content' => [
+        { 'nodeType' => 'text', 'value' => 'Title', 'marks' => [{ 'type' => 'bold' }] }
+      ] }]
+      expect(ContentfulMappers.render_rich_text(content)).to eq('<h2><strong>Title</strong></h2>')
+    end
+
+    it 'renders code-marked text inside a table cell' do
+      content = [{ 'nodeType' => 'table', 'content' => [
+        { 'nodeType' => 'table-row', 'content' => [
+          { 'nodeType' => 'table-cell', 'content' => [
+            { 'nodeType' => 'paragraph', 'content' => [
+              { 'nodeType' => 'text', 'value' => 'field_name', 'marks' => [{ 'type' => 'code' }] }
+            ] }
+          ] }
+        ] }
+      ] }]
+      expect(ContentfulMappers.render_rich_text(content)).to eq('<table><tr><td><p><code>field_name</code></p></td></tr></table>')
+    end
+
+    it 'renders italic-marked text inside a hyperlink' do
+      content = [{ 'nodeType' => 'paragraph', 'content' => [
+        { 'nodeType' => 'hyperlink', 'data' => { 'uri' => 'https://example.com' }, 'content' => [
+          { 'nodeType' => 'text', 'value' => 'click here', 'marks' => [{ 'type' => 'italic' }] }
+        ] }
+      ] }]
+      expect(ContentfulMappers.render_rich_text(content)).to eq('<p><a href="https://example.com"><em>click here</em></a></p>')
+    end
+  end
 end
 
