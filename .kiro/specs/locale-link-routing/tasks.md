@@ -84,7 +84,7 @@
     - _Preservation: German locale header links remain unchanged_
     - _Requirements: 1.5, 1.7, 2.5, 2.7, 2.8, 3.1_
 
-  - [~] 3.5 Add locale prefix logic and update links in `_includes/spot-detail-content.html`
+  - [x] 3.5 Add locale prefix logic and update links in `_includes/spot-detail-content.html`
     - Add locale prefix computation at the top of the file
     - Prepend `locale_prefix` to the waterway link (`/gewaesser/`)
     - _Bug_Condition: isBugCondition(input) where input.currentLocale != input.defaultLocale AND linkHref does not start with "/en/"_
