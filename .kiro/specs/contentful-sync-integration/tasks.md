@@ -98,7 +98,7 @@ Replace the `jekyll-contentful-data-import` gem with a custom Jekyll Generator p
     - **Property 2: Mapper resilience to missing fields**
     - **Validates: Requirements 2.10**
 
-  - [~] 6.4 Write property test: Data file YAML round-trip
+  - [x] 6.4 Write property test: Data file YAML round-trip
     - **Property 6: Data file YAML round-trip**
     - **Validates: Requirements 9.8**
 
