@@ -141,7 +141,7 @@ Replace the `jekyll-contentful-data-import` gem with a custom Jekyll Generator p
     - **Property 8: Configuration mismatch triggers full sync**
     - **Validates: Requirements 6.1, 6.2**
 
-  - [~] 8.5 Write property test: Post-sync cache persistence
+  - [x] 8.5 Write property test: Post-sync cache persistence
     - **Property 9: Post-sync cache persistence**
     - **Validates: Requirements 4.1, 4.2, 5.2**
 
