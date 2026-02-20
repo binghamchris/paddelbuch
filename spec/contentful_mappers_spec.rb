@@ -836,6 +836,46 @@ RSpec.describe ContentfulMappers do
       expect(result).to include('<td>')
       expect(result).to include('<p>Cell</p>')
     end
+
+    it '[PBT-exploration] renders correct table HTML tags for any random table structure' do
+      # **Validates: Requirements 2.1, 2.2, 2.3, 2.4**
+      property_of {
+        num_rows = range(1, 5)
+        total_td = 0
+        total_th = 0
+
+        rows = Array.new(num_rows) do
+          num_cells = range(1, 4)
+          cells = Array.new(num_cells) do
+            cell_type = boolean ? 'table-cell' : 'table-header-cell'
+            text = sized(range(1, 20)) { string(:alpha) }
+            if cell_type == 'table-cell'
+              total_td += 1
+            else
+              total_th += 1
+            end
+            {
+              'nodeType' => cell_type,
+              'content' => [
+                { 'nodeType' => 'paragraph', 'content' => [{ 'nodeType' => 'text', 'value' => text }] }
+              ]
+            }
+          end
+          { 'nodeType' => 'table-row', 'content' => cells }
+        end
+
+        content = [{ 'nodeType' => 'table', 'content' => rows }]
+        [content, num_rows, total_td, total_th]
+      }.check(100) { |content, num_rows, td_count, th_count|
+        result = ContentfulMappers.render_rich_text(content)
+
+        expect(result.scan('<table>').length).to eq(1), "Expected 1 <table> tag, got #{result.scan('<table>').length}"
+        expect(result.scan('</table>').length).to eq(1), "Expected 1 </table> tag, got #{result.scan('</table>').length}"
+        expect(result.scan('<tr>').length).to eq(num_rows), "Expected #{num_rows} <tr> tags, got #{result.scan('<tr>').length}"
+        expect(result.scan('<td>').length).to eq(td_count), "Expected #{td_count} <td> tags, got #{result.scan('<td>').length}"
+        expect(result.scan('<th>').length).to eq(th_count), "Expected #{th_count} <th> tags, got #{result.scan('<th>').length}"
+      }
+    end
   end
 
   # --- Nil reference handling ---
