@@ -24,7 +24,7 @@
 
 ## Task 4: Write preservation tests
 
-- [~] 4.1 [PBT-preservation] Property test: for any randomly generated non-table rich text document (random mix of paragraphs, headings, hyperlinks, lists with random text content), the fixed `render_rich_text` produces identical output to the original unfixed behavior. Use `rantly` to generate random document structures excluding table node types.
+- [x] 4.1 [PBT-preservation] Property test: for any randomly generated non-table rich text document (random mix of paragraphs, headings, hyperlinks, lists with random text content), the fixed `render_rich_text` produces identical output to the original unfixed behavior. Use `rantly` to generate random document structures excluding table node types.
 - [~] 4.2 Add unit tests verifying existing non-table rendering is unchanged:
   - Paragraph with text
   - Heading levels 1-3
