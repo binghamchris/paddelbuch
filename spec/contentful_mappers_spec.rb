@@ -1381,5 +1381,39 @@ RSpec.describe ContentfulMappers do
       expect(result).to eq('<p><code><u><em><strong>all</strong></em></u></code></p>')
     end
   end
+
+  # --- Fix checking: mark edge cases ---
+
+  describe 'Fix checking: mark edge cases' do
+    it 'renders plain text when marks array is empty' do
+      content = [{ 'nodeType' => 'paragraph', 'content' => [
+        { 'nodeType' => 'text', 'value' => 'plain', 'marks' => [] }
+      ] }]
+      expect(ContentfulMappers.render_rich_text(content)).to eq('<p>plain</p>')
+    end
+
+    it 'renders plain text when marks key is missing' do
+      content = [{ 'nodeType' => 'paragraph', 'content' => [
+        { 'nodeType' => 'text', 'value' => 'no marks key' }
+      ] }]
+      expect(ContentfulMappers.render_rich_text(content)).to eq('<p>no marks key</p>')
+    end
+
+    it 'ignores unknown mark types' do
+      content = [{ 'nodeType' => 'paragraph', 'content' => [
+        { 'nodeType' => 'text', 'value' => 'test', 'marks' => [{ 'type' => 'strikethrough' }] }
+      ] }]
+      expect(ContentfulMappers.render_rich_text(content)).to eq('<p>test</p>')
+    end
+
+    it 'applies known marks and ignores unknown marks in the same node' do
+      content = [{ 'nodeType' => 'paragraph', 'content' => [
+        { 'nodeType' => 'text', 'value' => 'mixed', 'marks' => [{ 'type' => 'bold' }, { 'type' => 'strikethrough' }] }
+      ] }]
+      result = ContentfulMappers.render_rich_text(content)
+      expect(result).to include('<strong>')
+      expect(result).not_to include('strikethrough')
+    end
+  end
 end
 
