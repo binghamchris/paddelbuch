@@ -1047,3 +1047,75 @@ RSpec.describe 'Contentful Sync Properties (Property 13)' do
     end
   end
 end
+
+# frozen_string_literal: true
+
+# Bugfix: blank-static-pages, Property 1: Static Page Content Mapping
+# For any staticPage entry with non-empty rich text content, map_static_page SHALL produce non-empty HTML content
+# **Validates: Requirements 2.1, 2.3**
+RSpec.describe 'Blank Static Pages Bugfix Properties' do
+  describe 'Property 1: Static page content mapping' do
+    def build_fields(hash)
+      result = {}
+      hash.each do |key, value|
+        if value.is_a?(Hash) && value.keys.all? { |k| k.is_a?(Symbol) && k.to_s.length == 2 }
+          result[key] = value
+        else
+          result[key] = { en: value }
+        end
+      end
+      result
+    end
+
+    def build_mock_entry(fields_hash)
+      fields = build_fields(fields_hash)
+      entry = double('Entry')
+      allow(entry).to receive(:sys).and_return({
+        id: 'test-id',
+        created_at: Time.now,
+        updated_at: Time.now
+      })
+      allow(entry).to receive(:fields_with_locales).and_return(fields)
+      entry
+    end
+
+    it 'always produces non-empty HTML content for entries with rich text content' do
+      property_of {
+        Rantly {
+          # Generate random rich text content with 1-5 paragraphs
+          num_paragraphs = range(1, 5)
+          paragraphs = Array.new(num_paragraphs) {
+            text = sized(range(3, 30)) { string(:alpha) }
+            { 'nodeType' => 'paragraph', 'content' => [{ 'nodeType' => 'text', 'value' => text }] }
+          }
+          rich_text = { 'content' => paragraphs }
+
+          locale = choose('de', 'en')
+          slug = sized(range(3, 15)) { string(:alpha) }
+          title = sized(range(3, 20)) { string(:alpha) }
+          menu = choose('Offene Daten', 'Über', nil)
+
+          { rich_text: rich_text, locale: locale, slug: slug, title: title, menu: menu }
+        }
+      }.check(100) { |data|
+        fields_hash = {
+          slug: data[:slug],
+          title: { de: data[:title], en: data[:title] },
+          menu: data[:menu],
+          content: { de: data[:rich_text], en: data[:rich_text] }
+        }
+
+        entry = build_mock_entry(fields_hash)
+        fields = build_fields(fields_hash)
+        result = ContentfulMappers.map_static_page(entry, fields, data[:locale])
+
+        expect(result['content']).not_to be_nil,
+          "Expected non-nil content for locale=#{data[:locale]}, slug=#{data[:slug]}"
+        expect(result['content']).not_to be_empty,
+          "Expected non-empty content for locale=#{data[:locale]}, slug=#{data[:slug]}"
+        expect(result['content']).to include('<p>'),
+          "Expected HTML paragraph tags in content for locale=#{data[:locale]}, slug=#{data[:slug]}"
+      }
+    end
+  end
+end
