@@ -128,7 +128,7 @@
     - **EXPECTED OUTCOME**: Test PASSES (confirms bug is fixed)
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7_
 
-  - [~] 3.10 Verify preservation tests still pass
+  - [x] 3.10 Verify preservation tests still pass
     - **Property 2: Preservation** - German Locale Links Have No Locale Prefix
     - **IMPORTANT**: Re-run the SAME tests from task 2 - do NOT write new tests
     - Run preservation property tests from step 2
