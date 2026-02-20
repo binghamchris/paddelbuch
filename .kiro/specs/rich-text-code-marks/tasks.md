@@ -15,7 +15,7 @@
 - [x] 3.2 Add unit tests for multiple simultaneous marks verifying correctly nested tags
 - [x] 3.3 Add unit tests for edge cases: empty marks array, missing marks key, unknown mark type
 - [x] 3.4 Add unit test for marked text inside a paragraph, heading, table cell, and hyperlink
-- [~] 3.5 [PBT-fix] Add a property-based test that generates random text values with random subsets of mark types and verifies each mark's HTML tag wraps the text value `spec/contentful_mappers_spec.rb` **Validates: Property 1**
+- [x] 3.5 [PBT-fix] Add a property-based test that generates random text values with random subsets of mark types and verifies each mark's HTML tag wraps the text value `spec/contentful_mappers_spec.rb` **Validates: Property 1**
 
 ## 4. Write preservation tests
 
