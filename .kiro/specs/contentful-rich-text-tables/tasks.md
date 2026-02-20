@@ -19,7 +19,7 @@
 
 ## Task 3: Write fix-checking tests
 
-- [~] 3.1 Verify the exploratory tests from Task 1 now PASS on the fixed code by running `bundle exec rspec spec/contentful_mappers_spec.rb`.
+- [-] 3.1 Verify the exploratory tests from Task 1 now PASS on the fixed code by running `bundle exec rspec spec/contentful_mappers_spec.rb`.
 - [~] 3.2 [PBT-fix] Property test: for any randomly generated table structure (random rows 1-5, cells 1-4, random text, mix of `table-cell` and `table-header-cell`), the fixed `render_rich_text` output contains the correct count of `<table>`, `<tr>`, `<td>`, and `<th>` tags matching the input structure.
 
 ## Task 4: Write preservation tests
