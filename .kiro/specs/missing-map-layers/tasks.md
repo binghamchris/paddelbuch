@@ -18,7 +18,7 @@
 - [x] 4.1 Create `_tests/property/map-layers-data-init.property.test.js` that tests the initialization logic: for random viewport bounds within Switzerland, verify `PaddelbuchDataLoader.loadDataForBounds` returns data and the population functions are callable with that data `Property 1`
 
 ## Task 5: Write preservation test (PBT)
-- [~] 5.1 Create `_tests/property/map-layers-preservation.property.test.js` that verifies: map-init.html still contains map initialization with Switzerland center/bounds/zoom, layer-control.html still creates all 9 layer groups, and noEntry layer is not added to map by default `Property 2`
+- [x] 5.1 Create `_tests/property/map-layers-preservation.property.test.js` that verifies: map-init.html still contains map initialization with Switzerland center/bounds/zoom, layer-control.html still creates all 9 layer groups, and noEntry layer is not added to map by default `Property 2`
 
 ## Task 6: Verify fix end-to-end
 - [~] 6.1 Build the Jekyll site and verify the rendered `_site/index.html` contains all five script tags in correct dependency order
