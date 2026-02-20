@@ -8,6 +8,7 @@ pageName: waterway-details
   Displays a waterway detail page with bounded map (8 cols) + details panel (4 cols).
   Shows: waterway name and list of active event notices for that waterway.
   Map bounds are calculated from the waterway's GeoJSON geometry.
+  All data layers (spots, obstacles, protected areas, event notices) are loaded.
   
   Collection permalink: /gewaesser/:slug/
   
@@ -72,7 +73,6 @@ pageName: waterway-details
           {% endif %}
           
           <!-- Last Updated Timestamp -->
-          <!-- Property 19: Date Locale Formatting - using localized_date filter -->
           {% if waterway.updatedAt %}
           <tr>
             <th>{% t labels.last_updated %}</th>
@@ -89,25 +89,13 @@ pageName: waterway-details
 </div>
 
 <!-- Map Initialization Script -->
-<script src="{{ '/assets/js/layer-styles.js' | relative_url }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  /**
-   * Waterway Detail Map Initialization
-   * 
-   * Property 7: Waterway Detail Map Bounds
-   * For any waterway with a geometry, the detail page map bounds shall be 
-   * calculated from the waterway's GeoJSON geometry.
-   * 
-   * Validates: Requirements 4.6
-   */
-  
-  // Parse waterway geometry
+  // Parse waterway geometry for bounds calculation only
   {% if waterway.geometry %}
   var geometryData = {{ waterway.geometry | jsonify }};
   var geometry;
   
-  // Handle both string and object geometry
   if (typeof geometryData === 'string') {
     try {
       geometry = JSON.parse(geometryData);
@@ -118,6 +106,9 @@ document.addEventListener('DOMContentLoaded', function() {
   } else {
     geometry = geometryData;
   }
+  {% else %}
+  var geometry = null;
+  {% endif %}
   
   // Initialize map with default Switzerland center
   var map = L.map('waterway-map', {
@@ -126,42 +117,27 @@ document.addEventListener('DOMContentLoaded', function() {
     zoomControl: true
   });
   
-  // Add Mapbox tile layer
+  // Add tile layer
   L.tileLayer('{{ site.mapbox_url }}', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     maxZoom: {{ site.map.max_zoom | default: 18 }}
   }).addTo(map);
   
-  // Position zoom control at bottom-right
   map.zoomControl.setPosition('bottomright');
   
+  // Fit bounds from waterway geometry (Property 7) without rendering the polygon
   if (geometry) {
-    // Create GeoJSON layer for waterway
-    var waterwayLayer = L.geoJSON(geometry, {
-      style: PaddelbuchLayerStyles.getLayerStyle('waterway')
-    }).addTo(map);
-    
-    // Calculate and fit bounds from geometry (Property 7)
-    var bounds = waterwayLayer.getBounds();
+    var tempLayer = L.geoJSON(geometry);
+    var bounds = tempLayer.getBounds();
     if (bounds.isValid()) {
       map.fitBounds(bounds, { padding: [20, 20] });
     }
   }
-  {% else %}
-  // No geometry - show default Switzerland view
-  var map = L.map('waterway-map', {
-    center: [{{ site.map.center.lat }}, {{ site.map.center.lon }}],
-    zoom: {{ site.map.default_zoom }},
-    zoomControl: true
-  });
   
-  // Add Mapbox tile layer
-  L.tileLayer('{{ site.mapbox_url }}', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    maxZoom: {{ site.map.max_zoom | default: 18 }}
-  }).addTo(map);
-  
-  map.zoomControl.setPosition('bottomright');
-  {% endif %}
+  // Store map globally so the data layer pipeline can find it
+  window.paddelbuchMap = map;
 });
 </script>
+
+<!-- Load all data layers (spots, obstacles, protected areas, event notices) -->
+{% include detail-map-layers.html locale=current_locale %}
