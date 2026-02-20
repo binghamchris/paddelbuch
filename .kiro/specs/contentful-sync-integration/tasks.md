@@ -73,7 +73,7 @@ Replace the `jekyll-contentful-data-import` gem with a custom Jekyll Generator p
     - **Property 12: Sync page iteration completeness**
     - **Validates: Requirements 3.7, 3.8**
 
-  - [~] 4.5 Write unit tests for SyncChecker
+  - [x] 4.5 Write unit tests for SyncChecker
     - Test initial_sync, check_for_changes with mocked Contentful client
     - Test multi-page iteration, token extraction, error handling
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8_
