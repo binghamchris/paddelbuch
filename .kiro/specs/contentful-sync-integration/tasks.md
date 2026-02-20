@@ -170,7 +170,7 @@ Replace the `jekyll-contentful-data-import` gem with a custom Jekyll Generator p
     - Verify `site.data` is updated so downstream generators access fresh data without re-reading files
     - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5, 9.6, 9.7_
 
-  - [~] 10.2 Write integration tests for full fetch flow
+  - [x] 10.2 Write integration tests for full fetch flow
     - Test full generate flow with mocked Contentful client: fetch → transform → write YAML → update site.data
     - Verify downstream generators can read the written data
     - _Requirements: 1.7, 1.8, 9.1, 9.2, 9.3, 9.4, 9.5, 9.6, 9.7_
