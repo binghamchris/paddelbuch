@@ -69,7 +69,7 @@
     - _Preservation: German locale links remain unchanged_
     - _Requirements: 1.4, 2.4, 2.8, 3.1_
 
-  - [~] 3.4 Add locale prefix logic and update links in `_includes/header.html`
+  - [x] 3.4 Add locale prefix logic and update links in `_includes/header.html`
     - Add locale prefix computation at the top of the file
     - Prepend `locale_prefix` to ALL dropdown links:
       - Lake links (`/gewaesser/{slug}/`)
