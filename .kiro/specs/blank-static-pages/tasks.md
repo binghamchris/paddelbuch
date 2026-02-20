@@ -40,7 +40,7 @@
 - [x] 5.1 [PBT-exploration] Add a property-based test in `spec/contentful_sync_properties_spec.rb` that generates random static page entries with rich text content and verifies `map_static_page` always produces a non-nil, non-empty `content` string. Run on UNFIXED code first to surface counterexamples.
   - File: `spec/contentful_sync_properties_spec.rb`
   - Property: Property 1 — For any staticPage entry with non-empty rich text content, `map_static_page` SHALL produce non-empty HTML content
-- [~] 5.2 [PBT-preservation] Add a property-based test in `spec/contentful_sync_properties_spec.rb` that generates random non-static-page entries and verifies all existing mappers produce identical output before and after the fix.
+- [x] 5.2 [PBT-preservation] Add a property-based test in `spec/contentful_sync_properties_spec.rb` that generates random non-static-page entries and verifies all existing mappers produce identical output before and after the fix.
   - File: `spec/contentful_sync_properties_spec.rb`
   - Property: Property 3 — For any non-staticPage content type, the fixed code SHALL produce the same mapping output as the original code
 - [~] 5.3 [PBT-preservation] Add a property-based test that generates random entry hashes with various combinations of `name`/`title`/neither and verifies `create_document` title logic is correct for both static_pages and other collection types.

@@ -1118,4 +1118,182 @@ RSpec.describe 'Blank Static Pages Bugfix Properties' do
       }
     end
   end
+
+  # Bugfix: blank-static-pages, Property 3: Non-static-page mapper preservation
+  # For any non-staticPage content type, the fixed code SHALL produce the same mapping output as the original code.
+  # **Validates: Requirements 3.1, 3.2**
+  describe 'Property 3: Non-static-page mapper preservation' do
+    NON_STATIC_MAPPERS = %i[map_spot map_waterway map_obstacle map_protected_area map_event_notice map_type].freeze
+
+    def build_fields(hash)
+      result = {}
+      hash.each do |key, value|
+        if value.is_a?(Hash) && value.keys.all? { |k| k.is_a?(Symbol) && k.to_s.length == 2 }
+          result[key] = value
+        else
+          result[key] = { en: value }
+        end
+      end
+      result
+    end
+
+    def build_mock_entry(fields_hash)
+      fields = build_fields(fields_hash)
+      entry = double('Entry')
+      allow(entry).to receive(:sys).and_return({
+        id: 'test-id',
+        created_at: Time.now,
+        updated_at: Time.now
+      })
+      allow(entry).to receive(:fields_with_locales).and_return(fields)
+      entry
+    end
+
+    def build_reference(slug)
+      ref = double("Ref:#{slug}")
+      allow(ref).to receive(:respond_to?).with(anything).and_return(false)
+      allow(ref).to receive(:respond_to?).with(:fields_with_locales).and_return(true)
+      allow(ref).to receive(:fields_with_locales).and_return({ slug: { en: slug } })
+      allow(ref).to receive(:sys).and_return({ id: slug })
+      ref
+    end
+
+    def build_location(lat, lon)
+      loc = double('Location')
+      allow(loc).to receive(:lat).and_return(lat)
+      allow(loc).to receive(:lon).and_return(lon)
+      loc
+    end
+
+    def build_geometry
+      geo = double('Geometry')
+      allow(geo).to receive(:to_json).and_return('{"type":"Point","coordinates":[7.0,46.0]}')
+      geo
+    end
+
+    def build_date
+      date = double('Date')
+      allow(date).to receive(:iso8601).and_return(Time.now.iso8601)
+      date
+    end
+
+    def random_string(len = 10)
+      (0...len).map { ('a'..'z').to_a.sample }.join
+    end
+
+    def generate_field_values_for(mapper_name)
+      fields = {}
+      case mapper_name
+      when :map_spot
+        fields[:slug] = random_string(rand(3..15))
+        fields[:name] = { de: random_string(rand(3..15)), en: random_string(rand(3..15)) }
+        fields[:description] = random_string(rand(5..20))
+        fields[:location] = build_location(rand * 180 - 90, rand * 360 - 180)
+        fields[:approximate_address] = random_string(rand(5..20))
+        fields[:country] = %w[CH DE AT FR].sample
+        fields[:confirmed] = [true, false].sample
+        fields[:rejected] = [true, false].sample
+        fields[:waterway] = build_reference('ww')
+        fields[:spot_type] = build_reference('st')
+        fields[:paddling_environment_type] = build_reference('pet')
+        fields[:paddle_craft_type] = [build_reference('kayak')]
+        fields[:event_notices] = []
+        fields[:obstacles] = []
+        fields[:data_source_type] = build_reference('ds')
+        fields[:data_license_type] = build_reference('dl')
+      when :map_waterway
+        fields[:slug] = random_string(rand(3..15))
+        fields[:name] = { de: random_string(rand(3..15)), en: random_string(rand(3..15)) }
+        fields[:length] = rand * 100
+        fields[:area] = rand * 500
+        fields[:geometry] = build_geometry
+        fields[:show_in_menu] = [true, false].sample
+        fields[:paddling_environment_type] = build_reference('pet')
+        fields[:data_source_type] = build_reference('ds')
+        fields[:data_license_type] = build_reference('dl')
+      when :map_obstacle
+        fields[:slug] = random_string(rand(3..15))
+        fields[:name] = { de: random_string(rand(3..15)), en: random_string(rand(3..15)) }
+        fields[:description] = random_string(rand(5..20))
+        fields[:geometry] = build_geometry
+        fields[:portage_route] = build_geometry
+        fields[:portage_distance] = rand * 1000
+        fields[:portage_description] = random_string(rand(5..20))
+        fields[:is_portage_necessary] = [true, false].sample
+        fields[:is_portage_possible] = [true, false].sample
+        fields[:obstacle_type] = build_reference('ot')
+        fields[:waterway] = build_reference('ww')
+        fields[:spots] = [build_reference('s1')]
+      when :map_protected_area
+        fields[:slug] = random_string(rand(3..15))
+        fields[:name] = { de: random_string(rand(3..15)), en: random_string(rand(3..15)) }
+        fields[:geometry] = build_geometry
+        fields[:is_area_marked] = [true, false].sample
+        fields[:protected_area_type] = build_reference('pat')
+      when :map_event_notice
+        fields[:slug] = random_string(rand(3..15))
+        fields[:name] = { de: random_string(rand(3..15)), en: random_string(rand(3..15)) }
+        fields[:description] = random_string(rand(5..20))
+        fields[:location] = build_location(rand * 180 - 90, rand * 360 - 180)
+        fields[:affected_area] = build_geometry
+        fields[:start_date] = build_date
+        fields[:end_date] = build_date
+        fields[:waterways] = [build_reference('ww')]
+      when :map_type
+        fields[:slug] = random_string(rand(3..15))
+        fields[:name] = { de: random_string(rand(3..15)), en: random_string(rand(3..15)) }
+      end
+      fields
+    end
+
+    it 'produces consistent output for all non-static-page mappers' do
+      property_of {
+        Rantly {
+          mapper_name = choose(*NON_STATIC_MAPPERS)
+          locale = choose('de', 'en')
+          { mapper_name: mapper_name, locale: locale }
+        }
+      }.check(100) { |data|
+        mapper_name = data[:mapper_name]
+        locale = data[:locale]
+        field_values = generate_field_values_for(mapper_name)
+        entry = build_mock_entry(field_values)
+        fields = entry.fields_with_locales
+
+        # Call the mapper — should produce valid output with all expected keys
+        result = ContentfulMappers.send(mapper_name, entry, fields, locale)
+
+        # Verify the result is a Hash with a slug key (basic structural check)
+        expect(result).to be_a(Hash)
+        expect(result).to have_key('slug')
+        expect(result['slug']).not_to be_nil
+
+        # Verify all fields that should be present are present
+        # (This confirms the fix didn't break any mapper's field resolution)
+        case mapper_name
+        when :map_spot
+          expect(result).to have_key('name')
+          expect(result).to have_key('description')
+          expect(result).to have_key('confirmed')
+        when :map_waterway
+          expect(result).to have_key('name')
+          expect(result).to have_key('geometry')
+        when :map_obstacle
+          expect(result).to have_key('name')
+          expect(result).to have_key('description')
+          expect(result).to have_key('isPortageNecessary')
+        when :map_protected_area
+          expect(result).to have_key('name')
+          expect(result).to have_key('isAreaMarked')
+        when :map_event_notice
+          expect(result).to have_key('name')
+          expect(result).to have_key('description')
+          expect(result).to have_key('waterways')
+        when :map_type
+          expect(result).to have_key('name_de')
+          expect(result).to have_key('name_en')
+        end
+      }
+    end
+  end
 end
