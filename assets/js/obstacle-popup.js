@@ -61,6 +61,7 @@
    */
   function generateObstaclePopupContent(obstacle, locale) {
     var localeStrings = strings[locale] || strings.de;
+    var localePrefix = (locale && locale !== 'de') ? '/' + locale : '';
     var html = '<div class="obstacle-popup">';
     
     // Obstacle name (Requirement 5.3)
@@ -77,7 +78,7 @@
     // Link to obstacle detail page (Requirement 5.3)
     if (obstacle.slug) {
       html += '<div class="obstacle-popup-actions">';
-      html += '<a href="/hindernisse/' + encodeURIComponent(obstacle.slug) + '/" class="btn btn-sm btn-primary obstacle-popup-details-link">';
+      html += '<a href="' + localePrefix + '/hindernisse/' + encodeURIComponent(obstacle.slug) + '/" class="btn btn-sm btn-primary obstacle-popup-details-link">';
       html += localeStrings.moreDetails;
       html += '</a>';
       html += '</div>';

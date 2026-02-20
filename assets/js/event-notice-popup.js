@@ -172,6 +172,7 @@
    */
   function generateEventNoticePopupContent(notice, locale) {
     var localeStrings = strings[locale] || strings.de;
+    var localePrefix = (locale && locale !== 'de') ? '/' + locale : '';
     var html = '<div class="event-notice-popup">';
     
     // Event notice name (Requirement 7.3)
@@ -209,7 +210,7 @@
     // Link to event notice detail page (Requirement 7.3)
     if (notice.slug) {
       html += '<div class="event-notice-popup-actions">';
-      html += '<a href="/gewaesserereignisse/' + encodeURIComponent(notice.slug) + '/" class="btn btn-sm btn-primary event-notice-popup-details-link">';
+      html += '<a href="' + localePrefix + '/gewaesserereignisse/' + encodeURIComponent(notice.slug) + '/" class="btn btn-sm btn-primary event-notice-popup-details-link">';
       html += localeStrings.moreDetails;
       html += '</a>';
       html += '</div>';
