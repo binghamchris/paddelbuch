@@ -31,7 +31,7 @@
 - [x] 4.1 Add unit tests in `spec/contentful_mappers_spec.rb` for `map_static_page` covering: (a) rich text content as Hash with `'content'` key, (b) rich text content as object with `.content` method, (c) nil content field, (d) both `de` and `en` locales.
   - File: `spec/contentful_mappers_spec.rb`
   - Acceptance: All new tests pass with the fixed code
-- [~] 4.2 Add unit tests in `spec/collection_generator_spec.rb` for `create_document` covering: (a) static page entry with `title` but no `name`, (b) spot entry with `name`, (c) entry with neither `name` nor `title` falls back to slug, (d) permalink generation for static pages.
+- [x] 4.2 Add unit tests in `spec/collection_generator_spec.rb` for `create_document` covering: (a) static page entry with `title` but no `name`, (b) spot entry with `name`, (c) entry with neither `name` nor `title` falls back to slug, (d) permalink generation for static pages.
   - File: `spec/collection_generator_spec.rb`
   - Acceptance: All new tests pass with the fixed code
 
