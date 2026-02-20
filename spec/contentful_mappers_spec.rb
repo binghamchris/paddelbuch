@@ -1283,4 +1283,41 @@ RSpec.describe ContentfulMappers do
       expect(result['protectedAreaType_slug']).to be_nil
     end
   end
+
+  # --- Bug exploration: marks on text nodes ---
+
+  describe 'Bug exploration: marks on text nodes' do
+    MARK_TO_TAG = { 'code' => 'code', 'bold' => 'strong', 'italic' => 'em', 'underline' => 'u' }.freeze
+
+    it '[PBT-exploration] marked text nodes render with correct HTML tags' do
+      # **Validates: Property 1**
+      property_of {
+        text = sized(range(1, 20)) { string(:alpha) }
+        all_marks = %w[code bold italic underline]
+        # Generate a random non-empty subset of mark types
+        subset = all_marks.select { boolean }
+        subset = [all_marks.sample] if subset.empty?
+        [text, subset]
+      }.check(100) { |text, marks|
+        text_node = {
+          'nodeType' => 'text',
+          'value' => text,
+          'marks' => marks.map { |m| { 'type' => m } }
+        }
+        content = [{ 'nodeType' => 'paragraph', 'content' => [text_node] }]
+        result = ContentfulMappers.render_rich_text(content)
+
+        # The text value must appear in the output
+        expect(result).to include(text), "Expected output to include text '#{text}'"
+
+        # Each mark type must produce its corresponding HTML tag
+        marks.each do |mark_type|
+          tag = MARK_TO_TAG[mark_type]
+          expect(result).to include("<#{tag}>"), "Expected <#{tag}> tag for mark '#{mark_type}'"
+          expect(result).to include("</#{tag}>"), "Expected </#{tag}> tag for mark '#{mark_type}'"
+        end
+      }
+    end
+  end
 end
+
