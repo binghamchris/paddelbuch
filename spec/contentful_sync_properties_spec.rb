@@ -1102,7 +1102,7 @@ RSpec.describe 'Blank Static Pages Bugfix Properties' do
           slug: data[:slug],
           title: { de: data[:title], en: data[:title] },
           menu: data[:menu],
-          content: { de: data[:rich_text], en: data[:rich_text] }
+          page_contents: { de: data[:rich_text], en: data[:rich_text] }
         }
 
         entry = build_mock_entry(fields_hash)

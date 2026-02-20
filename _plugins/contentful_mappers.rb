@@ -246,7 +246,7 @@ module ContentfulMappers
       'title' => resolve_field(fields, :title, locale),
       'menu' => menu,
       'menu_slug' => menu_to_slug(menu),
-      'content' => extract_rich_text_html(resolve_field(fields, :content, locale)),
+      'content' => extract_rich_text_html(resolve_field(fields, :page_contents, locale)),
       'menuOrder' => resolve_field(fields, :menu_order, locale) || 0
     }
   end
