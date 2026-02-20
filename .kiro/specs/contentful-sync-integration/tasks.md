@@ -61,7 +61,7 @@ Replace the `jekyll-contentful-data-import` gem with a custom Jekyll Generator p
     - Rescue `StandardError` and return `SyncResult.new(success: false, error: e)`
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8_
 
-  - [~] 4.2 Write property test: Sync result determines fetch behavior
+  - [x] 4.2 Write property test: Sync result determines fetch behavior
     - **Property 3: Sync result determines fetch behavior**
     - **Validates: Requirements 3.2, 3.3**
 
