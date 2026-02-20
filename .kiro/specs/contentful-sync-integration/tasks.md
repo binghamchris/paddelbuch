@@ -163,7 +163,7 @@ Replace the `jekyll-contentful-data-import` gem with a custom Jekyll Generator p
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 10. Integration wiring and data file output verification
-  - [~] 10.1 Verify data file output compatibility with downstream generators
+  - [x] 10.1 Verify data file output compatibility with downstream generators
     - Ensure `_data/spots.yml` structure is compatible with `ApiGenerator` and `TileGenerator`
     - Ensure all 13 content types write to correct file paths per the CONTENT_TYPES mapping
     - Ensure `_data/types/` subdirectory is created for type data files
