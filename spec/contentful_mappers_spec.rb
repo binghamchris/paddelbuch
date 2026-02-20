@@ -1455,5 +1455,46 @@ RSpec.describe ContentfulMappers do
       expect(ContentfulMappers.render_rich_text(content)).to eq('<p><a href="https://example.com"><em>click here</em></a></p>')
     end
   end
+
+  # --- Fix checking: marks PBT ---
+
+  describe 'Fix checking: marks PBT' do
+    MARK_TO_TAG_FIX = { 'code' => 'code', 'bold' => 'strong', 'italic' => 'em', 'underline' => 'u' }.freeze
+
+    it '[PBT-fix] each mark type produces its HTML tag for random text and mark subsets' do
+      # **Validates: Property 1**
+      property_of {
+        text = sized(range(1, 20)) { string(:alpha) }
+        all_marks = %w[code bold italic underline]
+        subset = all_marks.select { boolean }
+        [text, subset]
+      }.check(100) { |text, marks|
+        text_node = {
+          'nodeType' => 'text',
+          'value' => text,
+          'marks' => marks.map { |m| { 'type' => m } }
+        }
+        content = [{ 'nodeType' => 'paragraph', 'content' => [text_node] }]
+        result = ContentfulMappers.render_rich_text(content)
+
+        # Text value must always be present
+        expect(result).to include(text), "Expected output to include text '#{text}'"
+
+        # Each mark's HTML tag must appear
+        marks.each do |mark_type|
+          tag = MARK_TO_TAG_FIX[mark_type]
+          expect(result).to include("<#{tag}>"), "Expected <#{tag}> for mark '#{mark_type}'"
+          expect(result).to include("</#{tag}>"), "Expected </#{tag}> for mark '#{mark_type}'"
+        end
+
+        # If no marks, no mark tags should appear
+        if marks.empty?
+          MARK_TO_TAG_FIX.values.each do |tag|
+            expect(result).not_to include("<#{tag}>"), "Expected no <#{tag}> for unmarked text"
+          end
+        end
+      }
+    end
+  end
 end
 
