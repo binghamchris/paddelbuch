@@ -7,7 +7,7 @@
 
 ## 2. Write exploratory tests to confirm the bug on unfixed code
 
-- [~] 2.1 [PBT-exploration] Add a property-based test that generates random text values with random non-empty subsets of mark types and asserts the output contains the corresponding HTML tags (expected to fail on unfixed code) `spec/contentful_mappers_spec.rb` **Validates: Property 1**
+- [x] 2.1 [PBT-exploration] Add a property-based test that generates random text values with random non-empty subsets of mark types and asserts the output contains the corresponding HTML tags (expected to fail on unfixed code) `spec/contentful_mappers_spec.rb` **Validates: Property 1**
 
 ## 3. Write fix-checking tests
 
