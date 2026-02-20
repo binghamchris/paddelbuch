@@ -34,7 +34,7 @@ Replace the `jekyll-contentful-data-import` gem with a custom Jekyll Generator p
     - Handle missing file, corrupted YAML, and missing fields gracefully
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6_
 
-  - [~] 2.2 Write property test: Cache metadata YAML round-trip
+  - [x] 2.2 Write property test: Cache metadata YAML round-trip
     - **Property 5: Cache metadata YAML round-trip**
     - **Validates: Requirements 4.5, 4.6**
 
