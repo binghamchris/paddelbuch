@@ -111,7 +111,7 @@ Replace the `jekyll-contentful-data-import` gem with a custom Jekyll Generator p
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 8. Implement ContentfulFetcher generator
-  - [~] 8.1 Create ContentfulFetcher generator
+  - [x] 8.1 Create ContentfulFetcher generator
     - Create `_plugins/contentful_fetcher.rb`
     - Register as `Jekyll::Generator` with `priority :highest`
     - Include `SyncChecker` module
@@ -125,7 +125,7 @@ Replace the `jekyll-contentful-data-import` gem with a custom Jekyll Generator p
     - Implement `write_yaml(filename, data)` writing to `_data/{filename}.yml` and updating `site.data`
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 3.1, 3.2, 3.3, 3.4, 4.1, 4.2, 4.3, 4.4, 5.1, 5.2, 5.3, 6.1, 6.2, 6.3_
 
-  - [~] 8.2 Implement build logging
+  - [x] 8.2 Implement build logging
     - Log cached content usage with last sync timestamp
     - Log number of changed entries detected by Sync API
     - Log sync errors and fallback actions
