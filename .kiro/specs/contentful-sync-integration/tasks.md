@@ -78,7 +78,7 @@ Replace the `jekyll-contentful-data-import` gem with a custom Jekyll Generator p
     - Test multi-page iteration, token extraction, error handling
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8_
 
-- [~] 5. Checkpoint - Ensure SyncChecker tests pass
+- [x] 5. Checkpoint - Ensure SyncChecker tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 6. Refactor ContentfulMappers module
