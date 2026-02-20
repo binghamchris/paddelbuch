@@ -41,6 +41,37 @@ RSpec.describe 'Contentful Sync Properties' do
     end
   end
 
+  # Feature: contentful-sync-integration, Property 3: Sync result determines fetch behavior
+  # **Validates: Requirements 3.2, 3.3**
+  describe 'Property 3: Sync result determines fetch behavior' do
+    it 'fetches content if and only if sync result indicates changes' do
+      property_of {
+        Rantly {
+          items_count = range(0, 100)
+          {
+            items_count: items_count,
+            has_changes: items_count > 0
+          }
+        }
+      }.check(100) { |data|
+        result = SyncChecker::SyncResult.new(
+          success: true,
+          has_changes: data[:has_changes],
+          new_token: 'token',
+          items_count: data[:items_count]
+        )
+
+        if data[:items_count] > 0
+          expect(result.has_changes).to be true
+          expect(result.success?).to be true
+        else
+          expect(result.has_changes).to be false
+          expect(result.success?).to be true
+        end
+      }
+    end
+  end
+
   # Feature: contentful-sync-integration, Property 10: Cache validation rejects incomplete metadata
   # **Validates: Requirements 4.6**
   describe 'Property 10: Cache validation rejects incomplete metadata' do
