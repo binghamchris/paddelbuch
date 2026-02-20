@@ -5,7 +5,7 @@
 - [x] 1.1 Write an exploratory test in `spec/contentful_mappers_spec.rb` that calls `map_static_page` with a rich text content field (both Hash-style and object-style) and asserts `result['content']` is non-empty HTML. Run on unfixed code to confirm the content mapping failure.
   - File: `spec/contentful_mappers_spec.rb`
   - Acceptance: Test demonstrates that `map_static_page` returns nil content for rich text input formats that `resolve_field` rejects
-- [~] 1.2 Write an exploratory test in `spec/collection_generator_spec.rb` that creates a static page entry with `title` but no `name` field, passes it through `create_document`, and asserts `doc.data['title']` equals the entry's title. Run on unfixed code to confirm the title overwrite.
+- [x] 1.2 Write an exploratory test in `spec/collection_generator_spec.rb` that creates a static page entry with `title` but no `name` field, passes it through `create_document`, and asserts `doc.data['title']` equals the entry's title. Run on unfixed code to confirm the title overwrite.
   - File: `spec/collection_generator_spec.rb`
   - Acceptance: Test demonstrates that `create_document` overwrites title with slug when `entry['name']` is nil
 
