@@ -1554,5 +1554,70 @@ RSpec.describe ContentfulMappers do
       expect(ContentfulMappers.render_rich_text(content)).to eq('<ul><li><p>item text</p></li></ul>')
     end
   end
+
+  # --- Preservation: no marks PBT ---
+
+  describe 'Preservation: no marks PBT' do
+    MARK_TAGS = %w[code strong em u].freeze
+
+    it '[PBT-preservation] random documents with no marks produce no mark tags and preserve all text' do
+      # **Validates: Property 2**
+      property_of {
+        num_nodes = range(1, 5)
+        texts = []
+
+        nodes = Array.new(num_nodes) do
+          node_kind = choose('paragraph', 'heading-1', 'heading-2', 'heading-3',
+                             'table-single-cell', 'list-item-in-ul')
+
+          case node_kind
+          when 'paragraph', 'heading-1', 'heading-2', 'heading-3'
+            text = sized(range(1, 15)) { string(:alpha) }
+            texts << text
+            { 'nodeType' => node_kind, 'content' => [
+              { 'nodeType' => 'text', 'value' => text, 'marks' => [] }
+            ] }
+          when 'table-single-cell'
+            text = sized(range(1, 15)) { string(:alpha) }
+            texts << text
+            { 'nodeType' => 'table', 'content' => [
+              { 'nodeType' => 'table-row', 'content' => [
+                { 'nodeType' => 'table-cell', 'content' => [
+                  { 'nodeType' => 'paragraph', 'content' => [
+                    { 'nodeType' => 'text', 'value' => text, 'marks' => [] }
+                  ] }
+                ] }
+              ] }
+            ] }
+          when 'list-item-in-ul'
+            text = sized(range(1, 15)) { string(:alpha) }
+            texts << text
+            { 'nodeType' => 'unordered-list', 'content' => [
+              { 'nodeType' => 'list-item', 'content' => [
+                { 'nodeType' => 'paragraph', 'content' => [
+                  { 'nodeType' => 'text', 'value' => text, 'marks' => [] }
+                ] }
+              ] }
+            ] }
+          end
+        end
+
+        [nodes, texts]
+      }.check(100) { |nodes, texts|
+        result = ContentfulMappers.render_rich_text(nodes)
+
+        # No mark tags should appear
+        MARK_TAGS.each do |tag|
+          expect(result).not_to include("<#{tag}>"), "Unmarked document should not contain <#{tag}>"
+          expect(result).not_to include("</#{tag}>"), "Unmarked document should not contain </#{tag}>"
+        end
+
+        # All text content must be preserved
+        texts.each do |text|
+          expect(result).to include(text), "Expected output to include text '#{text}'"
+        end
+      }
+    end
+  end
 end
 
