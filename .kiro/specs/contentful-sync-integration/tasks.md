@@ -26,7 +26,7 @@ Replace the `jekyll-contentful-data-import` gem with a custom Jekyll Generator p
     - Ensure test suite runs with `bundle exec rspec`
     - _Requirements: 10.4, 10.5_
 
-- [ ] 2. Implement CacheMetadata class
+- [x] 2. Implement CacheMetadata class
   - [x] 2.1 Create CacheMetadata class
     - Create `_plugins/cache_metadata.rb`
     - Implement `initialize(data_dir)`, `load`, `save`, `valid?`, and `matches_config?` methods
