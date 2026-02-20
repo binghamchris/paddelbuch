@@ -210,6 +210,61 @@ RSpec.describe ContentfulMappers do
         expect(ContentfulMappers.extract_rich_text_html(field)).to be_nil
       end
     end
+
+    context 'with raw JSON containing a table' do
+      it 'parses and renders table HTML from raw JSON document' do
+        doc = {
+          'nodeType' => 'document',
+          'data' => {},
+          'content' => [
+            { 'nodeType' => 'paragraph', 'data' => {}, 'content' => [
+              { 'nodeType' => 'text', 'value' => 'Before table.', 'marks' => [], 'data' => {} }
+            ] },
+            { 'nodeType' => 'table', 'data' => {}, 'content' => [
+              { 'nodeType' => 'table-row', 'data' => {}, 'content' => [
+                { 'nodeType' => 'table-header-cell', 'data' => {}, 'content' => [
+                  { 'nodeType' => 'paragraph', 'data' => {}, 'content' => [
+                    { 'nodeType' => 'text', 'value' => 'Field', 'marks' => [], 'data' => {} }
+                  ] }
+                ] },
+                { 'nodeType' => 'table-header-cell', 'data' => {}, 'content' => [
+                  { 'nodeType' => 'paragraph', 'data' => {}, 'content' => [
+                    { 'nodeType' => 'text', 'value' => 'Description', 'marks' => [], 'data' => {} }
+                  ] }
+                ] }
+              ] },
+              { 'nodeType' => 'table-row', 'data' => {}, 'content' => [
+                { 'nodeType' => 'table-cell', 'data' => {}, 'content' => [
+                  { 'nodeType' => 'paragraph', 'data' => {}, 'content' => [
+                    { 'nodeType' => 'text', 'value' => 'name', 'marks' => [], 'data' => {} }
+                  ] }
+                ] },
+                { 'nodeType' => 'table-cell', 'data' => {}, 'content' => [
+                  { 'nodeType' => 'paragraph', 'data' => {}, 'content' => [
+                    { 'nodeType' => 'text', 'value' => 'The spot name', 'marks' => [], 'data' => {} }
+                  ] }
+                ] }
+              ] }
+            ] },
+            { 'nodeType' => 'paragraph', 'data' => {}, 'content' => [
+              { 'nodeType' => 'text', 'value' => 'After table.', 'marks' => [], 'data' => {} }
+            ] }
+          ]
+        }
+        field = { 'raw' => JSON.generate(doc) }
+        result = ContentfulMappers.extract_rich_text_html(field)
+
+        expect(result).to include('<p>Before table.</p>')
+        expect(result).to include('<p>After table.</p>')
+        expect(result).to include('<table>')
+        expect(result).to include('</table>')
+        expect(result).to include('<tr>')
+        expect(result).to include('<th><p>Field</p></th>')
+        expect(result).to include('<th><p>Description</p></th>')
+        expect(result).to include('<td><p>name</p></td>')
+        expect(result).to include('<td><p>The spot name</p></td>')
+      end
+    end
   end
 
   # --- resolve_field ---
