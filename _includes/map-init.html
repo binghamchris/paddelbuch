@@ -105,3 +105,111 @@ document.addEventListener('DOMContentLoaded', function() {
 <script src="{{ '/assets/js/spatial-utils.js' | relative_url }}"></script>
 <script src="{{ '/assets/js/data-loader.js' | relative_url }}"></script>
 <script src="{{ '/assets/js/zoom-layer-manager.js' | relative_url }}"></script>
+
+<!-- Map data initialization: loads tile data and populates layer groups (Requirements 2.1-2.6) -->
+<script>
+(function() {
+  'use strict';
+
+  // Slug-based deduplication sets to prevent duplicate markers/layers
+  var loadedSlugs = {
+    spots: new Set(),
+    notices: new Set(),
+    obstacles: new Set(),
+    protected: new Set()
+  };
+
+  /**
+   * Populate layer groups with data from the data loader response.
+   * Skips items whose slug has already been added (deduplication).
+   *
+   * @param {Object} data - Data object with spots, notices, obstacles, protected arrays
+   */
+  function populateLayers(data) {
+    if (data.spots) {
+      data.spots.forEach(function(spot) {
+        if (spot.slug && loadedSlugs.spots.has(spot.slug)) return;
+        if (spot.slug) loadedSlugs.spots.add(spot.slug);
+        window.paddelbuchAddSpotMarker(spot);
+      });
+    }
+
+    if (data.notices) {
+      data.notices.forEach(function(notice) {
+        if (notice.slug && loadedSlugs.notices.has(notice.slug)) return;
+        if (notice.slug) loadedSlugs.notices.add(notice.slug);
+        window.paddelbuchAddEventNoticeMarker(notice);
+      });
+    }
+
+    if (data.obstacles) {
+      data.obstacles.forEach(function(obstacle) {
+        if (obstacle.slug && loadedSlugs.obstacles.has(obstacle.slug)) return;
+        if (obstacle.slug) loadedSlugs.obstacles.add(obstacle.slug);
+        window.paddelbuchAddObstacleLayer(obstacle);
+      });
+    }
+
+    if (data.protected) {
+      data.protected.forEach(function(area) {
+        if (area.slug && loadedSlugs.protected.has(area.slug)) return;
+        if (area.slug) loadedSlugs.protected.add(area.slug);
+        window.paddelbuchAddProtectedAreaLayer(area);
+      });
+    }
+  }
+
+  /**
+   * Wait for map and layer groups to be available, then bootstrap data loading.
+   */
+  function initMapData() {
+    var map = window.paddelbuchMap;
+    var layerGroups = window.paddelbuchLayerGroups;
+
+    if (!map || !layerGroups) {
+      setTimeout(initMapData, 100);
+      return;
+    }
+
+    var locale = window.paddelbuchCurrentLocale || 'de';
+
+    // Initial data load for the current viewport
+    var bounds = PaddelbuchSpatialUtils.leafletBoundsToObject(map.getBounds());
+    var zoom = map.getZoom();
+
+    PaddelbuchDataLoader.loadDataForBounds(bounds, zoom, locale)
+      .then(function(data) {
+        populateLayers(data);
+      })
+      .catch(function(err) {
+        console.warn('Initial map data load failed:', err);
+      });
+
+    // Bind moveend event for subsequent viewport changes (debounced)
+    map.on('moveend', function() {
+      var newBounds = PaddelbuchSpatialUtils.leafletBoundsToObject(map.getBounds());
+      var newZoom = map.getZoom();
+
+      PaddelbuchDataLoader.loadDataForBoundsDebounced(newBounds, newZoom, locale, function(err, data) {
+        if (err) {
+          console.warn('Map data load on move failed:', err);
+          return;
+        }
+        populateLayers(data);
+      });
+    });
+
+    // Initialize zoom-based layer manager for obstacle/protected area visibility
+    PaddelbuchZoomLayerManager.initZoomLayerManager(map, layerGroups, { locale: locale });
+
+    console.log('Map data initialization complete');
+  }
+
+  // Start initialization
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initMapData);
+  } else {
+    setTimeout(initMapData, 100);
+  }
+})();
+</script>
