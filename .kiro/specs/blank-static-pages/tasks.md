@@ -23,7 +23,7 @@
 - [x] 3.1 Change the title assignment in `_plugins/collection_generator.rb` `create_document` method from `doc.data['title'] = entry['name'] || slug` to `doc.data['title'] = entry['name'] || entry['title'] || slug` so that static pages (which use `title` instead of `name`) retain their correct title.
   - File: `_plugins/collection_generator.rb`
   - Acceptance: Static page documents have `data['title']` equal to the entry's `title` value, not the slug
-- [~] 3.2 Verify that collections using `name` (spots, waterways, obstacles, notices) still get their title set from `entry['name']` as before.
+- [x] 3.2 Verify that collections using `name` (spots, waterways, obstacles, notices) still get their title set from `entry['name']` as before.
   - Acceptance: `create_document` for a spot entry with `name: "Test Spot"` sets `doc.data['title']` to `"Test Spot"`
 
 ## Task 4: Unit Tests for the Fix

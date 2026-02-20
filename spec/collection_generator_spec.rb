@@ -23,7 +23,37 @@ RSpec.describe Jekyll::CollectionGenerator do
     collection
   end
 
+  # Creates a minimal Jekyll site with a given collection
+  def build_site_with_collection(tmpdir, collection_name)
+    config = Jekyll.configuration(
+      'source' => tmpdir,
+      'destination' => File.join(tmpdir, '_site'),
+      'collections' => { collection_name => { 'output' => true } }
+    )
+    site = Jekyll::Site.new(config)
+    collection = site.collections[collection_name]
+    FileUtils.mkdir_p(File.join(site.source, collection.relative_directory))
+    [site, collection]
+  end
+
   describe '#create_document title handling' do
+    it 'sets title from entry name for spots collection' do
+      Dir.mktmpdir do |tmpdir|
+        site, collection = build_site_with_collection(tmpdir, 'spots')
+
+        entry = {
+          'name' => 'Test Spot',
+          'slug' => 'test-spot',
+          'locale' => 'de'
+        }
+
+        generator = Jekyll::CollectionGenerator.new
+        doc = generator.send(:create_document, site, collection, entry, 'test-spot')
+
+        expect(doc.data['title']).to eq('Test Spot')
+      end
+    end
+
     it 'BUG EXPLORATION: overwrites title with slug when entry has title but no name' do
       Dir.mktmpdir do |tmpdir|
         site = build_site(tmpdir)
