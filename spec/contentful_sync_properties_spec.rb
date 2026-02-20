@@ -170,7 +170,7 @@ RSpec.describe 'Contentful Sync Properties' do
         slug name description location affectedArea startDate endDate waterways
       ],
       map_type: %w[slug name_de name_en],
-      map_static_page: %w[slug title menu menu_slug content menuOrder]
+      map_static_page: %w[slug title menu menu_slug page_body menuOrder]
     }.freeze
 
     BASE_KEYS = %w[locale createdAt updatedAt].freeze
@@ -298,7 +298,7 @@ RSpec.describe 'Contentful Sync Properties' do
         fields[:slug] = random_string(rand(3..20))
         fields[:title] = { de: random_string(rand(3..20)), en: random_string(rand(3..20)) }
         fields[:menu] = ['Offene Daten', 'Über', 'Info'].sample
-        fields[:content] = random_string(rand(5..30))
+        fields[:page_contents] = random_string(rand(5..30))
         fields[:menu_order] = rand(0..10)
       end
       fields
@@ -1109,11 +1109,11 @@ RSpec.describe 'Blank Static Pages Bugfix Properties' do
         fields = build_fields(fields_hash)
         result = ContentfulMappers.map_static_page(entry, fields, data[:locale])
 
-        expect(result['content']).not_to be_nil,
+        expect(result['page_body']).not_to be_nil,
           "Expected non-nil content for locale=#{data[:locale]}, slug=#{data[:slug]}"
-        expect(result['content']).not_to be_empty,
+        expect(result['page_body']).not_to be_empty,
           "Expected non-empty content for locale=#{data[:locale]}, slug=#{data[:slug]}"
-        expect(result['content']).to include('<p>'),
+        expect(result['page_body']).to include('<p>'),
           "Expected HTML paragraph tags in content for locale=#{data[:locale]}, slug=#{data[:slug]}"
       }
     end
