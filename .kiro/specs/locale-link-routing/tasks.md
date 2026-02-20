@@ -36,7 +36,7 @@
   - Mark task complete when tests are written, run, and passing on unfixed code
   - _Requirements: 2.8, 3.1, 3.2, 3.5, 3.6_
 
-- [ ] 3. Fix locale link routing across all affected includes
+- [x] 3. Fix locale link routing across all affected includes
 
   - [x] 3.1 Add locale prefix logic and update links in `_includes/spot-popup.html`
     - Add locale prefix computation at the top of the file:
@@ -136,7 +136,7 @@
     - Confirm all German locale links remain unchanged after fix
     - _Requirements: 2.8, 3.1, 3.2, 3.5, 3.6_
 
-- [~] 4. Checkpoint - Ensure all tests pass
+- [x] 4. Checkpoint - Ensure all tests pass
   - Run full Jekyll build for both locales: `source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.1 && bundle exec jekyll build`
   - Run exploration test (Property 1) — must PASS
   - Run preservation test (Property 2) — must PASS
