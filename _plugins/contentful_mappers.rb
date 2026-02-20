@@ -115,7 +115,13 @@ module ContentfulMappers
       when 'paragraph'
         "<p>#{render_rich_text(node_content)}</p>"
       when 'text'
-        node_value.to_s
+        text = node_value.to_s
+        node_marks = node.is_a?(Hash) ? (node['marks'] || []) : []
+        node_marks.each do |mark|
+          tag = MARK_TAG_MAP[mark['type']]
+          text = "<#{tag}>#{text}</#{tag}>" if tag
+        end
+        text
       when 'hyperlink'
         uri = node_data.is_a?(Hash) ? node_data['uri'] : (node_data.respond_to?(:uri) ? node_data.uri : '')
         "<a href=\"#{uri}\">#{render_rich_text(node_content)}</a>"
