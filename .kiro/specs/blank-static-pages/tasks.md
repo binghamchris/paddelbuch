@@ -43,7 +43,7 @@
 - [x] 5.2 [PBT-preservation] Add a property-based test in `spec/contentful_sync_properties_spec.rb` that generates random non-static-page entries and verifies all existing mappers produce identical output before and after the fix.
   - File: `spec/contentful_sync_properties_spec.rb`
   - Property: Property 3 — For any non-staticPage content type, the fixed code SHALL produce the same mapping output as the original code
-- [~] 5.3 [PBT-preservation] Add a property-based test that generates random entry hashes with various combinations of `name`/`title`/neither and verifies `create_document` title logic is correct for both static_pages and other collection types.
+- [x] 5.3 [PBT-preservation] Add a property-based test that generates random entry hashes with various combinations of `name`/`title`/neither and verifies `create_document` title logic is correct for both static_pages and other collection types.
   - File: `spec/collection_generator_spec.rb`
   - Property: Property 2 — For any static page entry with a `title` field, `create_document` SHALL set `data['title']` to the entry's title, not the slug
 
