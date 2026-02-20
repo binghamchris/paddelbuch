@@ -90,7 +90,7 @@ Replace the `jekyll-contentful-data-import` gem with a custom Jekyll Generator p
     - Each mapper returns a hash with all required fields plus locale, createdAt (ISO 8601), updatedAt (ISO 8601)
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 2.10_
 
-  - [~] 6.2 Write property test: Mapper field completeness
+  - [x] 6.2 Write property test: Mapper field completeness
     - **Property 1: Mapper field completeness**
     - **Validates: Requirements 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9**
 

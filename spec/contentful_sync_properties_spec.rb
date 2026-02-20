@@ -146,6 +146,202 @@ RSpec.describe 'Contentful Sync Properties' do
     end
   end
 
+  # Feature: contentful-sync-integration, Property 1: Mapper field completeness
+  # **Validates: Requirements 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9**
+  describe 'Property 1: Mapper field completeness' do
+    MAPPER_REQUIRED_KEYS = {
+      map_spot: %w[
+        slug name description location approximateAddress country confirmed rejected
+        waterway_slug spotType_slug paddlingEnvironmentType_slug paddleCraftTypes
+        eventNotices obstacles dataSourceType_slug dataLicenseType_slug
+      ],
+      map_waterway: %w[
+        slug name length area geometry showInMenu
+        paddlingEnvironmentType_slug dataSourceType_slug dataLicenseType_slug
+      ],
+      map_obstacle: %w[
+        slug name description geometry portageRoute portageDistance portageDescription
+        isPortageNecessary isPortagePossible obstacleType_slug waterway_slug spots
+      ],
+      map_protected_area: %w[
+        slug name geometry isAreaMarked protectedAreaType_slug
+      ],
+      map_event_notice: %w[
+        slug name description location affectedArea startDate endDate waterways
+      ],
+      map_type: %w[slug name_de name_en],
+      map_static_page: %w[slug title menu menu_slug content menuOrder]
+    }.freeze
+
+    BASE_KEYS = %w[locale createdAt updatedAt].freeze
+
+    # Map of mapper method to the Contentful entry fields it accesses
+    MAPPER_ENTRY_FIELDS = {
+      map_spot: %i[slug name description location approximate_address country confirmed rejected
+                   waterway spot_type paddling_environment_type paddle_craft_types
+                   event_notices obstacles data_source_type data_license_type],
+      map_waterway: %i[slug name length area geometry show_in_menu
+                       paddling_environment_type data_source_type data_license_type],
+      map_obstacle: %i[slug name description geometry portage_route portage_distance
+                       portage_description is_portage_necessary is_portage_possible
+                       obstacle_type waterway spots],
+      map_protected_area: %i[slug name geometry is_area_marked protected_area_type],
+      map_event_notice: %i[slug name description location affected_area start_date end_date waterways],
+      map_type: %i[slug name_de name_en name],
+      map_static_page: %i[slug title menu content menu_order]
+    }.freeze
+
+    def build_mock_entry(fields_with_values, sys_overrides = {})
+      entry = double('Entry')
+      sys = {
+        id: 'test-id',
+        locale: 'de',
+        created_at: Time.now,
+        updated_at: Time.now
+      }.merge(sys_overrides)
+      allow(entry).to receive(:sys).and_return(sys)
+
+      # Default: respond_to? returns false for anything
+      allow(entry).to receive(:respond_to?).with(anything).and_return(false)
+
+      # Override for specific fields
+      fields_with_values.each do |field_name, value|
+        allow(entry).to receive(:respond_to?).with(field_name).and_return(true)
+        allow(entry).to receive(field_name).and_return(value)
+      end
+
+      entry
+    end
+
+    def build_reference(slug)
+      ref = double('Reference')
+      allow(ref).to receive(:respond_to?).with(anything).and_return(false)
+      allow(ref).to receive(:respond_to?).with(:slug).and_return(true)
+      allow(ref).to receive(:slug).and_return(slug)
+      allow(ref).to receive(:sys).and_return({ id: slug })
+      ref
+    end
+
+    def build_location(lat, lon)
+      loc = double('Location')
+      allow(loc).to receive(:lat).and_return(lat)
+      allow(loc).to receive(:lon).and_return(lon)
+      loc
+    end
+
+    def build_geometry
+      geo = double('Geometry')
+      allow(geo).to receive(:to_json).and_return('{"type":"Point","coordinates":[7.0,46.0]}')
+      geo
+    end
+
+    def build_date
+      date = double('Date')
+      allow(date).to receive(:iso8601).and_return(Time.now.iso8601)
+      date
+    end
+
+    def random_string(len = 10)
+      (0...len).map { ('a'..'z').to_a.sample }.join
+    end
+
+    def generate_field_values_for(mapper_name)
+      fields = {}
+      case mapper_name
+      when :map_spot
+        fields[:slug] = random_string(rand(3..20))
+        fields[:name] = random_string(rand(3..20))
+        fields[:description] = random_string(rand(5..30))
+        fields[:location] = build_location(rand * 180 - 90, rand * 360 - 180)
+        fields[:approximate_address] = random_string(rand(5..30))
+        fields[:country] = %w[CH DE AT FR].sample
+        fields[:confirmed] = [true, false].sample
+        fields[:rejected] = [true, false].sample
+        fields[:waterway] = build_reference('waterway-slug')
+        fields[:spot_type] = build_reference('spot-type-slug')
+        fields[:paddling_environment_type] = build_reference('env-type-slug')
+        fields[:paddle_craft_types] = [build_reference('kayak'), build_reference('sup')]
+        fields[:event_notices] = [build_reference('notice-1')]
+        fields[:obstacles] = [build_reference('obstacle-1')]
+        fields[:data_source_type] = build_reference('source-slug')
+        fields[:data_license_type] = build_reference('license-slug')
+      when :map_waterway
+        fields[:slug] = random_string(rand(3..20))
+        fields[:name] = random_string(rand(3..20))
+        fields[:length] = rand * 100
+        fields[:area] = rand * 500
+        fields[:geometry] = build_geometry
+        fields[:show_in_menu] = [true, false].sample
+        fields[:paddling_environment_type] = build_reference('env-type-slug')
+        fields[:data_source_type] = build_reference('source-slug')
+        fields[:data_license_type] = build_reference('license-slug')
+      when :map_obstacle
+        fields[:slug] = random_string(rand(3..20))
+        fields[:name] = random_string(rand(3..20))
+        fields[:description] = random_string(rand(5..30))
+        fields[:geometry] = build_geometry
+        fields[:portage_route] = build_geometry
+        fields[:portage_distance] = rand * 1000
+        fields[:portage_description] = random_string(rand(5..30))
+        fields[:is_portage_necessary] = [true, false].sample
+        fields[:is_portage_possible] = [true, false].sample
+        fields[:obstacle_type] = build_reference('obstacle-type-slug')
+        fields[:waterway] = build_reference('waterway-slug')
+        fields[:spots] = [build_reference('spot-1'), build_reference('spot-2')]
+      when :map_protected_area
+        fields[:slug] = random_string(rand(3..20))
+        fields[:name] = random_string(rand(3..20))
+        fields[:geometry] = build_geometry
+        fields[:is_area_marked] = [true, false].sample
+        fields[:protected_area_type] = build_reference('protected-area-type-slug')
+      when :map_event_notice
+        fields[:slug] = random_string(rand(3..20))
+        fields[:name] = random_string(rand(3..20))
+        fields[:description] = random_string(rand(5..30))
+        fields[:location] = build_location(rand * 180 - 90, rand * 360 - 180)
+        fields[:affected_area] = build_geometry
+        fields[:start_date] = build_date
+        fields[:end_date] = build_date
+        fields[:waterways] = [build_reference('waterway-1')]
+      when :map_type
+        fields[:slug] = random_string(rand(3..20))
+        fields[:name_de] = random_string(rand(3..20))
+        fields[:name_en] = random_string(rand(3..20))
+        fields[:name] = random_string(rand(3..20))
+      when :map_static_page
+        fields[:slug] = random_string(rand(3..20))
+        fields[:title] = random_string(rand(3..20))
+        fields[:menu] = ['Offene Daten', 'Über', 'Info'].sample
+        fields[:content] = random_string(rand(5..30))
+        fields[:menu_order] = rand(0..10)
+      end
+      fields
+    end
+
+    it 'produces a hash containing all required fields plus base fields for any content type' do
+      mapper_names = MAPPER_REQUIRED_KEYS.keys
+
+      property_of {
+        Rantly {
+          mapper_name = choose(*mapper_names)
+          { mapper_name: mapper_name }
+        }
+      }.check(100) { |data|
+        mapper_name = data[:mapper_name]
+        field_values = generate_field_values_for(mapper_name)
+        entry = build_mock_entry(field_values)
+
+        result = ContentfulMappers.send(mapper_name, entry)
+
+        expected_keys = MAPPER_REQUIRED_KEYS[mapper_name] + BASE_KEYS
+        expected_keys.each do |key|
+          expect(result).to have_key(key),
+            "Expected mapper #{mapper_name} result to have key '#{key}', but it was missing. Keys present: #{result.keys}"
+        end
+      }
+    end
+  end
+
   # Feature: contentful-sync-integration, Property 10: Cache validation rejects incomplete metadata
   # **Validates: Requirements 4.6**
   describe 'Property 10: Cache validation rejects incomplete metadata' do
