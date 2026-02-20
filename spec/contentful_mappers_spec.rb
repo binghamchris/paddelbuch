@@ -1319,5 +1319,37 @@ RSpec.describe ContentfulMappers do
       }
     end
   end
+
+  # --- Fix checking: individual mark types ---
+
+  describe 'Fix checking: individual mark types' do
+    it 'wraps text with code mark in <code> tags' do
+      content = [{ 'nodeType' => 'paragraph', 'content' => [
+        { 'nodeType' => 'text', 'value' => 'slug', 'marks' => [{ 'type' => 'code' }] }
+      ] }]
+      expect(ContentfulMappers.render_rich_text(content)).to eq('<p><code>slug</code></p>')
+    end
+
+    it 'wraps text with bold mark in <strong> tags' do
+      content = [{ 'nodeType' => 'paragraph', 'content' => [
+        { 'nodeType' => 'text', 'value' => 'important', 'marks' => [{ 'type' => 'bold' }] }
+      ] }]
+      expect(ContentfulMappers.render_rich_text(content)).to eq('<p><strong>important</strong></p>')
+    end
+
+    it 'wraps text with italic mark in <em> tags' do
+      content = [{ 'nodeType' => 'paragraph', 'content' => [
+        { 'nodeType' => 'text', 'value' => 'note', 'marks' => [{ 'type' => 'italic' }] }
+      ] }]
+      expect(ContentfulMappers.render_rich_text(content)).to eq('<p><em>note</em></p>')
+    end
+
+    it 'wraps text with underline mark in <u> tags' do
+      content = [{ 'nodeType' => 'paragraph', 'content' => [
+        { 'nodeType' => 'text', 'value' => 'term', 'marks' => [{ 'type' => 'underline' }] }
+      ] }]
+      expect(ContentfulMappers.render_rich_text(content)).to eq('<p><u>term</u></p>')
+    end
+  end
 end
 
