@@ -38,7 +38,7 @@
 
 - [ ] 3. Fix locale link routing across all affected includes
 
-  - [~] 3.1 Add locale prefix logic and update links in `_includes/spot-popup.html`
+  - [x] 3.1 Add locale prefix logic and update links in `_includes/spot-popup.html`
     - Add locale prefix computation at the top of the file:
       ```liquid
       {% if site.lang != site.default_lang %}
