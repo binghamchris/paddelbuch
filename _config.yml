@@ -34,7 +34,6 @@ exclude:
 
 # Plugins
 plugins:
-  - jekyll-contentful-data-import
   - jekyll-multiple-languages-plugin
 
 # Collections Configuration
