@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   
   // Add Mapbox tile layer
-  L.tileLayer('{{ site.mapbox_url | default: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" }}', {
+  L.tileLayer('{{ site.mapbox_url }}', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     maxZoom: {{ site.map.max_zoom | default: 18 }}
   }).addTo(map);
@@ -163,7 +163,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   
   // Add Mapbox tile layer
-  L.tileLayer('{{ site.mapbox_url | default: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" }}', {
+  L.tileLayer('{{ site.mapbox_url }}', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     maxZoom: {{ site.map.max_zoom | default: 18 }}
   }).addTo(map);

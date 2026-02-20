@@ -52,7 +52,7 @@ collections:
     permalink: /gewaesserereignisse/:slug/
   static_pages:
     output: true
-    permalink: /:menu_slug/:slug/
+    permalink: /:slug/
 
 # Default front matter
 defaults:
@@ -92,6 +92,9 @@ languages: ["de", "en"]
 default_lang: "de"
 exclude_from_localizations: ["assets", "api"]
 parallel_localization: true
+
+# Tile layer URL (Leaflet template — {s}, {z}, {x}, {y} are Leaflet placeholders)
+mapbox_url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
 
 # Map Configuration
 map:

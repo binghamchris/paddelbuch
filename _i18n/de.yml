@@ -65,8 +65,8 @@ labels:
   name: "Name"
   data_source: "Datenquelle"
   last_updated: "Zuletzt aktualisiert"
-  yes: "Ja"
-  no: "Nein"
+  "yes": "Ja"
+  "no": "Nein"
   unknown: "Unbekannt"
   summary: "Kurzfassung"
 

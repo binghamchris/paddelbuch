@@ -19,11 +19,16 @@ RSpec.describe 'Integration: Contentful fetch pipeline' do
   let(:site_config) { {} }
 
   let(:site) do
+    pages = []
     s = double('Jekyll::Site')
     allow(s).to receive(:source).and_return(tmpdir)
     allow(s).to receive(:dest).and_return(dest_dir)
     allow(s).to receive(:config).and_return(site_config)
     allow(s).to receive(:data).and_return(site_data)
+    allow(s).to receive(:pages).and_return(pages)
+    allow(s).to receive(:in_theme_dir) { |*args| File.join(*args) }
+    allow(s).to receive(:in_source_dir) { |*args| File.join(*args) }
+    allow(s).to receive(:in_dest_dir) { |*args| File.join(dest_dir, *args.drop(1)) }
     s
   end
 
@@ -179,6 +184,16 @@ RSpec.describe 'Integration: Contentful fetch pipeline' do
     allow(mock_client).to receive(:entries) do |args|
       ct = args[:content_type]
       content_type_entries[ct] || []
+    end
+  end
+
+  # Write site.pages to disk (simulates Jekyll's write phase for PageWithoutAFile)
+  def write_pages_to_disk(site)
+    site.pages.each do |page|
+      # Use the raw @dir and @name to avoid triggering url/permalink resolution
+      dir = File.join(site.dest, page.instance_variable_get(:@dir))
+      FileUtils.mkdir_p(dir)
+      File.write(File.join(dir, page.name), page.content)
     end
   end
 
@@ -356,6 +371,7 @@ RSpec.describe 'Integration: Contentful fetch pipeline' do
     it 'ApiGenerator reads site.data spots and filters by locale' do
       fetcher.generate(site)
       api_generator.generate(site)
+      write_pages_to_disk(site)
 
       de_file = File.join(dest_dir, 'api', 'spots-de.json')
       expect(File.exist?(de_file)).to be true
@@ -369,6 +385,7 @@ RSpec.describe 'Integration: Contentful fetch pipeline' do
     it 'ApiGenerator reads site.data types and extracts dimension data' do
       fetcher.generate(site)
       api_generator.generate(site)
+      write_pages_to_disk(site)
 
       de_file = File.join(dest_dir, 'api', 'spottypes-de.json')
       expect(File.exist?(de_file)).to be true
@@ -383,6 +400,7 @@ RSpec.describe 'Integration: Contentful fetch pipeline' do
     it 'ApiGenerator generates lastUpdateIndex.json' do
       fetcher.generate(site)
       api_generator.generate(site)
+      write_pages_to_disk(site)
 
       index_file = File.join(dest_dir, 'api', 'lastUpdateIndex.json')
       expect(File.exist?(index_file)).to be true
@@ -420,6 +438,7 @@ RSpec.describe 'Integration: Contentful fetch pipeline' do
     it 'TileGenerator reads site.data spots and extracts location data' do
       fetcher.generate(site)
       tile_generator.generate(site)
+      write_pages_to_disk(site)
 
       index_file = File.join(dest_dir, 'api', 'tiles', 'spots', 'de', 'index.json')
       expect(File.exist?(index_file)).to be true
@@ -433,6 +452,7 @@ RSpec.describe 'Integration: Contentful fetch pipeline' do
     it 'TileGenerator creates tile file containing the spot' do
       fetcher.generate(site)
       tile_generator.generate(site)
+      write_pages_to_disk(site)
 
       tiles_dir = File.join(dest_dir, 'api', 'tiles', 'spots', 'de')
       tile_files = Dir.glob(File.join(tiles_dir, '*.json')).reject { |f| f.end_with?('index.json') }
@@ -485,6 +505,7 @@ RSpec.describe 'Integration: Contentful fetch pipeline' do
     it 'generates locale-filtered API JSON files from fetched data' do
       fetcher.generate(site)
       api_generator.generate(site)
+      write_pages_to_disk(site)
 
       # DE spots — one entry produces one de row
       de_spots = JSON.parse(File.read(File.join(dest_dir, 'api', 'spots-de.json')))
@@ -500,6 +521,7 @@ RSpec.describe 'Integration: Contentful fetch pipeline' do
     it 'generates waterway API files from fetched data' do
       fetcher.generate(site)
       api_generator.generate(site)
+      write_pages_to_disk(site)
 
       de_waterways = JSON.parse(File.read(File.join(dest_dir, 'api', 'waterways-de.json')))
       expect(de_waterways.size).to eq(1)
@@ -509,6 +531,7 @@ RSpec.describe 'Integration: Contentful fetch pipeline' do
     it 'generates dimension table API files from fetched type data' do
       fetcher.generate(site)
       api_generator.generate(site)
+      write_pages_to_disk(site)
 
       de_spot_types = JSON.parse(File.read(File.join(dest_dir, 'api', 'spottypes-de.json')))
       expect(de_spot_types.size).to eq(1)
@@ -539,6 +562,7 @@ RSpec.describe 'Integration: Contentful fetch pipeline' do
 
       fetcher.generate(site)
       api_generator.generate(site)
+      write_pages_to_disk(site)
 
       de_spots = JSON.parse(File.read(File.join(dest_dir, 'api', 'spots-de.json')))
       slugs = de_spots.map { |s| s['slug'] }
