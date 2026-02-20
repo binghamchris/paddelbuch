@@ -72,6 +72,30 @@ RSpec.describe 'Contentful Sync Properties' do
     end
   end
 
+  # Feature: contentful-sync-integration, Property 4: Sync error triggers full fetch fallback
+  # **Validates: Requirements 3.4**
+  describe 'Property 4: Sync error triggers full fetch fallback' do
+    let(:checker) { Class.new { include SyncChecker }.new }
+
+    it 'returns failed SyncResult for any error during sync check' do
+      property_of {
+        Rantly {
+          error_class = choose(StandardError, RuntimeError, Timeout::Error, IOError, SocketError)
+          message = sized(range(5, 30)) { string(:alpha) }
+          { error_class: error_class, message: message }
+        }
+      }.check(100) { |data|
+        client = double('client')
+        allow(client).to receive(:sync).and_raise(data[:error_class], data[:message])
+
+        result = checker.check_for_changes(client, 'some_token')
+        expect(result.success?).to be false
+        expect(result.error).to be_a(StandardError)
+        expect(result.error.message).to eq(data[:message])
+      }
+    end
+  end
+
   # Feature: contentful-sync-integration, Property 10: Cache validation rejects incomplete metadata
   # **Validates: Requirements 4.6**
   describe 'Property 10: Cache validation rejects incomplete metadata' do
