@@ -65,7 +65,7 @@ Replace the `jekyll-contentful-data-import` gem with a custom Jekyll Generator p
     - **Property 3: Sync result determines fetch behavior**
     - **Validates: Requirements 3.2, 3.3**
 
-  - [~] 4.3 Write property test: Sync error triggers full fetch fallback
+  - [x] 4.3 Write property test: Sync error triggers full fetch fallback
     - **Property 4: Sync error triggers full fetch fallback**
     - **Validates: Requirements 3.4**
 
