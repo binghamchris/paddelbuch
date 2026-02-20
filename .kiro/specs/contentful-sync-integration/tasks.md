@@ -47,7 +47,7 @@ Replace the `jekyll-contentful-data-import` gem with a custom Jekyll Generator p
     - Test missing file handling, corrupted YAML, missing fields
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6_
 
-- [~] 3. Checkpoint - Ensure CacheMetadata tests pass
+- [x] 3. Checkpoint - Ensure CacheMetadata tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 4. Implement SyncChecker module
