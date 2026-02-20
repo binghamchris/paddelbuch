@@ -50,7 +50,7 @@ Replace the `jekyll-contentful-data-import` gem with a custom Jekyll Generator p
 - [x] 3. Checkpoint - Ensure CacheMetadata tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 4. Implement SyncChecker module
+- [x] 4. Implement SyncChecker module
   - [x] 4.1 Create SyncChecker module
     - Create `_plugins/sync_checker.rb`
     - Implement `SyncResult` struct with `success`, `has_changes`, `new_token`, `items_count`, `error` fields
