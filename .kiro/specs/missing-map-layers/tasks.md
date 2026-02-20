@@ -15,7 +15,7 @@
 - [x] 3.1 Create `_tests/property/map-layers-script-inclusion.property.test.js` that reads the raw `_includes/map-init.html` source and verifies the required script tags and initialization code are present — this test should FAIL on unfixed code to confirm the bug condition `Property 1`
 
 ## Task 4: Write fix verification test (PBT)
-- [~] 4.1 Create `_tests/property/map-layers-data-init.property.test.js` that tests the initialization logic: for random viewport bounds within Switzerland, verify `PaddelbuchDataLoader.loadDataForBounds` returns data and the population functions are callable with that data `Property 1`
+- [x] 4.1 Create `_tests/property/map-layers-data-init.property.test.js` that tests the initialization logic: for random viewport bounds within Switzerland, verify `PaddelbuchDataLoader.loadDataForBounds` returns data and the population functions are callable with that data `Property 1`
 
 ## Task 5: Write preservation test (PBT)
 - [~] 5.1 Create `_tests/property/map-layers-preservation.property.test.js` that verifies: map-init.html still contains map initialization with Switzerland center/bounds/zoom, layer-control.html still creates all 9 layer groups, and noEntry layer is not added to map by default `Property 2`
