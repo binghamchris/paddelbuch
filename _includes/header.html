@@ -32,14 +32,14 @@
               {% assign lakes = site.data.waterways | top_lakes_by_area: current_locale, 10 %}
               {% for lake in lakes %}
               <li>
-                <a class="dropdown-item" href="{{ locale_prefix | append: '/gewaesser/' | append: lake.slug | append: '/' | relative_url }}">
+                <a class="dropdown-item" href="{{ locale_prefix | append: '/gewaesser/' | append: lake.slug | append: '/' }}">
                   <span class="nav-link">{{ lake.name }}</span>
                 </a>
               </li>
               {% endfor %}
               <li><hr class="dropdown-divider"></li>
               <li>
-                <a class="dropdown-item" href="{{ locale_prefix | append: '/gewaesser/seen' | relative_url }}">
+                <a class="dropdown-item" href="{{ locale_prefix | append: '/gewaesser/seen' }}">
                   <span class="nav-link">{% t nav.more_lakes %}...</span>
                 </a>
               </li>
@@ -55,14 +55,14 @@
               {% assign rivers = site.data.waterways | top_rivers_by_length: current_locale, 10 %}
               {% for river in rivers %}
               <li>
-                <a class="dropdown-item" href="{{ locale_prefix | append: '/gewaesser/' | append: river.slug | append: '/' | relative_url }}">
+                <a class="dropdown-item" href="{{ locale_prefix | append: '/gewaesser/' | append: river.slug | append: '/' }}">
                   <span class="nav-link">{{ river.name }}</span>
                 </a>
               </li>
               {% endfor %}
               <li><hr class="dropdown-divider"></li>
               <li>
-                <a class="dropdown-item" href="{{ locale_prefix | append: '/gewaesser/fluesse' | relative_url }}">
+                <a class="dropdown-item" href="{{ locale_prefix | append: '/gewaesser/fluesse' }}">
                   <span class="nav-link">{% t nav.more_rivers %}...</span>
                 </a>
               </li>
@@ -82,13 +82,13 @@
               {% endif %}
               {% for static_page in open_data_pages %}
               <li>
-                <a class="dropdown-item" href="{{ locale_prefix | append: '/' | append: static_page.menu_slug | append: '/' | append: static_page.slug | append: '/' | relative_url }}">
+                <a class="dropdown-item" href="{{ locale_prefix | append: '/' | append: static_page.menu_slug | append: '/' | append: static_page.slug | append: '/' }}">
                   <span class="nav-link">{{ static_page.title }}</span>
                 </a>
               </li>
               {% endfor %}
               <li>
-                <a class="dropdown-item" href="{{ locale_prefix | append: '/offene-daten/api' | relative_url }}">
+                <a class="dropdown-item" href="{{ locale_prefix | append: '/offene-daten/api' }}">
                   <span class="nav-link">{% t nav.public_database_api %}</span>
                 </a>
               </li>
@@ -108,7 +108,7 @@
               {% endif %}
               {% for static_page in about_pages %}
               <li>
-                <a class="dropdown-item" href="{{ locale_prefix | append: '/' | append: static_page.menu_slug | append: '/' | append: static_page.slug | append: '/' | relative_url }}">
+                <a class="dropdown-item" href="{{ locale_prefix | append: '/' | append: static_page.menu_slug | append: '/' | append: static_page.slug | append: '/' }}">
                   <span class="nav-link">{{ static_page.title }}</span>
                 </a>
               </li>

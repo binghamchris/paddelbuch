@@ -59,17 +59,34 @@ check_links_in_file() {
     # Skip JavaScript template literals (contain single quotes)
     [[ "$href" == *"'"* ]] && continue
 
+    # Skip language switcher links (these correctly point to the other locale version)
+    # Language switcher links are inside the lang dropdown and point to the German version
+    # of the current page — they should NOT have /en/ prefix (Requirement 3.2)
+    local is_lang_switcher=false
+    if grep -q "nav-dropdown-lang" "$file" 2>/dev/null; then
+      # Check if this exact href appears inside the language switcher section
+      local lang_section
+      lang_section=$(sed -n '/nav-dropdown-lang/,/<\/ul>/p' "$file" 2>/dev/null || true)
+      if echo "$lang_section" | grep -qF "href=\"${href}\"" 2>/dev/null; then
+        is_lang_switcher=true
+      fi
+    fi
+    [[ "$is_lang_switcher" == true ]] && continue
+
     # Check if this is a German path segment that needs locale prefix
+    # After the fix, links may start with /en/ followed by the German path
     local is_german_path=false
     for gpath in "${GERMAN_PATHS[@]}"; do
       case "$href" in
         ${gpath}*) is_german_path=true; break ;;
+        ${LOCALE_PREFIX}${gpath#/}*) is_german_path=true; break ;;
       esac
     done
 
     # Also check paths starting with /gewaesser/ without trailing slash (e.g., /gewaesser/seen)
     case "$href" in
       /gewaesser/*) is_german_path=true ;;
+      ${LOCALE_PREFIX}gewaesser/*) is_german_path=true ;;
     esac
 
     # Only check links that match known German path patterns

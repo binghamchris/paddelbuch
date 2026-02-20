@@ -119,7 +119,7 @@
     - _Preservation: German locale links remain unchanged_
     - _Requirements: 1.4, 2.4, 2.8, 3.1_
 
-  - [~] 3.9 Verify bug condition exploration test now passes
+  - [x] 3.9 Verify bug condition exploration test now passes
     - **Property 1: Expected Behavior** - Internal Links Include Locale Prefix for Non-Default Locale
     - **IMPORTANT**: Re-run the SAME test from task 1 - do NOT write a new test
     - The test from task 1 encodes the expected behavior: all English locale internal links must start with `/en/`
