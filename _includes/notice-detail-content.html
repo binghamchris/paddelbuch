@@ -14,6 +14,12 @@
   start date, end date, and last updated timestamp.
 -->
 
+{% if site.lang != site.default_lang %}
+  {% assign locale_prefix = '/' | append: site.lang %}
+{% else %}
+  {% assign locale_prefix = '' %}
+{% endif %}
+
 {% assign notice = include.notice %}
 {% assign current_locale = site.lang | default: 'de' %}
 
@@ -53,7 +59,7 @@
             {% assign waterway = waterways_data | where: "slug", waterway_slug | first %}
             <li>
               {% if waterway %}
-                <a href="{{ '/gewaesser/' | append: waterway.slug | append: '/' | relative_url }}">
+                <a href="{{ locale_prefix | append: '/gewaesser/' | append: waterway.slug | append: '/' | relative_url }}">
                   {{ waterway.name }}
                 </a>
               {% else %}
