@@ -116,7 +116,7 @@
     
     <!-- More Details Link (Requirement 3.5) -->
     {% if spot.slug %}
-    <a href="{{ locale_prefix | append: '/einstiegsorte/' | append: spot.slug | append: '/' | relative_url }}" 
+    <a href="{{ locale_prefix | append: '/einstiegsorte/' | append: spot.slug | append: '/' }}" 
        class="btn btn-sm btn-primary spot-popup-details-link">
       {% t labels.more_details %}
     </a>

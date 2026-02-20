@@ -14,15 +14,15 @@
   that affect that waterway AND have an end date in the future.
 -->
 
+{% assign waterway_slug = include.waterway_slug %}
+{% assign current_locale = site.lang | default: 'de' %}
+{% assign today = 'now' | date: '%Y-%m-%d' %}
+
 {% if site.lang != site.default_lang %}
   {% assign locale_prefix = '/' | append: site.lang %}
 {% else %}
   {% assign locale_prefix = '' %}
 {% endif %}
-
-{% assign waterway_slug = include.waterway_slug %}
-{% assign current_locale = site.lang | default: 'de' %}
-{% assign today = 'now' | date: '%Y-%m-%d' %}
 
 <!-- Get notices data based on locale -->
 {% if current_locale == 'en' %}
@@ -60,7 +60,7 @@
       {% for notice in active_notices %}
       <tr>
         <td>
-          <a href="{{ locale_prefix | append: '/gewaesserereignisse/' | append: notice.slug | append: '/' | relative_url }}">
+          <a href="{{ locale_prefix | append: '/gewaesserereignisse/' | append: notice.slug | append: '/' }}">
             {{ notice.name }}
           </a>
         </td>

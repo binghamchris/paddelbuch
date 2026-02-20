@@ -52,7 +52,7 @@
     <tr>
       <th>{% t labels.waterway %}</th>
       <td>
-        <a href="{{ locale_prefix | append: '/gewaesser/' | append: waterway.slug | append: '/' | relative_url }}">
+        <a href="{{ locale_prefix | append: '/gewaesser/' | append: waterway.slug | append: '/' }}">
           {{ waterway.name }}
         </a>
       </td>
@@ -128,7 +128,7 @@
         <tr>
           <th>{% t obstacles.exit_spot %}</th>
           <td>
-            <a href="{{ locale_prefix | append: '/einstiegsorte/' | append: exit_spot.slug | append: '/' | relative_url }}">
+            <a href="{{ locale_prefix | append: '/einstiegsorte/' | append: exit_spot.slug | append: '/' }}">
               {{ exit_spot.name }}
             </a>
           </td>
@@ -148,7 +148,7 @@
         <tr>
           <th>{% t obstacles.reentry_spot %}</th>
           <td>
-            <a href="{{ locale_prefix | append: '/einstiegsorte/' | append: reentry_spot.slug | append: '/' | relative_url }}">
+            <a href="{{ locale_prefix | append: '/einstiegsorte/' | append: reentry_spot.slug | append: '/' }}">
               {{ reentry_spot.name }}
             </a>
           </td>

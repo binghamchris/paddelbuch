@@ -70,7 +70,7 @@
   <div class="event-notice-popup-actions">
     <!-- More Details Link (Requirement 7.3) -->
     {% if notice.slug %}
-    <a href="{{ locale_prefix | append: '/gewaesserereignisse/' | append: notice.slug | append: '/' | relative_url }}" 
+    <a href="{{ locale_prefix | append: '/gewaesserereignisse/' | append: notice.slug | append: '/' }}" 
        class="btn btn-sm btn-primary event-notice-popup-details-link">
       {% if current_locale == 'en' %}More details{% else %}Weitere Details{% endif %}
     </a>
