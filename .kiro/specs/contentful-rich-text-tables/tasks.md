@@ -35,4 +35,4 @@
 ## Task 5: Integration test with `extract_rich_text_html`
 
 - [x] 5.1 Add an RSpec example testing `extract_rich_text_html` with a raw JSON document containing a table, verifying the full pipeline from JSON parsing through to correct table HTML output.
-- [~] 5.2 Add an RSpec example testing `map_static_page` with a rich text field containing a table, verifying the `page_body` output includes proper table HTML.
+- [x] 5.2 Add an RSpec example testing `map_static_page` with a rich text field containing a table, verifying the `page_body` output includes proper table HTML.

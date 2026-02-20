@@ -697,6 +697,43 @@ RSpec.describe ContentfulMappers do
       expect(de_result['page_body']).to eq('<p>German content</p>')
       expect(en_result['page_body']).to eq('<p>English content</p>')
     end
+
+    it 'renders table HTML in page_body from rich text with tables' do
+      rich_text = {
+        'content' => [
+          { 'nodeType' => 'paragraph', 'content' => [{ 'nodeType' => 'text', 'value' => 'Data schema fields:' }] },
+          { 'nodeType' => 'table', 'content' => [
+            { 'nodeType' => 'table-row', 'content' => [
+              { 'nodeType' => 'table-header-cell', 'content' => [
+                { 'nodeType' => 'paragraph', 'content' => [{ 'nodeType' => 'text', 'value' => 'Field' }] }
+              ] },
+              { 'nodeType' => 'table-header-cell', 'content' => [
+                { 'nodeType' => 'paragraph', 'content' => [{ 'nodeType' => 'text', 'value' => 'Type' }] }
+              ] }
+            ] },
+            { 'nodeType' => 'table-row', 'content' => [
+              { 'nodeType' => 'table-cell', 'content' => [
+                { 'nodeType' => 'paragraph', 'content' => [{ 'nodeType' => 'text', 'value' => 'name' }] }
+              ] },
+              { 'nodeType' => 'table-cell', 'content' => [
+                { 'nodeType' => 'paragraph', 'content' => [{ 'nodeType' => 'text', 'value' => 'String' }] }
+              ] }
+            ] }
+          ] }
+        ]
+      }
+      fields = build_fields(slug: 'daten-schema', title: 'Daten Schema', menu: 'Offene Daten', page_contents: rich_text)
+      entry = build_entry(fields)
+      result = ContentfulMappers.map_static_page(entry, fields, 'de')
+
+      expect(result['page_body']).to include('<p>Data schema fields:</p>')
+      expect(result['page_body']).to include('<table>')
+      expect(result['page_body']).to include('<th><p>Field</p></th>')
+      expect(result['page_body']).to include('<th><p>Type</p></th>')
+      expect(result['page_body']).to include('<td><p>name</p></td>')
+      expect(result['page_body']).to include('<td><p>String</p></td>')
+      expect(result['menu_slug']).to eq('offene-daten')
+    end
   end
 
   # --- Bug exploration: content mapping failure for non-Hash locale wrappers ---
