@@ -14,7 +14,7 @@ Replace the `jekyll-contentful-data-import` gem with a custom Jekyll Generator p
     - Add `rspec` gem (~> 3.12) and `rantly` gem (~> 2.0) to a `:test` group
     - _Requirements: 10.1, 10.2, 10.3, 10.4, 10.5_
 
-  - [~] 1.2 Create the SSL patch module
+  - [x] 1.2 Create the SSL patch module
     - Create `_plugins/ssl_patch.rb`
     - Conditionally monkey-patch `HTTP::Connection#start_tls` for Ruby 3.4+ / OpenSSL 3.x
     - Maintain `VERIFY_PEER` mode while disabling CRL checking
