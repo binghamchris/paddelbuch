@@ -21,10 +21,23 @@ module ContentfulMappers
   def resolve_field(fields, field_name, locale)
     locale_sym = locale.to_sym
     field_hash = fields[field_name]
-    return nil unless field_hash.is_a?(Hash)
+    return nil if field_hash.nil?
 
-    # Try requested locale first, then fall back to :en (the space default)
-    field_hash[locale_sym] || field_hash[:en]
+    if field_hash.is_a?(Hash)
+      # Standard locale-wrapped field: { locale_sym: value }
+      field_hash[locale_sym] || field_hash[:en]
+    elsif field_hash.respond_to?(:[])
+      # Non-Hash object that supports [] access (e.g., Contentful SDK locale wrapper)
+      # Try locale lookup; fall back to the object itself if lookup fails
+      begin
+        field_hash[locale_sym] || field_hash[:en] || field_hash
+      rescue TypeError, NoMethodError
+        field_hash
+      end
+    else
+      # Raw field value with no locale wrapping — return directly
+      field_hash
+    end
   end
 
   def extract_slug(fields, entry)

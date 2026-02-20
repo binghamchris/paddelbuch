@@ -182,9 +182,9 @@ RSpec.describe ContentfulMappers do
       expect(ContentfulMappers.resolve_field({}, :name, 'de')).to be_nil
     end
 
-    it 'returns nil when field value is not a hash' do
+    it 'returns the value directly when field value is not a locale hash' do
       fields = { name: 'not a locale hash' }
-      expect(ContentfulMappers.resolve_field(fields, :name, 'de')).to be_nil
+      expect(ContentfulMappers.resolve_field(fields, :name, 'de')).to eq('not a locale hash')
     end
   end
 
