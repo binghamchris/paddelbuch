@@ -94,7 +94,7 @@ Replace the `jekyll-contentful-data-import` gem with a custom Jekyll Generator p
     - **Property 1: Mapper field completeness**
     - **Validates: Requirements 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9**
 
-  - [~] 6.3 Write property test: Mapper resilience to missing fields
+  - [x] 6.3 Write property test: Mapper resilience to missing fields
     - **Property 2: Mapper resilience to missing fields**
     - **Validates: Requirements 2.10**
 

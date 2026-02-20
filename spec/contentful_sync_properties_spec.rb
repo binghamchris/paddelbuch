@@ -342,6 +342,46 @@ RSpec.describe 'Contentful Sync Properties' do
     end
   end
 
+  # Feature: contentful-sync-integration, Property 2: Mapper resilience to missing fields
+  # **Validates: Requirements 2.10**
+  describe 'Property 2: Mapper resilience to missing fields' do
+    it 'returns nil for missing fields without raising and still contains all keys' do
+      mapper_names = MAPPER_REQUIRED_KEYS.keys
+
+      property_of {
+        Rantly {
+          mapper_name = choose(*mapper_names)
+          { mapper_name: mapper_name }
+        }
+      }.check(100) { |data|
+        mapper_name = data[:mapper_name]
+
+        # Build entry with NO fields responding - only sys
+        entry = double('Entry')
+        allow(entry).to receive(:sys).and_return({
+          id: 'fallback-id',
+          locale: 'de',
+          created_at: Time.now,
+          updated_at: Time.now
+        })
+        allow(entry).to receive(:respond_to?).with(anything).and_return(false)
+
+        # Should not raise
+        result = ContentfulMappers.send(mapper_name, entry)
+
+        # Should still have all keys
+        expected_keys = MAPPER_REQUIRED_KEYS[mapper_name] + BASE_KEYS
+        expected_keys.each do |key|
+          expect(result).to have_key(key),
+            "Expected mapper #{mapper_name} result to have key '#{key}' even with all fields missing. Keys present: #{result.keys}"
+        end
+
+        # Slug should fall back to sys[:id]
+        expect(result['slug']).to eq('fallback-id')
+      }
+    end
+  end
+
   # Feature: contentful-sync-integration, Property 10: Cache validation rejects incomplete metadata
   # **Validates: Requirements 4.6**
   describe 'Property 10: Cache validation rejects incomplete metadata' do
