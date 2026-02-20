@@ -558,7 +558,7 @@ RSpec.describe ContentfulMappers do
       expect(result['title']).to eq('Über uns')
       expect(result['menu']).to eq('Über')
       expect(result['menu_slug']).to eq('ueber')
-      expect(result['content']).to eq('<p>About page content.</p>')
+      expect(result['page_body']).to eq('<p>About page content.</p>')
       expect(result['menuOrder']).to eq(2)
     end
 
@@ -583,7 +583,7 @@ RSpec.describe ContentfulMappers do
       fields = build_fields(slug: 'test', title: 'Test', page_contents: rich_text)
       entry = build_entry(fields)
       result = ContentfulMappers.map_static_page(entry, fields, 'de')
-      expect(result['content']).to eq('<p>Hello</p>')
+      expect(result['page_body']).to eq('<p>Hello</p>')
     end
 
     it 'handles rich text content in Contentful raw JSON format' do
@@ -607,9 +607,9 @@ RSpec.describe ContentfulMappers do
       entry = build_entry(fields)
 
       result = ContentfulMappers.map_static_page(entry, fields, 'de')
-      expect(result['content']).to include('<p>Willkommen auf der Seite.</p>')
-      expect(result['content']).to include('<h2>Abschnitt</h2>')
-      expect(result['content']).to include('<p>Mehr Inhalt hier.</p>')
+      expect(result['page_body']).to include('<p>Willkommen auf der Seite.</p>')
+      expect(result['page_body']).to include('<h2>Abschnitt</h2>')
+      expect(result['page_body']).to include('<p>Mehr Inhalt hier.</p>')
       expect(result['title']).to eq('Das Projekt')
     end
 
@@ -620,14 +620,14 @@ RSpec.describe ContentfulMappers do
       fields[:page_contents] = { en: rt_object }
       entry = build_entry(fields)
       result = ContentfulMappers.map_static_page(entry, fields, 'de')
-      expect(result['content']).to eq('<p>Object content</p>')
+      expect(result['page_body']).to eq('<p>Object content</p>')
     end
 
     it 'handles nil content field gracefully' do
       fields = build_fields(slug: 'test', title: 'Test')
       entry = build_entry(fields)
       result = ContentfulMappers.map_static_page(entry, fields, 'de')
-      expect(result['content']).to be_nil
+      expect(result['page_body']).to be_nil
     end
 
     it 'resolves content for both de and en locales' do
@@ -639,8 +639,8 @@ RSpec.describe ContentfulMappers do
 
       de_result = ContentfulMappers.map_static_page(entry, fields, 'de')
       en_result = ContentfulMappers.map_static_page(entry, fields, 'en')
-      expect(de_result['content']).to eq('<p>German content</p>')
-      expect(en_result['content']).to eq('<p>English content</p>')
+      expect(de_result['page_body']).to eq('<p>German content</p>')
+      expect(en_result['page_body']).to eq('<p>English content</p>')
     end
   end
 
@@ -683,9 +683,9 @@ RSpec.describe ContentfulMappers do
       result = ContentfulMappers.map_static_page(entry, fields, 'de')
 
       # We EXPECT this to produce non-empty HTML content, but the bug causes nil
-      expect(result['content']).to_not be_nil
-      expect(result['content']).to_not be_empty
-      expect(result['content']).to include('This is static page content.')
+      expect(result['page_body']).to_not be_nil
+      expect(result['page_body']).to_not be_empty
+      expect(result['page_body']).to include('This is static page content.')
     end
 
     it 'BUG EXPLORATION: object-style rich text in a proper Hash locale wrapper works' do
@@ -707,9 +707,9 @@ RSpec.describe ContentfulMappers do
       result = ContentfulMappers.map_static_page(entry, fields, 'de')
 
       # This should work because the locale wrapper IS a Hash
-      expect(result['content']).to_not be_nil
-      expect(result['content']).to_not be_empty
-      expect(result['content']).to include('Object-style rich text.')
+      expect(result['page_body']).to_not be_nil
+      expect(result['page_body']).to_not be_empty
+      expect(result['page_body']).to include('Object-style rich text.')
     end
   end
 
