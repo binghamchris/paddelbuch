@@ -40,4 +40,39 @@ RSpec.describe 'Contentful Sync Properties' do
       }
     end
   end
+
+  # Feature: contentful-sync-integration, Property 10: Cache validation rejects incomplete metadata
+  # **Validates: Requirements 4.6**
+  describe 'Property 10: Cache validation rejects incomplete metadata' do
+    let(:tmpdir) { Dir.mktmpdir }
+
+    after do
+      FileUtils.remove_entry(tmpdir)
+    end
+
+    it 'rejects cache metadata with any missing required field' do
+      property_of {
+        Rantly {
+          fields = {
+            sync_token: sized(range(10, 50)) { string(:alpha) },
+            last_sync_at: Time.now.iso8601,
+            space_id: sized(range(5, 20)) { string(:alpha) },
+            environment: choose('master', 'staging', 'development')
+          }
+          # Randomly nil out at least one field
+          keys = fields.keys
+          nil_count = range(1, keys.length)
+          keys.sample(nil_count).each { |k| fields[k] = nil }
+          fields
+        }
+      }.check(100) { |data|
+        cache = CacheMetadata.new(tmpdir)
+        cache.sync_token = data[:sync_token]
+        cache.last_sync_at = data[:last_sync_at]
+        cache.space_id = data[:space_id]
+        cache.environment = data[:environment]
+        expect(cache.valid?).to be false
+      }
+    end
+  end
 end
