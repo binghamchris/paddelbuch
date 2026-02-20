@@ -81,7 +81,7 @@ Replace the `jekyll-contentful-data-import` gem with a custom Jekyll Generator p
 - [x] 5. Checkpoint - Ensure SyncChecker tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 6. Refactor ContentfulMappers module
+- [x] 6. Refactor ContentfulMappers module
   - [x] 6.1 Refactor contentful_mappers.rb to standalone module
     - Rewrite `_plugins/contentful_mappers.rb` as a standalone `ContentfulMappers` module (no `Base` class inheritance)
     - Convert each mapper class to a module method: `map_spot`, `map_waterway`, `map_obstacle`, `map_protected_area`, `map_event_notice`, `map_type`, `map_static_page`
@@ -107,7 +107,7 @@ Replace the `jekyll-contentful-data-import` gem with a custom Jekyll Generator p
     - Test missing fields, nil references, rich text conversion
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 2.10_
 
-- [-] 7. Checkpoint - Ensure Mapper tests pass
+- [x] 7. Checkpoint - Ensure Mapper tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 8. Implement ContentfulFetcher generator
