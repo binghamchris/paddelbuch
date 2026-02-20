@@ -1064,6 +1064,94 @@ RSpec.describe ContentfulMappers do
     end
   end
 
+  # --- Preservation unit tests: non-table rendering ---
+
+  describe 'Preservation unit tests: non-table rendering' do
+    it 'renders a paragraph with text' do
+      content = [{ 'nodeType' => 'paragraph', 'content' => [{ 'nodeType' => 'text', 'value' => 'Hello' }] }]
+      expect(ContentfulMappers.render_rich_text(content)).to eq('<p>Hello</p>')
+    end
+
+    it 'renders heading-1' do
+      content = [{ 'nodeType' => 'heading-1', 'content' => [{ 'nodeType' => 'text', 'value' => 'Title' }] }]
+      expect(ContentfulMappers.render_rich_text(content)).to eq('<h1>Title</h1>')
+    end
+
+    it 'renders heading-2' do
+      content = [{ 'nodeType' => 'heading-2', 'content' => [{ 'nodeType' => 'text', 'value' => 'Subtitle' }] }]
+      expect(ContentfulMappers.render_rich_text(content)).to eq('<h2>Subtitle</h2>')
+    end
+
+    it 'renders heading-3' do
+      content = [{ 'nodeType' => 'heading-3', 'content' => [{ 'nodeType' => 'text', 'value' => 'Section' }] }]
+      expect(ContentfulMappers.render_rich_text(content)).to eq('<h3>Section</h3>')
+    end
+
+    it 'renders a hyperlink with URI inside a paragraph' do
+      content = [
+        {
+          'nodeType' => 'paragraph',
+          'content' => [
+            {
+              'nodeType' => 'hyperlink',
+              'data' => { 'uri' => 'https://example.com' },
+              'content' => [{ 'nodeType' => 'text', 'value' => 'link' }]
+            }
+          ]
+        }
+      ]
+      expect(ContentfulMappers.render_rich_text(content)).to eq('<p><a href="https://example.com">link</a></p>')
+    end
+
+    it 'renders an unordered list' do
+      content = [
+        {
+          'nodeType' => 'unordered-list',
+          'content' => [
+            { 'nodeType' => 'list-item', 'content' => [{ 'nodeType' => 'paragraph', 'content' => [{ 'nodeType' => 'text', 'value' => 'Item 1' }] }] },
+            { 'nodeType' => 'list-item', 'content' => [{ 'nodeType' => 'paragraph', 'content' => [{ 'nodeType' => 'text', 'value' => 'Item 2' }] }] }
+          ]
+        }
+      ]
+      expect(ContentfulMappers.render_rich_text(content)).to eq('<ul><li><p>Item 1</p></li><li><p>Item 2</p></li></ul>')
+    end
+
+    it 'renders an ordered list' do
+      content = [
+        {
+          'nodeType' => 'ordered-list',
+          'content' => [
+            { 'nodeType' => 'list-item', 'content' => [{ 'nodeType' => 'paragraph', 'content' => [{ 'nodeType' => 'text', 'value' => 'Item 1' }] }] },
+            { 'nodeType' => 'list-item', 'content' => [{ 'nodeType' => 'paragraph', 'content' => [{ 'nodeType' => 'text', 'value' => 'Item 2' }] }] }
+          ]
+        }
+      ]
+      expect(ContentfulMappers.render_rich_text(content)).to eq('<ol><li><p>Item 1</p></li><li><p>Item 2</p></li></ol>')
+    end
+
+    it 'renders a mixed document with all non-table node types' do
+      content = [
+        { 'nodeType' => 'paragraph', 'content' => [{ 'nodeType' => 'text', 'value' => 'Intro' }] },
+        { 'nodeType' => 'heading-1', 'content' => [{ 'nodeType' => 'text', 'value' => 'Main Title' }] },
+        {
+          'nodeType' => 'unordered-list',
+          'content' => [
+            { 'nodeType' => 'list-item', 'content' => [{ 'nodeType' => 'paragraph', 'content' => [{ 'nodeType' => 'text', 'value' => 'A' }] }] },
+            { 'nodeType' => 'list-item', 'content' => [{ 'nodeType' => 'paragraph', 'content' => [{ 'nodeType' => 'text', 'value' => 'B' }] }] }
+          ]
+        },
+        {
+          'nodeType' => 'paragraph',
+          'content' => [
+            { 'nodeType' => 'hyperlink', 'data' => { 'uri' => 'https://example.com' }, 'content' => [{ 'nodeType' => 'text', 'value' => 'click' }] }
+          ]
+        }
+      ]
+      expected = '<p>Intro</p><h1>Main Title</h1><ul><li><p>A</p></li><li><p>B</p></li></ul><p><a href="https://example.com">click</a></p>'
+      expect(ContentfulMappers.render_rich_text(content)).to eq(expected)
+    end
+  end
+
   # --- Nil reference handling ---
 
   describe 'nil reference handling' do
