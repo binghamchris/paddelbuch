@@ -3,9 +3,11 @@
 # - Fact tables: spots, obstacles, notices, protected-areas, waterways (per locale)
 # - Dimension tables: spot types, obstacle types, etc. (per locale)
 # - Last update index with timestamps for all tables
+#
+# Uses Jekyll::PageWithoutAFile so files are tracked by Jekyll and survive
+# the cleanup phase (important for multi-language builds).
 
 require 'json'
-require 'fileutils'
 
 module Jekyll
   class ApiGenerator < Generator
@@ -36,98 +38,66 @@ module Jekyll
 
     def generate(site)
       @site = site
-      
-      # Create api directory if it doesn't exist
-      api_dir = File.join(site.dest, 'api')
-      FileUtils.mkdir_p(api_dir)
-
-      # Track last update times for each table
       @last_updates = {}
 
-      # Generate fact table JSON files
-      generate_fact_tables(api_dir)
+      generate_fact_tables
+      generate_dimension_tables
+      generate_last_update_index
 
-      # Generate dimension table JSON files
-      generate_dimension_tables(api_dir)
-
-      # Generate last update index
-      generate_last_update_index(api_dir)
-
-      Jekyll.logger.info "API Generator:", "Generated JSON API files in #{api_dir}"
+      Jekyll.logger.info "API Generator:", "Generated JSON API files"
     end
 
     private
 
-    def generate_fact_tables(api_dir)
+    def generate_fact_tables
       FACT_TABLES.each do |table_name, config|
         LOCALES.each do |locale|
           data = get_data_for_locale(config[:data_key], locale)
           
-          # Filter out rejected spots if configured
           if config[:exclude_rejected]
             data = data.reject { |item| item['rejected'] == true }
           end
 
-          # Sort by slug ascending
           data = data.sort_by { |item| item['slug'].to_s.downcase }
-
-          # Track last update time
           track_last_update("#{table_name}-#{locale}", data)
-
-          # Write JSON file
-          filename = "#{table_name}-#{locale}.json"
-          write_json_file(api_dir, filename, data)
-          
-          # Add as static file so Jekyll knows about it
-          add_static_file(api_dir, filename)
+          add_json_page("#{table_name}-#{locale}.json", data)
         end
       end
     end
 
-    def generate_dimension_tables(api_dir)
+    def generate_dimension_tables
       DIMENSION_TABLES.each do |table_name, config|
         LOCALES.each do |locale|
           data = get_dimension_data(config[:data_key], locale)
-          
-          # Sort by slug ascending
           data = data.sort_by { |item| item['slug'].to_s.downcase }
-
-          # Track last update time
           track_last_update("#{table_name}-#{locale}", data)
-
-          # Write JSON file
-          filename = "#{table_name}-#{locale}.json"
-          write_json_file(api_dir, filename, data)
-          
-          # Add as static file
-          add_static_file(api_dir, filename)
+          add_json_page("#{table_name}-#{locale}.json", data)
         end
       end
     end
 
-    def generate_last_update_index(api_dir)
-      # Build the last update index from tracked updates
+    def generate_last_update_index
       index_data = @last_updates.map do |table, timestamp|
-        {
-          'table' => table,
-          'lastUpdatedAt' => timestamp
-        }
+        { 'table' => table, 'lastUpdatedAt' => timestamp }
       end.sort_by { |item| item['table'] }
 
-      write_json_file(api_dir, 'lastUpdateIndex.json', index_data)
-      add_static_file(api_dir, 'lastUpdateIndex.json')
+      add_json_page('lastUpdateIndex.json', index_data)
+    end
+
+    def add_json_page(filename, data)
+      page = PageWithoutAFile.new(@site, @site.source, 'api', filename)
+      page.content = JSON.pretty_generate(data)
+      page.data['layout'] = nil
+      @site.pages << page
     end
 
     def get_data_for_locale(data_key, locale)
-      # Try to get data from site.data
       data = resolve_data_key(data_key)
       return [] unless data
 
-      # Filter by locale if data has locale field
       if data.is_a?(Array)
         data.select { |item| item['locale'] == locale || item['node_locale'] == locale }
       elsif data.is_a?(Hash)
-        # If data is organized by locale
         data[locale] || []
       else
         []
@@ -138,9 +108,6 @@ module Jekyll
       data = resolve_data_key(data_key)
       return [] unless data
 
-      # For dimension tables, transform to include locale-specific name.
-      # Deduplicate by slug since locale:'*' flattening produces one row
-      # per locale but dimension tables are locale-independent.
       if data.is_a?(Array)
         seen = {}
         data.each_with_object([]) do |item, result|
@@ -160,40 +127,19 @@ module Jekyll
     end
 
     def resolve_data_key(data_key)
-      # Handle nested data keys like 'types/spot_types'
       keys = data_key.split('/')
       data = @site.data
-      
       keys.each do |key|
         return nil unless data.is_a?(Hash)
         data = data[key]
       end
-      
       data
     end
 
     def track_last_update(table_name, data)
       return if data.empty?
-
-      # Find the most recent updatedAt timestamp
-      latest = data
-        .map { |item| item['updatedAt'] }
-        .compact
-        .max
-
+      latest = data.map { |item| item['updatedAt'] }.compact.max
       @last_updates[table_name] = latest if latest
-    end
-
-    def write_json_file(dir, filename, data)
-      filepath = File.join(dir, filename)
-      File.write(filepath, JSON.pretty_generate(data))
-      Jekyll.logger.debug "API Generator:", "Wrote #{filepath}"
-    end
-
-    def add_static_file(dir, filename)
-      # No-op: files are written directly to the output directory by the generator.
-      # Registering them as StaticFile would cause Jekyll to try to copy them
-      # from source, which fails during multi-language builds.
     end
   end
 end
