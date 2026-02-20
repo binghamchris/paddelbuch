@@ -8,6 +8,7 @@ pageName: spot-details
   Displays a spot detail page with map (8 cols) + details panel (4 cols).
   Shows: full description, GPS, approximate address, waterway link, 
   paddle craft types, and last updated timestamp.
+  All data layers (spots, obstacles, protected areas, event notices) are loaded.
   
   Collection permalink: /einstiegsorte/:slug/
   
@@ -91,24 +92,28 @@ document.addEventListener('DOMContentLoaded', function() {
     zoomControl: true
   });
   
-  // Add Mapbox tile layer
+  // Add tile layer
   L.tileLayer('{{ site.mapbox_url }}', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    maxZoom: 18
+    maxZoom: {{ site.map.max_zoom | default: 18 }}
   }).addTo(map);
   
   // Position zoom control at bottom-right
   map.zoomControl.setPosition('bottomright');
   
-  // Add spot marker
+  // Add spot marker for this page's spot
   var spotType = '{{ spot_type_slug }}';
   var isRejected = {{ is_rejected | default: false }};
   var markerIcon = PaddelbuchMarkerStyles.getSpotIcon(spotType, isRejected);
   
   var marker = L.marker([spotLat, spotLon], { icon: markerIcon }).addTo(map);
-  
-  // Add popup with spot name
   marker.bindPopup('<strong>{{ spot.name | escape }}</strong>');
+  
+  // Store map globally so the data layer pipeline can find it
+  window.paddelbuchMap = map;
   {% endif %}
 });
 </script>
+
+<!-- Load all data layers (spots, obstacles, protected areas, event notices) -->
+{% include detail-map-layers.html locale=current_locale %}
