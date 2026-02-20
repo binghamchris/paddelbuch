@@ -23,4 +23,4 @@
 ## Task 6: Verify fix end-to-end
 - [x] 6.1 Build the Jekyll site and verify the rendered `_site/index.html` contains all five script tags in correct dependency order
 - [x] 6.2 Verify the rendered HTML contains initialization code that references `PaddelbuchDataLoader` and `PaddelbuchZoomLayerManager`
-- [-] 6.3 Run the full test suite to confirm all existing tests still pass
+- [x] 6.3 Run the full test suite to confirm all existing tests still pass
