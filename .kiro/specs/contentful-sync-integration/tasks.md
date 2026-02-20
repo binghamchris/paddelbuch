@@ -153,7 +153,7 @@ Replace the `jekyll-contentful-data-import` gem with a custom Jekyll Generator p
     - **Property 13: Missing credentials graceful skip**
     - **Validates: Requirements 1.3**
 
-  - [~] 8.8 Write unit tests for ContentfulFetcher
+  - [x] 8.8 Write unit tests for ContentfulFetcher
     - Test credential checking, force sync detection, fetch flow with mocked client
     - Test site.data update after YAML write
     - Test environment mismatch detection and logging
