@@ -11,7 +11,7 @@ Bundle all external CDN dependencies (Bootstrap, Leaflet, Leaflet Locate Control
   - Add `copy-assets` and `download-fonts` npm scripts
   - _Requirements: 1.1, 2.1, 3.1, 3.2, 3.3, 4.1, 4.2_
 
-- [ ] 2. Create vendor asset copy script
+- [x] 2. Create vendor asset copy script
   - [x] 2.1 Implement `scripts/copy-vendor-assets.js`
     - Create destination directories (`assets/js/vendor/`, `assets/css/vendor/`, `assets/css/vendor/images/`)
     - Copy Bootstrap JS bundle from `node_modules/bootstrap/dist/js/bootstrap.bundle.min.js` to `assets/js/vendor/`
@@ -30,7 +30,7 @@ Bundle all external CDN dependencies (Bootstrap, Leaflet, Leaflet Locate Control
     - _Requirements: 2.1, 3.1, 3.2, 3.3, 4.1, 4.2_
 
 - [ ] 3. Create Google Fonts download script
-  - [~] 3.1 Implement `scripts/download-google-fonts.js`
+  - [x] 3.1 Implement `scripts/download-google-fonts.js`
     - Download Fredoka woff2 files (weights 300, 400, 500) to `assets/fonts/`
     - Download Quicksand woff2 files (weights 400, 500, 700) to `assets/fonts/`
     - Name files descriptively: `fredoka-300.woff2`, `quicksand-400.woff2`, etc.
