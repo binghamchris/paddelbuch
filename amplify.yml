@@ -3,14 +3,23 @@ frontend:
   phases:
     preBuild:
       commands:
-        # Install Ruby 3.3.0 using rbenv
-        - curl -fsSL https://github.com/rbenv/rbenv-installer/raw/HEAD/bin/rbenv-installer | bash
-        - export PATH="$HOME/.rbenv/bin:$PATH"
-        - eval "$(rbenv init -)"
-        - rbenv install 3.3.0 --skip-existing
-        - rbenv global 3.3.0
-        - ruby -v
+        # Install Ruby 3.3.0 using rbenv (skip if cached)
+        - |
+          export PATH="$HOME/.rbenv/bin:$HOME/.rbenv/shims:$PATH"
+          if [ ! -d "$HOME/.rbenv/versions/3.3.0" ]; then
+            echo "Ruby 3.3.0 not found in cache — installing from source"
+            curl -fsSL https://github.com/rbenv/rbenv-installer/raw/HEAD/bin/rbenv-installer | bash
+            eval "$(rbenv init -)"
+            rbenv install 3.3.0
+          else
+            echo "Ruby 3.3.0 found in cache — skipping compilation"
+            eval "$(rbenv init -)"
+          fi
+          rbenv global 3.3.0
+          ruby -v
         # Install bundler and gems
+        - export PATH="$HOME/.rbenv/bin:$HOME/.rbenv/shims:$PATH"
+        - eval "$(rbenv init -)"
         - gem install bundler
         - bundle config set --local path 'vendor/bundle'
         - bundle install
@@ -19,7 +28,7 @@ frontend:
     build:
       commands:
         # Set Ruby environment
-        - export PATH="$HOME/.rbenv/bin:$PATH"
+        - export PATH="$HOME/.rbenv/bin:$HOME/.rbenv/shims:$PATH"
         - eval "$(rbenv init -)"
         # Build Jekyll site
         - bundle exec jekyll build --verbose
@@ -34,3 +43,4 @@ frontend:
       - vendor/**/*
       - node_modules/**/*
       - $HOME/.rbenv/**/*
+      - _data/.contentful_sync_cache.yml
