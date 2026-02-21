@@ -61,7 +61,7 @@
     - _Preservation: File loading, priority ordering (system > .env.{JEKYLL_ENV} > .env), additional variable export unchanged_
     - _Requirements: 1.1, 1.2, 2.1, 2.2, 3.1, 3.2, 3.3_
 
-  - [~] 3.2 Verify bug condition exploration test now passes
+  - [x] 3.2 Verify bug condition exploration test now passes
     - **Property 1: Expected Behavior** - System env vars loaded without .env files
     - **IMPORTANT**: Re-run the SAME test from task 1 - do NOT write a new test
     - The test from task 1 encodes the expected behavior (known system env vars appear in site config)
