@@ -17,4 +17,4 @@ frontend:
     paths:
       - vendor/**/*
       - node_modules/**/*
-      - _data/.contentful_sync_cache.yml
+      - _data/**/*
