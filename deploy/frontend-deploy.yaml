@@ -135,8 +135,6 @@ Resources:
         Ref: AppDescription
       EnableBranchAutoDeletion: False
       EnvironmentVariables: 
-        - Name: RUBY_VERSION
-          Value: "3.4.1"
         - Name: MAPBOX_URL
           Value:
             Ref: EnvVarMapboxUrl
@@ -149,26 +147,6 @@ Resources:
         - Name: CONTENTFUL_ENVIRONMENT
           Value:
             Ref: EnvVarContentfulEnv
-      BuildSpec: |-
-        version: 1
-        frontend:
-          phases:
-            preBuild:
-              commands:
-                - rbenv install $RUBY_VERSION --skip-existing
-                - rbenv local $RUBY_VERSION
-                - ruby -v
-                - bundle install
-            build:
-              commands:
-                - bundle exec jekyll build
-          artifacts:
-            baseDirectory: _site
-            files:
-              - '**/*'
-          cache:
-            paths:
-              - 'vendor/**/*'
       Name:
         Ref: AppName
       Repository:
