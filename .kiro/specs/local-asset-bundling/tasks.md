@@ -29,7 +29,7 @@ Bundle all external CDN dependencies (Bootstrap, Leaflet, Leaflet Locate Control
     - Test that destination directories are created
     - _Requirements: 2.1, 3.1, 3.2, 3.3, 4.1, 4.2_
 
-- [ ] 3. Create Google Fonts download script
+- [x] 3. Create Google Fonts download script
   - [x] 3.1 Implement `scripts/download-google-fonts.js`
     - Download Fredoka woff2 files (weights 300, 400, 500) to `assets/fonts/`
     - Download Quicksand woff2 files (weights 400, 500, 700) to `assets/fonts/`
@@ -45,11 +45,11 @@ Bundle all external CDN dependencies (Bootstrap, Leaflet, Leaflet Locate Control
     - Test that font file paths in CSS are valid relative paths
     - _Requirements: 5.1, 5.2, 5.3, 5.5_
 
-- [~] 4. Checkpoint - Verify build scripts
+- [x] 4. Checkpoint - Verify build scripts
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 5. Configure Jekyll Sass and SCSS imports
-  - [~] 5.1 Update `_config.yml` Sass configuration
+  - [x] 5.1 Update `_config.yml` Sass configuration
     - Add `load_paths: [node_modules]` to the existing `sass` config section
     - _Requirements: 7.1, 7.2, 7.3_
 
