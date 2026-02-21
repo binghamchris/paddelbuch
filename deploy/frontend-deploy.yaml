@@ -35,7 +35,8 @@ Parameters:
     Description: The Contentful environment ID for accessing the Contentful API during the Jekyll build process
   EnvVarSiteUrl:
     Type: String
-    Description: The production site URL for Jekyll build
+    Description: The production site URL for Jekyll build (only required for PRODUCTION stage)
+    Default: ""
   GithubRepoUrl:
     Type: String
     Description: The URL of the GitHub repo to be deployed
@@ -146,9 +147,6 @@ Resources:
         - Name: CONTENTFUL_ENVIRONMENT
           Value:
             Ref: EnvVarContentfulEnv
-        - Name: SITE_URL
-          Value:
-            Ref: EnvVarSiteUrl
         - Name: _CUSTOM_IMAGE
           Value: public.ecr.aws/amazonlinux/amazonlinux:2023
       Name:
@@ -172,6 +170,13 @@ Resources:
       EnableAutoBuild: True
       EnablePerformanceMode: False
       EnablePullRequestPreview: True
+      EnvironmentVariables:
+        - Name: SITE_URL
+          Value:
+            !If
+              - IsProduction
+              - !Ref EnvVarSiteUrl
+              - !Sub "https://${GithubBranchName}.${PaddelBuchApp.AppId}.amplifyapp.com"
       Stage:
         Ref: AppStage
       Tags: 
