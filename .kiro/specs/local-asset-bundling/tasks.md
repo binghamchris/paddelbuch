@@ -57,7 +57,7 @@ Bundle all external CDN dependencies (Bootstrap, Leaflet, Leaflet Locate Control
     - Add `@import "bootstrap/scss/bootstrap";` before existing custom imports
     - _Requirements: 1.1, 1.2_
 
-- [ ] 6. Update layout to use local assets
+- [x] 6. Update layout to use local assets
   - [x] 6.1 Replace CDN references in `_layouts/default.html`
     - Remove Google Fonts preconnect and CSS `<link>` tags; add local `fonts.css` link
     - Remove Bootstrap CSS CDN link (now compiled via Sass)
@@ -78,7 +78,7 @@ Bundle all external CDN dependencies (Bootstrap, Leaflet, Leaflet Locate Control
     - **Validates: Requirements 8.1, 8.2, 8.3, 8.4, 8.5**
 
 - [ ] 7. Update Amplify build pipeline
-  - [~] 7.1 Update BuildSpec in `deploy/frontend-deploy.yaml`
+  - [x] 7.1 Update BuildSpec in `deploy/frontend-deploy.yaml`
     - Add `nvm use 18` and `npm install` to preBuild commands
     - Add `npm run download-fonts` after npm install
     - Add `npm run copy-assets` after font download
