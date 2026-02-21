@@ -19,6 +19,7 @@
 module Jekyll
   class EnvLoader
     ENV_VAR_PATTERN = /\A([A-Za-z_][A-Za-z0-9_]*)=(.*)\z/
+    KNOWN_KEYS = %w[MAPBOX_URL CONTENTFUL_SPACE_ID CONTENTFUL_ACCESS_TOKEN CONTENTFUL_ENVIRONMENT SITE_URL].freeze
 
     class << self
       def load_env_file(path)
@@ -56,8 +57,14 @@ Jekyll::Hooks.register :site, :after_init do |site|
   env_file = File.join(source, ".env.#{jekyll_env}")
   env_vars.merge!(Jekyll::EnvLoader.load_env_file(env_file))
 
-  # System env vars take highest priority
-  env_vars.each { |k, v| env_vars[k] = ENV[k] if ENV[k] }
+  # System env vars take highest priority — check known keys directly
+  # so they are picked up even when no .env file exists
+  Jekyll::EnvLoader::KNOWN_KEYS.each do |key|
+    env_vars[key] = ENV[key] if ENV[key]
+  end
+
+  # Also override any non-known file-loaded keys from system env
+  env_vars.each { |k, v| env_vars[k] = ENV[k] if ENV[k] && !Jekyll::EnvLoader::KNOWN_KEYS.include?(k) }
 
   Jekyll.logger.info "Env Loader:", "Loaded .env.#{jekyll_env} (#{env_vars.keys.length} vars)"
 
