@@ -23,7 +23,7 @@ Bundle all external CDN dependencies (Bootstrap, Leaflet, Leaflet Locate Control
     - Log each copied file, exit non-zero on failure
     - _Requirements: 2.1, 3.1, 3.2, 3.3, 4.1, 4.2_
 
-  - [~] 2.2 Write unit tests for copy script
+  - [x] 2.2 Write unit tests for copy script
     - Test that each file is copied to the correct destination
     - Test that missing source files cause non-zero exit
     - Test that destination directories are created
