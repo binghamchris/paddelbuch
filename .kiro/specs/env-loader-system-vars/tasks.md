@@ -69,7 +69,7 @@
     - **EXPECTED OUTCOME**: Test PASSES (confirms bug is fixed - known keys are now checked against system env regardless of file presence)
     - _Requirements: 2.1, 2.2_
 
-  - [~] 3.3 Verify preservation tests still pass
+  - [x] 3.3 Verify preservation tests still pass
     - **Property 2: Preservation** - File-only and override behavior unchanged
     - **IMPORTANT**: Re-run the SAME tests from task 2 - do NOT write new tests
     - Run: `source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.1 && bundle exec rspec spec/env_loader_spec.rb`
