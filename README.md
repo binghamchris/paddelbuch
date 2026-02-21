@@ -204,20 +204,77 @@ A full sync is also triggered automatically when no cache metadata exists, the c
 
 ## Deployment
 
-The site is automatically deployed via AWS Amplify when:
+The site is deployed to AWS Amplify using the CloudFormation template at `deploy/frontend-deploy.yaml`. The build configuration is defined in `amplify.yml`.
 
-1. Code is pushed to the `main` branch
+Once deployed, builds are triggered automatically when:
+
+1. Code is pushed to the configured branch
 2. Content is published in Contentful (via webhook)
 
-### AWS Amplify Configuration
+### CloudFormation Parameters
 
-The build configuration is defined in `amplify.yml`. Required environment variables must be configured in the Amplify Console:
+| Parameter | Description | Required |
+|---|---|---|
+| `AppName` | Name for the Amplify app | Yes |
+| `AppDescription` | Description for the Amplify app | Yes |
+| `AppStage` | Deployment stage (`PRODUCTION`, `BETA`, `DEVELOPMENT`, `EXPERIMENTAL`, `PULL_REQUEST`) | Yes |
+| `AppDomainName` | Custom domain name (e.g. `paddelbuch.ch`) | Production only |
+| `GithubRepoUrl` | GitHub repository URL | Yes |
+| `GithubBranchName` | Branch to deploy | Yes |
+| `GithubToken` | GitHub personal access token | Yes |
+| `EnvVarMapboxUrl` | MapBox tile style URL | Yes |
+| `EnvVarContentfulToken` | Contentful API access token | Yes |
+| `EnvVarContentfulSpace` | Contentful space ID | Yes |
+| `EnvVarContentfulEnv` | Contentful environment ID | Yes |
+| `EnvVarSiteUrl` | Site URL used during Jekyll build | Production only |
 
-- `CONTENTFUL_SPACE_ID`
-- `CONTENTFUL_ACCESS_TOKEN`
-- `CONTENTFUL_ENVIRONMENT`
-- `MAPBOX_URL`
-- `SITE_URL`
+### Production Deployment
+
+Production deployments configure a custom domain with both root and `www` subdomains, and set up a redirect from the naked domain to `www`.
+
+```bash
+aws cloudformation deploy \
+  --template-file deploy/frontend-deploy.yaml \
+  --stack-name paddelbuch-prod \
+  --region eu-central-1 \
+  --parameter-overrides \
+    AppName=paddelbuch \
+    AppDescription="Paddel Buch production" \
+    AppStage=PRODUCTION \
+    AppDomainName=paddelbuch.ch \
+    GithubRepoUrl=https://github.com/your-org/paddelbuch \
+    GithubBranchName=main \
+    GithubToken=ghp_xxxxxxxxxxxx \
+    EnvVarMapboxUrl=your_mapbox_url \
+    EnvVarContentfulToken=your_token \
+    EnvVarContentfulSpace=your_space_id \
+    EnvVarContentfulEnv=master \
+    EnvVarSiteUrl=https://www.paddelbuch.ch
+```
+
+### Non-Production Deployment
+
+Non-production deployments (any `AppStage` other than `PRODUCTION`) skip custom domain configuration entirely. The site is accessible only via the default Amplify-provided URL (e.g. `https://branch.xxxxxxxxxxxx.amplifyapp.com`).
+
+`AppDomainName` and `EnvVarSiteUrl` can be omitted for non-production stacks. The `SITE_URL` environment variable is automatically set to the default Amplify URL.
+
+```bash
+aws cloudformation deploy \
+  --template-file deploy/frontend-deploy.yaml \
+  --stack-name paddelbuch-dev \
+  --region eu-central-1 \
+  --parameter-overrides \
+    AppName=paddelbuch-dev \
+    AppDescription="Paddel Buch development" \
+    AppStage=DEVELOPMENT \
+    GithubRepoUrl=https://github.com/your-org/paddelbuch \
+    GithubBranchName=develop \
+    GithubToken=ghp_xxxxxxxxxxxx \
+    EnvVarMapboxUrl=your_mapbox_url \
+    EnvVarContentfulToken=your_token \
+    EnvVarContentfulSpace=your_space_id \
+    EnvVarContentfulEnv=development
+```
 
 ## API
 
