@@ -233,7 +233,7 @@ Once deployed, builds are triggered automatically when:
 Production deployments configure a custom domain with both root and `www` subdomains, and set up a redirect from the naked domain to `www`.
 
 ```bash
-aws cloudformation deploy \
+noglob aws cloudformation deploy \
   --template-file deploy/frontend-deploy.yaml \
   --stack-name paddelbuch-prod \
   --region eu-central-1 \
@@ -259,7 +259,7 @@ Non-production deployments (any `AppStage` other than `PRODUCTION`) skip custom 
 `AppDomainName` and `EnvVarSiteUrl` can be omitted for non-production stacks. The `SITE_URL` environment variable is automatically set to the default Amplify URL.
 
 ```bash
-aws cloudformation deploy \
+noglob aws cloudformation deploy \
   --template-file deploy/frontend-deploy.yaml \
   --stack-name paddelbuch-dev \
   --region eu-central-1 \

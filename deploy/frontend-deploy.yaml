@@ -147,8 +147,6 @@ Resources:
         - Name: CONTENTFUL_ENVIRONMENT
           Value:
             Ref: EnvVarContentfulEnv
-        - Name: _CUSTOM_IMAGE
-          Value: public.ecr.aws/amazonlinux/amazonlinux:2023
       Name:
         Ref: AppName
       Repository:
