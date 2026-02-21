@@ -147,6 +147,8 @@ Resources:
         - Name: CONTENTFUL_ENVIRONMENT
           Value:
             Ref: EnvVarContentfulEnv
+        - Name: JEKYLL_ENV
+          Value: production
       Name:
         Ref: AppName
       Repository:
