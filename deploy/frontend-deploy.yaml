@@ -58,6 +58,28 @@ Resources:
     Properties: 
       AccessToken:
         Ref: GithubToken
+      BuildSpec: |
+        version: 1
+        frontend:
+          phases:
+            preBuild:
+              commands:
+                - nvm use 18
+                - npm install
+                - npm run download-fonts
+                - npm run copy-assets
+                - bundle install
+            build:
+              commands:
+                - bundle exec jekyll build
+          artifacts:
+            baseDirectory: _site
+            files:
+              - '**/*'
+          cache:
+            paths:
+              - node_modules/**/*
+              - vendor/**/*
       CustomHeaders: |-
         customHeaders:
           # HTML pages - short TTL for content freshness (5 minutes)
