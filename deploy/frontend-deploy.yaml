@@ -6,8 +6,8 @@ Parameters:
     Description: The name for the app in Amplify
   AppDomainName:
     Type: String
-    Description: The domain name the app should be served on
-    AllowedPattern: ^(((?!-)[A-Za-z0-9-]{0,62}[A-Za-z0-9])\.)+((?!-)[A-Za-z0-9-]{1,62}[A-Za-z0-9])(\.)?$
+    Description: The domain name the app should be served on (only required for PRODUCTION stage)
+    Default: ""
   AppDescription:
     Type: String
     Description: The description for the app in Amplify
@@ -46,6 +46,11 @@ Parameters:
     Type: String
     Description: The GitHub personal access token to be used during the setup of the Amplify app
     NoEcho: true
+Conditions:
+  IsProduction:
+    !Equals
+      - !Ref AppStage
+      - PRODUCTION
 Resources:
   PaddelBuchApp:
     Type: AWS::Amplify::App
@@ -111,17 +116,20 @@ Resources:
                   serial=(), sync-script=(), trust-token-redemption=(),
                   vertical-scroll=(self)
       CustomRules:
-        - Source:
-            !Join
-              - ""
-              - - https://
-                - Ref: AppDomainName 
-          Status: 302
-          Target:
-            !Join
-              - "."
-              - - https://www
-                - Ref: AppDomainName
+        !If
+          - IsProduction
+          - - Source:
+                !Join
+                  - ""
+                  - - https://
+                    - Ref: AppDomainName 
+              Status: 302
+              Target:
+                !Join
+                  - "."
+                  - - https://www
+                    - Ref: AppDomainName
+          - !Ref AWS::NoValue
       Description:
         Ref: AppDescription
       EnableBranchAutoDeletion: False
@@ -175,6 +183,7 @@ Resources:
             Ref: AppStage
   PaddelBuchDomain:
     Type: AWS::Amplify::Domain
+    Condition: IsProduction
     Properties: 
       AppId:
         !GetAtt PaddelBuchApp.AppId
