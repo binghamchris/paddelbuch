@@ -40,7 +40,7 @@ Bundle all external CDN dependencies (Bootstrap, Leaflet, Leaflet Locate Control
     - Exit non-zero on any download failure
     - _Requirements: 5.1, 5.2, 5.3, 5.5_
 
-  - [~] 3.2 Write unit tests for font download script
+  - [x] 3.2 Write unit tests for font download script
     - Test that generated `fonts.css` contains 6 `@font-face` declarations (Fredoka 300/400/500, Quicksand 400/500/700)
     - Test that font file paths in CSS are valid relative paths
     - _Requirements: 5.1, 5.2, 5.3, 5.5_
