@@ -23,12 +23,12 @@
   
   // Common icon settings
   var commonSettings = {
-    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+    shadowUrl: null,
     iconAnchor: [16, 53],
     popupAnchor: [0, -53],
     iconSize: [32, 53],
-    shadowSize: [41, 41],
-    shadowAnchor: [12, 41]
+    shadowSize: [0, 0],
+    shadowAnchor: [0, 0]
   };
 
   // Icon URL configs (no Leaflet dependency)
