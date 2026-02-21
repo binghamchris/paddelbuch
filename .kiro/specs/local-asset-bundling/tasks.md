@@ -70,7 +70,7 @@ Bundle all external CDN dependencies (Bootstrap, Leaflet, Leaflet Locate Control
     - Use `{{ '...' | relative_url }}` for all local asset paths
     - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5, 1.3, 2.2, 3.4, 4.3, 5.4_
 
-  - [~] 6.2 Write property test: Layout contains no external CDN references (Property 2)
+  - [x] 6.2 Write property test: Layout contains no external CDN references (Property 2)
     - **Property 2: Layout contains no external CDN references**
     - Parse `_layouts/default.html` and extract all `href` and `src` attribute values
     - Assert no URL contains `cdn.jsdelivr.net`, `unpkg.com`, `fonts.googleapis.com`, or `fonts.gstatic.com`
