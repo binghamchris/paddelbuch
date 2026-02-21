@@ -86,7 +86,7 @@ Bundle all external CDN dependencies (Bootstrap, Leaflet, Leaflet Locate Control
     - Ensure `bundle install` and `bundle exec jekyll build` remain in correct order
     - _Requirements: 6.1, 6.2, 6.3, 6.4_
 
-  - [~] 7.2 Update Content Security Policy in `deploy/frontend-deploy.yaml`
+  - [x] 7.2 Update Content Security Policy in `deploy/frontend-deploy.yaml`
     - Remove `cdn.jsdelivr.net`, `unpkg.com`, `fonts.googleapis.com`, `fonts.gstatic.com` from CSP header
     - Ensure `'self'` is the source for styles, scripts, fonts, and images
     - Keep `data:` for img-src (used by Leaflet) and `raw.githubusercontent.com` and `api.mapbox.com` if present
