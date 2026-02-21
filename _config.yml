@@ -22,17 +22,11 @@ exclude:
   - .gitignore
   - .env.development
   - .env.production
-  - gatsby-config.js
   - package.json
   - package-lock.json
   - amplify.yml
   - README.md
   - LICENSE.md
-  - src/
-  - out/
-  - .next/
-  - .cache/
-  - util/
 
 # Plugins
 plugins:

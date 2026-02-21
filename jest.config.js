@@ -8,8 +8,7 @@ module.exports = {
   ],
   moduleFileExtensions: ['js', 'json'],
   collectCoverageFrom: [
-    'jekyll-assets/js/**/*.js',
-    '_plugins/**/*.rb',
+    'assets/js/**/*.js',
     '!**/node_modules/**'
   ],
   coverageDirectory: 'coverage',
