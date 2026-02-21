@@ -43,7 +43,7 @@
 
 - [ ] 3. Fix for system env vars ignored when no .env files exist
 
-  - [~] 3.1 Implement the fix in `_plugins/env_loader.rb`
+  - [x] 3.1 Implement the fix in `_plugins/env_loader.rb`
     - Add `KNOWN_KEYS` frozen constant to the `Jekyll::EnvLoader` class: `KNOWN_KEYS = %w[MAPBOX_URL CONTENTFUL_SPACE_ID CONTENTFUL_ACCESS_TOKEN CONTENTFUL_ENVIRONMENT SITE_URL].freeze`
     - Replace the existing override loop `env_vars.each { |k, v| env_vars[k] = ENV[k] if ENV[k] }` with a known-keys loop that checks system env directly:
       ```ruby
