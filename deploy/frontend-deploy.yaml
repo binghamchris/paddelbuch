@@ -82,28 +82,8 @@ Resources:
               - vendor/**/*
       CustomHeaders: |-
         customHeaders:
-          # HTML pages - short TTL for content freshness (5 minutes)
-          - pattern: '*.html'
-            headers:
-              - key: Cache-Control
-                value: public, max-age=300, s-maxage=300, must-revalidate
-          # Spatial tile JSON files - long TTL (7 days) as they only change on rebuild
-          - pattern: '/api/tiles/**/*.json'
-            headers:
-              - key: Cache-Control
-                value: public, max-age=604800, s-maxage=604800, immutable
-          # API JSON files - medium TTL (6 hours)
-          - pattern: '/api/*.json'
-            headers:
-              - key: Cache-Control
-                value: public, max-age=21600, s-maxage=21600
-          # Static assets (CSS, JS, images) - long TTL (30 days)
-          - pattern: '/assets/**/*'
-            headers:
-              - key: Cache-Control
-                value: public, max-age=2592000, s-maxage=2592000, immutable
-          # Default for all other files
-          - pattern: '*'
+          # Security and default cache headers for all files (recursive)
+          - pattern: '**/*'
             headers:
               - key: Cache-Control
                 value: public, max-age=21600, s-maxage=21600
@@ -138,6 +118,26 @@ Resources:
                   focus-without-user-activation=(), hid=(), idle-detection=(),
                   serial=(), sync-script=(), trust-token-redemption=(),
                   vertical-scroll=(self)
+          # HTML pages - 1 day TTL - site changes infrequently
+          - pattern: '*.html'
+            headers:
+              - key: Cache-Control
+                value: public, max-age=86400, s-maxage=86400, must-revalidate
+          # Spatial tile JSON files - long TTL (7 days) as they only change on rebuild
+          - pattern: '/api/tiles/**/*.json'
+            headers:
+              - key: Cache-Control
+                value: public, max-age=604800, s-maxage=604800, immutable
+          # API JSON files - 1 day TTL
+          - pattern: '/api/*.json'
+            headers:
+              - key: Cache-Control
+                value: public, max-age=86400, s-maxage=86400
+          # Static assets (CSS, JS, images) - long TTL (30 days)
+          - pattern: '/assets/**/*'
+            headers:
+              - key: Cache-Control
+                value: public, max-age=2592000, s-maxage=2592000, immutable
       CustomRules:
         !If
           - IsProduction
