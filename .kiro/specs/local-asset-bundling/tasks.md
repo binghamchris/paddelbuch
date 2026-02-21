@@ -92,7 +92,7 @@ Bundle all external CDN dependencies (Bootstrap, Leaflet, Leaflet Locate Control
     - Keep `data:` for img-src (used by Leaflet) and `raw.githubusercontent.com` and `api.mapbox.com` if present
     - _Requirements: 9.1, 9.2, 9.3, 9.4_
 
-- [ ] 8. Add vendor CSS path validity property test
+- [x] 8. Add vendor CSS path validity property test
   - [x] 8.1 Write property test: Vendor CSS path validity (Property 1)
     - **Property 1: Vendor CSS path validity**
     - Parse all CSS files in `assets/css/vendor/` (leaflet.css, L.Control.Locate.min.css, fonts.css)
@@ -101,7 +101,7 @@ Bundle all external CDN dependencies (Bootstrap, Leaflet, Leaflet Locate Control
     - Assert the resolved path points to an existing file
     - **Validates: Requirements 3.5, 5.5**
 
-- [~] 9. Final checkpoint - Ensure all tests pass
+- [x] 9. Final checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Notes
