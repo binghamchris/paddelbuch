@@ -42,10 +42,6 @@ describe('copy-vendor-assets.js', () => {
     execSync(`node ${SCRIPT}`, { cwd: ROOT, stdio: 'pipe' });
   });
 
-  afterAll(() => {
-    cleanVendorDirs();
-  });
-
   describe('destination directories', () => {
     test.each(EXPECTED_DIRS)('creates %s', (dir) => {
       const full = path.join(ROOT, dir);
