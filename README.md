@@ -14,11 +14,13 @@ The main goal of this project is to provide a central, nation-wide store of info
 
 ## Technology Stack
 
-- **Static Site Generator**: Jekyll
-- **CMS**: Contentful (headless CMS)
-- **Maps**: Leaflet.js with Mapbox tiles
+- **Static Site Generator**: Jekyll 4.3
+- **CMS**: Contentful (headless CMS) with Sync API for incremental updates
+- **Maps**: Leaflet.js with OpenStreetMap tiles
 - **Hosting**: AWS Amplify (eu-central-1)
 - **Languages**: German (default), English
+- **Ruby**: 3.4.1 (managed with chruby)
+- **Testing**: RSpec + Rantly (Ruby), Jest + fast-check (JavaScript)
 
 ## Project Structure
 
@@ -26,38 +28,64 @@ The main goal of this project is to provide a central, nation-wide store of info
 paddelbuch/
 ├── _config.yml           # Jekyll configuration
 ├── _data/                # Data files (populated from Contentful)
+│   ├── spots.yml         # Spot data
+│   ├── waterways.yml     # Waterway data
+│   ├── obstacles.yml     # Obstacle data
+│   ├── notices.yml       # Event notice data
+│   ├── protected_areas.yml
+│   ├── static_pages.yml  # CMS-driven static pages
+│   └── types/            # Dimension/lookup tables
 ├── _i18n/                # Internationalization files (de.yml, en.yml)
 ├── _includes/            # Reusable HTML partials
 │   ├── header.html       # Site navigation
 │   ├── footer.html       # Site footer
 │   ├── map-init.html     # Leaflet map initialization
-│   ├── spot-popup.html   # Spot marker popup
+│   ├── detail-map-layers.html  # Data layers for detail pages
+│   ├── layer-control.html      # Map layer toggle control
+│   ├── spot-popup.html         # Spot marker popup
 │   ├── obstacle-popup.html
 │   ├── event-popup.html
-│   └── ...
+│   ├── rejected-popup.html     # Rejected spot popup
+│   └── *-detail-content.html   # Detail page content partials
 ├── _layouts/             # Page templates
 │   ├── default.html      # Base layout
+│   ├── page.html         # Static page layout (CMS content)
 │   ├── spot.html         # Spot detail pages
 │   ├── waterway.html     # Waterway detail pages
 │   ├── obstacle.html     # Obstacle detail pages
 │   └── notice.html       # Event notice detail pages
 ├── _plugins/             # Jekyll plugins
-│   ├── api_generator.rb  # JSON API generation
-│   ├── tile_generator.rb # Spatial tile generation
-│   └── ...
+│   ├── api_generator.rb       # JSON API generation
+│   ├── cache_metadata.rb      # Sync state persistence
+│   ├── collection_generator.rb # Collection page generation
+│   ├── contentful_fetcher.rb  # Contentful data fetching
+│   ├── contentful_mappers.rb  # Contentful → Jekyll data mapping
+│   ├── env_loader.rb          # .env file loading
+│   ├── i18n_patch.rb          # i18n compatibility patch
+│   ├── locale_filter.rb       # Locale-aware filtering
+│   ├── ssl_patch.rb           # SSL fix for Ruby 3.4+/OpenSSL 3.x
+│   ├── sync_checker.rb        # Contentful Sync API integration
+│   ├── tile_generator.rb      # Spatial tile generation
+│   └── waterway_filters.rb    # Waterway-specific filters
 ├── _sass/                # SCSS stylesheets
 ├── _spots/               # Spot collection (generated)
 ├── _waterways/           # Waterway collection (generated)
 ├── _obstacles/           # Obstacle collection (generated)
 ├── _notices/             # Event notice collection (generated)
-├── _tests/               # Test files
-│   ├── unit/             # Unit tests
-│   └── property/         # Property-based tests
+├── _static_pages/        # Static page collection (generated)
+├── _tests/               # JavaScript test files
+│   ├── unit/             # Unit tests (Jest)
+│   └── property/         # Property-based tests (fast-check)
+├── spec/                 # Ruby test files (RSpec + Rantly)
+│   ├── *_spec.rb         # Unit and property-based tests
+│   └── spec_helper.rb    # Test configuration
 ├── api/                  # Generated JSON API files
 ├── assets/               # Static assets
 │   ├── css/              # Compiled CSS
 │   ├── images/           # Images and icons
 │   └── js/               # JavaScript modules
+├── deploy/               # Deployment configuration
+├── docs/                 # Project documentation
 ├── gewaesser/            # Waterway list pages
 ├── offene-daten/         # Open data/API pages
 ├── amplify.yml           # AWS Amplify build configuration
@@ -131,7 +159,7 @@ The built site will be in the `_site/` directory.
 ### Running Tests
 
 ```bash
-# Run all tests
+# Run all JavaScript tests (Jest + fast-check)
 npm test
 
 # Run property-based tests only
@@ -139,7 +167,40 @@ npm run test:property
 
 # Run tests in watch mode
 npm run test:watch
+
+# Run Ruby tests (RSpec + Rantly)
+source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.1 && bundle exec rspec
 ```
+
+## Contentful Integration
+
+Content is managed in Contentful and synced to Jekyll data files during the build process. The sync pipeline consists of several custom plugins:
+
+1. **ContentfulFetcher** (`contentful_fetcher.rb`) — Orchestrates the data fetch from Contentful, using the Sync API for incremental updates when possible
+2. **SyncChecker** (`sync_checker.rb`) — Determines whether a full or incremental sync is needed by querying the Contentful Sync API
+3. **CacheMetadata** (`cache_metadata.rb`) — Persists sync state (tokens, timestamps) between builds to enable incremental syncing
+4. **ContentfulMappers** (`contentful_mappers.rb`) — Transforms Contentful entries into Jekyll-compatible YAML data, including rich text rendering with support for tables, marks (bold, italic, underline, code), and embedded entries
+5. **CollectionGenerator** (`collection_generator.rb`) — Generates Jekyll collection pages from the synced data
+
+Content types mapped from Contentful include spots, waterways, obstacles, protected areas, event notices, static pages, and various dimension/lookup types.
+
+### Forcing a Full Sync
+
+By default, the build uses the Contentful Sync API for incremental updates. To force a full re-fetch of all content, you can either:
+
+1. Set the `CONTENTFUL_FORCE_SYNC` environment variable:
+
+```bash
+source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.1 && CONTENTFUL_FORCE_SYNC=true bundle exec jekyll build
+```
+
+2. Or add `force_contentful_sync: true` to `_config.yml`:
+
+```yaml
+force_contentful_sync: true
+```
+
+A full sync is also triggered automatically when no cache metadata exists, the cache is invalid, or the Contentful space/environment has changed since the last build.
 
 ## Deployment
 
