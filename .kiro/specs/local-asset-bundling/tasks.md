@@ -48,7 +48,7 @@ Bundle all external CDN dependencies (Bootstrap, Leaflet, Leaflet Locate Control
 - [x] 4. Checkpoint - Verify build scripts
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 5. Configure Jekyll Sass and SCSS imports
+- [x] 5. Configure Jekyll Sass and SCSS imports
   - [x] 5.1 Update `_config.yml` Sass configuration
     - Add `load_paths: [node_modules]` to the existing `sass` config section
     - _Requirements: 7.1, 7.2, 7.3_
@@ -58,7 +58,7 @@ Bundle all external CDN dependencies (Bootstrap, Leaflet, Leaflet Locate Control
     - _Requirements: 1.1, 1.2_
 
 - [ ] 6. Update layout to use local assets
-  - [~] 6.1 Replace CDN references in `_layouts/default.html`
+  - [x] 6.1 Replace CDN references in `_layouts/default.html`
     - Remove Google Fonts preconnect and CSS `<link>` tags; add local `fonts.css` link
     - Remove Bootstrap CSS CDN link (now compiled via Sass)
     - Replace Leaflet CSS CDN link with local `assets/css/vendor/leaflet.css`
