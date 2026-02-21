@@ -53,7 +53,7 @@ Bundle all external CDN dependencies (Bootstrap, Leaflet, Leaflet Locate Control
     - Add `load_paths: [node_modules]` to the existing `sass` config section
     - _Requirements: 7.1, 7.2, 7.3_
 
-  - [~] 5.2 Update `assets/css/application.scss` to import Bootstrap
+  - [x] 5.2 Update `assets/css/application.scss` to import Bootstrap
     - Add `@import "bootstrap/scss/bootstrap";` before existing custom imports
     - _Requirements: 1.1, 1.2_
 
