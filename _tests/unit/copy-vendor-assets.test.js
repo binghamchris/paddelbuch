@@ -38,8 +38,15 @@ function cleanVendorDirs() {
 
 describe('copy-vendor-assets.js', () => {
   beforeAll(() => {
-    cleanVendorDirs();
+    // Global setup already ensures vendor dirs exist; just re-run the script
+    // to verify it works (idempotent copy).
     execSync(`node ${SCRIPT}`, { cwd: ROOT, stdio: 'pipe' });
+  });
+
+  afterAll(() => {
+    // Restore vendor assets and fonts.css so downstream test suites find them
+    execSync(`node ${SCRIPT}`, { cwd: ROOT, stdio: 'pipe' });
+    execSync(`node ${path.join(ROOT, 'scripts/download-google-fonts.js')}`, { cwd: ROOT, stdio: 'pipe' });
   });
 
   describe('destination directories', () => {
@@ -79,11 +86,12 @@ describe('copy-vendor-assets.js', () => {
 
   describe('error handling', () => {
     test('exits with non-zero code when a source file is missing', () => {
-      // Temporarily rename a source file to simulate it being missing
+      // Temporarily rename a source file to simulate it being missing.
+      // We do NOT call cleanVendorDirs() here to avoid destroying files
+      // that parallel test suites depend on.
       const target = path.join(ROOT, 'node_modules/bootstrap/dist/js/bootstrap.bundle.min.js');
       const backup = target + '.bak';
 
-      cleanVendorDirs();
       fs.renameSync(target, backup);
 
       try {
@@ -92,6 +100,8 @@ describe('copy-vendor-assets.js', () => {
         }).toThrow();
       } finally {
         fs.renameSync(backup, target);
+        // Re-run the copy script to ensure vendor dirs are fully intact
+        execSync(`node ${SCRIPT}`, { cwd: ROOT, stdio: 'pipe' });
       }
     });
   });

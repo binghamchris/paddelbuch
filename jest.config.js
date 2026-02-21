@@ -14,6 +14,8 @@ module.exports = {
   ],
   coverageDirectory: 'coverage',
   verbose: true,
+  // Ensure vendor assets + fonts exist before any test file runs
+  globalSetup: '<rootDir>/_tests/globalSetup.js',
   // Property-based tests may need more time
   testTimeout: 30000
 };
