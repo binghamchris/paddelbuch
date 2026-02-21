@@ -41,7 +41,7 @@
   - Mark task complete when tests are written, run, and passing on unfixed code
   - _Requirements: 3.1, 3.2, 3.3_
 
-- [ ] 3. Fix for system env vars ignored when no .env files exist
+- [x] 3. Fix for system env vars ignored when no .env files exist
 
   - [x] 3.1 Implement the fix in `_plugins/env_loader.rb`
     - Add `KNOWN_KEYS` frozen constant to the `Jekyll::EnvLoader` class: `KNOWN_KEYS = %w[MAPBOX_URL CONTENTFUL_SPACE_ID CONTENTFUL_ACCESS_TOKEN CONTENTFUL_ENVIRONMENT SITE_URL].freeze`
@@ -76,6 +76,6 @@
     - **EXPECTED OUTCOME**: Tests PASS (confirms no regressions - file loading, priority ordering, and additional variable export all unchanged)
     - Confirm all preservation property tests still pass after fix
 
-- [~] 4. Checkpoint - Ensure all tests pass
+- [x] 4. Checkpoint - Ensure all tests pass
   - Run full test suite: `source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.1 && bundle exec rspec`
   - Ensure all tests pass, ask the user if questions arise.
