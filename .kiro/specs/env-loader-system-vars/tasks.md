@@ -24,7 +24,7 @@
   - Mark task complete when test is written, run, and failure is documented
   - _Requirements: 1.1, 1.2, 2.1, 2.2_
 
-- [~] 2. Write preservation property tests (BEFORE implementing fix)
+- [x] 2. Write preservation property tests (BEFORE implementing fix)
   - **Property 2: Preservation** - File-only and override behavior unchanged
   - **IMPORTANT**: Follow observation-first methodology
   - Create preservation tests in the same `spec/env_loader_spec.rb` file

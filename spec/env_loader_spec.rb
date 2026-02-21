@@ -141,3 +141,189 @@ RSpec.describe 'EnvLoader after_init hook' do
     end
   end
 end
+
+# ─── Property 2: Preservation ─────────────────────────────────────────
+# File-only and override behavior unchanged
+# **Validates: Requirements 3.1, 3.2, 3.3**
+
+RSpec.describe 'EnvLoader preservation properties' do
+  let(:tmpdir) { Dir.mktmpdir }
+  let(:site_config) { {} }
+  let(:site) do
+    site = double('Jekyll::Site')
+    allow(site).to receive(:source).and_return(tmpdir)
+    allow(site).to receive(:config).and_return(site_config)
+    site
+  end
+
+  PRESERVATION_KNOWN_KEYS = %w[
+    MAPBOX_URL
+    CONTENTFUL_SPACE_ID
+    CONTENTFUL_ACCESS_TOKEN
+    CONTENTFUL_ENVIRONMENT
+    SITE_URL
+  ].freeze
+
+  around do |example|
+    saved = ENV.to_h.dup
+    example.run
+  ensure
+    # Restore ENV exactly
+    ENV.clear
+    saved.each { |k, v| ENV[k] = v }
+  end
+
+  after { FileUtils.remove_entry(tmpdir) if File.exist?(tmpdir) }
+
+  def trigger_after_init(site)
+    hooks = Jekyll::Hooks.instance_variable_get(:@registry)
+    after_init_hooks = hooks.dig(:site, :after_init) || []
+    after_init_hooks.each { |hook| hook.call(site) }
+  end
+
+  def config_value_for(site, key)
+    case key
+    when 'MAPBOX_URL'
+      site.config['mapbox_url']
+    when 'CONTENTFUL_SPACE_ID'
+      site.config.dig('contentful', 'spaces', 0, 'space')
+    when 'CONTENTFUL_ACCESS_TOKEN'
+      site.config.dig('contentful', 'spaces', 0, 'access_token')
+    when 'CONTENTFUL_ENVIRONMENT'
+      site.config.dig('contentful', 'spaces', 0, 'environment')
+    when 'SITE_URL'
+      site.config['url']
+    end
+  end
+
+  before do
+    allow(Jekyll.logger).to receive(:info)
+    ENV['JEKYLL_ENV'] = 'development'
+  end
+
+  # ─── 2a: File-only loading preservation ─────────────────────────────
+  # **Validates: Requirements 3.1**
+
+  describe 'Preservation: file-only loading (no system env vars)' do
+    it 'maps .env file values to site config for all known keys' do
+      # **Validates: Requirements 3.1**
+      property_of {
+        # Generate random non-empty values for all 5 known keys
+        values = PRESERVATION_KNOWN_KEYS.map { |k|
+          [k, sized(range(3, 20)) { string(:alpha) }]
+        }.to_h
+        values
+      }.check(50) { |values|
+        site_config.clear
+
+        # Clear all known keys from system ENV so file values are used
+        PRESERVATION_KNOWN_KEYS.each { |k| ENV.delete(k) }
+
+        # Stub .env file with generated values
+        env_file_path = File.join(tmpdir, '.env')
+        env_lines = values.map { |k, v| "#{k}=#{v}\n" }
+
+        allow(File).to receive(:exist?).and_call_original
+        allow(File).to receive(:exist?).with(env_file_path).and_return(true)
+        allow(File).to receive(:exist?).with(File.join(tmpdir, '.env.development')).and_return(false)
+        allow(File).to receive(:readlines).with(env_file_path).and_return(env_lines)
+
+        trigger_after_init(site)
+
+        # Assert each known key in site config matches the file value
+        PRESERVATION_KNOWN_KEYS.each do |key|
+          actual = config_value_for(site, key)
+          expect(actual).to eq(values[key]),
+            "Expected site config for #{key} to be '#{values[key]}', got '#{actual.inspect}'"
+        end
+      }
+    end
+  end
+
+  # ─── 2b: System override preservation ───────────────────────────────
+  # **Validates: Requirements 3.2**
+
+  describe 'Preservation: system env overrides file values' do
+    it 'uses system env values over .env file values for all known keys' do
+      # **Validates: Requirements 3.2**
+      property_of {
+        # Generate distinct random values for file and system env
+        file_values = PRESERVATION_KNOWN_KEYS.map { |k|
+          [k, "file_" + sized(range(3, 15)) { string(:alpha) }]
+        }.to_h
+        sys_values = PRESERVATION_KNOWN_KEYS.map { |k|
+          [k, "sys_" + sized(range(3, 15)) { string(:alpha) }]
+        }.to_h
+        [file_values, sys_values]
+      }.check(50) { |file_values, sys_values|
+        site_config.clear
+
+        # Set system env vars for all known keys
+        PRESERVATION_KNOWN_KEYS.each { |k| ENV[k] = sys_values[k] }
+
+        # Stub .env file with file values
+        env_file_path = File.join(tmpdir, '.env')
+        env_lines = file_values.map { |k, v| "#{k}=#{v}\n" }
+
+        allow(File).to receive(:exist?).and_call_original
+        allow(File).to receive(:exist?).with(env_file_path).and_return(true)
+        allow(File).to receive(:exist?).with(File.join(tmpdir, '.env.development')).and_return(false)
+        allow(File).to receive(:readlines).with(env_file_path).and_return(env_lines)
+
+        trigger_after_init(site)
+
+        # Assert system env values win over file values
+        PRESERVATION_KNOWN_KEYS.each do |key|
+          actual = config_value_for(site, key)
+          expect(actual).to eq(sys_values[key]),
+            "Expected site config for #{key} to be system value '#{sys_values[key]}', got '#{actual.inspect}'"
+        end
+      }
+    end
+  end
+
+  # ─── 2c: Additional variables preservation ──────────────────────────
+  # **Validates: Requirements 3.3**
+
+  describe 'Preservation: additional non-known keys exported to ENV' do
+    it 'exports extra .env keys to ENV via ENV[k] ||= v' do
+      # **Validates: Requirements 3.3**
+      property_of {
+        # Generate 2-4 extra non-known keys with random values
+        count = range(2, 4)
+        extra = count.times.map { |i|
+          key = "CUSTOM_VAR_#{i}_" + sized(range(3, 8)) { string(:alpha).upcase }
+          val = sized(range(3, 15)) { string(:alpha) }
+          [key, val]
+        }.to_h
+        extra
+      }.check(50) { |extra|
+        site_config.clear
+
+        # Clear extra keys from ENV
+        extra.each { |k, _| ENV.delete(k) }
+        PRESERVATION_KNOWN_KEYS.each { |k| ENV.delete(k) }
+
+        # Stub .env file with only the extra keys (no known keys)
+        env_file_path = File.join(tmpdir, '.env')
+        env_lines = extra.map { |k, v| "#{k}=#{v}\n" }
+
+        allow(File).to receive(:exist?).and_call_original
+        allow(File).to receive(:exist?).with(env_file_path).and_return(true)
+        allow(File).to receive(:exist?).with(File.join(tmpdir, '.env.development')).and_return(false)
+        allow(File).to receive(:readlines).with(env_file_path).and_return(env_lines)
+
+        trigger_after_init(site)
+
+        # Assert extra keys are exported to ENV
+        extra.each do |key, val|
+          expect(ENV[key]).to eq(val),
+            "Expected ENV['#{key}'] to be '#{val}', got '#{ENV[key].inspect}'"
+        end
+
+        # Clean up extra keys after assertion
+        extra.each { |k, _| ENV.delete(k) }
+      }
+    end
+  end
+end
