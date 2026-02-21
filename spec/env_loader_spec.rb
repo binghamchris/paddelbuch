@@ -98,6 +98,14 @@ RSpec.describe 'EnvLoader after_init hook' do
 
         # Assert each chosen key appears in site config
         chosen_keys.each do |key|
+          # CONTENTFUL_ENVIRONMENT is only mapped when CONTENTFUL_SPACE_ID or
+          # CONTENTFUL_ACCESS_TOKEN is also present (gate condition in env_loader.rb)
+          if key == 'CONTENTFUL_ENVIRONMENT' &&
+             !chosen_keys.include?('CONTENTFUL_SPACE_ID') &&
+             !chosen_keys.include?('CONTENTFUL_ACCESS_TOKEN')
+            next
+          end
+
           actual = config_value_for(site, key)
           expect(actual).to eq(values[key]),
             "Expected site config for #{key} to be '#{values[key]}', got '#{actual.inspect}'"
