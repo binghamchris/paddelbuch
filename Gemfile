@@ -1,7 +1,5 @@
 source "https://rubygems.org"
 
-ruby "3.4.1"
-
 gem "jekyll", "~> 4.3"
 gem "contentful", "~> 2.17"
 gem "dotenv", "~> 3.1"
