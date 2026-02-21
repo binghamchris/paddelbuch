@@ -77,7 +77,7 @@ Bundle all external CDN dependencies (Bootstrap, Leaflet, Leaflet Locate Control
     - Assert all CSS/JS/font asset references use local relative paths
     - **Validates: Requirements 8.1, 8.2, 8.3, 8.4, 8.5**
 
-- [ ] 7. Update Amplify build pipeline
+- [x] 7. Update Amplify build pipeline
   - [x] 7.1 Update BuildSpec in `deploy/frontend-deploy.yaml`
     - Add `nvm use 18` and `npm install` to preBuild commands
     - Add `npm run download-fonts` after npm install
@@ -93,7 +93,7 @@ Bundle all external CDN dependencies (Bootstrap, Leaflet, Leaflet Locate Control
     - _Requirements: 9.1, 9.2, 9.3, 9.4_
 
 - [ ] 8. Add vendor CSS path validity property test
-  - [~] 8.1 Write property test: Vendor CSS path validity (Property 1)
+  - [x] 8.1 Write property test: Vendor CSS path validity (Property 1)
     - **Property 1: Vendor CSS path validity**
     - Parse all CSS files in `assets/css/vendor/` (leaflet.css, L.Control.Locate.min.css, fonts.css)
     - Extract all `url()` references from CSS content
