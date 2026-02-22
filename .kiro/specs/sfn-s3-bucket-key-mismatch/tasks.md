@@ -34,7 +34,7 @@
   - Mark task complete when tests are written, run, and passing on unfixed code
   - _Requirements: 3.1, 3.2, 3.3, 3.4_
 
-- [ ] 3. Fix S3 bucket key mismatch in Step Function DefinitionString
+- [x] 3. Fix S3 bucket key mismatch in Step Function DefinitionString
 
   - [x] 3.1 Implement the fix
     - In `paddelbuch-migrationuxtester/infrastructure/template.yaml`, rename the left-hand parameter key in the PipelineStateMachine DefinitionString for four states:
@@ -63,6 +63,6 @@
     - **EXPECTED OUTCOME**: Tests PASS (confirms no regressions)
     - Confirm all tests still pass after fix (no regressions)
 
-- [~] 4. Checkpoint - Ensure all tests pass
+- [x] 4. Checkpoint - Ensure all tests pass
   - Run full test suite: `python3 -m pytest paddelbuch-migrationuxtester/tests/ -v`
   - Ensure all tests pass, ask the user if questions arise.
