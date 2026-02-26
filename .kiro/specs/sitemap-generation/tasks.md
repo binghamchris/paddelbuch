@@ -6,7 +6,7 @@ Implement a Jekyll Generator plugin (`SitemapGenerator`) that produces XML sitem
 
 ## Tasks
 
-- [ ] 1. Implement core SitemapGenerator plugin
+- [x] 1. Implement core SitemapGenerator plugin
   - [x] 1.1 Create `_plugins/sitemap_generator.rb` with the `Jekyll::SitemapGenerator` class skeleton
     - Define the class inheriting from `Jekyll::Generator` with `safe true` and `priority :low`
     - Add `MAX_URLS_PER_SITEMAP = 50_000` constant
@@ -38,7 +38,7 @@ Implement a Jekyll Generator plugin (`SitemapGenerator`) that produces XML sitem
     - Wire the `generate` method to split URLs into chunks of 50,000, write sub-sitemaps, then write the index
     - _Requirements: 1.1, 1.3, 1.4, 2.1, 7.3_
 
-- [~] 2. Checkpoint - Verify plugin loads and generates files
+- [-] 2. Checkpoint - Verify plugin loads and generates files
   - Ensure the plugin can be loaded by Jekyll without errors, ask the user if questions arise.
 
 - [ ] 3. Implement unit and property tests
