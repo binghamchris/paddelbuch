@@ -183,5 +183,41 @@ RSpec.describe Jekyll::SitemapGenerator do
       end
     end
   end
+
+  # Feature: sitemap-generation, Property 5: No duplicate URLs
+  describe '#collect_urls - no duplicate URLs (PBT)' do
+    # **Validates: Requirements 6.4**
+    it 'produces no duplicate URLs even when input pages have overlapping slugs' do
+      property_of {
+        Rantly {
+          slug_count = range(3, 8)
+          slugs = slug_count.times.map { sized(range(3, 10)) { string(:alpha).downcase } }
+          # Deliberately duplicate some slugs by repeating random entries
+          dup_count = range(1, 3)
+          dup_count.times { slugs << slugs[range(0, slugs.size - 1)] }
+          slugs
+        }
+      }.check(100) do |slugs|
+        Dir.mktmpdir do |tmpdir|
+          site = build_site(tmpdir)
+
+          # Add slugs as standalone pages (some will be duplicates)
+          slugs.each do |slug|
+            add_page(site, "#{slug}.html", "/#{slug}/")
+          end
+
+          # Also add some collection documents with potentially overlapping slugs
+          overlap_slugs = slugs.sample([slugs.size, 3].min)
+          overlap_slugs.each do |slug|
+            add_collection_doc(site, 'static_pages', slug)
+          end
+
+          result = generator.collect_urls(site)
+          expect(result).to eq(result.uniq),
+            "Expected no duplicate URLs but found duplicates: #{(result - result.uniq).inspect}"
+        end
+      end
+    end
+  end
 end
 
