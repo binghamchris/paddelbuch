@@ -13,7 +13,7 @@ Implement a Jekyll Generator plugin (`SitemapGenerator`) that produces XML sitem
     - Implement the `generate(site)` entry point with begin/rescue error handling
     - _Requirements: 7.1, 7.2, 7.4_
 
-  - [-] 1.2 Implement URL collection methods
+  - [x] 1.2 Implement URL collection methods
     - Implement `collection_urls(site)` to iterate all 5 collections (spots, waterways, obstacles, notices, static_pages) and return base paths
     - Implement `standalone_urls(site)` to iterate `site.pages`, filter excluded pages, and return base paths
     - Implement `exclude_page?(page)` to exclude 404, assets/, api/, sitemap:false, and non-HTML pages
