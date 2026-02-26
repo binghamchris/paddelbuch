@@ -66,4 +66,22 @@ RSpec.describe Jekyll::SitemapGenerator do
   def generator
     Jekyll::SitemapGenerator.new
   end
+
+  # Feature: sitemap-generation, Property 1: URL entry rendering contains required metadata
+  describe '#render_url_entry (PBT)' do
+    # **Validates: Requirements 2.3, 2.4, 2.5**
+    it 'contains <loc>, <changefreq>daily</changefreq>, and <priority>0.7</priority> for any URL' do
+      property_of {
+        Rantly {
+          segments = range(1, 5).times.map { sized(range(1, 12)) { string(:alpha).downcase } }
+          "https://www.paddelbuch.ch/#{segments.join('/')}/"
+        }
+      }.check(100) do |url|
+        xml = generator.render_url_entry(url)
+        expect(xml).to include("<loc>#{url}</loc>")
+        expect(xml).to include('<changefreq>daily</changefreq>')
+        expect(xml).to include('<priority>0.7</priority>')
+      end
+    end
+  end
 end
