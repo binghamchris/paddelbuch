@@ -38,11 +38,11 @@ Implement a Jekyll Generator plugin (`SitemapGenerator`) that produces XML sitem
     - Wire the `generate` method to split URLs into chunks of 50,000, write sub-sitemaps, then write the index
     - _Requirements: 1.1, 1.3, 1.4, 2.1, 7.3_
 
-- [-] 2. Checkpoint - Verify plugin loads and generates files
+- [x] 2. Checkpoint - Verify plugin loads and generates files
   - Ensure the plugin can be loaded by Jekyll without errors, ask the user if questions arise.
 
 - [ ] 3. Implement unit and property tests
-  - [~] 3.1 Create `spec/sitemap_generator_spec.rb` with test setup
+  - [-] 3.1 Create `spec/sitemap_generator_spec.rb` with test setup
     - Set up RSpec describe block for `Jekyll::SitemapGenerator`
     - Create helper methods for building minimal Jekyll site objects with configurable collections, pages, and config values
     - Follow patterns from `spec/collection_generator_spec.rb` using `Dir.mktmpdir`
