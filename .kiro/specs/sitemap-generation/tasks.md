@@ -20,7 +20,7 @@ Implement a Jekyll Generator plugin (`SitemapGenerator`) that produces XML sitem
     - Implement `collect_urls(site)` to combine collection and standalone URLs through bilingual expansion and deduplicate
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 4.1, 4.2, 4.3, 4.4, 4.5_
 
-  - [~] 1.3 Implement bilingual URL generation and URL building helpers
+  - [x] 1.3 Implement bilingual URL generation and URL building helpers
     - Implement `bilingual_urls(site, base_paths)` to produce default locale and `/en/`-prefixed URLs, respecting `exclude_from_localizations`
     - Implement `build_url(site, path)` to combine site URL with path and ensure trailing slash
     - Implement `ensure_trailing_slash(path)` to append `/` when needed (skip `.html`/`.xml` paths)
