@@ -73,7 +73,7 @@ Implement a Jekyll Generator plugin (`SitemapGenerator`) that produces XML sitem
     - Generate page sets with potential duplicate paths, run `collect_urls`, verify uniqueness
     - **Validates: Requirements 6.4**
 
-  - [-] 3.7 Write property test for sitemap splitting (Property 6)
+  - [x] 3.7 Write property test for sitemap splitting (Property 6)
     - **Property 6: Sitemap splitting at 50,000 URLs**
     - Generate random URL counts, verify correct number of sub-sitemaps and max size per file
     - **Validates: Requirements 1.3, 1.4**

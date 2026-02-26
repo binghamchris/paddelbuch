@@ -219,5 +219,34 @@ RSpec.describe Jekyll::SitemapGenerator do
       end
     end
   end
+
+  # Feature: sitemap-generation, Property 6: Sitemap splitting at 50,000 URLs
+  describe 'sitemap splitting at 50,000 URLs (PBT)' do
+    # **Validates: Requirements 1.3, 1.4**
+    it 'produces ceil(N / 50,000) chunks each with at most 50,000 entries' do
+      max_urls = Jekyll::SitemapGenerator::MAX_URLS_PER_SITEMAP
+
+      property_of {
+        Rantly { range(1, 200_000) }
+      }.check(100) do |n|
+        urls = Array.new(n) { |i| "https://www.paddelbuch.ch/page-#{i}/" }
+        chunks = urls.each_slice(max_urls).to_a
+
+        expected_chunks = (n.to_f / max_urls).ceil
+
+        expect(chunks.size).to eq(expected_chunks),
+          "Expected #{expected_chunks} chunks for #{n} URLs but got #{chunks.size}"
+
+        chunks.each_with_index do |chunk, idx|
+          expect(chunk.size).to be <= max_urls,
+            "Chunk #{idx} has #{chunk.size} entries, exceeding max of #{max_urls}"
+        end
+
+        total = chunks.sum(&:size)
+        expect(total).to eq(n),
+          "Expected total URLs across chunks to be #{n} but got #{total}"
+      end
+    end
+  end
 end
 
