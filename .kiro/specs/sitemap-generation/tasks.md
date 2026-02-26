@@ -26,7 +26,7 @@ Implement a Jekyll Generator plugin (`SitemapGenerator`) that produces XML sitem
     - Implement `ensure_trailing_slash(path)` to append `/` when needed (skip `.html`/`.xml` paths)
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 6.1, 6.2_
 
-  - [~] 1.4 Implement XML rendering methods
+  - [-] 1.4 Implement XML rendering methods
     - Implement `render_url_entry(url)` to produce `<url>` XML fragments with `<loc>`, `<changefreq>daily</changefreq>`, `<priority>0.7</priority>`
     - Implement `render_sub_sitemap_xml(url_entries)` to produce complete sub-sitemap XML with declaration and namespace
     - Implement `render_sitemap_index_xml(site, sitemap_filenames)` to produce sitemap index XML
