@@ -346,23 +346,28 @@ RSpec.describe Jekyll::SitemapGenerator do
   # --- Unit tests for edge cases and XML structure ---
   # Validates: Requirements 1.1, 1.2, 2.1, 2.2, 4.2, 4.3, 4.4, 6.3, 7.2, 7.4
   describe 'edge cases and XML structure' do
-    it 'generates sitemap-index.xml in site output' do
+    # Helper to find a generated page by name after calling generate
+    def find_generated_page(site, filename)
+      site.pages.find { |p| p.is_a?(Jekyll::PageWithoutAFile) && p.name == filename }
+    end
+
+    it 'generates sitemap-index.xml as a page' do
       Dir.mktmpdir do |tmpdir|
         site = build_site(tmpdir)
         add_page(site, 'index.html', '/')
         generator.generate(site)
 
-        expect(File.exist?(File.join(site.dest, 'sitemap-index.xml'))).to be(true)
+        expect(find_generated_page(site, 'sitemap-index.xml')).not_to be_nil
       end
     end
 
-    it 'generates sitemap-0.xml in site output' do
+    it 'generates sitemap-0.xml as a page' do
       Dir.mktmpdir do |tmpdir|
         site = build_site(tmpdir)
         add_page(site, 'index.html', '/')
         generator.generate(site)
 
-        expect(File.exist?(File.join(site.dest, 'sitemap-0.xml'))).to be(true)
+        expect(find_generated_page(site, 'sitemap-0.xml')).not_to be_nil
       end
     end
 
@@ -372,7 +377,7 @@ RSpec.describe Jekyll::SitemapGenerator do
         add_page(site, 'index.html', '/')
         generator.generate(site)
 
-        content = File.read(File.join(site.dest, 'sitemap-index.xml'))
+        content = find_generated_page(site, 'sitemap-index.xml').content
         expect(content).to include('xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"')
         expect(content).to include('<sitemapindex')
       end
@@ -384,7 +389,7 @@ RSpec.describe Jekyll::SitemapGenerator do
         add_page(site, 'index.html', '/')
         generator.generate(site)
 
-        content = File.read(File.join(site.dest, 'sitemap-0.xml'))
+        content = find_generated_page(site, 'sitemap-0.xml').content
         expect(content).to include('xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"')
         expect(content).to include('<urlset')
       end
@@ -396,8 +401,8 @@ RSpec.describe Jekyll::SitemapGenerator do
         add_page(site, 'index.html', '/')
         generator.generate(site)
 
-        index_content = File.read(File.join(site.dest, 'sitemap-index.xml'))
-        sub_content = File.read(File.join(site.dest, 'sitemap-0.xml'))
+        index_content = find_generated_page(site, 'sitemap-index.xml').content
+        sub_content = find_generated_page(site, 'sitemap-0.xml').content
 
         expect(index_content).to start_with('<?xml version="1.0" encoding="UTF-8"?>')
         expect(sub_content).to start_with('<?xml version="1.0" encoding="UTF-8"?>')

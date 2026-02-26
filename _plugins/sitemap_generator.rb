@@ -19,7 +19,6 @@ module Jekyll
 
     def generate(site)
       urls = collect_urls(site)
-      FileUtils.mkdir_p(site.dest)
 
       sitemap_files = urls.each_slice(MAX_URLS_PER_SITEMAP).each_with_index.map do |chunk, index|
         write_sub_sitemap(site, chunk, index)
@@ -36,15 +35,20 @@ module Jekyll
     def write_sub_sitemap(site, urls, index)
       filename = "sitemap-#{index}.xml"
       xml = render_sub_sitemap_xml(urls)
-      File.write(File.join(site.dest, filename), xml)
-      site.static_files << Jekyll::StaticFile.new(site, site.dest, "/", filename)
+      add_page_to_site(site, filename, xml)
       filename
     end
 
     def write_sitemap_index(site, sitemap_files)
       xml = render_sitemap_index_xml(site, sitemap_files)
-      File.write(File.join(site.dest, "sitemap-index.xml"), xml)
-      site.static_files << Jekyll::StaticFile.new(site, site.dest, "/", "sitemap-index.xml")
+      add_page_to_site(site, "sitemap-index.xml", xml)
+    end
+
+    def add_page_to_site(site, filename, content)
+      page = PageWithoutAFile.new(site, site.source, "/", filename)
+      page.content = content
+      page.data["layout"] = nil
+      site.pages << page
     end
 
     def collect_urls(site)
