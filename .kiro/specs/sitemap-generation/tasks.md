@@ -68,7 +68,7 @@ Implement a Jekyll Generator plugin (`SitemapGenerator`) that produces XML sitem
     - Generate random paths, call `build_url`, verify starts with site URL and ends with `/`
     - **Validates: Requirements 6.1, 6.2**
 
-  - [~] 3.6 Write property test for no duplicate URLs (Property 5)
+  - [-] 3.6 Write property test for no duplicate URLs (Property 5)
     - **Property 5: No duplicate URLs**
     - Generate page sets with potential duplicate paths, run `collect_urls`, verify uniqueness
     - **Validates: Requirements 6.4**
