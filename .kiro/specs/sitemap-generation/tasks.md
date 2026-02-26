@@ -48,7 +48,7 @@ Implement a Jekyll Generator plugin (`SitemapGenerator`) that produces XML sitem
     - Follow patterns from `spec/collection_generator_spec.rb` using `Dir.mktmpdir`
     - _Requirements: 7.1_
 
-  - [~] 3.2 Write property test for URL entry rendering (Property 1)
+  - [-] 3.2 Write property test for URL entry rendering (Property 1)
     - **Property 1: URL entry rendering contains required metadata**
     - Generate random URL strings, call `render_url_entry`, verify XML contains `<loc>`, `<changefreq>daily</changefreq>`, `<priority>0.7</priority>`
     - **Validates: Requirements 2.3, 2.4, 2.5**
