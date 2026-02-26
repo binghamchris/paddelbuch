@@ -26,7 +26,40 @@ module Jekyll
 
     def collect_urls(site)
       base_paths = collection_urls(site) + standalone_urls(site)
-      base_paths.uniq
+      bilingual_urls(site, base_paths).uniq
+    end
+
+    def bilingual_urls(site, base_paths)
+      languages = site.config['languages'] || ['de']
+      default_lang = site.config['default_lang'] || 'de'
+      excluded_dirs = Array(site.config['exclude_from_localizations'])
+
+      base_paths.flat_map do |path|
+        urls = [build_url(site, path)]
+
+        unless excluded_dirs.any? { |dir| path.start_with?("/#{dir}/") || path == "/#{dir}" }
+          languages.each do |lang|
+            next if lang == default_lang
+
+            urls << build_url(site, "/#{lang}#{path}")
+          end
+        end
+
+        urls
+      end
+    end
+
+    def build_url(site, path)
+      base = site.config['url'] || ''
+      combined = "#{base}#{path}".gsub(%r{(?<!:)//+}, '/')
+      ensure_trailing_slash(combined)
+    end
+
+    def ensure_trailing_slash(path)
+      return path if path.end_with?('/')
+      return path if path.end_with?('.html') || path.end_with?('.xml')
+
+      "#{path}/"
     end
 
     def collection_urls(site)
