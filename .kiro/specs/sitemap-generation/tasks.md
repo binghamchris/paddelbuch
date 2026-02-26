@@ -83,7 +83,7 @@ Implement a Jekyll Generator plugin (`SitemapGenerator`) that produces XML sitem
     - Generate pages with random `sitemap` front matter values, verify excluded when false
     - **Validates: Requirements 4.5**
 
-  - [~] 3.9 Write property test for standalone HTML page inclusion (Property 8)
+  - [-] 3.9 Write property test for standalone HTML page inclusion (Property 8)
     - **Property 8: Standalone HTML pages are included**
     - Generate random standalone pages (HTML and non-HTML), verify HTML pages included and non-HTML excluded
     - **Validates: Requirements 4.1**
