@@ -41,7 +41,7 @@ Implement a Jekyll Generator plugin (`SitemapGenerator`) that produces XML sitem
 - [x] 2. Checkpoint - Verify plugin loads and generates files
   - Ensure the plugin can be loaded by Jekyll without errors, ask the user if questions arise.
 
-- [ ] 3. Implement unit and property tests
+- [x] 3. Implement unit and property tests
   - [x] 3.1 Create `spec/sitemap_generator_spec.rb` with test setup
     - Set up RSpec describe block for `Jekyll::SitemapGenerator`
     - Create helper methods for building minimal Jekyll site objects with configurable collections, pages, and config values
@@ -98,7 +98,7 @@ Implement a Jekyll Generator plugin (`SitemapGenerator`) that produces XML sitem
     - Test error handling doesn't crash the build (simulate error, verify no exception raised)
     - _Requirements: 1.1, 1.2, 2.1, 2.2, 4.2, 4.3, 4.4, 6.3, 7.2, 7.4_
 
-- [~] 4. Final checkpoint - Ensure all tests pass
+- [-] 4. Final checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Notes
