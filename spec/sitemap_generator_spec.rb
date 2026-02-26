@@ -289,5 +289,58 @@ RSpec.describe Jekyll::SitemapGenerator do
       end
     end
   end
+
+  # Feature: sitemap-generation, Property 8: Standalone HTML pages are included
+  describe '#standalone_urls (PBT)' do
+    # **Validates: Requirements 4.1**
+    it 'includes HTML pages and excludes non-HTML pages from standalone URLs' do
+      non_html_extensions = %w[.css .js .xml .json .txt .svg]
+
+      property_of {
+        Rantly {
+          pages = []
+          # Generate 2-6 random HTML pages (valid, should be included)
+          html_count = range(2, 6)
+          html_count.times do
+            slug = sized(range(3, 10)) { string(:alpha).downcase }
+            pages << { name: "#{slug}.html", url: "/#{slug}/", html: true }
+          end
+
+          # Generate 1-4 random non-HTML pages (should be excluded)
+          non_html_count = range(1, 4)
+          non_html_count.times do
+            slug = sized(range(3, 10)) { string(:alpha).downcase }
+            ext = non_html_extensions[range(0, non_html_extensions.size - 1)]
+            pages << { name: "#{slug}#{ext}", url: "/#{slug}#{ext}", html: false }
+          end
+
+          pages
+        }
+      }.check(100) do |pages|
+        Dir.mktmpdir do |tmpdir|
+          site = build_site(tmpdir)
+
+          # Add all generated pages to the site
+          pages.each do |pg|
+            add_page(site, pg[:name], pg[:url])
+          end
+
+          result = generator.standalone_urls(site)
+
+          # HTML pages should be included
+          pages.select { |pg| pg[:html] }.each do |pg|
+            expect(result).to include(pg[:url]),
+              "Expected standalone_urls to include HTML page '#{pg[:name]}' at '#{pg[:url]}' but it was missing"
+          end
+
+          # Non-HTML pages should be excluded
+          pages.reject { |pg| pg[:html] }.each do |pg|
+            expect(result).not_to include(pg[:url]),
+              "Expected standalone_urls to exclude non-HTML page '#{pg[:name]}' at '#{pg[:url]}' but it was present"
+          end
+        end
+      end
+    end
+  end
 end
 
