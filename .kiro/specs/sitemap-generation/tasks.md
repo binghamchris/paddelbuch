@@ -42,7 +42,7 @@ Implement a Jekyll Generator plugin (`SitemapGenerator`) that produces XML sitem
   - Ensure the plugin can be loaded by Jekyll without errors, ask the user if questions arise.
 
 - [ ] 3. Implement unit and property tests
-  - [-] 3.1 Create `spec/sitemap_generator_spec.rb` with test setup
+  - [x] 3.1 Create `spec/sitemap_generator_spec.rb` with test setup
     - Set up RSpec describe block for `Jekyll::SitemapGenerator`
     - Create helper methods for building minimal Jekyll site objects with configurable collections, pages, and config values
     - Follow patterns from `spec/collection_generator_spec.rb` using `Dir.mktmpdir`
