@@ -84,5 +84,42 @@ module Jekyll
 
       false
     end
+
+    def render_url_entry(url)
+      <<~XML
+        <url>
+          <loc>#{url}</loc>
+          <changefreq>daily</changefreq>
+          <priority>0.7</priority>
+        </url>
+      XML
+    end
+
+    def render_sub_sitemap_xml(url_entries)
+      entries = url_entries.map { |url| render_url_entry(url) }.join
+      <<~XML
+        <?xml version="1.0" encoding="UTF-8"?>
+        <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+        #{entries.chomp}
+        </urlset>
+      XML
+    end
+
+    def render_sitemap_index_xml(site, sitemap_filenames)
+      entries = sitemap_filenames.map do |filename|
+        loc = build_url(site, "/#{filename}")
+        <<~ENTRY
+          <sitemap>
+            <loc>#{loc}</loc>
+          </sitemap>
+        ENTRY
+      end.join
+      <<~XML
+        <?xml version="1.0" encoding="UTF-8"?>
+        <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+        #{entries.chomp}
+        </sitemapindex>
+      XML
+    end
   end
 end
