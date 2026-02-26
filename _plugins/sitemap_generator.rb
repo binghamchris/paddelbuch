@@ -15,11 +15,41 @@ module Jekyll
 
     MAX_URLS_PER_SITEMAP = 50_000
 
+    COLLECTION_NAMES = %w[spots waterways obstacles notices static_pages].freeze
+
     def generate(site)
       # TODO: Collect URLs, split into sub-sitemaps, write index
     rescue => e
       Jekyll.logger.error "SitemapGenerator:", "Error generating sitemap: #{e.message}"
       Jekyll.logger.debug "SitemapGenerator:", e.backtrace.join("\n")
+    end
+
+    def collect_urls(site)
+      base_paths = collection_urls(site) + standalone_urls(site)
+      base_paths.uniq
+    end
+
+    def collection_urls(site)
+      COLLECTION_NAMES.flat_map do |name|
+        collection = site.collections[name]
+        next [] unless collection
+
+        collection.docs.map(&:url)
+      end
+    end
+
+    def standalone_urls(site)
+      site.pages.reject { |page| exclude_page?(page) }.map(&:url)
+    end
+
+    def exclude_page?(page)
+      return true if page.name == '404.html'
+      return true if page.url.start_with?('/assets/')
+      return true if page.url.start_with?('/api/')
+      return true if page.data['sitemap'] == false
+      return true unless page.html?
+
+      false
     end
   end
 end
