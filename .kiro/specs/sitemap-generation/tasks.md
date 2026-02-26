@@ -53,7 +53,7 @@ Implement a Jekyll Generator plugin (`SitemapGenerator`) that produces XML sitem
     - Generate random URL strings, call `render_url_entry`, verify XML contains `<loc>`, `<changefreq>daily</changefreq>`, `<priority>0.7</priority>`
     - **Validates: Requirements 2.3, 2.4, 2.5**
 
-  - [-] 3.3 Write property test for collection document inclusion (Property 2)
+  - [x] 3.3 Write property test for collection document inclusion (Property 2)
     - **Property 2: All collection documents are included**
     - Generate random documents across collections, run `collection_urls`, verify all document URLs present
     - **Validates: Requirements 3.1, 3.2, 3.3, 3.4, 3.5**

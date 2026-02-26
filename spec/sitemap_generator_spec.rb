@@ -84,4 +84,45 @@ RSpec.describe Jekyll::SitemapGenerator do
       end
     end
   end
+
+  # Feature: sitemap-generation, Property 2: All collection documents are included
+  describe '#collection_urls (PBT)' do
+    # **Validates: Requirements 3.1, 3.2, 3.3, 3.4, 3.5**
+    it 'includes URLs for all documents across all five collections' do
+      collection_names = %w[spots waterways obstacles notices static_pages]
+
+      property_of {
+        Rantly {
+          # Generate a hash mapping each collection to a list of random slugs (1-5 docs each)
+          docs = {}
+          collection_names.each do |name|
+            count = range(1, 5)
+            slugs = count.times.map { sized(range(3, 12)) { string(:alpha).downcase } }
+            docs[name] = slugs
+          end
+          docs
+        }
+      }.check(100) do |docs_by_collection|
+        Dir.mktmpdir do |tmpdir|
+          site = build_site(tmpdir)
+
+          # Add random documents to each collection and track their URLs
+          expected_urls = []
+          docs_by_collection.each do |collection_name, slugs|
+            slugs.each do |slug|
+              doc = add_collection_doc(site, collection_name, slug)
+              expected_urls << doc.url
+            end
+          end
+
+          # Run collection_urls and verify every document URL is present
+          result = generator.collection_urls(site)
+          expected_urls.each do |url|
+            expect(result).to include(url),
+              "Expected collection_urls to include '#{url}' but it was missing. Result: #{result.inspect}"
+          end
+        end
+      end
+    end
+  end
 end
