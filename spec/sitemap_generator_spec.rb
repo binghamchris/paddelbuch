@@ -248,5 +248,46 @@ RSpec.describe Jekyll::SitemapGenerator do
       end
     end
   end
+
+  # Feature: sitemap-generation, Property 7: Pages with sitemap:false are excluded
+  describe '#exclude_page? - sitemap:false exclusion (PBT)' do
+    # **Validates: Requirements 4.5**
+    it 'excludes pages with sitemap:false and includes pages with sitemap:true or no sitemap key' do
+      property_of {
+        Rantly {
+          # Generate a random page name (always .html so only sitemap front matter matters)
+          slug = sized(range(3, 12)) { string(:alpha).downcase }
+          name = "#{slug}.html"
+          url = "/#{slug}/"
+
+          # Randomly choose sitemap front matter: false, true, or absent
+          sitemap_variant = choose(:false_val, :true_val, :absent)
+
+          [name, url, sitemap_variant]
+        }
+      }.check(100) do |(name, url, sitemap_variant)|
+        Dir.mktmpdir do |tmpdir|
+          site = build_site(tmpdir)
+
+          data = case sitemap_variant
+                 when :false_val then { 'sitemap' => false }
+                 when :true_val  then { 'sitemap' => true }
+                 when :absent    then {}
+                 end
+
+          page = add_page(site, name, url, data)
+          result = generator.exclude_page?(page)
+
+          if sitemap_variant == :false_val
+            expect(result).to be(true),
+              "Expected page '#{name}' with sitemap:false to be excluded, but it was not"
+          else
+            expect(result).to be(false),
+              "Expected page '#{name}' with sitemap:#{sitemap_variant} to be included, but it was excluded"
+          end
+        end
+      end
+    end
+  end
 end
 
