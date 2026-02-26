@@ -98,7 +98,7 @@ Implement a Jekyll Generator plugin (`SitemapGenerator`) that produces XML sitem
     - Test error handling doesn't crash the build (simulate error, verify no exception raised)
     - _Requirements: 1.1, 1.2, 2.1, 2.2, 4.2, 4.3, 4.4, 6.3, 7.2, 7.4_
 
-- [-] 4. Final checkpoint - Ensure all tests pass
+- [x] 4. Final checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Notes
