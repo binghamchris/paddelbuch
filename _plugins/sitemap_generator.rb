@@ -18,10 +18,33 @@ module Jekyll
     COLLECTION_NAMES = %w[spots waterways obstacles notices static_pages].freeze
 
     def generate(site)
-      # TODO: Collect URLs, split into sub-sitemaps, write index
+      urls = collect_urls(site)
+      FileUtils.mkdir_p(site.dest)
+
+      sitemap_files = urls.each_slice(MAX_URLS_PER_SITEMAP).each_with_index.map do |chunk, index|
+        write_sub_sitemap(site, chunk, index)
+      end
+
+      write_sitemap_index(site, sitemap_files)
+
+      Jekyll.logger.info "SitemapGenerator:", "Generated sitemap with #{urls.size} URLs in #{sitemap_files.size} file(s)"
     rescue => e
       Jekyll.logger.error "SitemapGenerator:", "Error generating sitemap: #{e.message}"
       Jekyll.logger.debug "SitemapGenerator:", e.backtrace.join("\n")
+    end
+
+    def write_sub_sitemap(site, urls, index)
+      filename = "sitemap-#{index}.xml"
+      xml = render_sub_sitemap_xml(urls)
+      File.write(File.join(site.dest, filename), xml)
+      site.static_files << Jekyll::StaticFile.new(site, site.dest, "/", filename)
+      filename
+    end
+
+    def write_sitemap_index(site, sitemap_files)
+      xml = render_sitemap_index_xml(site, sitemap_files)
+      File.write(File.join(site.dest, "sitemap-index.xml"), xml)
+      site.static_files << Jekyll::StaticFile.new(site, site.dest, "/", "sitemap-index.xml")
     end
 
     def collect_urls(site)
