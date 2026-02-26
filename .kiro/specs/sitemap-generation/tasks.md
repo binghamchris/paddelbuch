@@ -88,7 +88,7 @@ Implement a Jekyll Generator plugin (`SitemapGenerator`) that produces XML sitem
     - Generate random standalone pages (HTML and non-HTML), verify HTML pages included and non-HTML excluded
     - **Validates: Requirements 4.1**
 
-  - [~] 3.10 Write unit tests for edge cases and XML structure
+  - [-] 3.10 Write unit tests for edge cases and XML structure
     - Test that `sitemap-index.xml` is generated with correct sitemaps.org namespace
     - Test that `sitemap-0.xml` is generated with correct sitemaps.org namespace
     - Test XML declaration `<?xml version="1.0" encoding="UTF-8"?>` is present
