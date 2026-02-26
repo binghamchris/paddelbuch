@@ -78,7 +78,7 @@ Implement a Jekyll Generator plugin (`SitemapGenerator`) that produces XML sitem
     - Generate random URL counts, verify correct number of sub-sitemaps and max size per file
     - **Validates: Requirements 1.3, 1.4**
 
-  - [-] 3.8 Write property test for sitemap:false exclusion (Property 7)
+  - [x] 3.8 Write property test for sitemap:false exclusion (Property 7)
     - **Property 7: Pages with sitemap:false are excluded**
     - Generate pages with random `sitemap` front matter values, verify excluded when false
     - **Validates: Requirements 4.5**
