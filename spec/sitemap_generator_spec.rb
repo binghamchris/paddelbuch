@@ -154,5 +154,34 @@ RSpec.describe Jekyll::SitemapGenerator do
       end
     end
   end
+
+  # Feature: sitemap-generation, Property 4: URL well-formedness
+  describe '#build_url (PBT)' do
+    # **Validates: Requirements 6.1, 6.2**
+    it 'produces URLs starting with site URL and ending with / for any path' do
+      property_of {
+        Rantly {
+          segment_count = range(1, 4)
+          segments = segment_count.times.map { sized(range(3, 10)) { string(:alpha).downcase } }
+          path = "/#{segments.join('/')}/"
+
+          # Randomly strip trailing slash for some inputs
+          path = path.chomp('/') if range(0, 1) == 0
+
+          path
+        }
+      }.check(100) do |path|
+        Dir.mktmpdir do |tmpdir|
+          site = build_site(tmpdir)
+          result = generator.build_url(site, path)
+
+          expect(result).to start_with('https://www.paddelbuch.ch'),
+            "Expected URL '#{result}' to start with 'https://www.paddelbuch.ch' for path '#{path}'"
+          expect(result).to end_with('/'),
+            "Expected URL '#{result}' to end with '/' for path '#{path}'"
+        end
+      end
+    end
+  end
 end
 
