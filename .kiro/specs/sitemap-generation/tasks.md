@@ -32,7 +32,7 @@ Implement a Jekyll Generator plugin (`SitemapGenerator`) that produces XML sitem
     - Implement `render_sitemap_index_xml(site, sitemap_filenames)` to produce sitemap index XML
     - _Requirements: 1.2, 2.2, 2.3, 2.4, 2.5, 6.3_
 
-  - [~] 1.5 Implement file writing and sitemap splitting
+  - [-] 1.5 Implement file writing and sitemap splitting
     - Implement `write_sub_sitemap(site, urls, index)` to render XML, write to `_site/`, and add as `StaticFile`
     - Implement `write_sitemap_index(site, sitemap_files)` to render index XML, write to `_site/`, and add as `StaticFile`
     - Wire the `generate` method to split URLs into chunks of 50,000, write sub-sitemaps, then write the index
