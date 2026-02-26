@@ -342,5 +342,108 @@ RSpec.describe Jekyll::SitemapGenerator do
       end
     end
   end
+
+  # --- Unit tests for edge cases and XML structure ---
+  # Validates: Requirements 1.1, 1.2, 2.1, 2.2, 4.2, 4.3, 4.4, 6.3, 7.2, 7.4
+  describe 'edge cases and XML structure' do
+    it 'generates sitemap-index.xml in site output' do
+      Dir.mktmpdir do |tmpdir|
+        site = build_site(tmpdir)
+        add_page(site, 'index.html', '/')
+        generator.generate(site)
+
+        expect(File.exist?(File.join(site.dest, 'sitemap-index.xml'))).to be(true)
+      end
+    end
+
+    it 'generates sitemap-0.xml in site output' do
+      Dir.mktmpdir do |tmpdir|
+        site = build_site(tmpdir)
+        add_page(site, 'index.html', '/')
+        generator.generate(site)
+
+        expect(File.exist?(File.join(site.dest, 'sitemap-0.xml'))).to be(true)
+      end
+    end
+
+    it 'sitemap-index.xml has correct sitemaps.org namespace' do
+      Dir.mktmpdir do |tmpdir|
+        site = build_site(tmpdir)
+        add_page(site, 'index.html', '/')
+        generator.generate(site)
+
+        content = File.read(File.join(site.dest, 'sitemap-index.xml'))
+        expect(content).to include('xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"')
+        expect(content).to include('<sitemapindex')
+      end
+    end
+
+    it 'sitemap-0.xml has correct sitemaps.org namespace' do
+      Dir.mktmpdir do |tmpdir|
+        site = build_site(tmpdir)
+        add_page(site, 'index.html', '/')
+        generator.generate(site)
+
+        content = File.read(File.join(site.dest, 'sitemap-0.xml'))
+        expect(content).to include('xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"')
+        expect(content).to include('<urlset')
+      end
+    end
+
+    it 'includes XML declaration in generated files' do
+      Dir.mktmpdir do |tmpdir|
+        site = build_site(tmpdir)
+        add_page(site, 'index.html', '/')
+        generator.generate(site)
+
+        index_content = File.read(File.join(site.dest, 'sitemap-index.xml'))
+        sub_content = File.read(File.join(site.dest, 'sitemap-0.xml'))
+
+        expect(index_content).to start_with('<?xml version="1.0" encoding="UTF-8"?>')
+        expect(sub_content).to start_with('<?xml version="1.0" encoding="UTF-8"?>')
+      end
+    end
+
+    it 'excludes 404 page' do
+      Dir.mktmpdir do |tmpdir|
+        site = build_site(tmpdir)
+        page = add_page(site, '404.html', '/404.html')
+
+        expect(generator.exclude_page?(page)).to be(true)
+      end
+    end
+
+    it 'excludes assets/ pages' do
+      Dir.mktmpdir do |tmpdir|
+        site = build_site(tmpdir)
+        page = add_page(site, 'style.css', '/assets/style.css')
+
+        expect(generator.exclude_page?(page)).to be(true)
+      end
+    end
+
+    it 'excludes api/ pages' do
+      Dir.mktmpdir do |tmpdir|
+        site = build_site(tmpdir)
+        page = add_page(site, 'data.html', '/api/data.html')
+
+        expect(generator.exclude_page?(page)).to be(true)
+      end
+    end
+
+    it 'has priority :low' do
+      expect(Jekyll::SitemapGenerator.priority).to eq(:low)
+    end
+
+    it 'does not crash the build on error' do
+      Dir.mktmpdir do |tmpdir|
+        site = build_site(tmpdir)
+        gen = generator
+        allow(gen).to receive(:collect_urls).and_raise(RuntimeError, 'simulated error')
+
+        expect { gen.generate(site) }.not_to raise_error
+      end
+    end
+  end
 end
 
