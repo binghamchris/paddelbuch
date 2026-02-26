@@ -63,7 +63,7 @@ Implement a Jekyll Generator plugin (`SitemapGenerator`) that produces XML sitem
     - Generate random base paths, call `bilingual_urls`, verify both default and `/en/`-prefixed URLs exist
     - **Validates: Requirements 5.1, 5.2**
 
-  - [-] 3.5 Write property test for URL well-formedness (Property 4)
+  - [x] 3.5 Write property test for URL well-formedness (Property 4)
     - **Property 4: URL well-formedness**
     - Generate random paths, call `build_url`, verify starts with site URL and ends with `/`
     - **Validates: Requirements 6.1, 6.2**
