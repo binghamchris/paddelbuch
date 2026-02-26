@@ -58,7 +58,7 @@ Implement a Jekyll Generator plugin (`SitemapGenerator`) that produces XML sitem
     - Generate random documents across collections, run `collection_urls`, verify all document URLs present
     - **Validates: Requirements 3.1, 3.2, 3.3, 3.4, 3.5**
 
-  - [-] 3.4 Write property test for bilingual URL generation (Property 3)
+  - [x] 3.4 Write property test for bilingual URL generation (Property 3)
     - **Property 3: Bilingual URL generation**
     - Generate random base paths, call `bilingual_urls`, verify both default and `/en/`-prefixed URLs exist
     - **Validates: Requirements 5.1, 5.2**

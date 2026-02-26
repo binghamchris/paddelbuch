@@ -125,4 +125,34 @@ RSpec.describe Jekyll::SitemapGenerator do
       end
     end
   end
+  # Feature: sitemap-generation, Property 3: Bilingual URL generation
+  describe '#bilingual_urls (PBT)' do
+    # **Validates: Requirements 5.1, 5.2**
+    it 'generates both default locale and /en/-prefixed URLs for any base path' do
+      property_of {
+        Rantly {
+          segment_count = range(1, 4)
+          segments = segment_count.times.map { sized(range(3, 10)) { string(:alpha).downcase } }
+          "/#{segments.join('/')}/"
+        }
+      }.check(100) do |path|
+        Dir.mktmpdir do |tmpdir|
+          site = build_site(tmpdir)
+          result = generator.bilingual_urls(site, [path])
+
+          default_url = "https://www.paddelbuch.ch#{path}"
+          default_url = "#{default_url}/" unless default_url.end_with?('/')
+
+          en_url = "https://www.paddelbuch.ch/en#{path}"
+          en_url = "#{en_url}/" unless en_url.end_with?('/')
+
+          expect(result).to include(default_url),
+            "Expected default locale URL '#{default_url}' in result: #{result.inspect}"
+          expect(result).to include(en_url),
+            "Expected English URL '#{en_url}' in result: #{result.inspect}"
+        end
+      end
+    end
+  end
 end
+
