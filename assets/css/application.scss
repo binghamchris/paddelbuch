@@ -5,6 +5,11 @@
 // Import Bootstrap from node_modules (resolved via load_paths)
 @import "bootstrap/scss/bootstrap";
 
+// Override: remove border-radius from all buttons
+.btn {
+  border-radius: 0;
+}
+
 @import "settings/settings";
 @import "util/util";
 @import "components/components";
