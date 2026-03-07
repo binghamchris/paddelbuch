@@ -190,8 +190,9 @@
       html.push('<span class="popup-title"><h1>' + escapeHtml(spot.name) + '</h1></span>');
 
       // Description
-      if (spot.description) {
-        var plainText = stripHtml(spot.description);
+      var description = spot.description || spot.description_excerpt;
+      if (description) {
+        var plainText = stripHtml(description);
         var excerpt = truncate(plainText, 150);
         if (excerpt) {
           html.push('<div><p>' + escapeHtml(excerpt) + '</p></div>');
@@ -272,34 +273,33 @@
     var html = [];
     
     var iconPath = getIconPath(null, true, 'light');
+    var noEntryLabel = (locale === 'en') ? 'No Entry Spot' : 'Kein Zutritt Ort';
+    var iconAlt = (locale === 'en') ? 'No entry spot icon' : 'Kein Zutritt Symbol';
     
-    html.push('<div class="spot-popup rejected-spot-popup">');
-    
-    // Header with icon and name
-    html.push('<div class="spot-popup-header">');
-    html.push('<img src="' + iconPath + '" alt="" height="20" width="20" class="spot-icon spot-icon-light" loading="lazy" />');
-    html.push('<strong class="spot-popup-name">' + escapeHtml(spot.name) + '</strong>');
+    // Header: icon + category label (matches .popup-icon-div from Gatsby)
+    html.push('<div class="popup-icon-div">');
+    html.push('<span class="popup-icon">');
+    html.push('<img src="' + iconPath + '" alt="' + iconAlt + '" height="20" width="20" loading="lazy" />');
+    html.push('</span>');
+    html.push(escapeHtml(noEntryLabel));
     html.push('</div>');
     
-    // Rejection reason (from description)
-    if (spot.description) {
-      var plainText = stripHtml(spot.description);
-      html.push('<div class="spot-popup-description rejection-reason">');
-      html.push('<p>' + escapeHtml(plainText) + '</p>');
-      html.push('</div>');
+    // Title
+    html.push('<span class="popup-title"><h1>' + escapeHtml(spot.name) + '</h1></span>');
+    
+    // Description (rejection reason)
+    var description = spot.description || spot.description_excerpt;
+    if (description) {
+      var plainText = stripHtml(description);
+      html.push('<div><p>' + escapeHtml(plainText) + '</p></div>');
     }
     
-    // More details link
+    // More details button (matches regular spot popup: button.popup-btn-right > a)
     if (spot.slug) {
-      html.push('<div class="spot-popup-actions">');
-      html.push('<a href="' + localePrefix + '/einstiegsorte/' + escapeHtml(spot.slug) + '/" ');
-      html.push('class="btn btn-sm btn-primary spot-popup-details-link">');
-      html.push(labels.moreDetails);
-      html.push('</a>');
-      html.push('</div>');
+      html.push('<button class="popup-btn popup-btn-right">');
+      html.push('<a href="' + localePrefix + '/einstiegsorte/' + escapeHtml(spot.slug) + '/">');
+      html.push(labels.moreDetails + '</a></button>');
     }
-    
-    html.push('</div>');
     
     return html.join('');
   }
