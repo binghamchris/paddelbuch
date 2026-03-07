@@ -69,13 +69,14 @@ labels:
   "no": "Nein"
   unknown: "Unbekannt"
   summary: "Kurzfassung"
+  potentially_usable_by: "Potenziell nutzbar für"
 
 # Actions
 actions:
   copy: "Kopieren"
   copy_gps: "GPS in der Zwischenablage kopieren"
   copy_address: "Ungefähre Adresse in der Zwischenablage kopieren"
-  navigate: "Navigieren"
+  navigate: "Navigieren zu"
 
 # Obstacles
 obstacles:

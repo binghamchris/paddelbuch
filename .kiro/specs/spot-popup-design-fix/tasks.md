@@ -20,7 +20,7 @@
   - Mark task complete when test is written, run, and failure is documented
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5_
 
-- [-] 2. Write preservation property tests (BEFORE implementing fix)
+- [x] 2. Write preservation property tests (BEFORE implementing fix)
   - **Property 2: Preservation** - Existing Functional Behavior Unchanged
   - **IMPORTANT**: Follow observation-first methodology
   - **IMPORTANT**: Write these tests BEFORE implementing the fix
@@ -46,7 +46,7 @@
 
 - [ ] 3. Fix spot popup layout and content to match original Gatsby design
 
-  - [~] 3.1 Add and update i18n keys in `_i18n/de.yml` and `_i18n/en.yml`
+  - [-] 3.1 Add and update i18n keys in `_i18n/de.yml` and `_i18n/en.yml`
     - Add `labels.potentially_usable_by`: "Potenziell nutzbar für" (de) / "Potentially Usable By" (en)
     - Update `actions.navigate` to "Navigieren zu" (de) / "Navigate To" (en)
     - Verify `actions.copy` key exists with "Kopieren" (de) / "Copy" (en)
