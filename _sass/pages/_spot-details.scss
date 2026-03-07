@@ -11,6 +11,7 @@
 
   th {
     padding-right: 1.5em;
+    font-weight: 500;
   }
 
   @media screen and (min-width: 992px) {
@@ -27,6 +28,7 @@
   .spot-description {
     padding-right: 1.5em;
     padding-left: 1.5em;
+    overflow-x: hidden;
   }
 
   .spot-description > div {
@@ -60,6 +62,10 @@
   
   .spot-icon img {
     width: 20px !important;
+  }
+
+  .spot-details-table {
+    width: 100%;
   }
 
   .spot-details-table ul {
@@ -107,6 +113,14 @@
   .clipboard-cell {
     text-align: right;
     white-space: nowrap;
+    width: 1px;
+    padding-left: 0.5em;
+  }
+
+  // Wrap long content in table cells
+  .spot-details-table td {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
   }
 
   // Copy buttons: filled style matching Gatsby

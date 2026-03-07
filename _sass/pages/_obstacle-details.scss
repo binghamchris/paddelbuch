@@ -27,6 +27,7 @@
   .obstacle-description {
     padding-right: 1.5em;
     padding-left: 1.5em;
+    overflow-x: hidden;
   }
 
   .obstacle-description > div {
@@ -37,6 +38,15 @@
     padding-top: 0.7em;
     border-bottom: 1px solid $swisscanoe-blue;
     margin-bottom: 1em;
+  }
+
+  .obstacle-details-table {
+    width: 100%;
+
+    td {
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+    }
   }
 
 }
