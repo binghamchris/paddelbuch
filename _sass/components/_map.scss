@@ -190,9 +190,6 @@
 .spot-popup-header {
   display: flex;
   align-items: center;
-  border-bottom: 1px solid $secondary-blue;
-  margin-bottom: 0.75em;
-  padding-bottom: 0.75em;
 }
 
 .spot-popup-header .spot-icon {
@@ -200,11 +197,26 @@
   flex-shrink: 0;
 }
 
-.spot-popup-name {
+.spot-popup-category {
   font-family: $font-brand;
   font-size: 1.1em;
   font-weight: 500;
   line-height: 1.2;
+}
+
+.spot-popup-divider {
+  border: 0;
+  border-top: 1px solid $secondary-blue;
+  margin: 0.75em 0;
+}
+
+.spot-popup-title {
+  font-family: $font-brand;
+  font-size: 1.4em;
+  font-weight: 500;
+  margin: 0 0 0.75em;
+  line-height: 1.2;
+  color: $white;
 }
 
 .spot-popup-description {
@@ -218,12 +230,26 @@
 }
 
 .spot-popup-gps,
-.spot-popup-address,
-.spot-popup-craft-types {
+.spot-popup-address {
   display: flex;
   align-items: flex-start;
   margin-bottom: 0.5em;
   font-size: 0.9em;
+}
+
+.spot-popup-craft-types {
+  margin-bottom: 0.5em;
+  font-size: 0.9em;
+}
+
+.spot-popup-craft-list {
+  margin: 0.25em 0 0;
+  padding-left: 1.25em;
+  list-style: disc;
+
+  li {
+    margin-bottom: 0.15em;
+  }
 }
 
 .spot-popup-label {
@@ -239,9 +265,10 @@
 
 .spot-popup .copy-btn {
   margin-left: 0.5em;
-  padding: 0.15em 0.35em;
+  padding: 0.2em 0.5em;
   border-color: $white-40pc;
   flex-shrink: 0;
+  font-size: 0.85em;
 }
 
 .spot-popup .copy-btn:hover {
