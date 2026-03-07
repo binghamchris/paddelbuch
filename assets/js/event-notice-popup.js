@@ -23,13 +23,13 @@
    */
   var strings = {
     de: {
-      startDate: 'Startdatum',
-      endDate: 'Enddatum',
+      startDate: 'Ungefähres Startdatum',
+      endDate: 'Ungefähres Enddatum',
       moreDetails: 'Weitere Details'
     },
     en: {
-      startDate: 'Start date',
-      endDate: 'End date',
+      startDate: 'Approx. Start Date',
+      endDate: 'Approx. End Date',
       moreDetails: 'More details'
     }
   };
@@ -173,50 +173,38 @@
   function generateEventNoticePopupContent(notice, locale) {
     var localeStrings = strings[locale] || strings.de;
     var localePrefix = (locale && locale !== 'de') ? '/' + locale : '';
-    var html = '<div class="event-notice-popup">';
     
-    // Event notice name (Requirement 7.3)
-    html += '<div class="event-notice-popup-header">';
-    html += '<span class="popup-title"><h1>' + escapeHtml(notice.name || '') + '</h1></span>';
-    html += '</div>';
+    // Title (Requirement 7.3)
+    var html = '<span class="popup-title"><h1>' + escapeHtml(notice.name || '') + '</h1></span>';
     
-    // Description excerpt (Requirement 7.3)
-    if (notice.description) {
-      var plainText = stripHtml(notice.description);
-      var excerpt = truncate(plainText, 150);
-      if (excerpt) {
-        html += '<div class="event-notice-popup-description">';
-        html += '<p>' + escapeHtml(excerpt) + '</p>';
-        html += '</div>';
-      }
-    }
+    // Dates in a table matching the original Gatsby layout (Requirement 7.3)
+    html += '<table class="popup-details-table popup-eventnotice-table"><tbody>';
     
-    // Start date (Requirement 7.3)
+    // Start date row
     if (notice.startDate) {
-      html += '<div class="event-notice-popup-start-date">';
-      html += '<span class="event-notice-popup-label">' + localeStrings.startDate + ': </span>';
-      html += '<span class="event-notice-popup-value">' + formatDate(notice.startDate, locale) + '</span>';
-      html += '</div>';
+      html += '<tr>';
+      html += '<th>' + localeStrings.startDate + ':</th>';
+      html += '<td>' + formatDate(notice.startDate, locale) + '</td>';
+      html += '</tr>';
     }
     
-    // End date (Requirement 7.3)
+    // End date row
     if (notice.endDate) {
-      html += '<div class="event-notice-popup-end-date">';
-      html += '<span class="event-notice-popup-label">' + localeStrings.endDate + ': </span>';
-      html += '<span class="event-notice-popup-value">' + formatDate(notice.endDate, locale) + '</span>';
-      html += '</div>';
+      html += '<tr>';
+      html += '<th>' + localeStrings.endDate + ':</th>';
+      html += '<td>' + formatDate(notice.endDate, locale) + '</td>';
+      html += '</tr>';
     }
+    
+    html += '</tbody></table>';
     
     // Link to event notice detail page (Requirement 7.3)
     if (notice.slug) {
-      html += '<div class="event-notice-popup-actions">';
-      html += '<a href="' + localePrefix + '/gewaesserereignisse/' + encodeURIComponent(notice.slug) + '/" class="btn btn-sm btn-primary event-notice-popup-details-link">';
+      html += '<button class="popup-btn popup-btn-right">';
+      html += '<a class="popup-btn-right" hreflang="' + (locale || 'de') + '" href="' + localePrefix + '/gewaesserereignisse/' + encodeURIComponent(notice.slug) + '/">';
       html += localeStrings.moreDetails;
-      html += '</a>';
-      html += '</div>';
+      html += '</a></button>';
     }
-    
-    html += '</div>';
     
     return html;
   }

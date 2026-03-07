@@ -89,26 +89,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   
-  // Add marker at notice location if available
+  // Set view to notice location if no affected area to fit bounds on
   {% if notice.location %}
   {% assign lat = notice.location.lat | default: notice.location.latitude %}
   {% assign lon = notice.location.lon | default: notice.location.lng | default: notice.location.longitude %}
   {% if lat and lon %}
-  var noticeLat = {{ lat }};
-  var noticeLon = {{ lon }};
-  
-  var eventIcon = L.icon({
-    iconUrl: '{{ "/assets/images/markers/waterwayevent.svg" | relative_url }}',
-    iconSize: [32, 32],
-    iconAnchor: [16, 32],
-    popupAnchor: [0, -32]
-  });
-  
-  L.marker([noticeLat, noticeLon], { icon: eventIcon }).addTo(map)
-    .bindPopup('<strong>{{ notice.name | escape }}</strong>');
-  
   {% unless notice.affectedArea %}
-  map.setView([noticeLat, noticeLon], 14);
+  map.setView([{{ lat }}, {{ lon }}], 14);
   {% endunless %}
   {% endif %}
   {% endif %}
@@ -131,16 +118,6 @@ document.addEventListener('DOMContentLoaded', function() {
   }).addTo(map);
   
   map.zoomControl.setPosition('bottomright');
-  
-  var eventIcon = L.icon({
-    iconUrl: '{{ "/assets/images/markers/waterwayevent.svg" | relative_url }}',
-    iconSize: [32, 32],
-    iconAnchor: [16, 32],
-    popupAnchor: [0, -32]
-  });
-  
-  L.marker([{{ lat }}, {{ lon }}], { icon: eventIcon }).addTo(map)
-    .bindPopup('<strong>{{ notice.name | escape }}</strong>');
   {% else %}
   map = L.map('notice-map', {
     center: [{{ site.map.center.lat }}, {{ site.map.center.lon }}],

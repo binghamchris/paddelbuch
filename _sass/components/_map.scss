@@ -80,19 +80,34 @@
   border: 1px solid $white-40pc;
   background-color: $secondary-blue;
   color: white;
+  padding: 0.35em 0.75em;
+  cursor: pointer;
+  font-size: 0.9em;
+}
+
+.popup-btn:hover {
+  background-color: lighten($secondary-blue, 8%);
 }
 
 .popup-btn:active {
   background-color: $green-1;
 }
 
-.popup-btn a{
+.popup-btn a {
   text-decoration: none;
+  color: white;
 }
 
 .popup-btn-right, .popup-btn-right a {
   float: right;
   text-decoration: none !important;
+}
+
+/* Clearfix for floated popup buttons */
+.leaflet-popup-content::after {
+  content: '';
+  display: table;
+  clear: both;
 }
 
 .leaflet-control-layers {

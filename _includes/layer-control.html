@@ -377,24 +377,21 @@
         popupContent = window.PaddelbuchEventNoticePopup.generateEventNoticePopupContent(notice, currentLocale);
       } else {
         // Fallback popup content if module not loaded
-        popupContent = '<div class="event-notice-popup">';
-        popupContent += '<strong>' + (notice.name || '') + '</strong>';
-        if (notice.description) {
-          var excerpt = notice.description.replace(/<[^>]*>/g, '').substring(0, 150);
-          if (notice.description.length > 150) excerpt += '...';
-          popupContent += '<p>' + excerpt + '</p>';
-        }
+        var localeStrs = currentLocale === 'en' 
+          ? { startDate: 'Approx. Start Date', endDate: 'Approx. End Date', moreDetails: 'More details' }
+          : { startDate: 'Ungefähres Startdatum', endDate: 'Ungefähres Enddatum', moreDetails: 'Weitere Details' };
+        popupContent = '<span class="popup-title"><h1>' + (notice.name || '') + '</h1></span>';
+        popupContent += '<table class="popup-details-table popup-eventnotice-table"><tbody>';
         if (notice.startDate) {
-          popupContent += '<p>' + (currentLocale === 'en' ? 'Start: ' : 'Start: ') + notice.startDate + '</p>';
+          popupContent += '<tr><th>' + localeStrs.startDate + ':</th><td>' + notice.startDate + '</td></tr>';
         }
         if (notice.endDate) {
-          popupContent += '<p>' + (currentLocale === 'en' ? 'End: ' : 'Ende: ') + notice.endDate + '</p>';
+          popupContent += '<tr><th>' + localeStrs.endDate + ':</th><td>' + notice.endDate + '</td></tr>';
         }
+        popupContent += '</tbody></table>';
         if (notice.slug) {
-          popupContent += '<a href="' + localePrefix + '/gewaesserereignisse/' + notice.slug + '/" class="btn btn-sm btn-primary">' + 
-            (currentLocale === 'en' ? 'More details' : 'Weitere Details') + '</a>';
+          popupContent += '<button class="popup-btn popup-btn-right"><a class="popup-btn-right" hreflang="' + currentLocale + '" href="' + localePrefix + '/gewaesserereignisse/' + notice.slug + '/">' + localeStrs.moreDetails + '</a></button>';
         }
-        popupContent += '</div>';
       }
       
       marker.bindPopup(popupContent, { maxWidth: 350 });
