@@ -45,13 +45,24 @@ pageName: spot-details
 
 <div class="container-fluid">
   <div class="row">
-    <!-- Map Column (8 cols on large screens) -->
-    <div class="col-lg-8 p-0">
+    <!-- Map Column -->
+    <div class="col-xl-8 col-lg-7 p-0">
       <div id="spot-map" class="map"></div>
     </div>
     
-    <!-- Details Panel (4 cols on large screens) -->
-    <div class="col-lg-4 spot-description">
+    <!-- Details Panel -->
+    <div class="col-xl-4 col-lg-5 col-md-12 col-sm-12 col-12 spot-description">
+      <!-- Navigate Button (top, matching Gatsby layout) -->
+      {% unless is_rejected %}
+        {% if spot.location %}
+          {% assign lat = spot.location.lat | default: spot.location.latitude %}
+          {% assign lon = spot.location.lon | default: spot.location.lng | default: spot.location.longitude %}
+          {% if lat and lon %}
+            {% include navigate-btn.html lat=lat lon=lon size="md" %}
+          {% endif %}
+        {% endif %}
+      {% endunless %}
+
       <!-- Spot Icon and Type -->
       <div class="spot-icon-div d-flex align-items-center">
         {% include spot-icon.html type=spot_type_slug rejected=is_rejected variant="dark" size=20 %}
@@ -59,7 +70,7 @@ pageName: spot-details
       </div>
       
       <!-- Spot Title -->
-      <h1 class="spot-title">{{ spot.name }}</h1>
+      <div class="spot-title"><h1>{{ spot.name }}</h1></div>
       
       {% if is_rejected %}
         <!-- Rejected Spot: Show rejection reason (Requirement 3.7) -->
