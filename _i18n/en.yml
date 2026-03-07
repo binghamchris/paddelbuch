@@ -81,9 +81,10 @@ actions:
 # Obstacles
 obstacles:
   title: "Obstacles"
+  portage_route: "Portage Route"
   portage_route_for: "Portage route for"
   portage_possible: "Portage Possible"
-  portage_distance: "Portage Distance"
+  portage_distance: "Distance"
   portage_description: "Portage Description"
   exit_spot: "Exit Spot"
   reentry_spot: "Re-entry Spot"

@@ -11,6 +11,7 @@
 
   th {
     padding-right: 1.5em;
+    font-weight: 500;
   }
 
   @media screen and (min-width: 992px) {
@@ -38,9 +39,13 @@
     padding-top: 0.7em;
     border-bottom: 1px solid $swisscanoe-blue;
     margin-bottom: 1em;
+
+    h1 {
+      margin-bottom: 0;
+    }
   }
 
-  .obstacle-details-table {
+  table {
     width: 100%;
 
     td {
