@@ -20,7 +20,7 @@ permalink: /offene-daten/api/
   {% assign locale_prefix = "/en" %}
 {% endif %}
 
-<div class="container api-page">
+<div class="container">
   <h1>{% t api.title %}</h1>
   
   <!-- Intro paragraph with data licensing link -->
@@ -33,151 +33,109 @@ permalink: /offene-daten/api/
 
   <!-- Last Update Index -->
   <h2>{% t api.last_update_index %}</h2>
-  <p>{% t api.last_update_index_description %}</p>
-  <p>
-    <a href="{{ '/api/lastUpdateIndex.json' | relative_url }}">{% t api.last_update_index %}</a>
+  <p>{% t api.last_update_index_description %}<p></p>
+  <a href="{{ '/api/lastUpdateIndex.json' | relative_url }}">{% t api.last_update_index %}</a>
   </p>
 
   <!-- Fact Tables Section -->
-  <section class="fact-tables">
-    <h2>{% t api.fact_tables %}</h2>
-    <p>{% t api.fact_tables_description %}</p>
-    
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th>{% t api.table_name %}</th>
-          <th>{% t api.german_download %}</th>
-          <th>{% t api.english_download %}</th>
-          <th>{% t labels.last_updated %}</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>{% t api.spots %}</td>
-          <td><a href="{{ '/api/spots-de.json' | relative_url }}">{% t api.german %}</a></td>
-          <td><a href="{{ '/api/spots-en.json' | relative_url }}">{% t api.english %}</a></td>
-          <td class="last-updated" data-table="spots-de"></td>
-        </tr>
-        <tr>
-          <td>{% t api.waterway_event_notices %}</td>
-          <td><a href="{{ '/api/notices-de.json' | relative_url }}">{% t api.german %}</a></td>
-          <td><a href="{{ '/api/notices-en.json' | relative_url }}">{% t api.english %}</a></td>
-          <td class="last-updated" data-table="notices-de"></td>
-        </tr>
-        <tr>
-          <td>{% t api.obstacles %}</td>
-          <td><a href="{{ '/api/obstacles-de.json' | relative_url }}">{% t api.german %}</a></td>
-          <td><a href="{{ '/api/obstacles-en.json' | relative_url }}">{% t api.english %}</a></td>
-          <td class="last-updated" data-table="obstacles-de"></td>
-        </tr>
-        <tr>
-          <td>{% t api.protected_areas %}</td>
-          <td><a href="{{ '/api/protected-areas-de.json' | relative_url }}">{% t api.german %}</a></td>
-          <td><a href="{{ '/api/protected-areas-en.json' | relative_url }}">{% t api.english %}</a></td>
-          <td class="last-updated" data-table="protected-areas-de"></td>
-        </tr>
-        <tr>
-          <td>{% t api.waterways %}</td>
-          <td><a href="{{ '/api/waterways-de.json' | relative_url }}">{% t api.german %}</a></td>
-          <td><a href="{{ '/api/waterways-en.json' | relative_url }}">{% t api.english %}</a></td>
-          <td class="last-updated" data-table="waterways-de"></td>
-        </tr>
-      </tbody>
-    </table>
-  </section>
-  
-  <!-- Dimension Tables Section -->
-  <section class="dimension-tables">
-    <h2>{% t api.dimension_tables %}</h2>
-    <p>{% t api.dimension_tables_description %}</p>
-    
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th>{% t api.table_name %}</th>
-          <th>{% t api.german_download %}</th>
-          <th>{% t api.english_download %}</th>
-          <th>{% t labels.last_updated %}</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>{% t api.data_license_types %}</td>
-          <td><a href="{{ '/api/datalicensetypes-de.json' | relative_url }}">{% t api.german %}</a></td>
-          <td><a href="{{ '/api/datalicensetypes-en.json' | relative_url }}">{% t api.english %}</a></td>
-          <td class="last-updated" data-table="datalicensetypes-de"></td>
-        </tr>
-        <tr>
-          <td>{% t api.data_source_types %}</td>
-          <td><a href="{{ '/api/datasourcetypes-de.json' | relative_url }}">{% t api.german %}</a></td>
-          <td><a href="{{ '/api/datasourcetypes-en.json' | relative_url }}">{% t api.english %}</a></td>
-          <td class="last-updated" data-table="datasourcetypes-de"></td>
-        </tr>
-        <tr>
-          <td>{% t api.obstacle_types %}</td>
-          <td><a href="{{ '/api/obstacletypes-de.json' | relative_url }}">{% t api.german %}</a></td>
-          <td><a href="{{ '/api/obstacletypes-en.json' | relative_url }}">{% t api.english %}</a></td>
-          <td class="last-updated" data-table="obstacletypes-de"></td>
-        </tr>
-        <tr>
-          <td>{% t api.paddle_craft_types %}</td>
-          <td><a href="{{ '/api/paddlecrafttypes-de.json' | relative_url }}">{% t api.german %}</a></td>
-          <td><a href="{{ '/api/paddlecrafttypes-en.json' | relative_url }}">{% t api.english %}</a></td>
-          <td class="last-updated" data-table="paddlecrafttypes-de"></td>
-        </tr>
-        <tr>
-          <td>{% t api.paddling_environment_types %}</td>
-          <td><a href="{{ '/api/paddlingenvironmenttypes-de.json' | relative_url }}">{% t api.german %}</a></td>
-          <td><a href="{{ '/api/paddlingenvironmenttypes-en.json' | relative_url }}">{% t api.english %}</a></td>
-          <td class="last-updated" data-table="paddlingenvironmenttypes-de"></td>
-        </tr>
-        <tr>
-          <td>{% t api.protected_area_types %}</td>
-          <td><a href="{{ '/api/protectedareatypes-de.json' | relative_url }}">{% t api.german %}</a></td>
-          <td><a href="{{ '/api/protectedareatypes-en.json' | relative_url }}">{% t api.english %}</a></td>
-          <td class="last-updated" data-table="protectedareatypes-de"></td>
-        </tr>
-        <tr>
-          <td>{% t api.spot_types %}</td>
-          <td><a href="{{ '/api/spottypes-de.json' | relative_url }}">{% t api.german %}</a></td>
-          <td><a href="{{ '/api/spottypes-en.json' | relative_url }}">{% t api.english %}</a></td>
-          <td class="last-updated" data-table="spottypes-de"></td>
-        </tr>
-      </tbody>
-    </table>
-  </section>
-</div>
+  <h2>{% t api.fact_tables %}</h2>
+  <p>{% t api.fact_tables_description %}</p>
 
-<script>
-// Fetch and display last updated timestamps
-document.addEventListener('DOMContentLoaded', function() {
-  fetch('{{ "/api/lastUpdateIndex.json" | relative_url }}')
-    .then(response => response.json())
-    .then(data => {
-      // Create a map of table names to timestamps
-      const updateMap = {};
-      data.forEach(item => {
-        updateMap[item.table] = item.lastUpdatedAt;
-      });
-      
-      // Update all cells with last updated timestamps
-      document.querySelectorAll('.last-updated').forEach(cell => {
-        const tableName = cell.dataset.table;
-        const timestamp = updateMap[tableName];
-        if (timestamp) {
-          const date = new Date(timestamp);
-          cell.textContent = date.toISOString();
-        } else {
-          cell.textContent = '-';
-        }
-      });
-    })
-    .catch(error => {
-      console.error('Error loading last update index:', error);
-      document.querySelectorAll('.last-updated').forEach(cell => {
-        cell.textContent = '-';
-      });
-    });
-});
-</script>
+  <table>
+    <tbody>
+      <tr>
+        <th>{% t api.table_name %}</th>
+        <th>{% t api.german_download %}</th>
+        <th>{% t api.english_download %}</th>
+        <th>{% t labels.last_updated %}</th>
+      </tr>
+      <tr>
+        <td>{% t api.spots %}</td>
+        <td><a href="{{ '/api/spots-de.json' | relative_url }}">{% t api.german %} </a></td>
+        <td><a href="{{ '/api/spots-en.json' | relative_url }}">{% t api.english %} </a></td>
+        <td class="last-updated" data-table="spots-de"></td>
+      </tr>
+      <tr>
+        <td>{% t api.waterway_event_notices %}</td>
+        <td><a href="{{ '/api/notices-de.json' | relative_url }}">{% t api.german %} </a></td>
+        <td><a href="{{ '/api/notices-en.json' | relative_url }}">{% t api.english %} </a></td>
+        <td class="last-updated" data-table="notices-de"></td>
+      </tr>
+      <tr>
+        <td>{% t api.obstacles %}</td>
+        <td><a href="{{ '/api/obstacles-de.json' | relative_url }}">{% t api.german %} </a></td>
+        <td><a href="{{ '/api/obstacles-en.json' | relative_url }}">{% t api.english %} </a></td>
+        <td class="last-updated" data-table="obstacles-de"></td>
+      </tr>
+      <tr>
+        <td>{% t api.protected_areas %}</td>
+        <td><a href="{{ '/api/protected-areas-de.json' | relative_url }}">{% t api.german %} </a></td>
+        <td><a href="{{ '/api/protected-areas-en.json' | relative_url }}">{% t api.english %} </a></td>
+        <td class="last-updated" data-table="protected-areas-de"></td>
+      </tr>
+      <tr>
+        <td>{% t api.waterways %}</td>
+        <td><a href="{{ '/api/waterways-de.json' | relative_url }}">{% t api.german %} </a></td>
+        <td><a href="{{ '/api/waterways-en.json' | relative_url }}">{% t api.english %} </a></td>
+        <td class="last-updated" data-table="waterways-de"></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Dimension Tables Section -->
+  <h2>{% t api.dimension_tables %}</h2>
+  <p>{% t api.dimension_tables_description %}</p>
+
+  <table>
+    <tbody>
+      <tr>
+        <th>{% t api.table_name %}</th>
+        <th>{% t api.german_download %}</th>
+        <th>{% t api.english_download %}</th>
+        <th>{% t labels.last_updated %}</th>
+      </tr>
+      <tr>
+        <td>{% t api.data_license_types %}</td>
+        <td><a href="{{ '/api/datalicensetypes-de.json' | relative_url }}">{% t api.german %} </a></td>
+        <td><a href="{{ '/api/datalicensetypes-en.json' | relative_url }}">{% t api.english %} </a></td>
+        <td class="last-updated" data-table="datalicensetypes-de"></td>
+      </tr>
+      <tr>
+        <td>{% t api.data_source_types %}</td>
+        <td><a href="{{ '/api/datasourcetypes-de.json' | relative_url }}">{% t api.german %} </a></td>
+        <td><a href="{{ '/api/datasourcetypes-en.json' | relative_url }}">{% t api.english %} </a></td>
+        <td class="last-updated" data-table="datasourcetypes-de"></td>
+      </tr>
+      <tr>
+        <td>{% t api.obstacle_types %}</td>
+        <td><a href="{{ '/api/obstacletypes-de.json' | relative_url }}">{% t api.german %} </a></td>
+        <td><a href="{{ '/api/obstacletypes-en.json' | relative_url }}">{% t api.english %} </a></td>
+        <td class="last-updated" data-table="obstacletypes-de"></td>
+      </tr>
+      <tr>
+        <td>{% t api.paddle_craft_types %}</td>
+        <td><a href="{{ '/api/paddlecrafttypes-de.json' | relative_url }}">{% t api.german %} </a></td>
+        <td><a href="{{ '/api/paddlecrafttypes-en.json' | relative_url }}">{% t api.english %} </a></td>
+        <td class="last-updated" data-table="paddlecrafttypes-de"></td>
+      </tr>
+      <tr>
+        <td>{% t api.paddling_environment_types %}</td>
+        <td><a href="{{ '/api/paddlingenvironmenttypes-de.json' | relative_url }}">{% t api.german %} </a></td>
+        <td><a href="{{ '/api/paddlingenvironmenttypes-en.json' | relative_url }}">{% t api.english %} </a></td>
+        <td class="last-updated" data-table="paddlingenvironmenttypes-de"></td>
+      </tr>
+      <tr>
+        <td>{% t api.protected_area_types %}</td>
+        <td><a href="{{ '/api/protectedareatypes-de.json' | relative_url }}">{% t api.german %} </a></td>
+        <td><a href="{{ '/api/protectedareatypes-en.json' | relative_url }}">{% t api.english %} </a></td>
+        <td class="last-updated" data-table="protectedareatypes-de"></td>
+      </tr>
+      <tr>
+        <td>{% t api.spot_types %}</td>
+        <td><a href="{{ '/api/spottypes-de.json' | relative_url }}">{% t api.german %} </a></td>
+        <td><a href="{{ '/api/spottypes-en.json' | relative_url }}">{% t api.english %} </a></td>
+        <td class="last-updated" data-table="spottypes-de"></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
