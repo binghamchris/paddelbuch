@@ -26,15 +26,12 @@ pageName: notice-details
       <div id="notice-map" class="map"></div>
     </div>
     
-    <!-- Details Panel (4 cols on large screens) -->
-    <div class="col-lg-4 notice-description">
-      <!-- Event Notice Type Badge -->
-      <div class="notice-icon-div d-flex align-items-center">
-        <span>{% t event_notices.title %}</span>
-      </div>
-      
+    <!-- Details Panel -->
+    <div class="notice-description col-lg-4 col-md-12 col-sm-12 col-12">
       <!-- Notice Title -->
-      <h1 class="notice-title">{{ notice.name }}</h1>
+      <div class="notice-title">
+        <h1>{{ notice.name }}</h1>
+      </div>
       
       <!-- Notice Details Content -->
       {% include notice-detail-content.html notice=notice %}
