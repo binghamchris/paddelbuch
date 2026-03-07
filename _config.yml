@@ -104,7 +104,7 @@ map:
     west: 5.9
   default_zoom: 8
   min_zoom: 7
-  max_zoom: 18
+  max_zoom: 20
   detail_layer_min_zoom: 12
 
 # Contentful Configuration (loaded from environment variables)
