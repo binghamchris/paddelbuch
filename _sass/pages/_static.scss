@@ -135,4 +135,19 @@
       }
     }
   }
+
+  // API page: same full-width + scrollable table treatment (targets .container directly)
+  .page-api {
+    .container {
+      max-width: 100%;
+      padding-left: 1rem;
+      padding-right: 1rem;
+      overflow-x: hidden;
+    }
+
+    table {
+      overflow-x: auto;
+      max-width: calc(100vw - 2rem);
+    }
+  }
 }
