@@ -87,7 +87,7 @@
     - **EXPECTED OUTCOME**: Tests PASS (confirms no regressions)
     - Confirm all existing date filter formats unchanged, notice map/details panel intact, non-notice pages unaffected
 
-- [~] 4. Checkpoint - Ensure all tests pass
+- [x] 4. Checkpoint - Ensure all tests pass
   - Run full test suite: `source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.1 && bundle exec rspec`
   - Ensure all tests pass, including the new bug condition and preservation tests
   - Optionally build the site and manually verify a notice page renders correctly: `source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.1 && bundle exec jekyll build`
