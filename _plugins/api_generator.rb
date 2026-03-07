@@ -82,6 +82,9 @@ module Jekyll
       end.sort_by { |item| item['table'] }
 
       add_json_page('lastUpdateIndex.json', index_data)
+
+      # Expose to Liquid so api.html can render timestamps at build time
+      @site.data['last_updates'] = @last_updates.dup
     end
 
     def add_json_page(filename, data)
