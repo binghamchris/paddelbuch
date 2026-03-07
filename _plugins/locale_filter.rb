@@ -155,13 +155,15 @@ module Jekyll
           nil => '%d.%m.%Y %H:%M',           # Default: DD.MM.YYYY HH:MM
           'short' => '%d.%m.%Y %H:%M',       # DD.MM.YYYY HH:MM
           'long' => '%d. %B %Y, %H:%M Uhr',  # DD. Month YYYY, HH:MM Uhr
-          'iso' => '%Y-%m-%dT%H:%M:%S'       # ISO 8601
+          'iso' => '%Y-%m-%dT%H:%M:%S',      # ISO 8601
+          'notice_updated' => '%-d. %B %Y um %H:%M'  # D. Month YYYY um HH:MM
         },
         'en' => {
           nil => '%d/%m/%Y %H:%M',           # Default: DD/MM/YYYY HH:MM
           'short' => '%d/%m/%Y %H:%M',       # DD/MM/YYYY HH:MM
           'long' => '%d %B %Y, %H:%M',       # DD Month YYYY, HH:MM
-          'iso' => '%Y-%m-%dT%H:%M:%S'       # ISO 8601
+          'iso' => '%Y-%m-%dT%H:%M:%S',      # ISO 8601
+          'notice_updated' => '%-d %B %Y at %H:%M'   # D Month YYYY at HH:MM
         }
       }
       
