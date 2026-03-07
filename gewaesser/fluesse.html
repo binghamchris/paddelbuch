@@ -22,22 +22,13 @@ permalink: /gewaesser/fluesse/
 <div class="container rivers-list">
   <h2>{% t waterways.rivers %}</h2>
   
-  <table class="table">
-    <thead>
-      <tr>
-        <th>{% t labels.name %}</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for river in rivers %}
-      <tr>
-        <td>
-          <a href="{{ '/gewaesser/' | append: river.slug | append: '/' | relative_url }}">
-            {{ river.name }}
-          </a>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  <ul class="waterway-list">
+    {% for river in rivers %}
+    <li>
+      <a href="{{ '/gewaesser/' | append: river.slug | append: '/' | relative_url }}">
+        {{ river.name }}
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
 </div>
