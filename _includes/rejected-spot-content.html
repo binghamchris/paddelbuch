@@ -64,16 +64,16 @@
         <td>{{ spot.approximateAddress }}</td>
       </tr>
       {% endif %}
+      <!-- Last Updated Timestamp -->
+      <!-- Property 19: Date Locale Formatting - using localized_datetime with 'long' format to match spot detail -->
+      {% if spot.updatedAt %}
+      <tr>
+        <th>{% t labels.last_updated %}</th>
+        <td colspan="2">{{ spot.updatedAt | localized_datetime: 'long' }}</td>
+      </tr>
+      {% endif %}
     </tbody>
   </table>
   {% endif %}
-  {% endif %}
-
-  <!-- Last Updated Timestamp -->
-  <!-- Property 19: Date Locale Formatting - using localized_date filter -->
-  {% if spot.updatedAt %}
-  <div class="mt-3 text-muted small">
-    {% t labels.last_updated %}: {{ spot.updatedAt | localized_date }}
-  </div>
   {% endif %}
 </div>
