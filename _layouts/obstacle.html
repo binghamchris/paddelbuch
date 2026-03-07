@@ -37,11 +37,7 @@ pageName: obstacle-details
 <!-- Get waterway information -->
 {% assign waterway_slug = obstacle.waterway_slug %}
 {% if waterway_slug %}
-  {% if current_locale == 'en' %}
-    {% assign waterways_data = site.data.waterways_en %}
-  {% else %}
-    {% assign waterways_data = site.data.waterways_de %}
-  {% endif %}
+  {% assign waterways_data = site.data.waterways | where: "locale", current_locale %}
   {% assign waterway = waterways_data | where: "slug", waterway_slug | first %}
 {% endif %}
 
@@ -52,20 +48,20 @@ pageName: obstacle-details
       <div id="obstacle-map" class="map"></div>
     </div>
     
-    <!-- Details Panel (4 cols on large screens) -->
-    <div class="col-lg-4 obstacle-description">
-      <!-- Obstacle Type Badge -->
-      {% if obstacle_type_name %}
-      <div class="obstacle-type-badge mt-3">
-        <span class="badge bg-danger">{{ obstacle_type_name }}</span>
+    <!-- Details Panel (4 cols on large screens, full width on smaller) -->
+    <div class="obstacle-description col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12">
+      <!-- Obstacle Title -->
+      <div class="obstacle-title"><h1>{{ obstacle.name }}</h1></div>
+
+      <!-- Description -->
+      {% if obstacle.description %}
+      <div>
+        {{ obstacle.description }}
       </div>
       {% endif %}
       
-      <!-- Obstacle Title -->
-      <h1 class="obstacle-title">{{ obstacle.name }}</h1>
-      
       <!-- Obstacle Details Table (Requirement 5.4) -->
-      {% include obstacle-detail-content.html obstacle=obstacle waterway=waterway %}
+      {% include obstacle-detail-content.html obstacle=obstacle waterway=waterway obstacle_type_name=obstacle_type_name %}
     </div>
   </div>
 </div>
