@@ -62,29 +62,23 @@
   function generateObstaclePopupContent(obstacle, locale) {
     var localeStrings = strings[locale] || strings.de;
     var localePrefix = (locale && locale !== 'de') ? '/' + locale : '';
-    var html = '<div class="obstacle-popup">';
     
-    // Obstacle name (Requirement 5.3)
-    html += '<div class="obstacle-popup-header">';
-    html += '<strong class="obstacle-popup-name">' + escapeHtml(obstacle.name || 'Obstacle') + '</strong>';
-    html += '</div>';
+    // Obstacle name — matches Gatsby's .popup-title > h1 structure
+    var html = '<span class="popup-title"><h1>' + escapeHtml(obstacle.name || 'Obstacle') + '</h1></span>';
     
-    // Portage possibility status (Requirement 5.3)
-    html += '<div class="obstacle-popup-portage">';
-    html += '<span class="obstacle-popup-label">' + localeStrings.portageLabel + ': </span>';
-    html += '<span class="obstacle-popup-value">' + getPortageStatus(obstacle, locale) + '</span>';
-    html += '</div>';
+    // Portage possibility status in a table — matches Gatsby's table layout
+    html += '<table><tbody>';
+    html += '<tr><th>' + localeStrings.portageLabel + ':</th>';
+    html += '<td>' + getPortageStatus(obstacle, locale) + '</td></tr>';
+    html += '</tbody></table>';
     
-    // Link to obstacle detail page (Requirement 5.3)
+    // Link to obstacle detail page — matches Gatsby's .popup-btn structure
     if (obstacle.slug) {
-      html += '<div class="obstacle-popup-actions">';
-      html += '<a href="' + localePrefix + '/hindernisse/' + encodeURIComponent(obstacle.slug) + '/" class="btn btn-sm btn-primary obstacle-popup-details-link">';
+      html += '<button class="popup-btn popup-btn-right obstacle-details-btn">';
+      html += '<a class="popup-btn-right" hreflang="' + (locale || 'de') + '" href="' + localePrefix + '/hindernisse/' + encodeURIComponent(obstacle.slug) + '/">';
       html += localeStrings.moreDetails;
-      html += '</a>';
-      html += '</div>';
+      html += '</a></button>';
     }
-    
-    html += '</div>';
     
     return html;
   }
