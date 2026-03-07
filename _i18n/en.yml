@@ -110,9 +110,17 @@ waterways:
 
 # API page
 api:
-  title: "Data Download / API"
+  title: "Data Download"
+  intro: "All of Paddel Buch's data is available here for download and reuse under the terms described in the"
+  intro_link_text: "Data Licensing"
+  intro_suffix: "page."
+  intro_json: "Data is published as JSON files which are updated automatically when Paddel Buch's data is changed. German and English data is available in separate files, which can be joined using their slug fields."
+  last_update_index: "Last Update Index"
+  last_update_index_description: "This file provides a list of all the tables and the ISO timestamp for when each was last updated."
   fact_tables: "Fact Tables"
+  fact_tables_description: "These tables contain Paddel Buch's primary data and are updated most frequently."
   dimension_tables: "Dimension Tables"
+  dimension_tables_description: "These tables contain dimension data referenced by entries in the fact tables via their slugs."
   table_name: "Table Name"
   german: "German"
   english: "English"
@@ -123,14 +131,15 @@ api:
   obstacles: "Obstacles"
   protected_areas: "Protected Areas"
   waterways: "Waterways"
+  waterway_event_notices: "Waterway Event Notices"
   event_notices: "Event Notices"
-  data_license_types: "Data License Types"
+  data_license_types: "Data Licenses Types"
   data_source_types: "Data Source Types"
   obstacle_types: "Obstacle Types"
   paddle_craft_types: "Paddle Craft Types"
   protected_area_types: "Protected Area Types"
   spot_types: "Spot Types"
-  paddling_environment_types: "Paddling Environment Types"
+  paddling_environment_types: "Paddling Envrionment Types"
 
 # Error pages
 errors:

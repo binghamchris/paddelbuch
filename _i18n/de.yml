@@ -110,9 +110,17 @@ waterways:
 
 # API page
 api:
-  title: "Daten herunterladen / API"
+  title: "Daten herunterladen"
+  intro: "Alle Daten von Paddel Buch stehen hier zum Herunterladen und zur Wiederverwendung unter den im beschriebenen Bedingungen zur Verfügung in der"
+  intro_link_text: "Datenlizenzen"
+  intro_suffix: "Seite."
+  intro_json: "Die Daten werden als JSON-Dateien veröffentlicht, die automatisch aktualisiert werden, wenn die Daten von Paddel Buch geändert werden. Deutsche und englische Daten stehen in separaten Dateien zur Verfügung, die über ihre slug-Felder zusammengefügt werden können."
+  last_update_index: "Verzeichnis der letzten Aktualisierungen"
+  last_update_index_description: "Diese Datei gibt eine Liste aller Tabellen zusammen mit ISO-Zeitstempel ihrer letzten Aktualisierung."
   fact_tables: "Faktentabellen"
+  fact_tables_description: "Diese Tabellen beinhalten das Hauptdaten des Paddel Buch und sind am häufigsten zu aktualisiert"
   dimension_tables: "Dimensionstabellen"
+  dimension_tables_description: "Diese Tabellen beinhalten Dimensionsdaten, auf die durch Einträge in den Faktentabellen über ihre Slugs verwiesen wird."
   table_name: "Tabellenname"
   german: "Deutsch"
   english: "Englisch"
@@ -123,6 +131,7 @@ api:
   obstacles: "Hindernisse"
   protected_areas: "Schutzgebiete"
   waterways: "Gewässer"
+  waterway_event_notices: "Gewässerereignisse"
   event_notices: "Gewässerereignisse"
   data_license_types: "Datenlizenztypen"
   data_source_types: "Datenquellentypen"
