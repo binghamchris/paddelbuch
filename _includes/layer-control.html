@@ -444,6 +444,19 @@
     
     layerControl.addTo(map);
     
+    // Lower the layer control's stacking context when a popup opens so it doesn't
+    // cover popup content. The control container (.leaflet-top.leaflet-right) has
+    // z-index: 1000 while the popup pane is trapped inside .leaflet-map-pane at
+    // z-index: 400, so CSS alone cannot fix this overlap.
+    var controlContainer = layerControl.getContainer().parentNode;
+    map.on('popupopen', function() {
+      layerControl.collapse();
+      controlContainer.style.zIndex = '0';
+    });
+    map.on('popupclose', function() {
+      controlContainer.style.zIndex = '';
+    });
+    
     // Add default layers to map (all except noEntry which is unchecked by default)
     layerGroups.entryExit.addTo(map);
     layerGroups.entryOnly.addTo(map);
