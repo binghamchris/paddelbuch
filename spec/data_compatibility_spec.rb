@@ -255,7 +255,7 @@ RSpec.describe 'Data file output compatibility' do
         affected_area: build_geometry('{"type":"Polygon","coordinates":[[7.4,46.9]]}'),
         start_date: start_date,
         end_date: end_date,
-        waterways: [build_reference('aare')]
+        waterway: [build_reference('aare')]
       )
     end
 

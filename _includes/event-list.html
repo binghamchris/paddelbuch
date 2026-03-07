@@ -24,12 +24,8 @@
   {% assign locale_prefix = '' %}
 {% endif %}
 
-<!-- Get notices data based on locale -->
-{% if current_locale == 'en' %}
-  {% assign all_notices = site.data.notices_en %}
-{% else %}
-  {% assign all_notices = site.data.notices_de %}
-{% endif %}
+<!-- Get notices data filtered by locale -->
+{% assign all_notices = site.data.notices | where: "locale", current_locale %}
 
 <!-- Filter notices: must affect this waterway AND have future end date -->
 {% assign active_notices = "" | split: "" %}
@@ -45,7 +41,7 @@
   {% endif %}
 {% endfor %}
 
-<div class="event-notices-section mt-4">
+<div class="event-notices-section">
   <h2>{% t event_notices.waterway_notices %}</h2>
   
   {% if active_notices.size > 0 %}

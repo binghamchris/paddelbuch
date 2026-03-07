@@ -290,7 +290,7 @@ RSpec.describe 'Contentful Sync Properties' do
         fields[:affected_area] = build_geometry
         fields[:start_date] = build_date
         fields[:end_date] = build_date
-        fields[:waterways] = [build_reference('waterway-1')]
+        fields[:waterway] = [build_reference('waterway-1')]
       when :map_type
         fields[:slug] = random_string(rand(3..20))
         fields[:name] = { de: random_string(rand(3..20)), en: random_string(rand(3..20)) }
@@ -1238,7 +1238,7 @@ RSpec.describe 'Blank Static Pages Bugfix Properties' do
         fields[:affected_area] = build_geometry
         fields[:start_date] = build_date
         fields[:end_date] = build_date
-        fields[:waterways] = [build_reference('ww')]
+        fields[:waterway] = [build_reference('ww')]
       when :map_type
         fields[:slug] = random_string(rand(3..15))
         fields[:name] = { de: random_string(rand(3..15)), en: random_string(rand(3..15)) }

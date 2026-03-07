@@ -96,7 +96,7 @@ protected_areas:
 # Event notices
 event_notices:
   title: "Event Notices"
-  waterway_notices: "Waterway Event Notices"
+  waterway_notices: "Event Notices"
   no_notices: "There are presently no event notices for this waterway"
   approx_start_date: "Approx. Start Date"
   approx_end_date: "Approx. End Date"
