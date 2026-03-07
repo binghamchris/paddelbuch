@@ -80,7 +80,7 @@
     - **EXPECTED OUTCOME**: Test PASSES (confirms all three bugs are fixed)
     - _Requirements: 2.1, 2.2, 2.3_
 
-  - [~] 3.6 Verify preservation tests still pass
+  - [x] 3.6 Verify preservation tests still pass
     - **Property 2: Preservation** - Non-Notice Page and Filter Behavior
     - **IMPORTANT**: Re-run the SAME tests from task 2 - do NOT write new tests
     - Run preservation property tests from step 2
