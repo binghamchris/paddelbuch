@@ -2,8 +2,8 @@
   Spot Detail Content Include
   
   Displays the full content for a non-rejected spot on the detail page.
-  Shows: full description, GPS, approximate address, waterway link,
-  paddle craft types, and last updated timestamp.
+  Shows: description, then details table with paddle craft types, GPS,
+  approximate address, waterway link, and last updated timestamp.
   
   Parameters:
   - include.spot: The spot object containing all spot data
@@ -22,70 +22,21 @@
 {% assign waterway = include.waterway %}
 {% assign current_locale = site.lang | default: 'de' %}
 
+<!-- Description (between title and table, matching Gatsby layout) -->
+{% if spot.description %}
+<div class="spot-description-text">
+  {{ spot.description }}
+</div>
+{% endif %}
+
 <!-- Spot Details Table -->
 <table class="spot-details-table">
   <tbody>
-    <!-- GPS Coordinates -->
-    {% if spot.location %}
-    {% assign lat = spot.location.lat | default: spot.location.latitude %}
-    {% assign lon = spot.location.lon | default: spot.location.lng | default: spot.location.longitude %}
-    {% if lat and lon %}
-    <tr>
-      <th>{% t labels.gps %}</th>
-      <td>
-        <span id="gps-coords">{{ lat }}, {{ lon }}</span>
-        <button type="button" 
-                class="btn btn-sm btn-outline-secondary copy-btn ms-2" 
-                onclick="PaddelbuchClipboard.copyGPS('{{ lat }}', '{{ lon }}')"
-                title="{% t actions.copy_gps %}"
-                aria-label="{% t actions.copy_gps %}">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-            <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/>
-            <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/>
-          </svg>
-        </button>
-      </td>
-    </tr>
-    {% endif %}
-    {% endif %}
-
-    <!-- Approximate Address -->
-    {% if spot.approximateAddress %}
-    <tr>
-      <th>{% t labels.approx_address %}</th>
-      <td>
-        <span id="approx-address">{{ spot.approximateAddress }}</span>
-        <button type="button" 
-                class="btn btn-sm btn-outline-secondary copy-btn ms-2" 
-                onclick="PaddelbuchClipboard.copyAddress('{{ spot.approximateAddress | escape }}')"
-                title="{% t actions.copy_address %}"
-                aria-label="{% t actions.copy_address %}">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-            <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/>
-            <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/>
-          </svg>
-        </button>
-      </td>
-    </tr>
-    {% endif %}
-
-    <!-- Waterway Link -->
-    {% if waterway %}
-    <tr>
-      <th>{% t labels.waterway %}</th>
-      <td>
-        <a href="{{ locale_prefix | append: '/gewaesser/' | append: waterway.slug | append: '/' }}">
-          {{ waterway.name }}
-        </a>
-      </td>
-    </tr>
-    {% endif %}
-
-    <!-- Paddle Craft Types -->
+    <!-- Paddle Craft Types (first row, matching Gatsby order) -->
     {% if spot.paddleCraftTypes and spot.paddleCraftTypes.size > 0 %}
     <tr>
-      <th>{% t labels.type %}</th>
-      <td>
+      <th>{% t labels.potentially_usable_by %}</th>
+      <td colspan="2">
         <ul class="mb-0 ps-3">
           {% for craft_slug in spot.paddleCraftTypes %}
             {% assign craft_type = site.data.types.paddle_craft_types | where: "slug", craft_slug | first %}
@@ -102,34 +53,67 @@
     </tr>
     {% endif %}
 
+    <!-- GPS Coordinates -->
+    {% if spot.location %}
+    {% assign lat = spot.location.lat | default: spot.location.latitude %}
+    {% assign lon = spot.location.lon | default: spot.location.lng | default: spot.location.longitude %}
+    {% if lat and lon %}
+    <tr>
+      <th>{% t labels.gps %}</th>
+      <td>
+        <span id="gps-coords">{{ lat }}, {{ lon }}</span>
+      </td>
+      <td class="clipboard-cell">
+        <button type="button" 
+                class="btn btn-sm clipboard-btn copy-btn" 
+                onclick="PaddelbuchClipboard.copyGPS('{{ lat }}', '{{ lon }}')"
+                title="{% t actions.copy_gps %}"
+                aria-label="{% t actions.copy_gps %}">
+          {% t actions.copy %}
+        </button>
+      </td>
+    </tr>
+    {% endif %}
+    {% endif %}
+
+    <!-- Approximate Address -->
+    {% if spot.approximateAddress %}
+    <tr>
+      <th>{% t labels.approx_address %}</th>
+      <td>
+        <span id="approx-address">{{ spot.approximateAddress }}</span>
+      </td>
+      <td class="clipboard-cell">
+        <button type="button" 
+                class="btn btn-sm clipboard-btn copy-btn" 
+                onclick="PaddelbuchClipboard.copyAddress('{{ spot.approximateAddress | escape }}')"
+                title="{% t actions.copy_address %}"
+                aria-label="{% t actions.copy_address %}">
+          {% t actions.copy %}
+        </button>
+      </td>
+    </tr>
+    {% endif %}
+
+    <!-- Waterway Link -->
+    {% if waterway %}
+    <tr>
+      <th>{% t labels.waterway %}</th>
+      <td colspan="2">
+        <a href="{{ locale_prefix | append: '/gewaesser/' | append: waterway.slug | append: '/' }}">
+          {{ waterway.name }}
+        </a>
+      </td>
+    </tr>
+    {% endif %}
+
     <!-- Last Updated Timestamp -->
-    <!-- Property 19: Date Locale Formatting - using localized_date filter -->
+    <!-- Property 19: Date Locale Formatting - using localized_datetime with 'long' format to match Gatsby -->
     {% if spot.updatedAt %}
     <tr>
       <th>{% t labels.last_updated %}</th>
-      <td>{{ spot.updatedAt | localized_date }}</td>
+      <td colspan="2">{{ spot.updatedAt | localized_datetime: 'long' }}</td>
     </tr>
     {% endif %}
   </tbody>
 </table>
-
-<!-- Navigation Button -->
-{% if spot.location %}
-{% assign lat = spot.location.lat | default: spot.location.latitude %}
-{% assign lon = spot.location.lon | default: spot.location.lng | default: spot.location.longitude %}
-{% if lat and lon %}
-<div class="mt-3">
-  {% include navigate-btn.html lat=lat lon=lon size="md" %}
-</div>
-{% endif %}
-{% endif %}
-
-<!-- Full Description -->
-{% if spot.description %}
-<div class="spot-full-description mt-4">
-  <h2>{% t labels.summary %}</h2>
-  <div class="description-content">
-    {{ spot.description }}
-  </div>
-</div>
-{% endif %}
