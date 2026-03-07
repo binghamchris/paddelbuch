@@ -14,11 +14,11 @@ module Jekyll
 
     # Maps collection name to its data key in site.data and required fields
     COLLECTIONS = {
-      'spots' => { data_key: 'spots' },
-      'waterways' => { data_key: 'waterways' },
-      'obstacles' => { data_key: 'obstacles' },
-      'notices' => { data_key: 'notices' },
-      'static_pages' => { data_key: 'static_pages' }
+      'spots' => { data_key: 'spots', page_name: 'spot-details' },
+      'waterways' => { data_key: 'waterways', page_name: 'waterway-details' },
+      'obstacles' => { data_key: 'obstacles', page_name: 'obstacle-details' },
+      'notices' => { data_key: 'notices', page_name: 'notice-details' },
+      'static_pages' => { data_key: 'static_pages', page_name: 'static-page' }
     }.freeze
 
     def generate(site)
@@ -38,7 +38,7 @@ module Jekyll
           slug = entry['slug']
           next unless slug && !slug.empty?
 
-          doc = create_document(site, collection, entry, slug)
+          doc = create_document(site, collection, entry, slug, config[:page_name])
           collection.docs << doc
         end
       end
@@ -46,7 +46,7 @@ module Jekyll
 
     private
 
-    def create_document(site, collection, entry, slug)
+    def create_document(site, collection, entry, slug, page_name)
       # Create a virtual document path (doesn't need to exist on disk)
       path = File.join(site.source, collection.relative_directory, "#{slug}.md")
 
@@ -60,6 +60,7 @@ module Jekyll
       # Ensure required fields are set
       doc.data['slug'] = slug
       doc.data['title'] = entry['name'] || entry['title'] || slug
+      doc.data['pageName'] = page_name
 
       # Set empty body content for notice documents to prevent {{ content }}
       # in the default layout from rendering duplicate description elements.
