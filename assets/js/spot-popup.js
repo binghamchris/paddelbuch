@@ -259,9 +259,8 @@
     if (lat !== null && lon !== null) {
       html.push('<a href="https://www.google.com/maps/dir/?api=1&destination=' + lat + ',' + lon + '" ');
       html.push('target="_blank" rel="noopener noreferrer" ');
-      html.push('class="btn btn-sm btn-outline-primary navigate-btn" ');
+      html.push('class="btn btn-sm btn-primary navigate-btn" ');
       html.push('title="' + labels.navigate + '" aria-label="' + labels.navigate + '">');
-      html.push(getNavigateIcon());
       html.push(labels.navigate);
       html.push('</a>');
     }
