@@ -64,3 +64,21 @@
     }
   }
 }
+
+// API page: full-width content on mobile, with horizontally scrollable tables
+@media screen and (max-width: 991.98px) {
+  .page-api {
+    .api-page {
+      max-width: 100%;
+      padding-left: 1rem;
+      padding-right: 1rem;
+      overflow-x: hidden;
+    }
+
+    .api-page table {
+      display: block;
+      overflow-x: auto;
+      max-width: calc(100vw - 2rem);
+    }
+  }
+}
