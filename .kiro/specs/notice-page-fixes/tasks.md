@@ -53,7 +53,7 @@
     - _Preservation: endDate formatting unchanged, waterway links unchanged, description section unchanged_
     - _Requirements: 2.3_
 
-  - [~] 3.3 Remove extraneous Gewässerereignisse label from `_layouts/notice.html`
+  - [x] 3.3 Remove extraneous Gewässerereignisse label from `_layouts/notice.html`
     - Remove or replace the `<span>{% t event_notices.title %}</span>` inside the `notice-icon-div`
     - The notice-icon-div should remain as a container but without the collection-level title text acting as a breadcrumb
     - _Bug_Condition: isBugCondition(input) where hasExtraneousGewaesserereignisseLink(html)_
