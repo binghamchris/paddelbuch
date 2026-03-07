@@ -33,9 +33,13 @@
     padding-right: 1em;
   }
 
-  .spot-title{
+  .spot-title {
     padding-top: 0.7em;
     margin-bottom: 1em;
+
+    h1 {
+      margin-bottom: 0;
+    }
   }
 
   .spot-icon-div {
@@ -86,22 +90,23 @@
     }
   }
 
-  // Full description section
-  .spot-full-description {
-    h2 {
-      font-size: 1.2rem;
-      color: $swisscanoe-blue;
-      margin-bottom: 0.75rem;
-    }
+  // Description text (between title and table, matching Gatsby layout)
+  .spot-description-text {
+    margin-bottom: 1em;
 
-    .description-content {
-      color: $swisscanoe-blue;
-      line-height: 1.6;
-
-      p {
-        margin-bottom: 1rem;
-      }
+    p {
+      margin-bottom: 0.5rem;
     }
+  }
+
+  // Clipboard cell in details table (matching Gatsby layout)
+  .clipboard-cell {
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .navigate-btn {
+    margin-bottom: 0.5em;
   }
 
 }
