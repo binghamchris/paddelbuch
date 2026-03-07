@@ -61,6 +61,13 @@ module Jekyll
       doc.data['slug'] = slug
       doc.data['title'] = entry['name'] || entry['title'] || slug
 
+      # Set empty body content for notice documents to prevent {{ content }}
+      # in the default layout from rendering duplicate description elements.
+      # The notice layout provides all content via notice-detail-content.html.
+      if collection.label == 'notices'
+        doc.content = ''
+      end
+
       # For static_pages, build permalink from menu_slug + slug
       if collection.label == 'static_pages' && entry['menu_slug']
         doc.data['permalink'] = "/#{entry['menu_slug']}/#{slug}/"
