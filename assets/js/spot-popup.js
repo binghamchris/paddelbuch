@@ -21,6 +21,22 @@
     'notauswasserungsstelle': 'emergency'
   };
 
+  // Spot type translated names (sourced from spot_types.yml)
+  var spotTypeNames = {
+    'einstieg-ausstieg': { de: 'Ein- und Ausstieg', en: 'Entry and Exit' },
+    'nur-einstieg': { de: 'Nur Einstieg', en: 'Entry Only' },
+    'nur-ausstieg': { de: 'Nur Ausstieg', en: 'Exit Only' },
+    'rasthalte': { de: 'Rasthalte', en: 'Rest Stop' },
+    'notauswasserungsstelle': { de: 'Notauswasserungsstelle', en: 'Emergency Landing' }
+  };
+
+  // Paddle craft type translated names (sourced from paddle_craft_types.yml)
+  var paddleCraftTypeNames = {
+    'seekajak': { de: 'Seekajak', en: 'Sea Kayak' },
+    'kanadier': { de: 'Kanadier', en: 'Canoe' },
+    'stand-up-paddle-board': { de: 'Stand Up Paddle Board (SUP)', en: 'Stand Up Paddle Board (SUP)' }
+  };
+
   /**
    * Gets the icon filename for a spot type
    * 
@@ -91,9 +107,11 @@
         gps: 'GPS',
         approxAddress: 'Approx. Address',
         type: 'Type',
+        potentiallyUsableBy: 'Potentially Usable By',
+        copy: 'Copy',
         copyGps: 'Copy GPS to clipboard',
         copyAddress: 'Copy approx. address to clipboard',
-        navigate: 'Navigate',
+        navigate: 'Navigate To',
         moreDetails: 'More details'
       };
     }
@@ -102,9 +120,11 @@
       gps: 'GPS',
       approxAddress: 'Ungefähre Adresse',
       type: 'Typ',
+      potentiallyUsableBy: 'Potenziell nutzbar f\u00fcr',
+      copy: 'Kopieren',
       copyGps: 'GPS in der Zwischenablage kopieren',
       copyAddress: 'Ungefähre Adresse in der Zwischenablage kopieren',
-      navigate: 'Navigieren',
+      navigate: 'Navigieren zu',
       moreDetails: 'Weitere Details'
     };
   }
@@ -145,99 +165,99 @@
    * @returns {string} HTML content for the popup
    */
   function generateSpotPopupContent(spot, locale) {
-    locale = locale || 'de';
-    var labels = getLabels(locale);
-    var localePrefix = (locale !== 'de') ? '/' + locale : '';
-    var html = [];
-    
-    var isRejected = spot.rejected === true || spot.rejected === 'true';
-    var spotTypeSlug = spot.spotType_slug || spot.spotTypeSlug || spot.spot_type_slug;
-    var iconPath = getIconPath(spotTypeSlug, isRejected, 'light');
-    
-    html.push('<div class="spot-popup">');
-    
-    // Header with icon and name (Requirement 3.1)
-    html.push('<div class="spot-popup-header">');
-    html.push('<img src="' + iconPath + '" alt="" height="20" width="20" class="spot-icon spot-icon-light" loading="lazy" />');
-    html.push('<strong class="spot-popup-name">' + escapeHtml(spot.name) + '</strong>');
-    html.push('</div>');
-    
-    // Description excerpt (Requirement 3.1)
-    if (spot.description) {
-      var plainText = stripHtml(spot.description);
-      var excerpt = truncate(plainText, 150);
-      if (excerpt) {
-        html.push('<div class="spot-popup-description">');
-        html.push('<p>' + escapeHtml(excerpt) + '</p>');
-        html.push('</div>');
+      locale = locale || 'de';
+      var labels = getLabels(locale);
+      var localePrefix = (locale !== 'de') ? '/' + locale : '';
+      var html = [];
+
+      var isRejected = spot.rejected === true || spot.rejected === 'true';
+      var spotTypeSlug = spot.spotType_slug || spot.spotTypeSlug || spot.spot_type_slug;
+      var iconPath = getIconPath(spotTypeSlug, isRejected, 'light');
+
+      // Look up translated spot type category label
+      var spotTypeLabel = spotTypeSlug;
+      if (spotTypeSlug && Object.prototype.hasOwnProperty.call(spotTypeNames, spotTypeSlug)) {
+        spotTypeLabel = spotTypeNames[spotTypeSlug][locale] || spotTypeNames[spotTypeSlug]['de'] || spotTypeSlug;
       }
-    }
-    
-    // GPS coordinates with copy button (Requirements 3.1, 3.2)
-    var lat = spot.location ? (spot.location.lat || spot.location.latitude) : null;
-    var lon = spot.location ? (spot.location.lon || spot.location.lng || spot.location.longitude) : null;
-    
-    if (lat !== null && lon !== null) {
-      html.push('<div class="spot-popup-gps">');
-      html.push('<span class="spot-popup-label">' + labels.gps + ':</span>');
-      html.push('<span class="spot-popup-value">' + lat + ', ' + lon + '</span>');
-      html.push('<button type="button" class="btn btn-sm btn-outline-light copy-btn" ');
-      html.push('onclick="PaddelbuchClipboard.copyGPS(\'' + lat + '\', \'' + lon + '\', this)" ');
-      html.push('title="' + labels.copyGps + '" aria-label="' + labels.copyGps + '">');
-      html.push(getCopyIcon());
-      html.push('</button>');
+
+      // Header: icon + category label (matches Gatsby .popup-icon-div)
+      html.push('<div class="popup-icon-div">');
+      html.push('<span class="popup-icon"><img src="' + iconPath + '" alt="" width="20" height="20" loading="lazy" /></span>');
+      html.push(escapeHtml(spotTypeLabel));
       html.push('</div>');
+
+      // Title (matches Gatsby .popup-title > h1)
+      html.push('<span class="popup-title"><h1>' + escapeHtml(spot.name) + '</h1></span>');
+
+      // Description
+      var description = spot.description || spot.description_excerpt;
+      if (description) {
+        var plainText = stripHtml(description);
+        var excerpt = truncate(plainText, 150);
+        if (excerpt) {
+          html.push('<div><p>' + escapeHtml(excerpt) + '</p></div>');
+        }
+      }
+
+      // Details table (matches Gatsby .popup-details-table)
+      html.push('<table class="popup-details-table"><tbody>');
+
+      // Craft types row
+      if (spot.paddleCraftTypes && spot.paddleCraftTypes.length > 0) {
+        html.push('<tr><th>' + labels.potentiallyUsableBy + ':</th><td colspan="2"><ul>');
+        for (var i = 0; i < spot.paddleCraftTypes.length; i++) {
+          var craftSlug = spot.paddleCraftTypes[i];
+          var craftName = craftSlug;
+          if (Object.prototype.hasOwnProperty.call(paddleCraftTypeNames, craftSlug)) {
+            craftName = paddleCraftTypeNames[craftSlug][locale] || paddleCraftTypeNames[craftSlug]['de'] || craftSlug;
+          }
+          html.push('<li>' + escapeHtml(craftName) + '</li>');
+        }
+        html.push('</ul></td></tr>');
+      }
+
+      // GPS row
+      var lat = spot.location ? (spot.location.lat || spot.location.latitude) : null;
+      var lon = spot.location ? (spot.location.lon || spot.location.lng || spot.location.longitude) : null;
+
+      if (lat !== null && lon !== null) {
+        html.push('<tr><th>' + labels.gps + ':</th>');
+        html.push('<td>' + lat + ', ' + lon + '</td>');
+        html.push('<td class="clipboard-cell-popup">');
+        html.push('<button title="' + labels.copyGps + '" type="button" class="popup-btn" ');
+        html.push('onclick="PaddelbuchClipboard.copyGPS(\'' + lat + '\', \'' + lon + '\', this)">');
+        html.push(labels.copy + '</button></td></tr>');
+      }
+
+      // Address row
+      if (spot.approximateAddress) {
+        var escapedAddress = escapeHtml(spot.approximateAddress).replace(/'/g, "\\'");
+        html.push('<tr><th>' + labels.approxAddress + ':</th>');
+        html.push('<td>' + escapeHtml(spot.approximateAddress) + '</td>');
+        html.push('<td class="clipboard-cell-popup">');
+        html.push('<button title="' + labels.copyAddress + '" type="button" class="popup-btn" ');
+        html.push('onclick="PaddelbuchClipboard.copyAddress(\'' + escapedAddress + '\', this)">');
+        html.push(labels.copy + '</button></td></tr>');
+      }
+
+      html.push('</tbody></table>');
+
+      // Navigate button (matches Gatsby structure: button > a)
+      if (lat !== null && lon !== null) {
+        html.push('<button type="button" class="popup-btn">');
+        html.push('<a href="https://www.google.com/maps/dir/?api=1&destination=' + lat + ',' + lon + '" ');
+        html.push('target="_blank" rel="noopener noreferrer">' + labels.navigate + '</a></button>');
+      }
+
+      // More details button (matches Gatsby structure: button.popup-btn-right > a)
+      if (spot.slug) {
+        html.push('<button class="popup-btn popup-btn-right">');
+        html.push('<a href="' + localePrefix + '/einstiegsorte/' + escapeHtml(spot.slug) + '/">');
+        html.push(labels.moreDetails + '</a></button>');
+      }
+
+      return html.join('');
     }
-    
-    // Approximate address with copy button (Requirements 3.1, 3.3)
-    if (spot.approximateAddress) {
-      var escapedAddress = escapeHtml(spot.approximateAddress).replace(/'/g, "\\'");
-      html.push('<div class="spot-popup-address">');
-      html.push('<span class="spot-popup-label">' + labels.approxAddress + ':</span>');
-      html.push('<span class="spot-popup-value">' + escapeHtml(spot.approximateAddress) + '</span>');
-      html.push('<button type="button" class="btn btn-sm btn-outline-light copy-btn" ');
-      html.push('onclick="PaddelbuchClipboard.copyAddress(\'' + escapedAddress + '\', this)" ');
-      html.push('title="' + labels.copyAddress + '" aria-label="' + labels.copyAddress + '">');
-      html.push(getCopyIcon());
-      html.push('</button>');
-      html.push('</div>');
-    }
-    
-    // Paddle craft types (Requirement 3.1)
-    if (spot.paddleCraftTypes && spot.paddleCraftTypes.length > 0) {
-      html.push('<div class="spot-popup-craft-types">');
-      html.push('<span class="spot-popup-label">' + labels.type + ':</span>');
-      html.push('<span class="spot-popup-value">' + escapeHtml(spot.paddleCraftTypes.join(', ')) + '</span>');
-      html.push('</div>');
-    }
-    
-    // Action buttons
-    html.push('<div class="spot-popup-actions">');
-    
-    // Navigation button (Requirement 3.4)
-    if (lat !== null && lon !== null) {
-      html.push('<a href="https://www.google.com/maps/dir/?api=1&destination=' + lat + ',' + lon + '" ');
-      html.push('target="_blank" rel="noopener noreferrer" ');
-      html.push('class="btn btn-sm btn-outline-primary navigate-btn" ');
-      html.push('title="' + labels.navigate + '" aria-label="' + labels.navigate + '">');
-      html.push(getNavigateIcon());
-      html.push(labels.navigate);
-      html.push('</a>');
-    }
-    
-    // More details link (Requirement 3.5)
-    if (spot.slug) {
-      html.push('<a href="' + localePrefix + '/einstiegsorte/' + escapeHtml(spot.slug) + '/" ');
-      html.push('class="btn btn-sm btn-primary spot-popup-details-link">');
-      html.push(labels.moreDetails);
-      html.push('</a>');
-    }
-    
-    html.push('</div>'); // .spot-popup-actions
-    html.push('</div>'); // .spot-popup
-    
-    return html.join('');
-  }
 
   /**
    * Generates HTML content for a rejected spot popup
@@ -253,34 +273,33 @@
     var html = [];
     
     var iconPath = getIconPath(null, true, 'light');
+    var noEntryLabel = (locale === 'en') ? 'No Entry Spot' : 'Kein Zutritt Ort';
+    var iconAlt = (locale === 'en') ? 'No entry spot icon' : 'Kein Zutritt Symbol';
     
-    html.push('<div class="spot-popup rejected-spot-popup">');
-    
-    // Header with icon and name
-    html.push('<div class="spot-popup-header">');
-    html.push('<img src="' + iconPath + '" alt="" height="20" width="20" class="spot-icon spot-icon-light" loading="lazy" />');
-    html.push('<strong class="spot-popup-name">' + escapeHtml(spot.name) + '</strong>');
+    // Header: icon + category label (matches .popup-icon-div from Gatsby)
+    html.push('<div class="popup-icon-div">');
+    html.push('<span class="popup-icon">');
+    html.push('<img src="' + iconPath + '" alt="' + iconAlt + '" height="20" width="20" loading="lazy" />');
+    html.push('</span>');
+    html.push(escapeHtml(noEntryLabel));
     html.push('</div>');
     
-    // Rejection reason (from description)
-    if (spot.description) {
-      var plainText = stripHtml(spot.description);
-      html.push('<div class="spot-popup-description rejection-reason">');
-      html.push('<p>' + escapeHtml(plainText) + '</p>');
-      html.push('</div>');
+    // Title
+    html.push('<span class="popup-title"><h1>' + escapeHtml(spot.name) + '</h1></span>');
+    
+    // Description (rejection reason)
+    var description = spot.description || spot.description_excerpt;
+    if (description) {
+      var plainText = stripHtml(description);
+      html.push('<div><p>' + escapeHtml(plainText) + '</p></div>');
     }
     
-    // More details link
+    // More details button (matches regular spot popup: button.popup-btn-right > a)
     if (spot.slug) {
-      html.push('<div class="spot-popup-actions">');
-      html.push('<a href="' + localePrefix + '/einstiegsorte/' + escapeHtml(spot.slug) + '/" ');
-      html.push('class="btn btn-sm btn-primary spot-popup-details-link">');
-      html.push(labels.moreDetails);
-      html.push('</a>');
-      html.push('</div>');
+      html.push('<button class="popup-btn popup-btn-right">');
+      html.push('<a href="' + localePrefix + '/einstiegsorte/' + escapeHtml(spot.slug) + '/">');
+      html.push(labels.moreDetails + '</a></button>');
     }
-    
-    html.push('</div>');
     
     return html.join('');
   }
