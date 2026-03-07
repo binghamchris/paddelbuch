@@ -110,7 +110,7 @@ waterways:
 
 # API page
 api:
-  title: "Daten herunterladen"
+  title: "Daten herunterladen / API"
   intro: "Alle Daten von Paddel Buch stehen hier zum Herunterladen und zur Wiederverwendung unter den im beschriebenen Bedingungen zur Verfügung in der"
   intro_link_text: "Datenlizenzen"
   intro_suffix: "Seite."
