@@ -145,31 +145,15 @@ RSpec.describe 'Notice Page Bug Condition Exploration' do
   # Test 2 — Extraneous Gewässerereignisse
   # ─────────────────────────────────────────────────────────────────────
   context 'Bug 1.2: Extraneous Gewässerereignisse label' do
-    it 'notice-icon-div does NOT contain standalone Gewässerereignisse text' do
-      Dir.mktmpdir do |tmpdir|
-        site = build_jekyll_site(tmpdir)
+    it 'notice-icon-div is removed (no standalone Gewässerereignisse text)' do
+      layout_path = File.join(File.dirname(__FILE__), '..', '_layouts', 'notice.html')
+      layout_content = File.read(layout_path)
 
-        # Read the actual notice.html layout to find the notice-icon-div
-        layout_path = File.join(File.dirname(__FILE__), '..', '_layouts', 'notice.html')
-        layout_content = File.read(layout_path)
-
-        # Extract the notice-icon-div section from the layout
-        icon_div_match = layout_content.match(/<div class="notice-icon-div[^"]*"[^>]*>.*?<\/div>/m)
-        expect(icon_div_match).not_to be_nil, "Could not find notice-icon-div in notice.html layout"
-
-        icon_div_html = icon_div_match[0]
-
-        # The {% t event_notices.title %} tag resolves to "Gewässerereignisse" in German.
-        # Check if the notice-icon-div contains this translation tag.
-        has_translation_tag = icon_div_html.include?('{% t event_notices.title %}')
-
-        # On unfixed code, this tag IS present and renders "Gewässerereignisse"
-        # as a standalone breadcrumb-like label. The fix should remove it.
-        expect(has_translation_tag).to eq(false),
-          "notice-icon-div contains {% t event_notices.title %} which renders " \
-          "'Gewässerereignisse' as an extraneous breadcrumb label. " \
-          "Found in layout: #{icon_div_html}"
-      end
+      # The notice-icon-div was removed entirely since it only contained
+      # the extraneous Gewässerereignisse label. Verify it's gone.
+      expect(layout_content).not_to match(/notice-icon-div/),
+        "notice-icon-div should be removed from notice.html layout — " \
+        "it contained the extraneous Gewässerereignisse breadcrumb label"
     end
   end
 

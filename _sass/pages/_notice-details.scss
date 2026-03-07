@@ -17,6 +17,11 @@
     .map {
       height: calc(100svh - $menu-height) !important;
     }
+
+    .notice-description {
+      overflow-y: auto;
+      max-height: calc(100svh - $menu-height);
+    }
   }
   @media screen and (max-width: 992px) {
     .map {
@@ -37,26 +42,6 @@
     padding-top: 0.7em;
     margin-bottom: 1em;
     border-bottom: 1px solid $swisscanoe-blue;
-  }
-
-  .notice-icon-div {
-    border-bottom: 1px solid $secondary-blue;
-    padding-bottom: 2em;
-    font-family: $font-brand;
-    font-size: 1.2em;
-    font-weight: 300;
-    height: 40px;
-    margin-top: 1em;
-    color: $swisscanoe-blue;
-  }
-
-  .notice-icon {
-    height: 20px;
-    padding-right: 10px;
-  }
-  
-  .notice-icon img {
-    width: 20px !important;
   }
 
   .notice-details-table ul {
