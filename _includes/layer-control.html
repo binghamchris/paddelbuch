@@ -231,9 +231,8 @@
         if (window.PaddelbuchObstaclePopup) {
           popupContent = window.PaddelbuchObstaclePopup.generateObstaclePopupContent(obstacle, currentLocale);
         } else {
-          // Fallback popup content
-          popupContent = '<div class="obstacle-popup">';
-          popupContent += '<strong>' + (obstacle.name || 'Obstacle') + '</strong>';
+          // Fallback popup content — matches Gatsby structure
+          popupContent = '<span class="popup-title"><h1>' + (obstacle.name || 'Obstacle') + '</h1></span>';
           
           // Portage possibility status (Requirement 5.3)
           var portageStatus;
@@ -244,13 +243,14 @@
           } else {
             portageStatus = currentLocale === 'en' ? 'Unknown' : 'Unbekannt';
           }
-          popupContent += '<p>' + (currentLocale === 'en' ? 'Portage possible: ' : 'Umtragen möglich: ') + portageStatus + '</p>';
+          popupContent += '<table><tbody><tr><th>' + (currentLocale === 'en' ? 'Portage possible' : 'Umtragen möglich') + ':</th>';
+          popupContent += '<td>' + portageStatus + '</td></tr></tbody></table>';
           
           if (obstacle.slug) {
-            popupContent += '<a href="' + localePrefix + '/hindernisse/' + obstacle.slug + '/" class="btn btn-sm btn-primary">' + 
-              (currentLocale === 'en' ? 'More details' : 'Weitere Details') + '</a>';
+            popupContent += '<button class="popup-btn popup-btn-right obstacle-details-btn">';
+            popupContent += '<a class="popup-btn-right" href="' + localePrefix + '/hindernisse/' + obstacle.slug + '/">' + 
+              (currentLocale === 'en' ? 'More details' : 'Weitere Details') + '</a></button>';
           }
-          popupContent += '</div>';
         }
         
         obstacleLayer.bindPopup(popupContent, { maxWidth: 350 });

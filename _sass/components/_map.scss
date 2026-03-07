@@ -186,6 +186,16 @@
   margin-top: 1.5em;
 }
 
+/* Obstacle popup table — cells sized to content */
+.leaflet-popup-content table {
+  width: min-content !important;
+
+  th, td {
+    white-space: nowrap;
+    padding-right: 0.5em;
+  }
+}
+
 .popup-eventnotice-table th {
   min-width: 130px;
 }

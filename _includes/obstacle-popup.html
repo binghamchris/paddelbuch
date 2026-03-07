@@ -24,43 +24,34 @@
 {% assign obstacle = include.obstacle %}
 {% assign current_locale = include.locale | default: site.lang | default: 'de' %}
 
-<div class="obstacle-popup">
-  <!-- Obstacle Name (Requirement 5.3) -->
-  <div class="obstacle-popup-header">
-    <strong class="obstacle-popup-name">{{ obstacle.name }}</strong>
-  </div>
-  
-  <!-- Portage Possibility Status (Requirement 5.3) -->
-  <div class="obstacle-popup-portage">
-    <span class="obstacle-popup-label">
-      {% if current_locale == 'en' %}
-        Portage possible:
-      {% else %}
-        Umtragen möglich:
-      {% endif %}
-    </span>
-    <span class="obstacle-popup-value">
-      {% if obstacle.isPortagePossible == true %}
-        {% if current_locale == 'en' %}Yes{% else %}Ja{% endif %}
-      {% elsif obstacle.isPortagePossible == false %}
-        {% if current_locale == 'en' %}No{% else %}Nein{% endif %}
-      {% else %}
-        {% if current_locale == 'en' %}Unknown{% else %}Unbekannt{% endif %}
-      {% endif %}
-    </span>
-  </div>
-  
-  <!-- More Details Link (Requirement 5.3) -->
-  {% if obstacle.slug %}
-  <div class="obstacle-popup-actions">
-    <a href="{{ locale_prefix | append: '/hindernisse/' | append: obstacle.slug | append: '/' }}" 
-       class="btn btn-sm btn-primary obstacle-popup-details-link">
-      {% if current_locale == 'en' %}
-        More details
-      {% else %}
-        Weitere Details
-      {% endif %}
-    </a>
-  </div>
-  {% endif %}
-</div>
+<span class="popup-title"><h1>{{ obstacle.name }}</h1></span>
+
+<!-- Portage Possibility Status (Requirement 5.3) -->
+<table>
+  <tbody>
+    <tr>
+      <th>
+        {% if current_locale == 'en' %}Portage Possible{% else %}Umtragen möglich{% endif %}:
+      </th>
+      <td>
+        {% if obstacle.isPortagePossible == true %}
+          {% if current_locale == 'en' %}Yes{% else %}Ja{% endif %}
+        {% elsif obstacle.isPortagePossible == false %}
+          {% if current_locale == 'en' %}No{% else %}Nein{% endif %}
+        {% else %}
+          {% if current_locale == 'en' %}Unknown{% else %}Unbekannt{% endif %}
+        {% endif %}
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- More Details Link (Requirement 5.3) -->
+{% if obstacle.slug %}
+<button class="popup-btn popup-btn-right obstacle-details-btn">
+  <a class="popup-btn-right" hreflang="{{ current_locale }}"
+     href="{{ locale_prefix | append: '/hindernisse/' | append: obstacle.slug | append: '/' }}">
+    {% if current_locale == 'en' %}More details{% else %}Weitere Details{% endif %}
+  </a>
+</button>
+{% endif %}
