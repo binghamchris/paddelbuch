@@ -164,8 +164,8 @@ module ContentfulMappers
     LOCALES.map do |locale|
       base = {
         'locale' => locale,
-        'createdAt' => sys[:created_at]&.iso8601,
-        'updatedAt' => sys[:updated_at]&.iso8601
+        'createdAt' => sys[:created_at]&.utc&.strftime('%Y-%m-%dT%H:%M:%SZ'),
+        'updatedAt' => sys[:updated_at]&.utc&.strftime('%Y-%m-%dT%H:%M:%SZ')
       }
       mapped = send(mapper_method, entry, fields, locale)
       base.merge(mapped)
