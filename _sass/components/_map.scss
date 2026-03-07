@@ -229,21 +229,23 @@
   margin-bottom: 0;
 }
 
+.spot-popup-craft-types,
 .spot-popup-gps,
 .spot-popup-address {
-  display: flex;
-  align-items: flex-start;
-  margin-bottom: 0.5em;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  column-gap: 0.5em;
+  align-items: start;
+  margin-bottom: 0.75em;
   font-size: 0.9em;
 }
 
 .spot-popup-craft-types {
-  margin-bottom: 0.5em;
-  font-size: 0.9em;
+  grid-template-columns: auto 1fr;
 }
 
 .spot-popup-craft-list {
-  margin: 0.25em 0 0;
+  margin: 0;
   padding-left: 1.25em;
   list-style: disc;
 
@@ -254,12 +256,10 @@
 
 .spot-popup-label {
   font-weight: 500;
-  margin-right: 0.5em;
   white-space: nowrap;
 }
 
 .spot-popup-value {
-  flex: 1;
   word-break: break-word;
 }
 
@@ -295,28 +295,18 @@
   border-top: 1px solid $secondary-blue;
 }
 
-.spot-popup-actions .navigate-btn {
-  border-color: $white-40pc;
-}
-
-.spot-popup-actions .navigate-btn:hover {
-  background-color: $purple-1;
-  border-color: $purple-1;
-  color: $white;
-}
-
+.spot-popup-actions .navigate-btn,
 .spot-popup-details-link {
   background-color: $secondary-blue;
   border-color: $secondary-blue;
+  color: $white;
 }
 
+.spot-popup-actions .navigate-btn:hover,
 .spot-popup-details-link:hover {
   background-color: $purple-1;
   border-color: $purple-1;
-}
-
-.navigate-icon {
-  margin-right: 0.25em;
+  color: $white;
 }
 
 /* Rejected Spot Popup Styles (Requirement 3.7) */
