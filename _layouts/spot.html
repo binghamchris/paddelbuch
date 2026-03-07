@@ -35,12 +35,7 @@ pageName: spot-details
 <!-- Get waterway information -->
 {% assign waterway_slug = spot.waterway_slug %}
 {% if waterway_slug %}
-  {% if current_locale == 'en' %}
-    {% assign waterways_data = site.data.waterways_en %}
-  {% else %}
-    {% assign waterways_data = site.data.waterways_de %}
-  {% endif %}
-  {% assign waterway = waterways_data | where: "slug", waterway_slug | first %}
+  {% assign waterway = site.data.waterways | where: "slug", waterway_slug | where: "locale", current_locale | first %}
 {% endif %}
 
 <div class="container-fluid">

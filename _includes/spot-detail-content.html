@@ -61,11 +61,11 @@
     <tr>
       <th>{% t labels.gps %}</th>
       <td>
-        <span id="gps-coords">{{ lat }}, {{ lon }}</span>
+        <span id="gps-coords" class="text-nowrap">{{ lat }}, {{ lon }}</span>
       </td>
       <td class="clipboard-cell">
         <button type="button" 
-                class="btn btn-sm btn-outline-secondary copy-btn" 
+                class="btn btn-sm clipboard-btn copy-btn" 
                 onclick="PaddelbuchClipboard.copyGPS('{{ lat }}', '{{ lon }}')"
                 title="{% t actions.copy_gps %}"
                 aria-label="{% t actions.copy_gps %}">
@@ -85,7 +85,7 @@
       </td>
       <td class="clipboard-cell">
         <button type="button" 
-                class="btn btn-sm btn-outline-secondary copy-btn" 
+                class="btn btn-sm clipboard-btn copy-btn" 
                 onclick="PaddelbuchClipboard.copyAddress('{{ spot.approximateAddress | escape }}')"
                 title="{% t actions.copy_address %}"
                 aria-label="{% t actions.copy_address %}">
@@ -108,11 +108,11 @@
     {% endif %}
 
     <!-- Last Updated Timestamp -->
-    <!-- Property 19: Date Locale Formatting - using localized_date filter -->
+    <!-- Property 19: Date Locale Formatting - using localized_datetime with 'long' format to match Gatsby -->
     {% if spot.updatedAt %}
     <tr>
       <th>{% t labels.last_updated %}</th>
-      <td colspan="2">{{ spot.updatedAt | localized_date }}</td>
+      <td colspan="2">{{ spot.updatedAt | localized_datetime: 'long' }}</td>
     </tr>
     {% endif %}
   </tbody>
