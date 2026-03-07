@@ -245,9 +245,9 @@ RSpec.describe 'Notice Page Preservation' do
         'notice.html layout must contain an h1 with the notice title'
     end
 
-    it 'notice layout contains notice type badge div' do
-      expect(layout_content).to match(/notice-icon-div/),
-        'notice.html layout must contain the notice-icon-div for the type badge'
+    it 'notice layout contains notice title wrapper div' do
+      expect(layout_content).to match(/notice-title/),
+        'notice.html layout must contain the notice-title wrapper div'
     end
 
     it 'notice detail content includes description section' do
