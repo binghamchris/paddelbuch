@@ -55,7 +55,7 @@
     - _Preservation: Existing i18n keys not modified beyond navigate text update_
     - _Requirements: 2.2, 2.3, 2.4_
 
-  - [-] 3.2 Restructure `_includes/spot-popup.html` template
+  - [x] 3.2 Restructure `_includes/spot-popup.html` template
     - Replace spot name in header with translated spot type category label from `site.data.types.spot_types`
     - Add `<hr>` divider after header row
     - Add spot name as a prominent `<h3>` heading below the divider
@@ -68,7 +68,7 @@
     - _Preservation: Conditional section omission for missing data unchanged; rejected spot popup layout unchanged_
     - _Requirements: 2.1, 2.2, 2.3, 2.5_
 
-  - [~] 3.3 Update `assets/js/spot-popup.js` dynamic popup generation
+  - [-] 3.3 Update `assets/js/spot-popup.js` dynamic popup generation
     - Add `spotTypeNames` translation map (slug → { de, en }) sourced from `spot_types.yml`
     - Add `paddleCraftTypeNames` translation map (slug → { de, en }) sourced from `paddle_craft_types.yml`
     - Restructure header to show icon + translated spot type category label

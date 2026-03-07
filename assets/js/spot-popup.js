@@ -21,6 +21,22 @@
     'notauswasserungsstelle': 'emergency'
   };
 
+  // Spot type translated names (sourced from spot_types.yml)
+  var spotTypeNames = {
+    'einstieg-ausstieg': { de: 'Ein- und Ausstieg', en: 'Entry and Exit' },
+    'nur-einstieg': { de: 'Nur Einstieg', en: 'Entry Only' },
+    'nur-ausstieg': { de: 'Nur Ausstieg', en: 'Exit Only' },
+    'rasthalte': { de: 'Rasthalte', en: 'Rest Stop' },
+    'notauswasserungsstelle': { de: 'Notauswasserungsstelle', en: 'Emergency Landing' }
+  };
+
+  // Paddle craft type translated names (sourced from paddle_craft_types.yml)
+  var paddleCraftTypeNames = {
+    'seekajak': { de: 'Seekajak', en: 'Sea Kayak' },
+    'kanadier': { de: 'Kanadier', en: 'Canoe' },
+    'stand-up-paddle-board': { de: 'Stand Up Paddle Board (SUP)', en: 'Stand Up Paddle Board (SUP)' }
+  };
+
   /**
    * Gets the icon filename for a spot type
    * 
@@ -91,9 +107,11 @@
         gps: 'GPS',
         approxAddress: 'Approx. Address',
         type: 'Type',
+        potentiallyUsableBy: 'Potentially Usable By',
+        copy: 'Copy',
         copyGps: 'Copy GPS to clipboard',
         copyAddress: 'Copy approx. address to clipboard',
-        navigate: 'Navigate',
+        navigate: 'Navigate To',
         moreDetails: 'More details'
       };
     }
@@ -102,9 +120,11 @@
       gps: 'GPS',
       approxAddress: 'Ungefähre Adresse',
       type: 'Typ',
+      potentiallyUsableBy: 'Potenziell nutzbar f\u00fcr',
+      copy: 'Kopieren',
       copyGps: 'GPS in der Zwischenablage kopieren',
       copyAddress: 'Ungefähre Adresse in der Zwischenablage kopieren',
-      navigate: 'Navigieren',
+      navigate: 'Navigieren zu',
       moreDetails: 'Weitere Details'
     };
   }
@@ -154,13 +174,25 @@
     var spotTypeSlug = spot.spotType_slug || spot.spotTypeSlug || spot.spot_type_slug;
     var iconPath = getIconPath(spotTypeSlug, isRejected, 'light');
     
+    // Look up translated spot type category label
+    var spotTypeLabel = spotTypeSlug;
+    if (spotTypeSlug && Object.prototype.hasOwnProperty.call(spotTypeNames, spotTypeSlug)) {
+      spotTypeLabel = spotTypeNames[spotTypeSlug][locale] || spotTypeNames[spotTypeSlug]['de'] || spotTypeSlug;
+    }
+    
     html.push('<div class="spot-popup">');
     
-    // Header with icon and name (Requirement 3.1)
+    // Category header with icon and translated spot type label (Requirement 2.1)
     html.push('<div class="spot-popup-header">');
     html.push('<img src="' + iconPath + '" alt="" height="20" width="20" class="spot-icon spot-icon-light" loading="lazy" />');
-    html.push('<strong class="spot-popup-name">' + escapeHtml(spot.name) + '</strong>');
+    html.push('<span class="spot-popup-category">' + escapeHtml(spotTypeLabel) + '</span>');
     html.push('</div>');
+    
+    // Divider between header and title (Requirement 2.1)
+    html.push('<hr class="spot-popup-divider">');
+    
+    // Spot name as prominent heading (Requirement 2.1)
+    html.push('<h3 class="spot-popup-title">' + escapeHtml(spot.name) + '</h3>');
     
     // Description excerpt (Requirement 3.1)
     if (spot.description) {
@@ -173,7 +205,24 @@
       }
     }
     
-    // GPS coordinates with copy button (Requirements 3.1, 3.2)
+    // Paddle craft types as bullet list with translated names (Requirement 2.2)
+    if (spot.paddleCraftTypes && spot.paddleCraftTypes.length > 0) {
+      html.push('<div class="spot-popup-craft-types">');
+      html.push('<span class="spot-popup-label">' + labels.potentiallyUsableBy + ':</span>');
+      html.push('<ul class="spot-popup-craft-list">');
+      for (var i = 0; i < spot.paddleCraftTypes.length; i++) {
+        var craftSlug = spot.paddleCraftTypes[i];
+        var craftName = craftSlug;
+        if (Object.prototype.hasOwnProperty.call(paddleCraftTypeNames, craftSlug)) {
+          craftName = paddleCraftTypeNames[craftSlug][locale] || paddleCraftTypeNames[craftSlug]['de'] || craftSlug;
+        }
+        html.push('<li>' + escapeHtml(craftName) + '</li>');
+      }
+      html.push('</ul>');
+      html.push('</div>');
+    }
+    
+    // GPS coordinates with text copy button (Requirements 2.3, 3.2)
     var lat = spot.location ? (spot.location.lat || spot.location.latitude) : null;
     var lon = spot.location ? (spot.location.lon || spot.location.lng || spot.location.longitude) : null;
     
@@ -184,12 +233,12 @@
       html.push('<button type="button" class="btn btn-sm btn-outline-light copy-btn" ');
       html.push('onclick="PaddelbuchClipboard.copyGPS(\'' + lat + '\', \'' + lon + '\', this)" ');
       html.push('title="' + labels.copyGps + '" aria-label="' + labels.copyGps + '">');
-      html.push(getCopyIcon());
+      html.push(labels.copy);
       html.push('</button>');
       html.push('</div>');
     }
     
-    // Approximate address with copy button (Requirements 3.1, 3.3)
+    // Approximate address with text copy button (Requirements 2.3, 3.3)
     if (spot.approximateAddress) {
       var escapedAddress = escapeHtml(spot.approximateAddress).replace(/'/g, "\\'");
       html.push('<div class="spot-popup-address">');
@@ -198,23 +247,15 @@
       html.push('<button type="button" class="btn btn-sm btn-outline-light copy-btn" ');
       html.push('onclick="PaddelbuchClipboard.copyAddress(\'' + escapedAddress + '\', this)" ');
       html.push('title="' + labels.copyAddress + '" aria-label="' + labels.copyAddress + '">');
-      html.push(getCopyIcon());
+      html.push(labels.copy);
       html.push('</button>');
-      html.push('</div>');
-    }
-    
-    // Paddle craft types (Requirement 3.1)
-    if (spot.paddleCraftTypes && spot.paddleCraftTypes.length > 0) {
-      html.push('<div class="spot-popup-craft-types">');
-      html.push('<span class="spot-popup-label">' + labels.type + ':</span>');
-      html.push('<span class="spot-popup-value">' + escapeHtml(spot.paddleCraftTypes.join(', ')) + '</span>');
       html.push('</div>');
     }
     
     // Action buttons
     html.push('<div class="spot-popup-actions">');
     
-    // Navigation button (Requirement 3.4)
+    // Navigation button (Requirement 2.4)
     if (lat !== null && lon !== null) {
       html.push('<a href="https://www.google.com/maps/dir/?api=1&destination=' + lat + ',' + lon + '" ');
       html.push('target="_blank" rel="noopener noreferrer" ');
@@ -225,7 +266,7 @@
       html.push('</a>');
     }
     
-    // More details link (Requirement 3.5)
+    // More details link (Requirement 3.6)
     if (spot.slug) {
       html.push('<a href="' + localePrefix + '/einstiegsorte/' + escapeHtml(spot.slug) + '/" ');
       html.push('class="btn btn-sm btn-primary spot-popup-details-link">');
