@@ -191,9 +191,9 @@ RSpec.describe 'Notice Page Bug Condition Exploration' do
             date_str
           }
         }.check(50) { |iso_date|
-          # Render the startDate through the localized_date filter as currently used
-          # in notice-detail-content.html: {{ notice.startDate | localized_date }}
-          template_str = '{{ notice.startDate | localized_date }}'
+          # Render the startDate through the localized_date filter as used
+          # in the fixed notice-detail-content.html: {{ notice.startDate | localized_date: 'iso' }}
+          template_str = "{{ notice.startDate | localized_date: 'iso' }}"
           notice_data = { 'startDate' => iso_date }
           context = make_liquid_context(site, { 'notice' => notice_data })
           rendered = render_liquid(template_str, context).strip
@@ -227,9 +227,9 @@ RSpec.describe 'Notice Page Bug Condition Exploration' do
             datetime_str
           }
         }.check(50) { |iso_datetime|
-          # Render the updatedAt through the localized_date filter as currently used
-          # in notice-detail-content.html: {{ notice.updatedAt | localized_date }}
-          template_str = '{{ notice.updatedAt | localized_date }}'
+          # Render the updatedAt through the localized_datetime filter as used
+          # in the fixed notice-detail-content.html: {{ notice.updatedAt | localized_datetime: 'notice_updated' }}
+          template_str = "{{ notice.updatedAt | localized_datetime: 'notice_updated' }}"
           notice_data = { 'updatedAt' => iso_datetime }
           context = make_liquid_context(site, { 'notice' => notice_data })
           rendered = render_liquid(template_str, context).strip
