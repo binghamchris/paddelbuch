@@ -18,7 +18,7 @@
   - Mark task complete when tests are written, run, and failures are documented
   - _Requirements: 1.1, 1.2, 1.3_
 
-- [~] 2. Write preservation property tests (BEFORE implementing fix)
+- [x] 2. Write preservation property tests (BEFORE implementing fix)
   - **Property 2: Preservation** - Non-Notice Page and Filter Behavior
   - **IMPORTANT**: Follow observation-first methodology
   - **Observe on UNFIXED code first**, then write property-based tests capturing observed behavior
