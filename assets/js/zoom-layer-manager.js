@@ -114,7 +114,6 @@
     }
 
     options = options || {};
-    var locale = options.locale || 'de';
 
     // Set initial visibility based on current zoom
     var currentZoom = map.getZoom();
@@ -134,88 +133,15 @@
       layerVisibility.protected = map.hasLayer(layerGroups.protectedAreas);
     }
 
-    // Listen for zoom changes
+    // Listen for zoom changes — only toggle visibility, data loading is
+    // handled by the caller (map-init / detail-map-layers) via its own
+    // moveend handler to avoid duplicate layers stacking up.
     map.on('zoomend', function() {
       var zoom = map.getZoom();
       updateLayerVisibility(map, zoom, layerGroups);
-      
-      // Load data if zooming in past threshold and data not yet loaded
-      if (shouldShowDetailLayers(zoom) && global.PaddelbuchDataLoader) {
-        var bounds = map.getBounds();
-        var boundsObj = {
-          north: bounds.getNorth(),
-          south: bounds.getSouth(),
-          east: bounds.getEast(),
-          west: bounds.getWest()
-        };
-        
-        // Trigger data load for detail layers
-        loadDetailLayersIfNeeded(boundsObj, zoom, locale, layerGroups);
-      }
-    });
-
-    // Listen for move events to load data for new viewport
-    map.on('moveend', function() {
-      var zoom = map.getZoom();
-      if (shouldShowDetailLayers(zoom) && global.PaddelbuchDataLoader) {
-        var bounds = map.getBounds();
-        var boundsObj = {
-          north: bounds.getNorth(),
-          south: bounds.getSouth(),
-          east: bounds.getEast(),
-          west: bounds.getWest()
-        };
-        
-        loadDetailLayersIfNeeded(boundsObj, zoom, locale, layerGroups);
-      }
     });
 
     console.log('ZoomLayerManager initialized with threshold:', DETAIL_LAYER_ZOOM_THRESHOLD);
-  }
-
-  /**
-   * Load detail layers (obstacles, protected areas) if needed
-   * 
-   * @param {Object} bounds - Viewport bounds
-   * @param {number} zoom - Current zoom level
-   * @param {string} locale - Current locale
-   * @param {Object} layerGroups - Layer groups object
-   */
-  function loadDetailLayersIfNeeded(bounds, zoom, locale, layerGroups) {
-    if (!global.PaddelbuchDataLoader) {
-      return;
-    }
-
-    // Use debounced loading to prevent excessive requests
-    global.PaddelbuchDataLoader.loadDataForBoundsDebounced(
-      bounds,
-      zoom,
-      locale,
-      function(error, data) {
-        if (error) {
-          console.warn('Error loading detail layers:', error);
-          return;
-        }
-
-        // Add obstacles to layer group
-        if (data.obstacles && data.obstacles.length > 0 && layerGroups.obstacles) {
-          data.obstacles.forEach(function(obstacle) {
-            if (global.paddelbuchAddObstacleLayer) {
-              global.paddelbuchAddObstacleLayer(obstacle);
-            }
-          });
-        }
-
-        // Add protected areas to layer group
-        if (data.protected && data.protected.length > 0 && layerGroups.protectedAreas) {
-          data.protected.forEach(function(area) {
-            if (global.paddelbuchAddProtectedAreaLayer) {
-              global.paddelbuchAddProtectedAreaLayer(area);
-            }
-          });
-        }
-      }
-    );
   }
 
   /**
