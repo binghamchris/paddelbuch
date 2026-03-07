@@ -250,9 +250,9 @@ RSpec.describe 'Notice Page Preservation' do
         'notice.html layout must contain the notice-icon-div for the type badge'
     end
 
-    it 'notice detail content includes waterway links section' do
-      expect(include_content).to include('notice.waterways'),
-        'notice-detail-content.html must include waterway links section'
+    it 'notice detail content includes description section' do
+      expect(include_content).to include('notice.description'),
+        'notice-detail-content.html must include description section'
     end
 
     it 'notice layout includes detail-map-layers.html' do

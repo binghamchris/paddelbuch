@@ -234,9 +234,9 @@ RSpec.describe 'Notice Page Bug Condition Exploration' do
           context = make_liquid_context(site, { 'notice' => notice_data })
           rendered = render_liquid(template_str, context).strip
 
-          # Expected: "dd. MMMM YYYY um HH:MM" (e.g., "10. Mai 2025 um 14:30")
-          # On unfixed code, localized_date produces "DD.MM.YYYY" without time
-          expect(rendered).to match(/^\d{2}\. \w+ \d{4} um \d{2}:\d{2}$/),
+          # Expected: "d. MMMM YYYY um HH:MM" (e.g., "10. Mai 2025 um 14:30" or "5. Mai 2025 um 09:00")
+          # Day has no leading zero (%-d format)
+          expect(rendered).to match(/^\d{1,2}\. \w+ \d{4} um \d{2}:\d{2}$/),
             "updatedAt '#{iso_datetime}' rendered as '#{rendered}', " \
             "expected format like '10. Mai 2025 um 14:30'"
         }
