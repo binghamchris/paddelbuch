@@ -104,20 +104,11 @@
     // Check for invalid date
     if (isNaN(date.getTime())) return '';
     
-    // Format based on locale
-    if (locale === 'en') {
-      // en-GB format: DD/MM/YYYY
-      var day = String(date.getDate()).padStart(2, '0');
-      var month = String(date.getMonth() + 1).padStart(2, '0');
-      var year = date.getFullYear();
-      return day + '/' + month + '/' + year;
-    } else {
-      // de-CH format: DD.MM.YYYY
-      var day = String(date.getDate()).padStart(2, '0');
-      var month = String(date.getMonth() + 1).padStart(2, '0');
-      var year = date.getFullYear();
-      return day + '.' + month + '.' + year;
-    }
+    // ISO format: YYYY-MM-DD (locale-independent)
+    var day = String(date.getDate()).padStart(2, '0');
+    var month = String(date.getMonth() + 1).padStart(2, '0');
+    var year = date.getFullYear();
+    return year + '-' + month + '-' + day;
   }
 
   /**
