@@ -84,6 +84,11 @@
       background-color: rgba($warning-yellow, 0.15);
       border-color: $warning-yellow;
       color: darken($warning-yellow, 30%);
+      border-radius: 0;
+
+      .bi {
+        margin-right: 1.5em !important;
+      }
     }
 
     .rejection-reason {
