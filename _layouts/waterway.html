@@ -31,19 +31,6 @@ pageName: waterway-details
       <!-- Waterway Title -->
       <h1 class="waterway-title">{{ waterway.name }}</h1>
       
-      <!-- Waterway Details Table -->
-      <table class="waterway-details-table">
-        <tbody>
-          <!-- Length (for rivers) -->
-          {% if waterway.length and waterway.length > 0 %}
-          <tr>
-            <th>{% if current_locale == 'en' %}Length{% else %}Länge{% endif %}</th>
-            <td>{{ waterway.length | round: 2 }} km</td>
-          </tr>
-          {% endif %}
-        </tbody>
-      </table>
-      
       <!-- Event Notices Section (Requirement 4.5, 7.5) -->
       {% include event-list.html waterway_slug=waterway.slug %}
     </div>
