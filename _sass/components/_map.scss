@@ -54,19 +54,33 @@
   font-weight: 400;
 }
 
-.popup-details-table th {
-  width: 70px;
-  padding-right: 10px;
-}
-
-.popup-details-table ul {
-  margin-bottom: 0;
-  padding-left: 1rem;
-}
-
 .popup-details-table {
   margin-bottom: 1rem;
   width: 100%;
+
+  th {
+    width: 70px;
+    padding-right: 10px;
+    white-space: nowrap;
+    vertical-align: top;
+  }
+
+  td {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    vertical-align: top;
+  }
+
+  ul {
+    margin-bottom: 0;
+    padding-left: 1rem;
+  }
+}
+
+.clipboard-cell-popup {
+  white-space: nowrap;
+  padding-left: 10px;
+  width: 1%;
 }
 
 .popup-title h1 {
@@ -149,10 +163,6 @@
   background-color: $swisscanoe-blue !important;
 }
 
-.clipboard-cell-popup {
-  padding-left: 10px;
-}
-
 .clipboard-cell-popup > .clipboard-btn:hover {
   background-color: $purple-1;
 }
@@ -187,7 +197,7 @@
 }
 
 /* Obstacle popup table — cells sized to content */
-.leaflet-popup-content table {
+.leaflet-popup-content table:not(.popup-details-table) {
   width: min-content !important;
 
   th, td {
