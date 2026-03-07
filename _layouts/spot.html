@@ -32,6 +32,12 @@ pageName: spot-details
   {% assign spot_type_name = spot_type_slug %}
 {% endif %}
 
+<!-- Override spot type name for rejected spots -->
+{% if is_rejected %}
+  {% capture spot_type_name %}{% t spot_types.no_entry %}{% endcapture %}
+  {% assign spot_type_name = spot_type_name | strip %}
+{% endif %}
+
 <!-- Get waterway information -->
 {% assign waterway_slug = spot.waterway_slug %}
 {% if waterway_slug %}
