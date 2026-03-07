@@ -165,119 +165,98 @@
    * @returns {string} HTML content for the popup
    */
   function generateSpotPopupContent(spot, locale) {
-    locale = locale || 'de';
-    var labels = getLabels(locale);
-    var localePrefix = (locale !== 'de') ? '/' + locale : '';
-    var html = [];
-    
-    var isRejected = spot.rejected === true || spot.rejected === 'true';
-    var spotTypeSlug = spot.spotType_slug || spot.spotTypeSlug || spot.spot_type_slug;
-    var iconPath = getIconPath(spotTypeSlug, isRejected, 'light');
-    
-    // Look up translated spot type category label
-    var spotTypeLabel = spotTypeSlug;
-    if (spotTypeSlug && Object.prototype.hasOwnProperty.call(spotTypeNames, spotTypeSlug)) {
-      spotTypeLabel = spotTypeNames[spotTypeSlug][locale] || spotTypeNames[spotTypeSlug]['de'] || spotTypeSlug;
-    }
-    
-    html.push('<div class="spot-popup">');
-    
-    // Category header with icon and translated spot type label (Requirement 2.1)
-    html.push('<div class="spot-popup-header">');
-    html.push('<img src="' + iconPath + '" alt="" height="20" width="20" class="spot-icon spot-icon-light" loading="lazy" />');
-    html.push('<span class="spot-popup-category">' + escapeHtml(spotTypeLabel) + '</span>');
-    html.push('</div>');
-    
-    // Divider between header and title (Requirement 2.1)
-    html.push('<hr class="spot-popup-divider">');
-    
-    // Spot name as prominent heading (Requirement 2.1)
-    html.push('<h3 class="spot-popup-title">' + escapeHtml(spot.name) + '</h3>');
-    
-    // Description excerpt (Requirement 3.1)
-    if (spot.description) {
-      var plainText = stripHtml(spot.description);
-      var excerpt = truncate(plainText, 150);
-      if (excerpt) {
-        html.push('<div class="spot-popup-description">');
-        html.push('<p>' + escapeHtml(excerpt) + '</p>');
-        html.push('</div>');
+      locale = locale || 'de';
+      var labels = getLabels(locale);
+      var localePrefix = (locale !== 'de') ? '/' + locale : '';
+      var html = [];
+
+      var isRejected = spot.rejected === true || spot.rejected === 'true';
+      var spotTypeSlug = spot.spotType_slug || spot.spotTypeSlug || spot.spot_type_slug;
+      var iconPath = getIconPath(spotTypeSlug, isRejected, 'light');
+
+      // Look up translated spot type category label
+      var spotTypeLabel = spotTypeSlug;
+      if (spotTypeSlug && Object.prototype.hasOwnProperty.call(spotTypeNames, spotTypeSlug)) {
+        spotTypeLabel = spotTypeNames[spotTypeSlug][locale] || spotTypeNames[spotTypeSlug]['de'] || spotTypeSlug;
       }
-    }
-    
-    // Paddle craft types as bullet list with translated names (Requirement 2.2)
-    if (spot.paddleCraftTypes && spot.paddleCraftTypes.length > 0) {
-      html.push('<div class="spot-popup-craft-types">');
-      html.push('<span class="spot-popup-label">' + labels.potentiallyUsableBy + ':</span>');
-      html.push('<ul class="spot-popup-craft-list">');
-      for (var i = 0; i < spot.paddleCraftTypes.length; i++) {
-        var craftSlug = spot.paddleCraftTypes[i];
-        var craftName = craftSlug;
-        if (Object.prototype.hasOwnProperty.call(paddleCraftTypeNames, craftSlug)) {
-          craftName = paddleCraftTypeNames[craftSlug][locale] || paddleCraftTypeNames[craftSlug]['de'] || craftSlug;
+
+      // Header: icon + category label (matches Gatsby .popup-icon-div)
+      html.push('<div class="popup-icon-div">');
+      html.push('<span class="popup-icon"><img src="' + iconPath + '" alt="" width="20" height="20" loading="lazy" /></span>');
+      html.push(escapeHtml(spotTypeLabel));
+      html.push('</div>');
+
+      // Title (matches Gatsby .popup-title > h1)
+      html.push('<span class="popup-title"><h1>' + escapeHtml(spot.name) + '</h1></span>');
+
+      // Description
+      if (spot.description) {
+        var plainText = stripHtml(spot.description);
+        var excerpt = truncate(plainText, 150);
+        if (excerpt) {
+          html.push('<div><p>' + escapeHtml(excerpt) + '</p></div>');
         }
-        html.push('<li>' + escapeHtml(craftName) + '</li>');
       }
-      html.push('</ul>');
-      html.push('</div>');
+
+      // Details table (matches Gatsby .popup-details-table)
+      html.push('<table class="popup-details-table"><tbody>');
+
+      // Craft types row
+      if (spot.paddleCraftTypes && spot.paddleCraftTypes.length > 0) {
+        html.push('<tr><th>' + labels.potentiallyUsableBy + ':</th><td colspan="2"><ul>');
+        for (var i = 0; i < spot.paddleCraftTypes.length; i++) {
+          var craftSlug = spot.paddleCraftTypes[i];
+          var craftName = craftSlug;
+          if (Object.prototype.hasOwnProperty.call(paddleCraftTypeNames, craftSlug)) {
+            craftName = paddleCraftTypeNames[craftSlug][locale] || paddleCraftTypeNames[craftSlug]['de'] || craftSlug;
+          }
+          html.push('<li>' + escapeHtml(craftName) + '</li>');
+        }
+        html.push('</ul></td></tr>');
+      }
+
+      // GPS row
+      var lat = spot.location ? (spot.location.lat || spot.location.latitude) : null;
+      var lon = spot.location ? (spot.location.lon || spot.location.lng || spot.location.longitude) : null;
+
+      if (lat !== null && lon !== null) {
+        html.push('<tr><th>' + labels.gps + ':</th>');
+        html.push('<td>' + lat + ', ' + lon + '</td>');
+        html.push('<td class="clipboard-cell-popup">');
+        html.push('<button title="' + labels.copyGps + '" type="button" class="popup-btn" ');
+        html.push('onclick="PaddelbuchClipboard.copyGPS(\'' + lat + '\', \'' + lon + '\', this)">');
+        html.push(labels.copy + '</button></td></tr>');
+      }
+
+      // Address row
+      if (spot.approximateAddress) {
+        var escapedAddress = escapeHtml(spot.approximateAddress).replace(/'/g, "\\'");
+        html.push('<tr><th>' + labels.approxAddress + ':</th>');
+        html.push('<td>' + escapeHtml(spot.approximateAddress) + '</td>');
+        html.push('<td class="clipboard-cell-popup">');
+        html.push('<button title="' + labels.copyAddress + '" type="button" class="popup-btn" ');
+        html.push('onclick="PaddelbuchClipboard.copyAddress(\'' + escapedAddress + '\', this)">');
+        html.push(labels.copy + '</button></td></tr>');
+      }
+
+      html.push('</tbody></table>');
+
+      // Navigate button (matches Gatsby structure: button > a)
+      if (lat !== null && lon !== null) {
+        html.push('<button type="button" class="popup-btn">');
+        html.push('<a href="https://www.google.com/maps/dir/?api=1&destination=' + lat + ',' + lon + '" ');
+        html.push('target="_blank" rel="noopener noreferrer">' + labels.navigate + '</a></button>');
+      }
+
+      // More details button (matches Gatsby structure: button.popup-btn-right > a)
+      if (spot.slug) {
+        html.push('<button class="popup-btn popup-btn-right">');
+        html.push('<a href="' + localePrefix + '/einstiegsorte/' + escapeHtml(spot.slug) + '/">');
+        html.push(labels.moreDetails + '</a></button>');
+      }
+
+      return html.join('');
     }
-    
-    // GPS coordinates with text copy button (Requirements 2.3, 3.2)
-    var lat = spot.location ? (spot.location.lat || spot.location.latitude) : null;
-    var lon = spot.location ? (spot.location.lon || spot.location.lng || spot.location.longitude) : null;
-    
-    if (lat !== null && lon !== null) {
-      html.push('<div class="spot-popup-gps">');
-      html.push('<span class="spot-popup-label">' + labels.gps + ':</span>');
-      html.push('<span class="spot-popup-value">' + lat + ', ' + lon + '</span>');
-      html.push('<button type="button" class="btn btn-sm btn-outline-light copy-btn" ');
-      html.push('onclick="PaddelbuchClipboard.copyGPS(\'' + lat + '\', \'' + lon + '\', this)" ');
-      html.push('title="' + labels.copyGps + '" aria-label="' + labels.copyGps + '">');
-      html.push(labels.copy);
-      html.push('</button>');
-      html.push('</div>');
-    }
-    
-    // Approximate address with text copy button (Requirements 2.3, 3.3)
-    if (spot.approximateAddress) {
-      var escapedAddress = escapeHtml(spot.approximateAddress).replace(/'/g, "\\'");
-      html.push('<div class="spot-popup-address">');
-      html.push('<span class="spot-popup-label">' + labels.approxAddress + ':</span>');
-      html.push('<span class="spot-popup-value">' + escapeHtml(spot.approximateAddress) + '</span>');
-      html.push('<button type="button" class="btn btn-sm btn-outline-light copy-btn" ');
-      html.push('onclick="PaddelbuchClipboard.copyAddress(\'' + escapedAddress + '\', this)" ');
-      html.push('title="' + labels.copyAddress + '" aria-label="' + labels.copyAddress + '">');
-      html.push(labels.copy);
-      html.push('</button>');
-      html.push('</div>');
-    }
-    
-    // Action buttons
-    html.push('<div class="spot-popup-actions">');
-    
-    // Navigation button (Requirement 2.4)
-    if (lat !== null && lon !== null) {
-      html.push('<a href="https://www.google.com/maps/dir/?api=1&destination=' + lat + ',' + lon + '" ');
-      html.push('target="_blank" rel="noopener noreferrer" ');
-      html.push('class="btn btn-sm btn-primary navigate-btn" ');
-      html.push('title="' + labels.navigate + '" aria-label="' + labels.navigate + '">');
-      html.push(labels.navigate);
-      html.push('</a>');
-    }
-    
-    // More details link (Requirement 3.6)
-    if (spot.slug) {
-      html.push('<a href="' + localePrefix + '/einstiegsorte/' + escapeHtml(spot.slug) + '/" ');
-      html.push('class="btn btn-sm btn-primary spot-popup-details-link">');
-      html.push(labels.moreDetails);
-      html.push('</a>');
-    }
-    
-    html.push('</div>'); // .spot-popup-actions
-    html.push('</div>'); // .spot-popup
-    
-    return html.join('');
-  }
 
   /**
    * Generates HTML content for a rejected spot popup

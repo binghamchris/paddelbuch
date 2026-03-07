@@ -1,25 +1,9 @@
 <!--
-  Spot Popup Include
-  
-  Displays spot information in a Leaflet popup.
+  Spot Popup Include — matches original Gatsby popup HTML structure
   
   Parameters:
   - include.spot: The spot object containing all spot data
   - include.locale: Current locale (default: site.lang or 'de')
-  
-  Shows:
-  - Spot type category label in header (translated from spot_types.yml)
-  - Spot name as prominent heading
-  - Description excerpt (first paragraph)
-  - Paddle craft types as bullet list with translated names
-  - GPS coordinates with text copy button
-  - Approximate address with text copy button
-  - Navigation button
-  - "More details" link
-  
-  Layout order: category header → divider → title → description → craft types → GPS → address → actions
-  
-  Requirements: 2.1, 2.2, 2.3, 2.5, 3.1, 3.2, 3.3, 3.4, 3.5
 -->
 
 {% if site.lang != site.default_lang %}
@@ -33,7 +17,7 @@
 {% assign spot_type_slug = spot.spotType_slug | default: spot.spot_type_slug %}
 {% assign is_rejected = spot.rejected %}
 
-{% comment %} Look up translated spot type category label from spot_types.yml {% endcomment %}
+{% comment %} Look up translated spot type category label {% endcomment %}
 {% assign spot_type_entry = site.data.types.spot_types | where: "slug", spot_type_slug | first %}
 {% if spot_type_entry %}
   {% if current_locale == 'en' %}
@@ -45,95 +29,82 @@
   {% assign spot_type_label = spot_type_slug %}
 {% endif %}
 
-<div class="spot-popup">
-  <!-- Category Header: icon + translated spot type label (Requirement 2.1) -->
-  <div class="spot-popup-header">
-    {% include spot-icon.html type=spot_type_slug rejected=is_rejected variant="light" %}
-    <span class="spot-popup-category">{{ spot_type_label }}</span>
-  </div>
+<!-- Header: icon + category label (matches .popup-icon-div from Gatsby) -->
+<div class="popup-icon-div">
+  <span class="popup-icon">{% include spot-icon.html type=spot_type_slug rejected=is_rejected variant="light" %}</span>{{ spot_type_label }}
+</div>
 
-  <!-- Divider between header and title (Requirement 2.1) -->
-  <hr class="spot-popup-divider">
+<!-- Title -->
+<span class="popup-title"><h1>{{ spot.name }}</h1></span>
 
-  <!-- Spot Name as prominent heading (Requirement 2.1) -->
-  <h3 class="spot-popup-title">{{ spot.name }}</h3>
+<!-- Description -->
+{% if spot.description %}
+<div>
+  {% assign description_text = spot.description | strip_html | truncate: 150 %}
+  <p>{{ description_text }}</p>
+</div>
+{% endif %}
 
-  <!-- Description Excerpt - First Paragraph (Requirement 3.1) -->
-  {% if spot.description %}
-  <div class="spot-popup-description">
-    {% assign description_text = spot.description | strip_html | truncate: 150 %}
-    <p>{{ description_text }}</p>
-  </div>
-  {% endif %}
-
-  <!-- Paddle Craft Types as bullet list (Requirements 2.2, 3.4) -->
+<!-- Details table: craft types, GPS, address -->
+<table class="popup-details-table"><tbody>
   {% if spot.paddleCraftTypes and spot.paddleCraftTypes.size > 0 %}
-  <div class="spot-popup-craft-types">
-    <span class="spot-popup-label">{% t labels.potentially_usable_by %}:</span>
-    <ul class="spot-popup-craft-list">
-      {% for craft_slug in spot.paddleCraftTypes %}
-        {% assign craft_type = site.data.types.paddle_craft_types | where: "slug", craft_slug | first %}
-        {% if craft_type %}
-          {% if current_locale == 'en' %}<li>{{ craft_type.name_en }}</li>{% else %}<li>{{ craft_type.name_de }}</li>{% endif %}
-        {% else %}
-          <li>{{ craft_slug }}</li>
-        {% endif %}
-      {% endfor %}
-    </ul>
-  </div>
+  <tr>
+    <th>{% t labels.potentially_usable_by %}:</th>
+    <td colspan="2">
+      <ul>
+        {% for craft_slug in spot.paddleCraftTypes %}
+          {% assign craft_type = site.data.types.paddle_craft_types | where: "slug", craft_slug | first %}
+          {% if craft_type %}
+            {% if current_locale == 'en' %}<li>{{ craft_type.name_en }}</li>{% else %}<li>{{ craft_type.name_de }}</li>{% endif %}
+          {% else %}
+            <li>{{ craft_slug }}</li>
+          {% endif %}
+        {% endfor %}
+      </ul>
+    </td>
+  </tr>
   {% endif %}
 
-  <!-- GPS Coordinates with text Copy Button (Requirements 2.3, 3.2) -->
   {% if spot.location %}
   {% assign lat = spot.location.lat | default: spot.location.latitude %}
   {% assign lon = spot.location.lon | default: spot.location.lng | default: spot.location.longitude %}
   {% if lat and lon %}
-  <div class="spot-popup-gps">
-    <span class="spot-popup-label">{% t labels.gps %}:</span>
-    <span class="spot-popup-value" id="gps-{{ spot.slug }}">{{ lat }}, {{ lon }}</span>
-    <button type="button" 
-            class="btn btn-sm btn-outline-light copy-btn" 
-            onclick="PaddelbuchClipboard.copyGPS('{{ lat }}', '{{ lon }}')"
-            title="{% t actions.copy_gps %}"
-            aria-label="{% t actions.copy_gps %}">
-      {% t actions.copy %}
-    </button>
-  </div>
+  <tr>
+    <th>{% t labels.gps %}:</th>
+    <td>{{ lat }}, {{ lon }}</td>
+    <td class="clipboard-cell-popup">
+      <button title="{% t actions.copy_gps %}" type="button" class="popup-btn"
+              onclick="PaddelbuchClipboard.copyGPS('{{ lat }}', '{{ lon }}')">{% t actions.copy %}</button>
+    </td>
+  </tr>
   {% endif %}
   {% endif %}
 
-  <!-- Approximate Address with text Copy Button (Requirements 2.3, 3.3) -->
   {% if spot.approximateAddress %}
-  <div class="spot-popup-address">
-    <span class="spot-popup-label">{% t labels.approx_address %}:</span>
-    <span class="spot-popup-value" id="address-{{ spot.slug }}">{{ spot.approximateAddress }}</span>
-    <button type="button" 
-            class="btn btn-sm btn-outline-light copy-btn" 
-            onclick="PaddelbuchClipboard.copyAddress('{{ spot.approximateAddress | escape }}')"
-            title="{% t actions.copy_address %}"
-            aria-label="{% t actions.copy_address %}">
-      {% t actions.copy %}
-    </button>
-  </div>
+  <tr>
+    <th>{% t labels.approx_address %}:</th>
+    <td>{{ spot.approximateAddress }}</td>
+    <td class="clipboard-cell-popup">
+      <button title="{% t actions.copy_address %}" type="button" class="popup-btn"
+              onclick="PaddelbuchClipboard.copyAddress('{{ spot.approximateAddress | escape }}')">{% t actions.copy %}</button>
+    </td>
+  </tr>
   {% endif %}
-  
-  <!-- Action Buttons -->
-  <div class="spot-popup-actions">
-    <!-- Navigation Button (Requirement 3.4) -->
-    {% if spot.location %}
-    {% assign lat = spot.location.lat | default: spot.location.latitude %}
-    {% assign lon = spot.location.lon | default: spot.location.lng | default: spot.location.longitude %}
-    {% if lat and lon %}
-    {% include navigate-btn.html lat=lat lon=lon %}
-    {% endif %}
-    {% endif %}
-    
-    <!-- More Details Link (Requirement 3.5) -->
-    {% if spot.slug %}
-    <a href="{{ locale_prefix | append: '/einstiegsorte/' | append: spot.slug | append: '/' }}" 
-       class="btn btn-sm btn-primary spot-popup-details-link">
-      {% t labels.more_details %}
-    </a>
-    {% endif %}
-  </div>
-</div>
+</tbody></table>
+
+<!-- Action buttons -->
+{% if spot.location %}
+{% assign lat = spot.location.lat | default: spot.location.latitude %}
+{% assign lon = spot.location.lon | default: spot.location.lng | default: spot.location.longitude %}
+{% if lat and lon %}
+<button type="button" class="popup-btn">
+  <a href="https://www.google.com/maps/dir/?api=1&destination={{ lat }},{{ lon }}" target="_blank" rel="noopener noreferrer">{% t actions.navigate %}</a>
+</button>
+{% endif %}
+{% endif %}
+
+{% if spot.slug %}
+<button class="popup-btn popup-btn-right">
+  <a href="{{ locale_prefix | append: '/einstiegsorte/' | append: spot.slug | append: '/' }}">{% t labels.more_details %}</a>
+</button>
+{% endif %}
