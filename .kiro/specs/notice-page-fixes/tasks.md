@@ -44,7 +44,7 @@
     - _Preservation: All existing format types (nil, 'short', 'long', 'iso') must remain unchanged_
     - _Requirements: 2.3, 3.9_
 
-  - [~] 3.2 Fix date formatting in `_includes/notice-detail-content.html`
+  - [x] 3.2 Fix date formatting in `_includes/notice-detail-content.html`
     - Change `{{ notice.startDate | localized_date }}` to `{{ notice.startDate | localized_date: 'iso' }}` to produce `YYYY-MM-DD`
     - Change `{{ notice.updatedAt | localized_date }}` to `{{ notice.updatedAt | localized_datetime: 'notice_updated' }}` to produce `dd. MMMM YYYY um HH:MM`
     - Do NOT change `{{ notice.endDate | localized_date }}` — end date format is not specified in the bug report
