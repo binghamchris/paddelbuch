@@ -8,16 +8,18 @@
   - include.locale: Current locale (default: site.lang or 'de')
   
   Shows:
-  - Spot icon based on spot type
-  - Spot name
+  - Spot type category label in header (translated from spot_types.yml)
+  - Spot name as prominent heading
   - Description excerpt (first paragraph)
-  - GPS coordinates with copy button
-  - Approximate address with copy button
-  - Paddle craft types
+  - Paddle craft types as bullet list with translated names
+  - GPS coordinates with text copy button
+  - Approximate address with text copy button
   - Navigation button
   - "More details" link
   
-  Requirements: 3.1, 3.2, 3.3, 3.4, 3.5
+  Layout order: category header → divider → title → description → craft types → GPS → address → actions
+  
+  Requirements: 2.1, 2.2, 2.3, 2.5, 3.1, 3.2, 3.3, 3.4, 3.5
 -->
 
 {% if site.lang != site.default_lang %}
@@ -31,13 +33,31 @@
 {% assign spot_type_slug = spot.spotType_slug | default: spot.spot_type_slug %}
 {% assign is_rejected = spot.rejected %}
 
+{% comment %} Look up translated spot type category label from spot_types.yml {% endcomment %}
+{% assign spot_type_entry = site.data.types.spot_types | where: "slug", spot_type_slug | first %}
+{% if spot_type_entry %}
+  {% if current_locale == 'en' %}
+    {% assign spot_type_label = spot_type_entry.name_en %}
+  {% else %}
+    {% assign spot_type_label = spot_type_entry.name_de %}
+  {% endif %}
+{% else %}
+  {% assign spot_type_label = spot_type_slug %}
+{% endif %}
+
 <div class="spot-popup">
-  <!-- Spot Icon and Name (Requirement 3.1) -->
+  <!-- Category Header: icon + translated spot type label (Requirement 2.1) -->
   <div class="spot-popup-header">
     {% include spot-icon.html type=spot_type_slug rejected=is_rejected variant="light" %}
-    <strong class="spot-popup-name">{{ spot.name }}</strong>
+    <span class="spot-popup-category">{{ spot_type_label }}</span>
   </div>
-  
+
+  <!-- Divider between header and title (Requirement 2.1) -->
+  <hr class="spot-popup-divider">
+
+  <!-- Spot Name as prominent heading (Requirement 2.1) -->
+  <h3 class="spot-popup-title">{{ spot.name }}</h3>
+
   <!-- Description Excerpt - First Paragraph (Requirement 3.1) -->
   {% if spot.description %}
   <div class="spot-popup-description">
@@ -45,8 +65,25 @@
     <p>{{ description_text }}</p>
   </div>
   {% endif %}
-  
-  <!-- GPS Coordinates with Copy Button (Requirements 3.1, 3.2) -->
+
+  <!-- Paddle Craft Types as bullet list (Requirements 2.2, 3.4) -->
+  {% if spot.paddleCraftTypes and spot.paddleCraftTypes.size > 0 %}
+  <div class="spot-popup-craft-types">
+    <span class="spot-popup-label">{% t labels.potentially_usable_by %}:</span>
+    <ul class="spot-popup-craft-list">
+      {% for craft_slug in spot.paddleCraftTypes %}
+        {% assign craft_type = site.data.types.paddle_craft_types | where: "slug", craft_slug | first %}
+        {% if craft_type %}
+          {% if current_locale == 'en' %}<li>{{ craft_type.name_en }}</li>{% else %}<li>{{ craft_type.name_de }}</li>{% endif %}
+        {% else %}
+          <li>{{ craft_slug }}</li>
+        {% endif %}
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  <!-- GPS Coordinates with text Copy Button (Requirements 2.3, 3.2) -->
   {% if spot.location %}
   {% assign lat = spot.location.lat | default: spot.location.latitude %}
   {% assign lon = spot.location.lon | default: spot.location.lng | default: spot.location.longitude %}
@@ -59,16 +96,13 @@
             onclick="PaddelbuchClipboard.copyGPS('{{ lat }}', '{{ lon }}')"
             title="{% t actions.copy_gps %}"
             aria-label="{% t actions.copy_gps %}">
-      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-        <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/>
-        <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/>
-      </svg>
+      {% t actions.copy %}
     </button>
   </div>
   {% endif %}
   {% endif %}
 
-  <!-- Approximate Address with Copy Button (Requirements 3.1, 3.3) -->
+  <!-- Approximate Address with text Copy Button (Requirements 2.3, 3.3) -->
   {% if spot.approximateAddress %}
   <div class="spot-popup-address">
     <span class="spot-popup-label">{% t labels.approx_address %}:</span>
@@ -78,28 +112,8 @@
             onclick="PaddelbuchClipboard.copyAddress('{{ spot.approximateAddress | escape }}')"
             title="{% t actions.copy_address %}"
             aria-label="{% t actions.copy_address %}">
-      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-        <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/>
-        <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/>
-      </svg>
+      {% t actions.copy %}
     </button>
-  </div>
-  {% endif %}
-  
-  <!-- Paddle Craft Types (Requirement 3.1) -->
-  {% if spot.paddleCraftTypes and spot.paddleCraftTypes.size > 0 %}
-  <div class="spot-popup-craft-types">
-    <span class="spot-popup-label">{% t labels.type %}:</span>
-    <span class="spot-popup-value">
-      {% for craft_slug in spot.paddleCraftTypes %}
-        {% assign craft_type = site.data.types.paddle_craft_types | where: "slug", craft_slug | first %}
-        {% if craft_type %}
-          {% if current_locale == 'en' %}{{ craft_type.name_en }}{% else %}{{ craft_type.name_de }}{% endif %}{% unless forloop.last %}, {% endunless %}
-        {% else %}
-          {{ craft_slug }}{% unless forloop.last %}, {% endunless %}
-        {% endif %}
-      {% endfor %}
-    </span>
   </div>
   {% endif %}
   

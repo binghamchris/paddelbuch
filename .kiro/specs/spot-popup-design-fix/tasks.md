@@ -46,7 +46,7 @@
 
 - [ ] 3. Fix spot popup layout and content to match original Gatsby design
 
-  - [-] 3.1 Add and update i18n keys in `_i18n/de.yml` and `_i18n/en.yml`
+  - [x] 3.1 Add and update i18n keys in `_i18n/de.yml` and `_i18n/en.yml`
     - Add `labels.potentially_usable_by`: "Potenziell nutzbar für" (de) / "Potentially Usable By" (en)
     - Update `actions.navigate` to "Navigieren zu" (de) / "Navigate To" (en)
     - Verify `actions.copy` key exists with "Kopieren" (de) / "Copy" (en)
@@ -55,7 +55,7 @@
     - _Preservation: Existing i18n keys not modified beyond navigate text update_
     - _Requirements: 2.2, 2.3, 2.4_
 
-  - [~] 3.2 Restructure `_includes/spot-popup.html` template
+  - [-] 3.2 Restructure `_includes/spot-popup.html` template
     - Replace spot name in header with translated spot type category label from `site.data.types.spot_types`
     - Add `<hr>` divider after header row
     - Add spot name as a prominent `<h3>` heading below the divider
