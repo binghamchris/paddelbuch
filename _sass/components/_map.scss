@@ -309,29 +309,4 @@
   color: $white;
 }
 
-/* Rejected Spot Popup Styles (Requirement 3.7) */
-.rejected-spot-popup {
-  .spot-popup-warning {
-    display: flex;
-    align-items: center;
-    margin-bottom: 0.75em;
-    font-size: 0.9em;
-    font-weight: 500;
-  }
-
-  .spot-popup-rejection-reason {
-    margin-bottom: 0.75em;
-    font-size: 0.9em;
-    line-height: 1.4;
-
-    .spot-popup-label {
-      display: block;
-      margin-bottom: 0.25em;
-    }
-
-    p {
-      margin-bottom: 0;
-      color: rgba($white, 0.9);
-    }
-  }
-}
+/* Rejected Spot Popup — uses same structure as regular spot popups (Requirement 3.7) */

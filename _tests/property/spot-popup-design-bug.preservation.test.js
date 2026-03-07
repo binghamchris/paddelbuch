@@ -224,18 +224,19 @@ describe('Preservation Property Tests — Spot Popup Design (Property 2)', () =>
     });
   });
 
-  describe('3.5 — Rejected spot popup layout is preserved', () => {
-    test('property: rejected spot uses no-entry icon and rejection-specific layout', () => {
+  describe('3.5 — Rejected spot popup layout matches Gatsby design', () => {
+    test('property: rejected spot uses popup-icon-div with no-entry icon and popup-title', () => {
       fc.assert(fc.property(arbRejectedSpot, arbLocale, (spot, locale) => {
         const html = generateRejectedSpotPopupContent(spot, locale);
-        expect(html).toContain('rejected-spot-popup');
+        expect(html).toContain('popup-icon-div');
         expect(html).toContain('noentry');
+        expect(html).toContain('popup-title');
         expect(html).not.toContain('>GPS:<');
         expect(html).not.toContain('google.com/maps/dir');
       }), { numRuns: 50 });
     });
 
-    test('property: rejected spot with description shows rejection reason', () => {
+    test('property: rejected spot with description shows rejection reason in simple div/p', () => {
       fc.assert(fc.property(
         fc.record({
           name: arbSpotName, slug: arbSlug,
@@ -246,9 +247,21 @@ describe('Preservation Property Tests — Spot Popup Design (Property 2)', () =>
         arbLocale,
         (spot, locale) => {
           const html = generateRejectedSpotPopupContent(spot, locale);
-          expect(html).toContain('rejection-reason');
+          // Description is in a simple <div><p>...</p></div> (Gatsby structure)
+          expect(html).toMatch(/<div><p>.+<\/p><\/div>/);
         }
       ), { numRuns: 50 });
+    });
+
+    test('property: rejected spot shows "No Entry Spot" / "Kein Zutritt Ort" label', () => {
+      fc.assert(fc.property(arbRejectedSpot, arbLocale, (spot, locale) => {
+        const html = generateRejectedSpotPopupContent(spot, locale);
+        if (locale === 'en') {
+          expect(html).toContain('No Entry Spot');
+        } else {
+          expect(html).toContain('Kein Zutritt Ort');
+        }
+      }), { numRuns: 50 });
     });
   });
 
@@ -272,7 +285,7 @@ describe('Preservation Property Tests — Spot Popup Design (Property 2)', () =>
       }), { numRuns: 50 });
     });
 
-    test('property: rejected spot detail link also uses correct locale prefix', () => {
+    test('property: rejected spot detail link uses correct locale prefix', () => {
       fc.assert(fc.property(arbRejectedSpot, arbLocale, (spot, locale) => {
         const html = generateRejectedSpotPopupContent(spot, locale);
         if (spot.slug) {
