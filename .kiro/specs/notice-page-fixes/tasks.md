@@ -71,7 +71,7 @@
     - _Preservation: Non-notice pages continue to render {{ content }} normally_
     - _Requirements: 2.1_
 
-  - [~] 3.5 Verify bug condition exploration test now passes
+  - [x] 3.5 Verify bug condition exploration test now passes
     - **Property 1: Expected Behavior** - Notice Page Content Structure
     - **IMPORTANT**: Re-run the SAME test from task 1 - do NOT write a new test
     - The test from task 1 encodes the expected behavior for all three bugs
