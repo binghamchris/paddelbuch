@@ -1,4 +1,6 @@
 header {
+  position: relative;
+  z-index: 1050;
   width: 100%;
   color: $white;
   background-color: $swisscanoe-blue;
@@ -36,8 +38,17 @@ header {
   }
 
   .dropdown-menu {
+    --bs-dropdown-divider-bg: #{$white};
+    --bs-dropdown-divider-margin-y: 0;
     color: $white;
     background-color: $swisscanoe-blue;
+
+    hr.dropdown-divider {
+      width: 100%;
+      border-top: 1px solid $white !important;
+      opacity: 1 !important;
+      margin: 0;
+    }
   }
 
   .dropdown-item:hover .nav-link{
@@ -62,5 +73,16 @@ header {
 
   .navbar-nav {
     font-size: 1.2em;
+
+    @media (max-width: 991.98px) {
+      align-items: flex-start;
+    }
+  }
+
+  @media (max-width: 991.98px) {
+    .nav-item.dropdown {
+      flex-direction: column;
+      align-items: flex-start;
+    }
   }
 }

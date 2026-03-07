@@ -14,6 +14,7 @@ module Jekyll
         .select { |w| w['locale'] == locale && w['paddlingEnvironmentType_slug'] == 'see' && w['showInMenu'] == true }
         .sort_by { |w| -(w['area'] || 0) }
         .first(limit)
+        .sort_by { |w| w['name'].to_s.downcase }
     end
     
     # Get top N rivers sorted by length (descending)
@@ -25,6 +26,7 @@ module Jekyll
         .select { |w| w['locale'] == locale && w['paddlingEnvironmentType_slug'] == 'fluss' && w['showInMenu'] == true }
         .sort_by { |w| -(w['length'] || 0) }
         .first(limit)
+        .sort_by { |w| w['name'].to_s.downcase }
     end
     
     # Sort waterways alphabetically by name (ascending)
