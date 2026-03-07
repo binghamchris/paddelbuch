@@ -34,7 +34,7 @@
 
 - [ ] 3. Fix notice page content structure, navigation label, and date formatting
 
-  - [~] 3.1 Add `notice_updated` datetime format to `_plugins/locale_filter.rb`
+  - [x] 3.1 Add `notice_updated` datetime format to `_plugins/locale_filter.rb`
     - Add a `'notice_updated'` key to the `get_datetime_format` method's format hash
     - German (`de`): `'%d. %B %Y um %H:%M'` → produces `10. Mai 2025 um 14:30`
     - English (`en`): `'%d %B %Y at %H:%M'` → produces `10 May 2025 at 14:30`
