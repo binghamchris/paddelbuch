@@ -255,6 +255,7 @@
         
         obstacleLayer.bindPopup(popupContent, { maxWidth: 350 });
         obstacleLayer.addTo(layerGroups.obstacles);
+        obstacleLayer.bringToFront();
         
         // Render portage route if available (Requirement 5.2)
         if (obstacle.portageRoute) {
@@ -273,6 +274,7 @@
             // Portage route shares the same popup as the obstacle
             portageLayer.bindPopup(popupContent, { maxWidth: 350 });
             portageLayer.addTo(layerGroups.obstacles);
+            portageLayer.bringToFront();
           } catch (e) {
             console.warn('Failed to parse obstacle portage route:', e);
           }
@@ -332,6 +334,7 @@
         
         protectedAreaLayer.bindPopup(popupContent, { maxWidth: 350 });
         protectedAreaLayer.addTo(layerGroups.protectedAreas);
+        protectedAreaLayer.bringToBack();
       } catch (e) {
         console.warn('Failed to parse protected area geometry:', e);
       }
