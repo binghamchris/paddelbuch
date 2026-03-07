@@ -20,10 +20,10 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  // Switzerland bounds
+  // Switzerland bounds with padding so the map can pan freely at low zoom levels
   var switzerlandBounds = L.latLngBounds(
-    L.latLng(45.8, 5.9),   // Southwest corner
-    L.latLng(47.8, 10.5)   // Northeast corner
+    L.latLng(45.0, 4.5),   // Southwest corner (padded)
+    L.latLng(49.4, 11.8)   // Northeast corner (padded, extra north for popups)
   );
 
   // Initialize the map
