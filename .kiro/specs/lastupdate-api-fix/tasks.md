@@ -1,0 +1,148 @@
+# Implementation Plan
+
+- [x] 1. Write bug condition exploration test
+  - **Property 1: Bug Condition** — API JSON Structure Diverges from Gatsby Output
+  - **CRITICAL**: This test MUST FAIL on unfixed code — failure confirms the bug exists
+  - **DO NOT attempt to fix the test or the code when it fails**
+  - **NOTE**: This test encodes the expected behavior — it will validate the fix when it passes after implementation
+  - **GOAL**: Surface counterexamples that demonstrate all 6 categories of structural divergence
+  - **Scoped PBT Approach**: Scope the property to concrete failing cases using mock `site.data` with representative entries for each content type
+  - Write an RSpec test in `spec/plugins/api_generator_api_structure_spec.rb` that:
+    - Creates mock `site.data` with at least one spot, obstacle, waterway event, waterway, protected area, and each dimension table type
+    - Mock entries should include: rich text descriptions, geometry fields, reference slugs, timestamps, null values, empty arrays
+    - Instantiates `ApiGenerator`, calls `generate(site)`, and inspects the generated pages
+    - Asserts file naming: output includes `waterwayevents-de.json` and `protectedareas-de.json` (not `notices-de.json` or `protected-areas-de.json`)
+    - Asserts fact table structure for spots: `slug` is first field, uses `node_locale` not `locale`, `description` is `{"raw": "..."}`, `approximateAddress` is `{"approximateAddress": "..."}`, `rejected` preserves `null`, references are `{"slug": "..."}` objects, `paddleCraftType` (not `paddleCraftTypes`) is array of objects, `waterway_event_notice` (not `eventNotices`) is null when empty, `obstacle` (not `obstacles`) is null when empty
+    - Asserts fact table structure for obstacles: `{"internal": {"content": "..."}}` for geometry/portageRoute, `{"raw": "..."}` for description/portageDescription, no `spots` field, includes `dataSourceType`/`dataLicenseType` as nested objects
+    - Asserts fact table structure for waterway events: date-only `startDate`/`endDate`, `waterway` as array of objects, `spot` field present (null or array), no `location` field, includes `dataSourceType`/`dataLicenseType`
+    - Asserts fact table structure for waterways: `{"internal": {"content": "..."}}` for geometry, no `showInMenu` field, references as nested objects
+    - Asserts fact table structure for protected areas: includes `description`, `waterway`, `dataSourceType`, `dataLicenseType` fields, `protectedAreaType` as nested object
+    - Asserts dimension table structure: includes `node_locale`, field order is `slug`, `node_locale`, `createdAt`, `updatedAt`, `name`, then additional fields; `paddlecrafttypes` has `description`; `datasourcetypes` has `description`; `datalicensetypes` has `summaryUrl` and `fullTextUrl`
+    - Asserts timestamp format: all `createdAt`/`updatedAt` match `/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/`
+    - Asserts JSON formatting: all output is compact single-line JSON (no newlines within content)
+    - Asserts last update index: exactly 12 entries, camelCase names with `s` suffix (`spots`, `obstacles`, `waterwayEventNotices`, `protectedAreas`, `waterways`, `dataLicenseTypes`, `dataSourceTypes`, `obstacleTypes`, `paddleCraftTypes`, `protectedAreaTypes`, `spotTypes`, `paddlingEnvironmentTypes`), single max timestamp per content type across locales
+  - Run test on UNFIXED code: `source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.1 && bundle exec rspec spec/plugins/api_generator_api_structure_spec.rb`
+  - **EXPECTED OUTCOME**: Test FAILS (this is correct — it proves the bug exists)
+  - Document counterexamples found (e.g., file named `notices-de.json` instead of `waterwayevents-de.json`, `locale` instead of `node_locale`, HTML descriptions instead of `{"raw": "..."}`, pretty-printed JSON, 24 last update entries)
+  - Mark task complete when test is written, run, and failure is documented
+  - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 1.10, 1.11, 1.12, 1.13, 1.14, 1.15, 1.16, 1.17, 1.18, 1.19, 1.20, 1.21, 1.22, 1.23, 1.24, 1.25, 1.26, 1.27, 1.28, 1.29, 1.30, 1.31, 1.32, 1.33, 1.34, 1.35, 1.36, 1.37, 1.38, 1.39, 1.40, 1.41, 1.42, 1.43, 1.44, 1.45, 1.46_
+
+- [-] 2. Write preservation property tests (BEFORE implementing fix)
+  - **Property 2: Preservation** — YAML Data, HTML Rendering, and Liquid Template Data Unchanged
+  - **IMPORTANT**: Follow observation-first methodology
+  - Write an RSpec test in `spec/plugins/api_generator_preservation_spec.rb` that:
+    - Observe: On UNFIXED code, `contentful_mappers.rb` `flatten_entry` produces flattened hashes with `locale`, `_slug` references, HTML descriptions — this is the YAML pipeline output
+    - Observe: On UNFIXED code, `site.data['last_updates']` is populated by `ApiGenerator#generate` and accessible for Liquid templates
+    - Observe: On UNFIXED code, the `ApiGenerator` does not modify `site.data` entries (spots, obstacles, etc.) — it only reads them
+    - Write property-based tests:
+      - For any mock `site.data` with spots/obstacles/waterways/notices/protected_areas/types, after `ApiGenerator#generate`, `site.data` entries (excluding `last_updates`) remain identical to their pre-generation state (the generator must not mutate source data)
+      - For any mock `site.data`, after `ApiGenerator#generate`, `site.data['last_updates']` is a non-empty Hash that is accessible (preserving Liquid template exposure)
+      - For any `ContentfulMappers.flatten_entry` call with a mock entry, the output format remains unchanged: each hash has `locale` (not `node_locale`), `createdAt`/`updatedAt` as strings, and mapper-specific fields — confirming the YAML pipeline is untouched
+    - Verify that the `ApiGenerator` only adds pages to `site.pages` and sets `site.data['last_updates']` — no other side effects on `site.data`
+  - Run tests on UNFIXED code: `source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.1 && bundle exec rspec spec/plugins/api_generator_preservation_spec.rb`
+  - **EXPECTED OUTCOME**: Tests PASS (this confirms baseline behavior to preserve)
+  - Mark task complete when tests are written, run, and passing on unfixed code
+  - _Requirements: 3.1, 3.2, 3.3, 3.4_
+
+- [ ] 3. Fix API JSON output to match Gatsby structure
+
+  - [ ] 3.1 Modify `contentful_mappers.rb` to preserve raw data for API use
+    - Add `_raw_createdAt` and `_raw_updatedAt` fields in `flatten_entry` that store the original Contentful timestamp string with millisecond precision (`sys[:created_at]&.utc&.strftime('%Y-%m-%dT%H:%M:%S.%3NZ')`) alongside the existing `createdAt`/`updatedAt` fields
+    - Add `_raw_description` field in `map_spot`, `map_obstacle`, `map_event_notice` that stores the raw Contentful rich text JSON string (from `resolve_field(fields, :description, locale)`) before HTML rendering — if the field is a rich text object, serialize it to JSON string; if nil, store nil
+    - Add `_raw_portageDescription` field in `map_obstacle` that stores the raw rich text JSON string for portage description
+    - Add `_raw_geometry` field in `map_obstacle`, `map_waterway`, `map_protected_area`, `map_event_notice` (as `_raw_affectedArea`) that stores the raw geometry object (before `.to_json` flattening) for API use
+    - Add missing fields to `map_event_notice`: `spot` reference (extract_reference_slugs for spot field), `dataSourceType_slug`, `dataLicenseType_slug`
+    - Add missing fields to `map_protected_area`: `description` (raw rich text), `waterway` references (extract_reference_slugs), `dataSourceType_slug`, `dataLicenseType_slug`
+    - Add missing fields to `map_obstacle`: `dataSourceType_slug`, `dataLicenseType_slug`
+    - Extend `map_type` to store `_raw_description` for types that have descriptions (paddleCraftType, dataSourceType), and store `summaryUrl`/`fullTextUrl` for dataLicenseType — this requires the mapper to accept a content_type hint or the API generator to handle these separately
+    - Existing fields (`locale`, `createdAt`, `updatedAt`, HTML descriptions, flattened geometry, `_slug` references) MUST remain unchanged — they serve the Jekyll template pipeline
+    - _Bug_Condition: The YAML data lacks raw timestamps, raw rich text, raw geometry, and several reference fields needed for Gatsby-compatible API output_
+    - _Preservation: All existing fields in flatten_entry and all mapper methods must remain unchanged — only new `_raw_*` and missing fields are added_
+    - _Requirements: 1.5, 1.13, 1.14, 1.15, 1.16, 1.20, 1.21, 1.24, 1.26, 1.33, 1.35, 1.36, 1.39, 1.40, 1.41, 1.42, 2.5, 2.6, 2.14, 2.15, 2.19, 2.20, 2.22, 2.24, 2.25, 2.26, 2.29, 2.30, 2.31, 2.32_
+
+  - [ ] 3.2 Add fact table transformer methods to `api_generator.rb`
+    - Add `transform_spot(item)` method that converts a flattened YAML spot hash into Gatsby-compatible structure:
+      - Field order: `slug`, `node_locale` (from `locale`), `createdAt` (from `_raw_createdAt`), `updatedAt` (from `_raw_updatedAt`), `name`, `description` (as `{"raw": raw_json}` from `_raw_description`, or `{"raw": "{\"data\":{},\"content\":[],\"nodeType\":\"document\"}"}` when empty), `location`, `approximateAddress` (as `{"approximateAddress": value}`), `country`, `confirmed`, `rejected` (preserve null — do not default to false), `waterway` (as `{"slug": item['waterway_slug']}`), `spotType` (as `{"slug": item['spotType_slug']}`), `paddlingEnvironmentType` (as `{"slug": ...}`), `paddleCraftType` (array of `{"slug": ...}` objects from `paddleCraftTypes`), `waterway_event_notice` (null when empty, else array of objects with `slug`, `startDate`, `endDate`), `obstacle` (null when empty, else array of `{"slug": ...}`), `dataSourceType` (as `{"slug": ...}`), `dataLicenseType` (as `{"slug": ...}`)
+    - Add `transform_obstacle(item)` method:
+      - Field order: `slug`, `node_locale`, `createdAt`, `updatedAt`, `name`, `description` (as `{"raw": ...}`), `geometry` (as `{"internal": {"content": json_string}}`), `portageRoute` (as `{"internal": {"content": ...}}`), `portageDistance`, `portageDescription` (as `{"raw": ...}`), `isPortageNecessary`, `isPortagePossible`, `obstacleType` (as `{"slug": ...}`), `waterway` (as `{"slug": ...}`), `dataSourceType` (as `{"slug": ...}`), `dataLicenseType` (as `{"slug": ...}`)
+      - Exclude `spots` field (not in Gatsby output)
+    - Add `transform_waterway_event(item)` method:
+      - Field order: `slug`, `node_locale`, `createdAt`, `updatedAt`, `name`, `description` (as `{"raw": ...}`), `affectedArea` (as `{"internal": {"content": ...}}`), `startDate` (date-only: first 10 chars), `endDate` (date-only), `waterway` (array of `{"slug": ...}` objects from `waterways`), `spot` (null when empty, else array of `{"slug": ...}`), `dataSourceType` (as `{"slug": ...}`), `dataLicenseType` (as `{"slug": ...}`)
+      - Exclude `location` field (not in Gatsby output)
+    - Add `transform_waterway(item)` method:
+      - Field order: `slug`, `node_locale`, `createdAt`, `updatedAt`, `name`, `length`, `area`, `geometry` (as `{"internal": {"content": ...}}`), `paddlingEnvironmentType` (as `{"slug": ...}`), `dataSourceType` (as `{"slug": ...}`), `dataLicenseType` (as `{"slug": ...}`)
+      - Exclude `showInMenu` field (not in Gatsby output)
+    - Add `transform_protected_area(item)` method:
+      - Field order: `slug`, `node_locale`, `createdAt`, `updatedAt`, `name`, `description` (as `{"raw": ...}` or null), `geometry` (as `{"internal": {"content": ...}}`), `isAreaMarked`, `protectedAreaType` (as `{"slug": ...}`), `waterway` (array of `{"slug": ...}` or null), `dataSourceType` (as `{"slug": ...}`), `dataLicenseType` (as `{"slug": ...}`)
+    - All transformers use `_raw_createdAt`/`_raw_updatedAt` for millisecond-precision timestamps
+    - _Bug_Condition: isBugCondition(input) where fieldStructureMismatch(input) is true — flattened YAML fields instead of nested Gatsby structure_
+    - _Expected_Behavior: Each transformer produces a hash matching the Gatsby GraphQL query output structure exactly_
+    - _Preservation: The source YAML data (site.data) must not be mutated; transformers create new hashes_
+    - _Requirements: 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 2.10, 2.11, 2.12, 2.13, 2.14, 2.15, 2.16, 2.17, 2.18, 2.19, 2.20, 2.21, 2.22, 2.23, 2.24, 2.25, 2.26, 2.32_
+
+  - [ ] 3.3 Add dimension table transformer methods to `api_generator.rb`
+    - Add `transform_dimension_entry(item, locale, table_name)` method that converts a flattened YAML dimension hash into Gatsby-compatible structure:
+      - Field order: `slug`, `node_locale` (set to `locale`), `createdAt` (from `_raw_createdAt`), `updatedAt` (from `_raw_updatedAt`), `name`, then additional fields based on `table_name`
+      - For `paddlecrafttypes`: add `description` as `{"raw": ...}` from `_raw_description`
+      - For `datasourcetypes`: add `description` as `{"raw": ...}` from `_raw_description`
+      - For `datalicensetypes`: add `summaryUrl` and `fullTextUrl` fields
+    - Update `get_dimension_data` to pass locale and preserve `_raw_*` fields in the output hash
+    - _Bug_Condition: Dimension tables missing node_locale, wrong field order, missing additional fields_
+    - _Expected_Behavior: Each dimension entry has node_locale, correct field order, and type-specific additional fields_
+    - _Preservation: Source YAML data must not be mutated_
+    - _Requirements: 2.27, 2.28, 2.29, 2.30, 2.31, 2.32_
+
+  - [ ] 3.4 Fix file naming in `api_generator.rb`
+    - Change `FACT_TABLES` key `'notices'` to `'waterwayevents'` with `data_key: 'notices'` (YAML file is still `notices`)
+    - Change `FACT_TABLES` key `'protected-areas'` to `'protectedareas'` with `data_key: 'protected_areas'`
+    - This produces output files `waterwayevents-de.json`, `waterwayevents-en.json`, `protectedareas-de.json`, `protectedareas-en.json`
+    - _Bug_Condition: fileNameMismatch(input) where fileName IN ['notices-{locale}.json', 'protected-areas-{locale}.json']_
+    - _Expected_Behavior: Files named waterwayevents-{locale}.json and protectedareas-{locale}.json_
+    - _Requirements: 2.1, 2.2_
+
+  - [ ] 3.5 Fix JSON formatting in `api_generator.rb`
+    - Replace `JSON.pretty_generate(data)` with `JSON.generate(data)` in `add_json_page` method
+    - This produces compact single-line JSON for all API files
+    - _Bug_Condition: jsonFormattingMismatch(input) where isPrettyPrinted == true_
+    - _Expected_Behavior: All API JSON files are compact single-line_
+    - _Requirements: 2.33_
+
+  - [ ] 3.6 Fix last update index in `api_generator.rb`
+    - Restructure `generate_last_update_index` to produce exactly 12 entries (one per content type, not per locale)
+    - Define a mapping from content types to camelCase names with `s` suffix: `spots`, `obstacles`, `waterwayEventNotices`, `protectedAreas`, `waterways`, `dataLicenseTypes`, `dataSourceTypes`, `obstacleTypes`, `paddleCraftTypes`, `protectedAreaTypes`, `spotTypes`, `paddlingEnvironmentTypes`
+    - For each content type, compute the maximum `updatedAt` across both locales (de and en)
+    - Use `_raw_updatedAt` for millisecond-precision timestamps in the index
+    - Continue exposing `site.data['last_updates']` for Liquid templates
+    - _Bug_Condition: lastUpdateIndexMismatch(input) where entryCount != 12 OR tableNames are not camelCase_
+    - _Expected_Behavior: 12 entries with camelCase names, single max timestamp per content type_
+    - _Requirements: 2.34, 2.35, 2.36, 2.37_
+
+  - [ ] 3.7 Wire transformers into `generate_fact_tables` and `generate_dimension_tables`
+    - Update `generate_fact_tables` to apply the appropriate transformer (`transform_spot`, `transform_obstacle`, etc.) to each item before writing JSON
+    - Add a transformer mapping: `'spots' => :transform_spot`, `'obstacles' => :transform_obstacle`, `'waterwayevents' => :transform_waterway_event`, `'protectedareas' => :transform_protected_area`, `'waterways' => :transform_waterway`
+    - Update `generate_dimension_tables` to apply `transform_dimension_entry` to each item
+    - Update `track_last_update` to use `_raw_updatedAt` for millisecond-precision timestamps
+    - _Bug_Condition: All structural mismatches — transformers are the fix_
+    - _Expected_Behavior: All API JSON files match Gatsby output structure_
+    - _Preservation: site.data entries must not be mutated; only the JSON output changes_
+    - _Requirements: 2.1–2.37_
+
+  - [ ] 3.8 Verify bug condition exploration test now passes
+    - **Property 1: Expected Behavior** — API JSON Structure Matches Gatsby Output
+    - **IMPORTANT**: Re-run the SAME test from task 1 — do NOT write a new test
+    - The test from task 1 encodes the expected behavior (correct file names, field structure, timestamps, formatting, last update index)
+    - When this test passes, it confirms all 46 defects are resolved
+    - Run: `source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.1 && bundle exec rspec spec/plugins/api_generator_api_structure_spec.rb`
+    - **EXPECTED OUTCOME**: Test PASSES (confirms bug is fixed)
+    - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 2.10, 2.11, 2.12, 2.13, 2.14, 2.15, 2.16, 2.17, 2.18, 2.19, 2.20, 2.21, 2.22, 2.23, 2.24, 2.25, 2.26, 2.27, 2.28, 2.29, 2.30, 2.31, 2.32, 2.33, 2.34, 2.35, 2.36, 2.37_
+
+  - [ ] 3.9 Verify preservation tests still pass
+    - **Property 2: Preservation** — YAML Data, HTML Rendering, and Liquid Template Data Unchanged
+    - **IMPORTANT**: Re-run the SAME tests from task 2 — do NOT write new tests
+    - Run: `source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.1 && bundle exec rspec spec/plugins/api_generator_preservation_spec.rb`
+    - **EXPECTED OUTCOME**: Tests PASS (confirms no regressions)
+    - Confirm all preservation tests still pass after fix (YAML data unchanged, Liquid template data still exposed, no side effects on site.data)
+
+- [ ] 4. Checkpoint — Ensure all tests pass
+  - Run full test suite: `source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.1 && bundle exec rspec`
+  - Ensure all tests pass, ask the user if questions arise
