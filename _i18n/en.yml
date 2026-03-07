@@ -69,13 +69,14 @@ labels:
   "no": "No"
   unknown: "Unknown"
   summary: "Summary"
+  potentially_usable_by: "Potentially Usable By"
 
 # Actions
 actions:
   copy: "Copy"
   copy_gps: "Copy GPS to clipboard"
   copy_address: "Copy approx. address to clipboard"
-  navigate: "Navigate"
+  navigate: "Navigate To"
 
 # Obstacles
 obstacles:

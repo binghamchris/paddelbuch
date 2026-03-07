@@ -107,7 +107,30 @@ document.addEventListener('DOMContentLoaded', function() {
   var markerIcon = PaddelbuchMarkerStyles.getSpotIcon(spotType, isRejected);
   
   var marker = L.marker([spotLat, spotLon], { icon: markerIcon }).addTo(map);
-  marker.bindPopup('<strong>{{ spot.name | escape }}</strong>');
+
+  // Build the proper popup using the spot popup module (same as tile-loaded spots)
+  var currentSpotData = {
+    name: '{{ spot.name | escape }}',
+    slug: '{{ spot.slug }}',
+    spotType_slug: spotType,
+    rejected: isRejected,
+    description: {{ spot.description | jsonify | default: 'null' }},
+    approximateAddress: {{ spot.approximateAddress | jsonify | default: 'null' }},
+    paddleCraftTypes: {{ spot.paddleCraftTypes | jsonify | default: '[]' }},
+    location: { lat: spotLat, lon: spotLon }
+  };
+  var currentLocale = '{{ current_locale }}';
+  var popupHtml;
+  if (window.PaddelbuchSpotPopup) {
+    if (isRejected) {
+      popupHtml = window.PaddelbuchSpotPopup.generateRejectedSpotPopupContent(currentSpotData, currentLocale);
+    } else {
+      popupHtml = window.PaddelbuchSpotPopup.generateSpotPopupContent(currentSpotData, currentLocale);
+    }
+  } else {
+    popupHtml = '<strong>' + currentSpotData.name + '</strong>';
+  }
+  marker.bindPopup(popupHtml, { maxWidth: 350 });
   
   // Store map globally so the data layer pipeline can find it
   window.paddelbuchMap = map;
