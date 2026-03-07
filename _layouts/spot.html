@@ -59,7 +59,7 @@ pageName: spot-details
       {% endunless %}
 
       <!-- Spot Icon and Type -->
-      <div class="spot-icon-div d-flex align-items-center">
+      <div class="spot-icon-div align-items-center">
         {% include spot-icon.html type=spot_type_slug rejected=is_rejected variant="dark" size=20 %}
         <span class="ms-2">{{ spot_type_name }}</span>
       </div>
