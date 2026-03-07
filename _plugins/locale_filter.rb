@@ -74,7 +74,9 @@ module Jekyll
       # Get format based on locale and format type
       format = get_date_format(lang, format_type)
       
-      date.strftime(format)
+      result = date.strftime(format)
+      result = localize_month_names(result, lang)
+      result
     rescue ArgumentError, TypeError
       date.to_s
     end
@@ -97,12 +99,29 @@ module Jekyll
       # Get format based on locale and format type
       format = get_datetime_format(lang, format_type)
       
-      date.strftime(format)
+      result = date.strftime(format)
+      result = localize_month_names(result, lang)
+      result
     rescue ArgumentError, TypeError
       date.to_s
     end
 
     private
+
+    # German month name translations (Ruby strftime always outputs English)
+    GERMAN_MONTHS = {
+      'January' => 'Januar', 'February' => 'Februar', 'March' => 'März',
+      'April' => 'April', 'May' => 'Mai', 'June' => 'Juni',
+      'July' => 'Juli', 'August' => 'August', 'September' => 'September',
+      'October' => 'Oktober', 'November' => 'November', 'December' => 'Dezember'
+    }.freeze
+
+    # Replace English month names with localized equivalents
+    def localize_month_names(str, lang)
+      return str unless lang == 'de'
+      GERMAN_MONTHS.each { |en, de| str = str.gsub(en, de) }
+      str
+    end
 
     # Parse a date value into a Date object
     def parse_date_value(date)
@@ -154,14 +173,14 @@ module Jekyll
         'de' => {
           nil => '%d.%m.%Y %H:%M',           # Default: DD.MM.YYYY HH:MM
           'short' => '%d.%m.%Y %H:%M',       # DD.MM.YYYY HH:MM
-          'long' => '%d. %B %Y, %H:%M Uhr',  # DD. Month YYYY, HH:MM Uhr
+          'long' => '%-d. %B %Y um %H:%M',    # D. Month YYYY um HH:MM
           'iso' => '%Y-%m-%dT%H:%M:%S',      # ISO 8601
           'notice_updated' => '%-d. %B %Y um %H:%M'  # D. Month YYYY um HH:MM
         },
         'en' => {
           nil => '%d/%m/%Y %H:%M',           # Default: DD/MM/YYYY HH:MM
           'short' => '%d/%m/%Y %H:%M',       # DD/MM/YYYY HH:MM
-          'long' => '%d %B %Y, %H:%M',       # DD Month YYYY, HH:MM
+          'long' => '%-d %B %Y at %H:%M',     # D Month YYYY at HH:MM
           'iso' => '%Y-%m-%dT%H:%M:%S',      # ISO 8601
           'notice_updated' => '%-d %B %Y at %H:%M'   # D Month YYYY at HH:MM
         }
