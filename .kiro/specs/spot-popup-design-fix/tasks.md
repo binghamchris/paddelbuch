@@ -1,0 +1,112 @@
+# Implementation Plan
+
+- [x] 1. Write bug condition exploration test
+  - **Property 1: Bug Condition** - Spot Popup Layout Differs From Original Design
+  - **CRITICAL**: This test MUST FAIL on unfixed code - failure confirms the bug exists
+  - **DO NOT attempt to fix the test or the code when it fails**
+  - **NOTE**: This test encodes the expected behavior - it will validate the fix when it passes after implementation
+  - **GOAL**: Surface counterexamples that demonstrate the bug exists in `spot-popup.js` `generateSpotPopupContent()`
+  - **Scoped PBT Approach**: Scope the property to concrete failing cases — a non-rejected spot with known spot type slug, craft types, GPS, and address
+  - Write a Jest test that calls `generateSpotPopupContent()` with a representative spot object and asserts:
+    - Header contains translated spot type category label (e.g., "Entry and Exit") instead of the spot name
+    - Spot name appears as a prominent heading below a divider, not in the header
+    - Craft types rendered as a `<ul>` bullet list with translated names and "Potentially Usable By" label, not comma-separated raw slugs with "Type" label
+    - Copy buttons contain text "Copy"/"Kopieren" with no `<svg>` element
+    - Navigate button text is "Navigate To" / "Navigieren zu"
+    - Layout order: category header → divider → title → description → craft types → GPS → address → action buttons
+  - Run test on UNFIXED code
+  - **EXPECTED OUTCOME**: Test FAILS (this is correct - it proves the bug exists)
+  - Document counterexamples found (e.g., "header shows spot name instead of category", "craft types are comma-separated slugs", "copy buttons contain SVG icon")
+  - Mark task complete when test is written, run, and failure is documented
+  - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5_
+
+- [-] 2. Write preservation property tests (BEFORE implementing fix)
+  - **Property 2: Preservation** - Existing Functional Behavior Unchanged
+  - **IMPORTANT**: Follow observation-first methodology
+  - **IMPORTANT**: Write these tests BEFORE implementing the fix
+  - Observe behavior on UNFIXED code for non-buggy functional interactions:
+    - Observe: Spots without description omit the description section
+    - Observe: Spots without GPS omit the GPS section and navigate button
+    - Observe: Spots without address omit the address section
+    - Observe: Spots without craft types omit the craft types section
+    - Observe: Rejected spots render the rejection-specific popup layout with no-entry icon and rejection reason
+    - Observe: "More details" link points to the correct spot detail page with locale prefix
+    - Observe: Navigate button links to Google Maps with correct coordinates
+    - Observe: Copy button click handler copies the correct GPS/address value to clipboard
+  - Write property-based Jest tests that generate random spot configurations and assert:
+    - Conditional section omission is preserved (missing fields → missing sections)
+    - Rejected spot popup layout is unchanged
+    - Detail page link format is preserved with correct locale prefix
+    - Navigation URL format is preserved with correct coordinates
+    - Clipboard copy functionality is preserved
+  - Run tests on UNFIXED code
+  - **EXPECTED OUTCOME**: Tests PASS (this confirms baseline behavior to preserve)
+  - Mark task complete when tests are written, run, and passing on unfixed code
+  - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7_
+
+- [ ] 3. Fix spot popup layout and content to match original Gatsby design
+
+  - [~] 3.1 Add and update i18n keys in `_i18n/de.yml` and `_i18n/en.yml`
+    - Add `labels.potentially_usable_by`: "Potenziell nutzbar für" (de) / "Potentially Usable By" (en)
+    - Update `actions.navigate` to "Navigieren zu" (de) / "Navigate To" (en)
+    - Verify `actions.copy` key exists with "Kopieren" (de) / "Copy" (en)
+    - _Bug_Condition: isBugCondition(popup) where popup.missingPotentiallyUsableByLabel OR popup.navigateButtonTextMissing "To"/"zu"_
+    - _Expected_Behavior: Popup uses correct translated labels for all sections_
+    - _Preservation: Existing i18n keys not modified beyond navigate text update_
+    - _Requirements: 2.2, 2.3, 2.4_
+
+  - [~] 3.2 Restructure `_includes/spot-popup.html` template
+    - Replace spot name in header with translated spot type category label from `site.data.types.spot_types`
+    - Add `<hr>` divider after header row
+    - Add spot name as a prominent `<h3>` heading below the divider
+    - Move craft types section to appear after description and before GPS/address
+    - Change craft types label from `labels.type` to `labels.potentially_usable_by`
+    - Change craft types format from comma-separated inline text to `<ul>` bullet list with translated names from `paddle_craft_types.yml`
+    - Replace SVG clipboard icon in copy buttons with translated text "Copy"/"Kopieren" from `actions.copy`
+    - _Bug_Condition: isBugCondition(popup) where popup.headerShowsTitleInsteadOfCategory OR popup.layoutOrderIncorrect OR popup.craftTypesShownAsRawSlugs OR popup.copyButtonsAreIconOnly_
+    - _Expected_Behavior: Template renders category header → divider → title → description → craft types bullet list → GPS with text copy → address with text copy → actions_
+    - _Preservation: Conditional section omission for missing data unchanged; rejected spot popup layout unchanged_
+    - _Requirements: 2.1, 2.2, 2.3, 2.5_
+
+  - [~] 3.3 Update `assets/js/spot-popup.js` dynamic popup generation
+    - Add `spotTypeNames` translation map (slug → { de, en }) sourced from `spot_types.yml`
+    - Add `paddleCraftTypeNames` translation map (slug → { de, en }) sourced from `paddle_craft_types.yml`
+    - Restructure header to show icon + translated spot type category label
+    - Add divider and spot name as prominent heading after header
+    - Update `getLabels()` to include `potentiallyUsableBy` and update `navigate` to "Navigate To"/"Navigieren zu"
+    - Render craft types as `<ul>` bullet list with translated names instead of comma-separated raw slugs
+    - Replace SVG clipboard icon in copy buttons with translated "Copy"/"Kopieren" text
+    - Reorder sections: category header → divider → title → description → craft types → GPS → address → actions
+    - _Bug_Condition: isBugCondition(popup) where all sub-conditions apply to JS-rendered popups_
+    - _Expected_Behavior: generateSpotPopupContent() produces HTML matching the original Gatsby design layout_
+    - _Preservation: Clipboard copy handler, Google Maps navigation URL, detail page link, conditional omission all unchanged_
+    - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
+
+  - [~] 3.4 Add SCSS styles in `_sass/components/_map.scss`
+    - Add `.spot-popup-category` style for header category label
+    - Add `.spot-popup-title` style for large spot name heading
+    - Add `.spot-popup-divider` style for `<hr>` between header and title
+    - Add `.spot-popup-craft-list` style for bullet list of craft types
+    - Adjust `.copy-btn` padding/sizing for text content instead of icon-only
+    - _Requirements: 2.1, 2.2, 2.3, 2.5_
+
+  - [~] 3.5 Verify bug condition exploration test now passes
+    - **Property 1: Expected Behavior** - Spot Popup Layout Matches Original Design
+    - **IMPORTANT**: Re-run the SAME test from task 1 - do NOT write a new test
+    - The test from task 1 encodes the expected behavior
+    - When this test passes, it confirms the expected behavior is satisfied
+    - Run bug condition exploration test from step 1
+    - **EXPECTED OUTCOME**: Test PASSES (confirms bug is fixed)
+    - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
+
+  - [~] 3.6 Verify preservation tests still pass
+    - **Property 2: Preservation** - Existing Functional Behavior Unchanged
+    - **IMPORTANT**: Re-run the SAME tests from task 2 - do NOT write new tests
+    - Run preservation property tests from step 2
+    - **EXPECTED OUTCOME**: Tests PASS (confirms no regressions)
+    - Confirm all tests still pass after fix (no regressions)
+
+- [~] 4. Checkpoint - Ensure all tests pass
+  - Run the full test suite to confirm all exploration and preservation tests pass
+  - Verify no regressions in existing tests
+  - Ensure all tests pass, ask the user if questions arise
