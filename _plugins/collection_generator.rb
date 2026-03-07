@@ -74,7 +74,98 @@ module Jekyll
         doc.data['permalink'] = "/#{entry['menu_slug']}/#{slug}/"
       end
 
+      # For obstacles, compute center coordinates from geometry
+      # and resolve exit/re-entry spots from spots data
+      if collection.label == 'obstacles'
+        current_locale = site.config['lang'] || site.config['default_lang'] || 'de'
+
+        if entry['geometry']
+          center = compute_geometry_center(entry['geometry'])
+          if center
+            doc.data['centerLat'] = center[:lat]
+            doc.data['centerLon'] = center[:lon]
+          end
+        end
+
+        # Resolve exit/re-entry spots for portage table
+        resolve_obstacle_spots(doc, entry, site, current_locale)
+      end
+
       doc
+    end
+
+    # Resolve exit and re-entry spots for an obstacle.
+    # First checks the obstacle's own spots array, then falls back to
+    # finding spots whose slug starts with the obstacle slug.
+    def resolve_obstacle_spots(doc, entry, site, locale)
+      spots_data = site.data['spots']
+      return unless spots_data.is_a?(Array)
+
+      locale_spots = spots_data.select { |s| s['locale'] == locale }
+      obstacle_slug = entry['slug']
+      linked_slugs = entry['spots'] || []
+
+      # Try to find spots from the obstacle's spots array first
+      exit_spot = nil
+      reentry_spot = nil
+
+      if linked_slugs.any?
+        linked_slugs.each do |spot_slug|
+          spot = locale_spots.find { |s| s['slug'] == spot_slug }
+          next unless spot
+          exit_spot ||= spot if %w[nur-ausstieg einstieg-ausstieg].include?(spot['spotType_slug'])
+          reentry_spot ||= spot if %w[nur-einstieg einstieg-ausstieg].include?(spot['spotType_slug'])
+        end
+      end
+
+      # Fallback: find spots whose slug starts with the obstacle slug
+      unless exit_spot && reentry_spot
+        related = locale_spots.select { |s| s['slug']&.start_with?("#{obstacle_slug}-") }
+        related.each do |spot|
+          exit_spot ||= spot if %w[nur-ausstieg einstieg-ausstieg].include?(spot['spotType_slug'])
+          reentry_spot ||= spot if %w[nur-einstieg einstieg-ausstieg].include?(spot['spotType_slug'])
+        end
+      end
+
+      doc.data['exitSpot_slug'] = exit_spot['slug'] if exit_spot
+      doc.data['exitSpot_name'] = exit_spot['name'] if exit_spot
+      doc.data['reentrySpot_slug'] = reentry_spot['slug'] if reentry_spot
+      doc.data['reentrySpot_name'] = reentry_spot['name'] if reentry_spot
+    end
+
+    # Compute the center point of a GeoJSON geometry by averaging all coordinates
+    def compute_geometry_center(geometry_str)
+      geometry = geometry_str.is_a?(String) ? JSON.parse(geometry_str) : geometry_str
+      coords = extract_all_coordinates(geometry)
+      return nil if coords.empty?
+
+      avg_lon = coords.sum { |c| c[0] } / coords.size.to_f
+      avg_lat = coords.sum { |c| c[1] } / coords.size.to_f
+      { lat: avg_lat, lon: avg_lon }
+    rescue JSON::ParserError
+      nil
+    end
+
+    # Recursively extract all [lon, lat] coordinate pairs from a GeoJSON geometry
+    def extract_all_coordinates(geometry)
+      return [] unless geometry.is_a?(Hash)
+
+      type = geometry['type']
+      coords = geometry['coordinates']
+      return [] unless coords
+
+      case type
+      when 'Point'
+        [coords]
+      when 'LineString', 'MultiPoint'
+        coords
+      when 'Polygon', 'MultiLineString'
+        coords.flatten(1)
+      when 'MultiPolygon'
+        coords.flatten(2)
+      else
+        []
+      end
     end
   end
 end
