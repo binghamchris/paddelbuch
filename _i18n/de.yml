@@ -96,7 +96,7 @@ protected_areas:
 # Event notices
 event_notices:
   title: "Gewässerereignisse"
-  waterway_notices: "Absehbare Gewässerereignisse"
+  waterway_notices: "Gewässerereignisse"
   no_notices: "Zurzeit gibt es keine Veranstaltungshinweise für diese Gewässer"
   approx_start_date: "Ungefähres Startdatum"
   approx_end_date: "Ungefähres Enddatum"

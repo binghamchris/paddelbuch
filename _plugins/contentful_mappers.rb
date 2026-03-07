@@ -248,7 +248,7 @@ module ContentfulMappers
       'affectedArea' => resolve_field(fields, :affected_area, locale)&.to_json,
       'startDate' => resolve_field(fields, :start_date, locale)&.iso8601,
       'endDate' => resolve_field(fields, :end_date, locale)&.iso8601,
-      'waterways' => extract_reference_slugs(resolve_field(fields, :waterways, locale))
+      'waterways' => extract_reference_slugs(resolve_field(fields, :waterway, locale))
     }
   end
 
