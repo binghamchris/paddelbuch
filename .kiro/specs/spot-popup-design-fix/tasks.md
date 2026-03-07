@@ -44,7 +44,7 @@
   - Mark task complete when tests are written, run, and passing on unfixed code
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7_
 
-- [ ] 3. Fix spot popup layout and content to match original Gatsby design
+- [x] 3. Fix spot popup layout and content to match original Gatsby design
 
   - [x] 3.1 Add and update i18n keys in `_i18n/de.yml` and `_i18n/en.yml`
     - Add `labels.potentially_usable_by`: "Potenziell nutzbar für" (de) / "Potentially Usable By" (en)
@@ -82,7 +82,7 @@
     - _Preservation: Clipboard copy handler, Google Maps navigation URL, detail page link, conditional omission all unchanged_
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
 
-  - [-] 3.4 Add SCSS styles in `_sass/components/_map.scss`
+  - [x] 3.4 Add SCSS styles in `_sass/components/_map.scss`
     - Add `.spot-popup-category` style for header category label
     - Add `.spot-popup-title` style for large spot name heading
     - Add `.spot-popup-divider` style for `<hr>` between header and title
@@ -90,7 +90,7 @@
     - Adjust `.copy-btn` padding/sizing for text content instead of icon-only
     - _Requirements: 2.1, 2.2, 2.3, 2.5_
 
-  - [~] 3.5 Verify bug condition exploration test now passes
+  - [x] 3.5 Verify bug condition exploration test now passes
     - **Property 1: Expected Behavior** - Spot Popup Layout Matches Original Design
     - **IMPORTANT**: Re-run the SAME test from task 1 - do NOT write a new test
     - The test from task 1 encodes the expected behavior
@@ -99,14 +99,14 @@
     - **EXPECTED OUTCOME**: Test PASSES (confirms bug is fixed)
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
 
-  - [~] 3.6 Verify preservation tests still pass
+  - [x] 3.6 Verify preservation tests still pass
     - **Property 2: Preservation** - Existing Functional Behavior Unchanged
     - **IMPORTANT**: Re-run the SAME tests from task 2 - do NOT write new tests
     - Run preservation property tests from step 2
     - **EXPECTED OUTCOME**: Tests PASS (confirms no regressions)
     - Confirm all tests still pass after fix (no regressions)
 
-- [~] 4. Checkpoint - Ensure all tests pass
+- [-] 4. Checkpoint - Ensure all tests pass
   - Run the full test suite to confirm all exploration and preservation tests pass
   - Verify no regressions in existing tests
   - Ensure all tests pass, ask the user if questions arise
