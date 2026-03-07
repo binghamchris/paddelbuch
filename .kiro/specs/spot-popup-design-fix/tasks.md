@@ -68,7 +68,7 @@
     - _Preservation: Conditional section omission for missing data unchanged; rejected spot popup layout unchanged_
     - _Requirements: 2.1, 2.2, 2.3, 2.5_
 
-  - [-] 3.3 Update `assets/js/spot-popup.js` dynamic popup generation
+  - [x] 3.3 Update `assets/js/spot-popup.js` dynamic popup generation
     - Add `spotTypeNames` translation map (slug → { de, en }) sourced from `spot_types.yml`
     - Add `paddleCraftTypeNames` translation map (slug → { de, en }) sourced from `paddle_craft_types.yml`
     - Restructure header to show icon + translated spot type category label
@@ -82,7 +82,7 @@
     - _Preservation: Clipboard copy handler, Google Maps navigation URL, detail page link, conditional omission all unchanged_
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
 
-  - [~] 3.4 Add SCSS styles in `_sass/components/_map.scss`
+  - [-] 3.4 Add SCSS styles in `_sass/components/_map.scss`
     - Add `.spot-popup-category` style for header category label
     - Add `.spot-popup-title` style for large spot name heading
     - Add `.spot-popup-divider` style for `<hr>` between header and title
