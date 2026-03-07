@@ -80,6 +80,15 @@
       {% endif %}
     };
     
+    // Build a lookup map from protected area type slugs to translated names
+    // Uses the types data filtered by current locale
+    var protectedAreaTypeNames = {};
+    {% assign pa_type_key = "name_" | append: current_locale %}
+    {% assign pa_types = site.data.types.protected_area_types | where: "locale", current_locale %}
+    {% for pat in pa_types %}
+    protectedAreaTypeNames['{{ pat.slug }}'] = '{{ pat[pa_type_key] | default: pat.name_de }}';
+    {% endfor %}
+
     // Map spot type slugs to layer groups
     var spotTypeToLayerGroup = {
       'einstieg-ausstieg': layerGroups.entryExit,
@@ -302,13 +311,16 @@
         popupContent += '<span class="popup-title"><h1>' + (protectedArea.name || (currentLocale === 'en' ? 'Protected Area' : 'Schutzgebiet')) + '</h1></span>';
         
         // Display protected area type if available
+        // Resolve the translated type name from the slug using the lookup map
         var typeName = null;
         if (protectedArea.protectedAreaType_name) {
           typeName = protectedArea.protectedAreaType_name;
         } else if (protectedArea.protectedAreaType && protectedArea.protectedAreaType.name) {
           typeName = protectedArea.protectedAreaType.name;
+        } else if (protectedArea.protectedAreaType_slug && Object.prototype.hasOwnProperty.call(protectedAreaTypeNames, protectedArea.protectedAreaType_slug)) {
+          typeName = protectedAreaTypeNames[protectedArea.protectedAreaType_slug];
         } else if (protectedArea.protectedAreaType_slug) {
-          // Fallback to slug if name not available
+          // Final fallback to slug if no translation found
           typeName = protectedArea.protectedAreaType_slug;
         }
         

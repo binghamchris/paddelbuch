@@ -27,9 +27,11 @@ const strings = {
  * 
  * @param {Object} protectedArea - The protected area data object
  * @param {string} locale - The current locale ('de' or 'en')
+ * @param {Object} [typeNames={}] - Lookup map from slug to translated type name (built from protected_area_types data)
  * @returns {Object} Object containing the popup content fields
  */
-function generateProtectedAreaPopupContent(protectedArea, locale) {
+function generateProtectedAreaPopupContent(protectedArea, locale, typeNames) {
+  typeNames = typeNames || {};
   const localeStrings = strings[locale] || strings.de;
   
   const content = {
@@ -51,14 +53,17 @@ function generateProtectedAreaPopupContent(protectedArea, locale) {
   }
 
   // Protected area type (Requirement 6.2)
-  // Check multiple possible field names for type
+  // Check multiple possible field names for type, resolving slug via typeNames lookup
   let typeName = null;
   if (protectedArea.protectedAreaType_name) {
     typeName = protectedArea.protectedAreaType_name;
   } else if (protectedArea.protectedAreaType && protectedArea.protectedAreaType.name) {
     typeName = protectedArea.protectedAreaType.name;
+  } else if (protectedArea.protectedAreaType_slug && Object.prototype.hasOwnProperty.call(typeNames, protectedArea.protectedAreaType_slug)) {
+    // Resolve slug to translated name via lookup map
+    typeName = typeNames[protectedArea.protectedAreaType_slug];
   } else if (protectedArea.protectedAreaType_slug) {
-    // Fallback to slug if name not available
+    // Final fallback to slug if no translation found
     typeName = protectedArea.protectedAreaType_slug;
   }
   
@@ -257,13 +262,32 @@ describe('Protected Area Popup Content - Property 12', () => {
       );
     });
 
-    test('popup falls back to type slug when name not available', () => {
+    test('popup resolves type slug to translated name via lookup map', () => {
+      fc.assert(
+        fc.property(
+          protectedAreaWithTypeSlugOnlyArb,
+          localeArb,
+          fc.string({ minLength: 1, maxLength: 50 }).filter(s => s.trim().length > 0),
+          (protectedArea, locale, translatedName) => {
+            const typeNames = {};
+            typeNames[protectedArea.protectedAreaType_slug] = translatedName;
+            const popupContent = generateProtectedAreaPopupContent(protectedArea, locale, typeNames);
+            
+            return popupContent.hasType && 
+                   popupContent.typeName === translatedName;
+          }
+        ),
+        { numRuns: 100 }
+      );
+    });
+
+    test('popup falls back to type slug when no translation found in lookup', () => {
       fc.assert(
         fc.property(
           protectedAreaWithTypeSlugOnlyArb,
           localeArb,
           (protectedArea, locale) => {
-            const popupContent = generateProtectedAreaPopupContent(protectedArea, locale);
+            const popupContent = generateProtectedAreaPopupContent(protectedArea, locale, {});
             
             return popupContent.hasType && 
                    popupContent.typeName === protectedArea.protectedAreaType_slug;
