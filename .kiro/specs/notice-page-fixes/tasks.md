@@ -32,7 +32,7 @@
   - Mark task complete when tests are written, run, and passing on unfixed code
   - _Requirements: 3.1, 3.4, 3.5, 3.7, 3.9, 3.10, 3.11_
 
-- [ ] 3. Fix notice page content structure, navigation label, and date formatting
+- [x] 3. Fix notice page content structure, navigation label, and date formatting
 
   - [x] 3.1 Add `notice_updated` datetime format to `_plugins/locale_filter.rb`
     - Add a `'notice_updated'` key to the `get_datetime_format` method's format hash
