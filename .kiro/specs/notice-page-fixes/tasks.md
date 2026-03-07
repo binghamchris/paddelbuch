@@ -61,7 +61,7 @@
     - _Preservation: Notice type badge div structure preserved, notice title h1 preserved_
     - _Requirements: 2.2_
 
-  - [~] 3.4 Suppress redundant content rendering for notice pages
+  - [x] 3.4 Suppress redundant content rendering for notice pages
     - In `_layouts/notice.html`, ensure `{{ content }}` from `default.html` does not produce duplicate Kurzfassung/description elements
     - Option A: Override the content block so the notice layout wraps its own content and `{{ content }}` in `default.html` renders the notice template (this is the current mechanism — the layout content IS `{{ content }}`)
     - Option B: Ensure the collection generator sets empty body content for notice documents so `{{ content }}` renders nothing extra
