@@ -5,6 +5,11 @@
 // Import Bootstrap from node_modules (resolved via load_paths)
 @import "bootstrap/scss/bootstrap";
 
+// Override: remove border-radius from all buttons
+.btn {
+  border-radius: 0;
+}
+
 @import "settings/settings";
 @import "util/util";
 @import "components/components";
@@ -41,7 +46,7 @@ main {
   }
 
   .clipboard-cell {
-    padding-left: 2em;
+    padding-left: 0.5em;
   }
 }
 @media screen and (max-width: 992px) {
@@ -50,7 +55,7 @@ main {
   }
 
   .clipboard-cell {
-    padding-left: 3em;
+    padding-left: 0.5em;
   }
 }
 
