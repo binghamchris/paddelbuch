@@ -19,21 +19,6 @@ pageName: waterway-details
 {% assign current_locale = site.lang | default: 'de' %}
 {% assign waterway = page %}
 
-<!-- Get paddling environment type name -->
-{% assign env_type_slug = waterway.paddlingEnvironmentType_slug %}
-{% if env_type_slug %}
-  {% assign env_type = site.data.types.paddling_environment_types | where: "slug", env_type_slug | first %}
-  {% if env_type %}
-    {% if current_locale == 'en' %}
-      {% assign env_type_name = env_type.name_en %}
-    {% else %}
-      {% assign env_type_name = env_type.name_de %}
-    {% endif %}
-  {% else %}
-    {% assign env_type_name = env_type_slug %}
-  {% endif %}
-{% endif %}
-
 <div class="container-fluid">
   <div class="row">
     <!-- Map Column (8 cols on large screens) -->
@@ -43,40 +28,17 @@ pageName: waterway-details
     
     <!-- Details Panel (4 cols on large screens) -->
     <div class="col-lg-4 waterway-details">
-      <!-- Waterway Type Badge -->
-      {% if env_type_name %}
-      <div class="waterway-type-badge mt-3">
-        <span class="badge bg-primary">{{ env_type_name }}</span>
-      </div>
-      {% endif %}
-      
       <!-- Waterway Title -->
       <h1 class="waterway-title">{{ waterway.name }}</h1>
       
       <!-- Waterway Details Table -->
       <table class="waterway-details-table">
         <tbody>
-          <!-- Area (for lakes) -->
-          {% if waterway.area and waterway.area > 0 %}
-          <tr>
-            <th>{% if current_locale == 'en' %}Area{% else %}Fläche{% endif %}</th>
-            <td>{{ waterway.area | round: 2 }} km²</td>
-          </tr>
-          {% endif %}
-          
           <!-- Length (for rivers) -->
           {% if waterway.length and waterway.length > 0 %}
           <tr>
             <th>{% if current_locale == 'en' %}Length{% else %}Länge{% endif %}</th>
             <td>{{ waterway.length | round: 2 }} km</td>
-          </tr>
-          {% endif %}
-          
-          <!-- Last Updated Timestamp -->
-          {% if waterway.updatedAt %}
-          <tr>
-            <th>{% t labels.last_updated %}</th>
-            <td>{{ waterway.updatedAt | localized_date }}</td>
           </tr>
           {% endif %}
         </tbody>
