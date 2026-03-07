@@ -1,11 +1,6 @@
 // Static page layout styles
 // Requirements: 12.3, 13.5
 
-.page-static-page {
-  padding-top: 2rem;
-  padding-bottom: 3rem;
-}
-
 .static-page-container {
   padding-top: 1.5rem;
   padding-bottom: 2rem;
@@ -68,25 +63,6 @@
     margin: 1rem 0;
   }
   
-  table {
-    width: 100%;
-    margin-bottom: 1rem;
-    border-collapse: collapse;
-    
-    th, td {
-      padding: 0.75rem;
-      border: 1px solid $secondary-blue-20;
-    }
-    
-    th {
-      background-color: $secondary-blue-20;
-      color: $swisscanoe-blue;
-    }
-    
-    tr:nth-child(even) {
-      background-color: rgba($secondary-blue-20, 0.5);
-    }
-  }
 }
 
 .static-page-meta {
@@ -95,7 +71,7 @@
   border-top: 1px solid $secondary-blue-20;
 }
 
-.page-api, .page-static {
+.page-api, .page-static, .page-static-page {
   table {
     display: block !important;
     overflow-x: scroll !important;
@@ -128,7 +104,7 @@
   }
 }
 
-.page-static {
+.page-static, .page-static-page {
   table tbody tr th p {
     margin: 0;
   }
