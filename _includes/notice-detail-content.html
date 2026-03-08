@@ -37,7 +37,7 @@
     {% if notice.startDate %}
     <tr>
       <th>{% t event_notices.approx_start_date %}</th>
-      <td>{{ notice.startDate | localized_date: 'iso' }}</td>
+      <td>{{ notice.startDate | localized_date }}</td>
     </tr>
     {% endif %}
 
@@ -45,7 +45,7 @@
     {% if notice.endDate %}
     <tr>
       <th>{% t event_notices.approx_end_date %}</th>
-      <td>{{ notice.endDate | localized_date: 'iso' }}</td>
+      <td>{{ notice.endDate | localized_date }}</td>
     </tr>
     {% endif %}
 

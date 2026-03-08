@@ -108,7 +108,7 @@ module Jekyll
 
     private
 
-    # German month name translations (Ruby strftime always outputs English)
+    # German full month name translations (Ruby strftime always outputs English)
     GERMAN_MONTHS = {
       'January' => 'Januar', 'February' => 'Februar', 'March' => 'März',
       'April' => 'April', 'May' => 'Mai', 'June' => 'Juni',
@@ -116,10 +116,19 @@ module Jekyll
       'October' => 'Oktober', 'November' => 'November', 'December' => 'Dezember'
     }.freeze
 
+    # German abbreviated month name translations
+    GERMAN_MONTHS_ABBR = {
+      'Jan' => 'Jan', 'Feb' => 'Feb', 'Mar' => 'Mär',
+      'Apr' => 'Apr', 'May' => 'Mai', 'Jun' => 'Jun',
+      'Jul' => 'Jul', 'Aug' => 'Aug', 'Sep' => 'Sep',
+      'Oct' => 'Okt', 'Nov' => 'Nov', 'Dec' => 'Dez'
+    }.freeze
+
     # Replace English month names with localized equivalents
     def localize_month_names(str, lang)
       return str unless lang == 'de'
       GERMAN_MONTHS.each { |en, de| str = str.gsub(en, de) }
+      GERMAN_MONTHS_ABBR.each { |en, de| str = str.gsub(en, de) }
       str
     end
 
@@ -146,18 +155,19 @@ module Jekyll
 
     # Get date format string based on locale and format type
     # Property 19: Date Locale Formatting
+    # Standard display format: DD MMM YYYY (e.g. "08 Mar 2026" / "08 Mär 2026")
     def get_date_format(lang, format_type)
       formats = {
         'de' => {
-          nil => '%d.%m.%Y',           # Default: DD.MM.YYYY (de-CH format)
-          'short' => '%d.%m.%Y',       # DD.MM.YYYY
-          'long' => '%d. %B %Y',       # DD. Month YYYY
+          nil => '%d %b %Y',           # Default: DD MMM YYYY (e.g. 08 Mär 2026)
+          'short' => '%d %b %Y',       # DD MMM YYYY
+          'long' => '%d %b %Y',        # DD MMM YYYY
           'iso' => '%Y-%m-%d'          # YYYY-MM-DD
         },
         'en' => {
-          nil => '%d/%m/%Y',           # Default: DD/MM/YYYY (en-GB format)
-          'short' => '%d/%m/%Y',       # DD/MM/YYYY
-          'long' => '%d %B %Y',        # DD Month YYYY
+          nil => '%d %b %Y',           # Default: DD MMM YYYY (e.g. 08 Mar 2026)
+          'short' => '%d %b %Y',       # DD MMM YYYY
+          'long' => '%d %b %Y',        # DD MMM YYYY
           'iso' => '%Y-%m-%d'          # YYYY-MM-DD
         }
       }
@@ -168,21 +178,22 @@ module Jekyll
 
     # Get datetime format string based on locale and format type
     # Property 19: Date Locale Formatting
+    # Standard display format: DD MMM YYYY HH:MM (e.g. "08 Mar 2026 14:30")
     def get_datetime_format(lang, format_type)
       formats = {
         'de' => {
-          nil => '%d.%m.%Y %H:%M',           # Default: DD.MM.YYYY HH:MM
-          'short' => '%d.%m.%Y %H:%M',       # DD.MM.YYYY HH:MM
-          'long' => '%-d. %B %Y um %H:%M',    # D. Month YYYY um HH:MM
-          'iso' => '%Y-%m-%dT%H:%M:%S',      # ISO 8601
-          'notice_updated' => '%-d. %B %Y um %H:%M'  # D. Month YYYY um HH:MM
+          nil => '%d %b %Y %H:%M',              # Default: DD MMM YYYY HH:MM
+          'short' => '%d %b %Y %H:%M',          # DD MMM YYYY HH:MM
+          'long' => '%d %b %Y um %H:%M',        # DD MMM YYYY um HH:MM
+          'iso' => '%Y-%m-%dT%H:%M:%S',         # ISO 8601
+          'notice_updated' => '%d %b %Y um %H:%M'  # DD MMM YYYY um HH:MM
         },
         'en' => {
-          nil => '%d/%m/%Y %H:%M',           # Default: DD/MM/YYYY HH:MM
-          'short' => '%d/%m/%Y %H:%M',       # DD/MM/YYYY HH:MM
-          'long' => '%-d %B %Y at %H:%M',     # D Month YYYY at HH:MM
-          'iso' => '%Y-%m-%dT%H:%M:%S',      # ISO 8601
-          'notice_updated' => '%-d %B %Y at %H:%M'   # D Month YYYY at HH:MM
+          nil => '%d %b %Y %H:%M',              # Default: DD MMM YYYY HH:MM
+          'short' => '%d %b %Y %H:%M',          # DD MMM YYYY HH:MM
+          'long' => '%d %b %Y at %H:%M',        # DD MMM YYYY at HH:MM
+          'iso' => '%Y-%m-%dT%H:%M:%S',         # ISO 8601
+          'notice_updated' => '%d %b %Y at %H:%M'  # DD MMM YYYY at HH:MM
         }
       }
       
