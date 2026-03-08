@@ -18,7 +18,7 @@ Externalize inline JavaScript from Liquid templates into four static external `.
     - For any valid site config (randomized tile URL, center coordinates, zoom levels), verify the MapConfigGenerator output contains all required keys with correct values
     - **Validates: Requirements 5.1, 5.2, 5.3, 5.4, 5.5**
 
-  - [~] 1.3 Write RSpec unit tests for MapConfigGenerator changes
+  - [x] 1.3 Write RSpec unit tests for MapConfigGenerator changes
     - Verify the generated JS output contains `tileUrl`, `center`, `defaultZoom`, `maxZoom`, `attribution` keys
     - Verify values match the corresponding `_config.yml` settings
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5_

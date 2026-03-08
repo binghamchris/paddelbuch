@@ -265,4 +265,114 @@ RSpec.describe Jekyll::MapConfigGenerator do
       end
     end
   end
+
+  # ===========================================================================
+  # SITE-LEVEL SETTINGS (Requirements 5.1–5.5)
+  # ===========================================================================
+  describe 'site-level settings' do
+    before do
+      site.config['mapbox_url'] = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+      site.config['map'] = {
+        'center' => { 'lat' => 46.801111, 'lon' => 8.226667 },
+        'default_zoom' => 8,
+        'max_zoom' => 20
+      }
+      run_generator
+    end
+
+    let(:config) { parse_config_from_page(find_map_config_page) }
+
+    it 'includes tileUrl matching site.mapbox_url (Req 5.1)' do
+      expect(config['tileUrl']).to eq('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')
+    end
+
+    it 'includes center with lat and lon matching site.map.center (Req 5.2)' do
+      expect(config['center']).to be_a(Hash)
+      expect(config['center']['lat']).to eq(46.801111)
+      expect(config['center']['lon']).to eq(8.226667)
+    end
+
+    it 'includes defaultZoom matching site.map.default_zoom (Req 5.3)' do
+      expect(config['defaultZoom']).to eq(8)
+    end
+
+    it 'includes maxZoom matching site.map.max_zoom (Req 5.4)' do
+      expect(config['maxZoom']).to eq(20)
+    end
+
+    it 'includes attribution as a non-empty HTML string (Req 5.5)' do
+      expect(config['attribution']).to be_a(String)
+      expect(config['attribution']).not_to be_empty
+      expect(config['attribution']).to include('Mapbox')
+      expect(config['attribution']).to include('OpenStreetMap')
+    end
+
+    context 'with different config values' do
+      before do
+        site.pages.clear
+        site.config['mapbox_url'] = 'https://example.com/tiles/{z}/{x}/{y}.png'
+        site.config['map'] = {
+          'center' => { 'lat' => 47.0, 'lon' => 9.0 },
+          'default_zoom' => 10,
+          'max_zoom' => 18
+        }
+        run_generator
+      end
+
+      let(:config) { parse_config_from_page(find_map_config_page) }
+
+      it 'reflects updated tileUrl' do
+        expect(config['tileUrl']).to eq('https://example.com/tiles/{z}/{x}/{y}.png')
+      end
+
+      it 'reflects updated center coordinates' do
+        expect(config['center']['lat']).to eq(47.0)
+        expect(config['center']['lon']).to eq(9.0)
+      end
+
+      it 'reflects updated defaultZoom' do
+        expect(config['defaultZoom']).to eq(10)
+      end
+
+      it 'reflects updated maxZoom' do
+        expect(config['maxZoom']).to eq(18)
+      end
+    end
+
+    context 'when map config is missing' do
+      before do
+        site.pages.clear
+        site.config.delete('mapbox_url')
+        site.config.delete('map')
+        run_generator
+      end
+
+      let(:config) { parse_config_from_page(find_map_config_page) }
+
+      it 'includes tileUrl as nil' do
+        expect(config).to have_key('tileUrl')
+        expect(config['tileUrl']).to be_nil
+      end
+
+      it 'includes center with nil lat and lon' do
+        expect(config['center']).to eq({ 'lat' => nil, 'lon' => nil })
+      end
+
+      it 'includes defaultZoom as nil' do
+        expect(config).to have_key('defaultZoom')
+        expect(config['defaultZoom']).to be_nil
+      end
+
+      it 'includes maxZoom as nil' do
+        expect(config).to have_key('maxZoom')
+        expect(config['maxZoom']).to be_nil
+      end
+
+      it 'still includes attribution' do
+        expect(config['attribution']).to be_a(String)
+        expect(config['attribution']).not_to be_empty
+      end
+    end
+  end
 end
+
