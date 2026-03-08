@@ -89,7 +89,7 @@ module Jekyll
 
     def add_json_page(filename, data)
       page = PageWithoutAFile.new(@site, @site.source, 'api', filename)
-      page.content = JSON.pretty_generate(data)
+      page.content = JSON.generate(data)
       page.data['layout'] = nil
       @site.pages << page
     end

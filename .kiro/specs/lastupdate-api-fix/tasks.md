@@ -100,7 +100,7 @@
     - _Expected_Behavior: Files named waterwayevents-{locale}.json and protectedareas-{locale}.json_
     - _Requirements: 2.1, 2.2_
 
-  - [~] 3.5 Fix JSON formatting in `api_generator.rb`
+  - [x] 3.5 Fix JSON formatting in `api_generator.rb`
     - Replace `JSON.pretty_generate(data)` with `JSON.generate(data)` in `add_json_page` method
     - This produces compact single-line JSON for all API files
     - _Bug_Condition: jsonFormattingMismatch(input) where isPrettyPrinted == true_
