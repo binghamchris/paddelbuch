@@ -165,7 +165,7 @@ Add content-hash-based change detection to the Jekyll build pipeline so that `Ap
     - If any references exist, remove them
     - _Requirements: 9.1, 9.2_
 
-  - [~] 9.2 Write property test for CollectionGenerator independence (Property 7)
+  - [x] 9.2 Write property test for CollectionGenerator independence (Property 7)
     - **Property 7: CollectionGenerator independence**
     - Create `spec/plugins/collection_generator_cache_spec.rb`
     - Set flag to random values (`true`, `false`, `nil`), run CollectionGenerator, assert documents created identically
