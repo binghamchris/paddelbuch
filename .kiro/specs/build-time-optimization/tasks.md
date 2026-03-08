@@ -6,7 +6,7 @@ Extract repeated Liquid-generated map configuration into a shared JS file produc
 
 ## Tasks
 
-- [ ] 1. Create MapConfigGenerator plugin
+- [x] 1. Create MapConfigGenerator plugin
   - [x] 1.1 Implement `_plugins/map_config_generator.rb`
     - Create a new Jekyll `Generator` plugin with `safe true` and `priority :low`
     - Read `site.data.types.spot_types`, `site.data.types.paddle_craft_types`, and `site.data.types.protected_area_types`
