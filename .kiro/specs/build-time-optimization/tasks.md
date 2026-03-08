@@ -16,7 +16,7 @@ Extract repeated Liquid-generated map configuration into a shared JS file produc
     - Log warnings for missing or malformed type data entries
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5_
 
-  - [~] 1.2 Write unit tests for MapConfigGenerator
+  - [x] 1.2 Write unit tests for MapConfigGenerator
     - Create `spec/plugins/map_config_generator_spec.rb`
     - Test that generator produces valid JS output with `window.paddelbuchMapConfig = {...};` wrapper
     - Test output file is placed at `api/map-config.js`
