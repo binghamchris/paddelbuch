@@ -6,7 +6,7 @@ Externalize inline JavaScript from Liquid templates into four static external `.
 
 ## Tasks
 
-- [ ] 1. Extend MapConfigGenerator plugin with site-level settings
+- [x] 1. Extend MapConfigGenerator plugin with site-level settings
   - [x] 1.1 Add site-level keys to `_plugins/map_config_generator.rb`
     - Add `tileUrl`, `center` (with `lat` and `lon`), `defaultZoom`, `maxZoom`, and `attribution` to the generated `window.paddelbuchMapConfig` object
     - Read values from `site.mapbox_url`, `site.map.center.lat`, `site.map.center.lon`, `site.map.default_zoom`, `site.map.max_zoom`
@@ -24,7 +24,7 @@ Externalize inline JavaScript from Liquid templates into four static external `.
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5_
 
 - [ ] 2. Create `assets/js/filter-panel.js` and update `_includes/filter-panel.html`
-  - [~] 2.1 Extract filter panel JavaScript into `assets/js/filter-panel.js`
+  - [-] 2.1 Extract filter panel JavaScript into `assets/js/filter-panel.js`
     - Move the IIFE from `_includes/filter-panel.html` into `assets/js/filter-panel.js`
     - Expose `window.PaddelbuchFilterPanel.init(map, dimensionConfigs, layerToggles)`
     - No Liquid interpolation exists in this code, so it's a direct move
