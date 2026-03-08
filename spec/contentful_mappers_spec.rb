@@ -465,7 +465,9 @@ RSpec.describe ContentfulMappers do
         is_portage_possible: true,
         obstacle_type: build_reference('weir'),
         waterway: build_reference('aare'),
-        spots: [build_reference('spot-1'), build_reference('spot-2')]
+        spots: [build_reference('spot-1'), build_reference('spot-2')],
+        data_source_type: build_reference('community'),
+        data_license_type: build_reference('cc-by-sa')
       )
       entry = build_entry(fields)
 
@@ -480,6 +482,8 @@ RSpec.describe ContentfulMappers do
       expect(result['obstacleType_slug']).to eq('weir')
       expect(result['waterway_slug']).to eq('aare')
       expect(result['spots']).to eq(%w[spot-1 spot-2])
+      expect(result['dataSourceType_slug']).to eq('community')
+      expect(result['dataLicenseType_slug']).to eq('cc-by-sa')
     end
 
     it 'handles missing fields gracefully' do
@@ -502,7 +506,9 @@ RSpec.describe ContentfulMappers do
         name: 'Naturschutzgebiet Aaredelta',
         geometry: build_geometry('{"type":"Polygon","coordinates":[[7.6,46.7]]}'),
         is_area_marked: true,
-        protected_area_type: build_reference('nature-reserve')
+        protected_area_type: build_reference('nature-reserve'),
+        data_source_type: build_reference('community'),
+        data_license_type: build_reference('cc-by-sa')
       )
       entry = build_entry(fields)
 
@@ -512,6 +518,8 @@ RSpec.describe ContentfulMappers do
       expect(result['name']).to eq('Naturschutzgebiet Aaredelta')
       expect(result['isAreaMarked']).to be true
       expect(result['protectedAreaType_slug']).to eq('nature-reserve')
+      expect(result['dataSourceType_slug']).to eq('community')
+      expect(result['dataLicenseType_slug']).to eq('cc-by-sa')
     end
 
     it 'handles missing fields gracefully' do
@@ -541,7 +549,9 @@ RSpec.describe ContentfulMappers do
         affected_area: build_geometry('{"type":"Polygon","coordinates":[[7.4,46.9]]}'),
         start_date: start_date,
         end_date: end_date,
-        waterway: [build_reference('aare'), build_reference('thunersee')]
+        waterway: [build_reference('aare'), build_reference('thunersee')],
+        data_source_type: build_reference('community'),
+        data_license_type: build_reference('cc-by-sa')
       )
       entry = build_entry(fields)
 
@@ -554,6 +564,8 @@ RSpec.describe ContentfulMappers do
       expect(result['startDate']).to eq('2025-03-01T00:00:00Z')
       expect(result['endDate']).to eq('2025-03-31T23:59:59Z')
       expect(result['waterways']).to eq(%w[aare thunersee])
+      expect(result['dataSourceType_slug']).to eq('community')
+      expect(result['dataLicenseType_slug']).to eq('cc-by-sa')
     end
 
     it 'handles missing fields gracefully' do

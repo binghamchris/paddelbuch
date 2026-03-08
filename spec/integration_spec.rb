@@ -408,8 +408,8 @@ RSpec.describe 'Integration: Contentful fetch pipeline' do
       index = JSON.parse(File.read(index_file))
       expect(index).to be_an(Array)
       tables = index.map { |e| e['table'] }
-      expect(tables).to include('spots-de')
-      expect(tables).to include('spottypes-de')
+      expect(tables).to include('spots')
+      expect(tables).to include('spotTypes')
     end
   end
 

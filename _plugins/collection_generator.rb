@@ -24,6 +24,17 @@ module Jekyll
     def generate(site)
       current_locale = site.config['lang'] || site.config['default_lang'] || 'de'
 
+      # Pre-build spot lookup hash for obstacle resolution (avoids O(n²) search)
+      spots_data = site.data['spots']
+      @locale_spots_by_slug = {}
+      @locale_spots_list = []
+      if spots_data.is_a?(Array)
+        @locale_spots_list = spots_data.select { |s| s['locale'] == current_locale }
+        @locale_spots_list.each do |s|
+          @locale_spots_by_slug[s['slug']] = s if s['slug']
+        end
+      end
+
       COLLECTIONS.each do |collection_name, config|
         collection = site.collections[collection_name]
         next unless collection
@@ -97,11 +108,10 @@ module Jekyll
     # Resolve exit and re-entry spots for an obstacle.
     # First checks the obstacle's own spots array, then falls back to
     # finding spots whose slug starts with the obstacle slug.
+    # Uses pre-built @locale_spots_by_slug hash for O(1) lookups.
     def resolve_obstacle_spots(doc, entry, site, locale)
-      spots_data = site.data['spots']
-      return unless spots_data.is_a?(Array)
+      return if @locale_spots_by_slug.nil? || @locale_spots_by_slug.empty?
 
-      locale_spots = spots_data.select { |s| s['locale'] == locale }
       obstacle_slug = entry['slug']
       linked_slugs = entry['spots'] || []
 
@@ -111,7 +121,7 @@ module Jekyll
 
       if linked_slugs.any?
         linked_slugs.each do |spot_slug|
-          spot = locale_spots.find { |s| s['slug'] == spot_slug }
+          spot = @locale_spots_by_slug[spot_slug]
           next unless spot
           exit_spot ||= spot if %w[nur-ausstieg einstieg-ausstieg].include?(spot['spotType_slug'])
           reentry_spot ||= spot if %w[nur-einstieg einstieg-ausstieg].include?(spot['spotType_slug'])
@@ -120,10 +130,12 @@ module Jekyll
 
       # Fallback: find spots whose slug starts with the obstacle slug
       unless exit_spot && reentry_spot
-        related = locale_spots.select { |s| s['slug']&.start_with?("#{obstacle_slug}-") }
-        related.each do |spot|
+        prefix = "#{obstacle_slug}-"
+        @locale_spots_list.each do |spot|
+          next unless spot['slug']&.start_with?(prefix)
           exit_spot ||= spot if %w[nur-ausstieg einstieg-ausstieg].include?(spot['spotType_slug'])
           reentry_spot ||= spot if %w[nur-einstieg einstieg-ausstieg].include?(spot['spotType_slug'])
+          break if exit_spot && reentry_spot
         end
       end
 
