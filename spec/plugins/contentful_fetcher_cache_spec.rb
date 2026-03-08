@@ -226,3 +226,98 @@ RSpec.describe Jekyll::ContentfulFetcher, '#force_sync — Property 3: Force syn
     }
   end
 end
+
+# Feature: conditional-build-regeneration, Property 8: Change flag logging
+# **Validates: Requirements 7.5**
+
+RSpec.describe Jekyll::ContentfulFetcher, '#change_flag_logging — Property 8: Change flag logging' do
+  let(:fetcher) { described_class.new }
+  let(:tmpdir) { Dir.mktmpdir }
+  let(:data_dir) { File.join(tmpdir, '_data') }
+  let(:site_config) { {} }
+  let(:site) do
+    s = double('Jekyll::Site')
+    allow(s).to receive(:source).and_return(tmpdir)
+    allow(s).to receive(:config).and_return(site_config)
+    allow(s).to receive(:data).and_return({})
+    s
+  end
+
+  before do
+    FileUtils.mkdir_p(data_dir)
+    fetcher.instance_variable_set(:@site, site)
+    fetcher.instance_variable_set(:@data_dir, data_dir)
+    allow(Jekyll.logger).to receive(:info)
+  end
+
+  after { FileUtils.remove_entry(tmpdir) if File.exist?(tmpdir) }
+
+  def write_yaml_file(filename, content)
+    path = File.join(data_dir, "#{filename}.yml")
+    FileUtils.mkdir_p(File.dirname(path))
+    File.write(path, content)
+    path
+  end
+
+  def compute_hash(file_paths)
+    digest = Digest::SHA256.new
+    file_paths.sort.each { |p| digest.update(File.read(p)) }
+    digest.hexdigest
+  end
+
+  # Expected log messages for each code path
+  LOG_MESSAGES = {
+    hash_match:     'Content hash unchanged — setting change flag to false',
+    hash_mismatch:  'Content hash changed — setting change flag to true',
+    nil_previous:   'No previous content hash — setting change flag to true'
+  }.freeze
+
+  # Property 8: For any code path that sets the change flag via compute_and_set_change_flag,
+  # ContentfulFetcher must emit an info-level log message containing the flag value and the reason.
+  it 'emits the correct info-level log message for each hash comparison code path' do
+    property_of {
+      num_files = range(1, 5)
+      file_contents = Array.new(num_files) { |i| [i, sized(range(5, 60)) { string }] }
+      scenario = choose(:hash_match, :hash_mismatch, :nil_previous)
+      [file_contents, scenario]
+    }.check(100) { |file_contents, scenario|
+      # Clean between iterations
+      FileUtils.rm_rf(Dir.glob(File.join(data_dir, '*.yml')))
+
+      # Reset logger expectations
+      RSpec::Mocks.space.proxy_for(Jekyll.logger).reset
+
+      allow(Jekyll.logger).to receive(:info)
+
+      # Write YAML files
+      paths = file_contents.map { |i, content| write_yaml_file("log_test_#{i}", content) }
+      actual_hash = compute_hash(paths)
+
+      # Set up CacheMetadata
+      cache = CacheMetadata.new(data_dir)
+      cache.sync_token = 'test_token'
+      cache.last_sync_at = Time.now.iso8601
+      cache.space_id = 'test_space'
+      cache.environment = 'master'
+
+      case scenario
+      when :hash_match
+        cache.content_hash = actual_hash
+      when :hash_mismatch
+        cache.content_hash = Digest::SHA256.hexdigest("different_#{rand(1_000_000)}")
+        cache.content_hash = Digest::SHA256.hexdigest("extra_#{rand}") while cache.content_hash == actual_hash
+      when :nil_previous
+        cache.content_hash = nil
+      end
+
+      allow(fetcher).to receive(:yaml_file_paths).and_return(paths)
+      site_config.delete('contentful_data_changed')
+
+      fetcher.send(:compute_and_set_change_flag, cache, 'new_token', 'test_space', 'master')
+
+      expected_message = LOG_MESSAGES[scenario]
+      expect(Jekyll.logger).to have_received(:info).with('Contentful:', expected_message),
+        "Expected log message '#{expected_message}' for scenario=#{scenario}, but it was not emitted"
+    }
+  end
+end
