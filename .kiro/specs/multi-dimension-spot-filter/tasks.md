@@ -68,7 +68,7 @@ Replace the existing Leaflet `L.control.layers` with a custom Filter_Panel that 
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 4. Implement Filter Panel UI
-  - [-] 4.1 Create `_includes/filter-panel.html` as a Leaflet custom control (`L.Control.extend`) positioned at `topleft`
+  - [x] 4.1 Create `_includes/filter-panel.html` as a Leaflet custom control (`L.Control.extend`) positioned at `topleft`
     - Expose init as `window.PaddelbuchFilterPanel.init(map, dimensionConfigs, layerToggles)`
     - Render a collapsible container with a toggle button
     - Spot filter section: dynamically render one `<fieldset>` per dimension from `dimensionConfigs`, each with a `<legend>` and checkboxes generated from the dimension's options array
@@ -81,7 +81,7 @@ Replace the existing Leaflet `L.control.layers` with a custom Filter_Panel that 
     - Ensure keyboard navigability (native checkbox behavior)
     - _Requirements: 2.1, 2.2, 2.3, 3.1, 3.2, 3.3, 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8, 6.2, 6.3, 6.4, 7.1, 7.2, 7.3, 7.5, 8.3_
 
-  - [~] 4.2 Write property test for Filter Panel rendering from configuration
+  - [x] 4.2 Write property test for Filter Panel rendering from configuration
     - **Property 8: Filter panel renders checkbox groups from configuration**
     - Generate random dimension config arrays with 1–5 dimensions, each with 1–8 options; init Filter_Panel with a mock map DOM, count rendered fieldsets and checkboxes
     - Create `_tests/property/filter-panel-rendering.property.test.js`
