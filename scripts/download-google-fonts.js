@@ -10,6 +10,7 @@ const CSS_DIR = path.join(ROOT, 'assets/css/vendor');
 
 const FONT_FAMILIES = [
   { family: 'Fredoka', weights: [300, 400, 500] },
+  { family: 'Murecho', weights: [400] },
   { family: 'Quicksand', weights: [400, 500, 700] },
 ];
 
