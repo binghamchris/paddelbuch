@@ -117,7 +117,7 @@ RSpec.describe 'Notice Page Bug Condition Exploration' do
         collection = site.collections['notices']
 
         generator = Jekyll::CollectionGenerator.new
-        doc = generator.send(:create_document, site, collection, notice_data, 'hochwasser-warnung')
+        doc = generator.send(:create_document, site, collection, notice_data, 'hochwasser-warnung', 'notice-details')
 
         # The document's content is what {{ content }} in default.html would render.
         # If doc.content is non-empty, it would produce additional HTML alongside
@@ -220,7 +220,8 @@ RSpec.describe 'Notice Page Bug Condition Exploration' do
 
           # Expected: "d. MMMM YYYY um HH:MM" (e.g., "10. Mai 2025 um 14:30" or "5. Mai 2025 um 09:00")
           # Day has no leading zero (%-d format)
-          expect(rendered).to match(/^\d{1,2}\. \w+ \d{4} um \d{2}:\d{2}$/),
+          # Month names may contain non-ASCII characters (e.g., März) so use [[:alpha:]]+ instead of \w+
+          expect(rendered).to match(/^\d{1,2}\. [[:alpha:]]+ \d{4} um \d{2}:\d{2}$/),
             "updatedAt '#{iso_datetime}' rendered as '#{rendered}', " \
             "expected format like '10. Mai 2025 um 14:30'"
         }

@@ -48,7 +48,7 @@ RSpec.describe Jekyll::CollectionGenerator do
         }
 
         generator = Jekyll::CollectionGenerator.new
-        doc = generator.send(:create_document, site, collection, entry, 'test-spot')
+        doc = generator.send(:create_document, site, collection, entry, 'test-spot', 'spot-details')
 
         expect(doc.data['title']).to eq('Test Spot')
       end
@@ -70,7 +70,7 @@ RSpec.describe Jekyll::CollectionGenerator do
         }
 
         generator = Jekyll::CollectionGenerator.new
-        doc = generator.send(:create_document, site, collection, entry, 'datenlizenzen')
+        doc = generator.send(:create_document, site, collection, entry, 'datenlizenzen', 'static-page')
 
         # We expect the title to be 'Datenlizenzen' (from the entry),
         # but the bug causes it to be overwritten with the slug 'datenlizenzen'
@@ -85,7 +85,7 @@ RSpec.describe Jekyll::CollectionGenerator do
         collection = build_collection(site)
         entry = { 'slug' => 'projekt', 'title' => 'Das Projekt', 'menu_slug' => 'ueber', 'locale' => 'de' }
         generator = Jekyll::CollectionGenerator.new
-        doc = generator.send(:create_document, site, collection, entry, 'projekt')
+        doc = generator.send(:create_document, site, collection, entry, 'projekt', 'static-page')
         expect(doc.data['title']).to eq('Das Projekt')
       end
     end
@@ -95,7 +95,7 @@ RSpec.describe Jekyll::CollectionGenerator do
         site, collection = build_site_with_collection(tmpdir, 'spots')
         entry = { 'slug' => 'unknown-spot', 'locale' => 'de' }
         generator = Jekyll::CollectionGenerator.new
-        doc = generator.send(:create_document, site, collection, entry, 'unknown-spot')
+        doc = generator.send(:create_document, site, collection, entry, 'unknown-spot', 'spot-details')
         expect(doc.data['title']).to eq('unknown-spot')
       end
     end
@@ -106,7 +106,7 @@ RSpec.describe Jekyll::CollectionGenerator do
         collection = build_collection(site)
         entry = { 'slug' => 'datenlizenzen', 'title' => 'Datenlizenzen', 'menu_slug' => 'offene-daten', 'locale' => 'de' }
         generator = Jekyll::CollectionGenerator.new
-        doc = generator.send(:create_document, site, collection, entry, 'datenlizenzen')
+        doc = generator.send(:create_document, site, collection, entry, 'datenlizenzen', 'static-page')
         expect(doc.data['permalink']).to eq('/offene-daten/datenlizenzen/')
       end
     end
@@ -117,7 +117,7 @@ RSpec.describe Jekyll::CollectionGenerator do
         collection = build_collection(site)
         entry = { 'slug' => 'orphan-page', 'title' => 'Orphan', 'locale' => 'de' }
         generator = Jekyll::CollectionGenerator.new
-        doc = generator.send(:create_document, site, collection, entry, 'orphan-page')
+        doc = generator.send(:create_document, site, collection, entry, 'orphan-page', 'static-page')
         expect(doc.data['permalink']).to be_nil
       end
     end
@@ -160,8 +160,18 @@ RSpec.describe Jekyll::CollectionGenerator do
           entry['title'] = data[:title_val] if data[:title_val]
           entry['menu_slug'] = 'test-menu' if data[:collection_type] == 'static_pages'
 
+          # Map collection type to page_name
+          page_names = {
+            'spots' => 'spot-details',
+            'waterways' => 'waterway-details',
+            'obstacles' => 'obstacle-details',
+            'notices' => 'notice-details',
+            'static_pages' => 'static-page'
+          }
+          page_name = page_names[data[:collection_type]] || 'details'
+
           generator = Jekyll::CollectionGenerator.new
-          doc = generator.send(:create_document, site, collection, entry, data[:slug])
+          doc = generator.send(:create_document, site, collection, entry, data[:slug], page_name)
 
           # The expected title logic: name || title || slug
           expected_title = data[:name_val] || data[:title_val] || data[:slug]
