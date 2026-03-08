@@ -10,9 +10,12 @@
 # Requirements: 15.1, 15.2, 15.3, 15.4, 15.5
 
 require 'json'
+require_relative 'generator_cache'
 
 module Jekyll
   class TileGenerator < Generator
+    include GeneratorCache
+
     safe true
     priority :low
 
@@ -67,6 +70,34 @@ module Jekyll
         return
       end
 
+      data_changed = site.config.fetch('contentful_data_changed', true)
+      cache_dir = File.join(site.source, '_data', '.tile_cache')
+
+      # Attempt cache hit when data hasn't changed
+      cache_hit = false
+      if !data_changed && cache_available?(cache_dir)
+        begin
+          load_tile_from_cache(site, cache_dir)
+          cache_hit = true
+        rescue => e
+          Jekyll.logger.warn "Tile Generator:", "Corrupted cache file: #{e.message} — falling back to full generation"
+          clear_cache(cache_dir)
+        end
+      end
+
+      return if cache_hit
+
+      # Log the appropriate message for the generation path
+      if !data_changed
+        Jekyll.logger.info "Tile Generator:", "Cache empty/missing — performing full generation"
+      else
+        Jekyll.logger.info "Tile Generator:", "Generating spatial tile files"
+      end
+
+      # Full generation with cache writing
+      @cache_dir = cache_dir
+      clear_cache(cache_dir)
+
       @grid_cols = ((SWITZERLAND_BOUNDS[:east] - SWITZERLAND_BOUNDS[:west]) / TILE_SIZE[:lon]).ceil
       @grid_rows = ((SWITZERLAND_BOUNDS[:north] - SWITZERLAND_BOUNDS[:south]) / TILE_SIZE[:lat]).ceil
       @locale_cache = {}
@@ -80,6 +111,8 @@ module Jekyll
       end
 
       Jekyll.logger.info "Tile Generator:", "Spatial tile generation complete"
+
+      @cache_dir = nil
     end
 
     private
@@ -126,11 +159,34 @@ module Jekyll
       end
     end
 
+    def load_tile_from_cache(site, cache_dir)
+      cached_files = read_cache_files(cache_dir)
+      cached_files.each do |entry|
+        relative_path = entry[:relative_path]
+        content = entry[:content]
+
+        dir = File.dirname(relative_path)
+        filename = File.basename(relative_path)
+
+        page = PageWithoutAFile.new(site, site.source, dir, filename)
+        page.content = content
+        page.data['layout'] = nil
+        site.pages << page
+      end
+
+      Jekyll.logger.info "Tile Generator:", "Using cached tile files (#{cached_files.size} files loaded)"
+    end
+
     def add_json_page(dir, filename, data)
       page = PageWithoutAFile.new(@site, @site.source, dir, filename)
-      page.content = JSON.pretty_generate(data)
+      json_content = JSON.pretty_generate(data)
+      page.content = json_content
       page.data['layout'] = nil
       @site.pages << page
+
+      # Write to cache during fresh generation
+      relative_path = File.join(dir, filename)
+      write_cache_file(@cache_dir, relative_path, json_content) if @cache_dir
     end
 
     def get_tile_for_item(item, location_type)
