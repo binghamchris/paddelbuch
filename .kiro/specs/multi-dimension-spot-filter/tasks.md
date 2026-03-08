@@ -29,7 +29,7 @@ Replace the existing Leaflet `L.control.layers` with a custom Filter_Panel that 
     - Create `_tests/property/marker-registry-deduplication.property.test.js`
     - **Validates: Requirements 4.3, 9.3**
 
-- [ ] 2. Implement Filter Engine module
+- [x] 2. Implement Filter Engine module
   - [x] 2.1 Create `assets/js/filter-engine.js` with `init`, `getFilterState`, `setOption`, `applyFilters`, and `evaluateMarker` methods
     - Expose as `window.PaddelbuchFilterEngine`
     - `init(dimensionConfigs, map)` stores config and map reference, initializes filter state with all options selected per dimension
@@ -64,11 +64,11 @@ Replace the existing Leaflet `L.control.layers` with a custom Filter_Panel that 
     - Create `_tests/property/filter-engine-non-spot-isolation.property.test.js`
     - **Validates: Requirements 7.4**
 
-- [ ] 3. Checkpoint
+- [x] 3. Checkpoint
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 4. Implement Filter Panel UI
-  - [~] 4.1 Create `_includes/filter-panel.html` as a Leaflet custom control (`L.Control.extend`) positioned at `topleft`
+  - [-] 4.1 Create `_includes/filter-panel.html` as a Leaflet custom control (`L.Control.extend`) positioned at `topleft`
     - Expose init as `window.PaddelbuchFilterPanel.init(map, dimensionConfigs, layerToggles)`
     - Render a collapsible container with a toggle button
     - Spot filter section: dynamically render one `<fieldset>` per dimension from `dimensionConfigs`, each with a `<legend>` and checkboxes generated from the dimension's options array
