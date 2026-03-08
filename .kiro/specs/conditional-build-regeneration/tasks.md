@@ -158,8 +158,8 @@ Add content-hash-based change detection to the Jekyll build pipeline so that `Ap
 - [x] 8. Checkpoint
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 9. Verify CollectionGenerator independence and build output invariance
-  - [~] 9.1 Verify `_plugins/collection_generator.rb` does NOT reference the change flag or any cache directory
+- [-] 9. Verify CollectionGenerator independence and build output invariance
+  - [x] 9.1 Verify `_plugins/collection_generator.rb` does NOT reference the change flag or any cache directory
     - Confirm CollectionGenerator has no dependency on `site.config['contentful_data_changed']`
     - Confirm CollectionGenerator does not read from or write to `.api_cache/` or `.tile_cache/`
     - If any references exist, remove them
