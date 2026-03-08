@@ -111,7 +111,7 @@ Replace the existing Leaflet `L.control.layers` with a custom Filter_Panel that 
     - Preserve existing `PaddelbuchZoomLayerManager` initialization
     - _Requirements: 5.1, 5.2, 7.1, 7.2, 7.5, 8.1, 8.2, 9.1_
 
-- [ ] 6. Checkpoint
+- [x] 6. Checkpoint
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 7. Unit tests for integration and edge cases
