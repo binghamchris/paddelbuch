@@ -143,6 +143,6 @@
     - **EXPECTED OUTCOME**: Tests PASS (confirms no regressions)
     - Confirm all preservation tests still pass after fix (YAML data unchanged, Liquid template data still exposed, no side effects on site.data)
 
-- [~] 4. Checkpoint — Ensure all tests pass
+- [x] 4. Checkpoint — Ensure all tests pass
   - Run full test suite: `source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.1 && bundle exec rspec`
   - Ensure all tests pass, ask the user if questions arise
