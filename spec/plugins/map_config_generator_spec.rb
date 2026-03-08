@@ -229,8 +229,9 @@ RSpec.describe Jekyll::MapConfigGenerator do
 
     let(:config) { parse_config_from_page(find_map_config_page) }
 
-    it 'contains both de and en locale keys' do
-      expect(config.keys).to contain_exactly('de', 'en')
+    it 'contains both de and en locale keys plus site-level keys' do
+      expect(config.keys).to include('de', 'en')
+      expect(config.keys).to include('tileUrl', 'center', 'defaultZoom', 'maxZoom', 'attribution')
     end
 
     %w[de en].each do |locale|

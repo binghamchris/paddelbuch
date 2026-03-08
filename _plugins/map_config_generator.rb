@@ -16,6 +16,11 @@ module Jekyll
 
     LOCALES = %w[de en].freeze
 
+    # Mapbox attribution HTML string — identical across all layout templates.
+    ATTRIBUTION = '&copy; <a href="https://www.mapbox.com/about/maps/" target="_blank" rel="noopener">Mapbox</a> ' \
+                  '&copy; <a href="http://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> ' \
+                  '<strong><a href="https://www.mapbox.com/map-feedback/" target="_blank" rel="noopener">Improve this map</a></strong>'
+
     # Hardcoded spot type options matching the current Liquid output exactly.
     # The Liquid template uses labels that differ from the data file values
     # (e.g. "Ein-/Ausstiegsorte" vs "Ein- und Ausstieg"), so we preserve the
@@ -68,7 +73,7 @@ module Jekyll
 
       Jekyll.logger.info 'MapConfigGenerator:', 'Generating map config JS file'
 
-      config = {}
+      config = build_site_level_config(site)
       LOCALES.each do |locale|
         config[locale] = build_locale_config(site, locale)
       end
@@ -82,6 +87,19 @@ module Jekyll
     end
 
     private
+
+    def build_site_level_config(site)
+      map_cfg = site.config['map'] || {}
+      center = map_cfg['center'] || {}
+
+      {
+        'tileUrl'     => site.config['mapbox_url'],
+        'center'      => { 'lat' => center['lat'], 'lon' => center['lon'] },
+        'defaultZoom' => map_cfg['default_zoom'],
+        'maxZoom'     => map_cfg['max_zoom'],
+        'attribution' => ATTRIBUTION
+      }
+    end
 
     def build_locale_config(site, locale)
       {
