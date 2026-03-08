@@ -61,12 +61,15 @@ paddelbuch/
 │   ├── contentful_fetcher.rb  # Contentful data fetching
 │   ├── contentful_mappers.rb  # Contentful → Jekyll data mapping
 │   ├── env_loader.rb          # .env file loading
+│   ├── favicon_generator.rb   # Favicon and Apple Touch Icon handling
 │   ├── i18n_patch.rb          # i18n compatibility patch
 │   ├── locale_filter.rb       # Locale-aware filtering
 │   ├── ssl_patch.rb           # SSL fix for Ruby 3.4+/OpenSSL 3.x
 │   ├── sync_checker.rb        # Contentful Sync API integration
 │   ├── tile_generator.rb      # Spatial tile generation
 │   └── waterway_filters.rb    # Waterway-specific filters
+├── _scripts/             # Build helper scripts
+│   └── generate_apple_touch_icon.py  # SVG → PNG icon generation
 ├── _sass/                # SCSS stylesheets
 ├── _spots/               # Spot collection (generated)
 ├── _waterways/           # Waterway collection (generated)
@@ -100,6 +103,7 @@ paddelbuch/
 - Ruby 3.4.1 (managed with chruby)
 - Bundler
 - Node.js (for running tests)
+- librsvg (`brew install librsvg`) — for regenerating the Apple Touch Icon PNG
 
 ### Environment Variables
 
@@ -171,6 +175,25 @@ npm run test:watch
 # Run Ruby tests (RSpec + Rantly)
 source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.1 && bundle exec rspec
 ```
+
+## Favicon and Apple Touch Icon
+
+The site uses an SVG favicon (`assets/images/logo-favicon.svg`) for modern browsers and a 180×180 PNG Apple Touch Icon (`assets/images/apple-touch-icon.png`) for iOS devices.
+
+The `favicon_generator.rb` plugin handles both during the Jekyll build:
+- Copies the SVG to `/favicon.ico` at the site root (prevents browser 404s)
+- Copies the PNG to `/apple-touch-icon.png` at the site root (where iOS looks for it)
+
+### Regenerating the Apple Touch Icon
+
+The PNG is checked into the repo so production builds on AWS Amplify don't need any image conversion tools. If you update the SVG favicon, regenerate the PNG locally:
+
+```bash
+# Requires: brew install librsvg
+python3 _scripts/generate_apple_touch_icon.py
+```
+
+The script uses a SHA-256 checksum to skip regeneration when the SVG hasn't changed.
 
 ## Contentful Integration
 
