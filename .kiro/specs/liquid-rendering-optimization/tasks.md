@@ -38,7 +38,7 @@ Externalize inline JavaScript from Liquid templates into four static external `.
 - [x] 3. Checkpoint - Verify filter panel extraction
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 4. Create `assets/js/detail-map.js` and update detail layout files
+- [x] 4. Create `assets/js/detail-map.js` and update detail layout files
   - [x] 4.1 Create `assets/js/detail-map.js` with unified map initialization
     - Implement shared map setup: tile layer creation from `window.paddelbuchMapConfig.tileUrl`, attribution, zoom control positioning, locate control with locale-specific tooltip
     - Read `data-page-type` from the map container element to determine initialization path
@@ -89,7 +89,7 @@ Externalize inline JavaScript from Liquid templates into four static external `.
     - For any randomly generated spot data object (name, slug, type, rejected status, description, address, paddle craft types, coordinates), verify the popup HTML from the external JS matches the original inline code
     - **Validates: Requirements 6.2**
 
-- [~] 5. Checkpoint - Verify detail map extraction
+- [x] 5. Checkpoint - Verify detail map extraction
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 6. Create `assets/js/layer-control.js` and update `_includes/layer-control.html`
