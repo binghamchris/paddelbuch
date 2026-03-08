@@ -250,3 +250,142 @@ RSpec.describe Jekyll::ApiGenerator, '#cache_hit_logging — Property 9: Generat
     }
   end
 end
+
+
+# Unit tests for ApiGenerator caching
+# Requirements: 3.1, 3.2, 3.3, 3.4, 5.1
+
+RSpec.describe Jekyll::ApiGenerator, 'caching unit tests' do
+  let(:generator) { described_class.new }
+  let(:tmpdir) { Dir.mktmpdir }
+  let(:source_dir) { tmpdir }
+  let(:cache_dir) { File.join(tmpdir, '_data', '.api_cache') }
+  let(:site_pages) { [] }
+  let(:site_data) { {} }
+  let(:site_config) { { 'default_lang' => 'de', 'lang' => 'de' } }
+  let(:site) do
+    s = double('Jekyll::Site')
+    allow(s).to receive(:source).and_return(source_dir)
+    allow(s).to receive(:pages).and_return(site_pages)
+    allow(s).to receive(:data).and_return(site_data)
+    allow(s).to receive(:config).and_return(site_config)
+    allow(s).to receive(:dest).and_return(File.join(tmpdir, '_site'))
+    allow(s).to receive(:layouts).and_return({})
+    allow(s).to receive(:converters).and_return([])
+    allow(s).to receive(:in_theme_dir) { |*args| args.compact.first }
+    allow(s).to receive(:in_source_dir) { |*args| File.join(source_dir, *args.compact) }
+    allow(s).to receive(:in_dest_dir) { |*args| File.join(tmpdir, '_site', *args.compact) }
+    allow(s).to receive(:theme).and_return(nil)
+    allow(s).to receive(:frontmatter_defaults).and_return(double(all: {}))
+    s
+  end
+
+  before do
+    FileUtils.mkdir_p(File.join(tmpdir, '_data'))
+    allow(Jekyll.logger).to receive(:info)
+    allow(Jekyll.logger).to receive(:warn)
+  end
+
+  after { FileUtils.remove_entry(tmpdir) if File.exist?(tmpdir) }
+
+  # Requirement 5.1: Cache directory is _data/.api_cache/
+  describe 'cache directory path' do
+    it 'uses _data/.api_cache/ as the cache directory' do
+      site_config['contentful_data_changed'] = true
+      generator.generate(site)
+
+      expect(Dir.exist?(cache_dir)).to be true
+    end
+  end
+
+  # Requirements 3.2, 3.4: lastUpdateIndex.json is correctly reconstructed from cache
+  describe 'lastUpdateIndex.json reconstruction from cache' do
+    it 'reconstructs site.data["last_updates"] from cached lastUpdateIndex.json' do
+      index_data = [
+        { 'table' => 'spots', 'lastUpdatedAt' => '2025-01-15T10:30:00Z' },
+        { 'table' => 'obstacles', 'lastUpdatedAt' => '2025-02-20T08:00:00Z' },
+        { 'table' => 'waterways', 'lastUpdatedAt' => '2025-03-10T14:45:00Z' }
+      ]
+
+      # Populate cache with lastUpdateIndex.json and a regular file
+      FileUtils.mkdir_p(cache_dir)
+      File.write(File.join(cache_dir, 'lastUpdateIndex.json'), JSON.generate(index_data))
+      File.write(File.join(cache_dir, 'spots-de.json'), JSON.generate([{ 'slug' => 'test' }]))
+
+      site_config['contentful_data_changed'] = false
+      generator.generate(site)
+
+      expected_updates = {
+        'spots' => '2025-01-15T10:30:00Z',
+        'obstacles' => '2025-02-20T08:00:00Z',
+        'waterways' => '2025-03-10T14:45:00Z'
+      }
+      expect(site_data['last_updates']).to eq(expected_updates)
+    end
+  end
+
+  # Requirement 3.3: Cache miss (empty directory) falls back to full generation
+  describe 'cache miss fallback' do
+    it 'falls back to full generation when cache directory is empty' do
+      site_config['contentful_data_changed'] = false
+      FileUtils.mkdir_p(cache_dir)
+      # cache_dir exists but has no JSON files
+
+      generator.generate(site)
+
+      expect(Jekyll.logger).to have_received(:info).with(
+        'API Generator:', 'Cache empty/missing — performing full generation'
+      )
+    end
+
+    it 'falls back to full generation when cache directory is missing' do
+      site_config['contentful_data_changed'] = false
+      FileUtils.rm_rf(cache_dir)
+
+      generator.generate(site)
+
+      expect(Jekyll.logger).to have_received(:info).with(
+        'API Generator:', 'Cache empty/missing — performing full generation'
+      )
+    end
+  end
+
+  # Requirements 3.3, 3.4: Corrupted cache file falls back to full generation
+  describe 'corrupted cache fallback' do
+    it 'falls back to full generation when lastUpdateIndex.json contains invalid JSON' do
+      FileUtils.mkdir_p(cache_dir)
+      File.write(File.join(cache_dir, 'lastUpdateIndex.json'), '{{not valid json}}')
+      File.write(File.join(cache_dir, 'spots-de.json'), JSON.generate([{ 'slug' => 'ok' }]))
+
+      site_config['contentful_data_changed'] = false
+      generator.generate(site)
+
+      expect(Jekyll.logger).to have_received(:warn).with(
+        'API Generator:', a_string_matching(/Corrupted cache file.*falling back to full generation/)
+      )
+    end
+  end
+
+  # Requirements 3.2, 3.4: @@cached_last_updates is set correctly from cache
+  describe '@@cached_last_updates from cache' do
+    it 'sets @@cached_last_updates from cached lastUpdateIndex.json' do
+      index_data = [
+        { 'table' => 'spotTypes', 'lastUpdatedAt' => '2025-06-01T12:00:00Z' },
+        { 'table' => 'obstacleTypes', 'lastUpdatedAt' => '2025-06-02T09:30:00Z' }
+      ]
+
+      FileUtils.mkdir_p(cache_dir)
+      File.write(File.join(cache_dir, 'lastUpdateIndex.json'), JSON.generate(index_data))
+      File.write(File.join(cache_dir, 'spottypes-de.json'), JSON.generate([]))
+
+      site_config['contentful_data_changed'] = false
+      generator.generate(site)
+
+      cached = described_class.class_variable_get(:@@cached_last_updates)
+      expect(cached).to eq({
+        'spotTypes' => '2025-06-01T12:00:00Z',
+        'obstacleTypes' => '2025-06-02T09:30:00Z'
+      })
+    end
+  end
+end
