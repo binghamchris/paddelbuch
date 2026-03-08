@@ -133,7 +133,7 @@ Replace the existing Leaflet `L.control.layers` with a custom Filter_Panel that 
     - Create `_tests/unit/filter-panel-toggles.test.js`
     - _Requirements: 6.2, 6.3, 6.4, 7.1, 7.2, 7.3, 5.8_
 
-- [ ] 8. Final checkpoint
+- [x] 8. Final checkpoint
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Notes
