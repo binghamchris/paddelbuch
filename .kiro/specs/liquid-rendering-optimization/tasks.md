@@ -13,7 +13,7 @@ Externalize inline JavaScript from Liquid templates into four static external `.
     - Build the attribution HTML string from the Mapbox attribution
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5_
 
-  - [-] 1.2 Write property test for MapConfig site-level settings (Property 5)
+  - [x] 1.2 Write property test for MapConfig site-level settings (Property 5)
     - **Property 5: MapConfig contains all required site-level settings**
     - For any valid site config (randomized tile URL, center coordinates, zoom levels), verify the MapConfigGenerator output contains all required keys with correct values
     - **Validates: Requirements 5.1, 5.2, 5.3, 5.4, 5.5**
