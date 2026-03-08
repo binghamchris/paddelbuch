@@ -75,6 +75,8 @@ RSpec.describe 'ApiGenerator API structure (Bug Condition Exploration)' do
       'obstacleType_slug' => 'wehr',
       'waterway_slug' => 'aare',
       'spots' => ['test-spot'],
+      'dataSourceType_slug' => 'community',
+      'dataLicenseType_slug' => 'cc-by',
       'createdAt' => '2023-10-01T08:00:00Z',
       'updatedAt' => '2024-05-20T10:00:00Z'
     }
@@ -101,6 +103,8 @@ RSpec.describe 'ApiGenerator API structure (Bug Condition Exploration)' do
       'startDate' => '2024-07-01T00:00:00+00:00',
       'endDate' => '2024-07-31T00:00:00+00:00',
       'waterways' => ['aare'],
+      'dataSourceType_slug' => 'community',
+      'dataLicenseType_slug' => 'cc-by',
       'createdAt' => '2024-06-01T12:00:00Z',
       'updatedAt' => '2024-06-28T16:00:00Z'
     }

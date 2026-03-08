@@ -127,7 +127,7 @@
     - _Preservation: site.data entries must not be mutated; only the JSON output changes_
     - _Requirements: 2.1–2.37_
 
-  - [~] 3.8 Verify bug condition exploration test now passes
+  - [x] 3.8 Verify bug condition exploration test now passes
     - **Property 1: Expected Behavior** — API JSON Structure Matches Gatsby Output
     - **IMPORTANT**: Re-run the SAME test from task 1 — do NOT write a new test
     - The test from task 1 encodes the expected behavior (correct file names, field structure, timestamps, formatting, last update index)
