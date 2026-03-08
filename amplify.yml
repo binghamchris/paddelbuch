@@ -3,7 +3,7 @@ frontend:
   phases:
     preBuild:
       commands:
-        - nvm use 18
+        - nvm install 18
         - npm ci
         - npm run download-fonts
         - npm run copy-assets
