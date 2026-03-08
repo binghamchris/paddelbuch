@@ -88,7 +88,7 @@ Replace the existing Leaflet `L.control.layers` with a custom Filter_Panel that 
     - **Validates: Requirements 8.3**
 
 - [ ] 5. Integrate with existing data pipeline
-  - [-] 5.1 Modify `_includes/layer-control.html` to remove spot-type LayerGroups and Leaflet `L.control.layers`, keep non-spot LayerGroups and marker/layer creation functions
+  - [x] 5.1 Modify `_includes/layer-control.html` to remove spot-type LayerGroups and Leaflet `L.control.layers`, keep non-spot LayerGroups and marker/layer creation functions
     - Remove `spotTypeToLayerGroup` mapping and spot LayerGroups (`entryExit`, `entryOnly`, `exitOnly`, `rest`, `emergency`)
     - Remove `L.control.layers` creation and the `overlayLayers` object
     - Keep `layerGroups.noEntry`, `layerGroups.eventNotices`, `layerGroups.obstacles`, `layerGroups.protectedAreas` as LayerGroups
@@ -98,7 +98,7 @@ Replace the existing Leaflet `L.control.layers` with a custom Filter_Panel that 
     - Keep all global function exports (`window.paddelbuchAddSpotMarker`, etc.)
     - _Requirements: 4.1, 6.1, 9.1, 9.2, 9.3_
 
-  - [~] 5.2 Write property test for rejected spots exclusion
+  - [x] 5.2 Write property test for rejected spots exclusion
     - **Property 6: Rejected spots excluded from filter evaluation**
     - Generate spots with `rejected: true`; verify they are not registered in Marker_Registry after processing
     - Create `_tests/property/filter-rejected-spots-exclusion.property.test.js`
