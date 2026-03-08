@@ -105,6 +105,37 @@ document.addEventListener('DOMContentLoaded', function() {
   
   map.zoomControl.setPosition('bottomright');
   
+  // Add locate control for user position finding
+  L.control.locate({
+    position: 'bottomright',
+    strings: {
+      title: '{{ site.lang | default: "de" }}' === 'de' ? 'Meinen Standort anzeigen' : 'Show my location'
+    },
+    locateOptions: {
+      enableHighAccuracy: true,
+      maxZoom: 14
+    },
+    flyTo: true,
+    showCompass: true,
+    showPopup: false,
+    drawCircle: true,
+    drawMarker: true,
+    markerStyle: {
+      weight: 2,
+      opacity: 0.8,
+      fillOpacity: 0.8
+    },
+    circleStyle: {
+      weight: 1,
+      clickable: false
+    },
+    icon: 'leaflet-control-locate-location-arrow',
+    iconLoading: 'leaflet-control-locate-spinner',
+    onLocationError: function(err) {
+      console.warn('Location error:', err.message);
+    }
+  }).addTo(map);
+
   if (geometry) {
     // Render obstacle polygon (red)
     var obstacleLayer = L.geoJSON(geometry, {
