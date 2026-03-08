@@ -107,7 +107,7 @@
     - _Expected_Behavior: All API JSON files are compact single-line_
     - _Requirements: 2.33_
 
-  - [~] 3.6 Fix last update index in `api_generator.rb`
+  - [x] 3.6 Fix last update index in `api_generator.rb`
     - Restructure `generate_last_update_index` to produce exactly 12 entries (one per content type, not per locale)
     - Define a mapping from content types to camelCase names with `s` suffix: `spots`, `obstacles`, `waterwayEventNotices`, `protectedAreas`, `waterways`, `dataLicenseTypes`, `dataSourceTypes`, `obstacleTypes`, `paddleCraftTypes`, `protectedAreaTypes`, `spotTypes`, `paddlingEnvironmentTypes`
     - For each content type, compute the maximum `updatedAt` across both locales (de and en)
