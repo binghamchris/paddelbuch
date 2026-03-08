@@ -54,6 +54,10 @@ module Jekyll
                  end
         Jekyll.logger.info 'Contentful:', "Performing full sync — #{reason}"
         perform_full_fetch(cache, current_space_id, current_environment)
+        new_hash = cache.compute_content_hash(yaml_file_paths)
+        save_cache(cache, cache.sync_token, current_space_id, current_environment, new_hash)
+        site.config['contentful_data_changed'] = true
+        Jekyll.logger.info 'Contentful:', 'Force sync — setting change flag to true'
         return
       end
 
@@ -61,6 +65,10 @@ module Jekyll
         reason = cache_loaded ? 'cache metadata is invalid (missing fields)' : 'no cache metadata found'
         Jekyll.logger.info 'Contentful:', "Performing full sync — #{reason}"
         perform_full_fetch(cache, current_space_id, current_environment)
+        new_hash = cache.compute_content_hash(yaml_file_paths)
+        save_cache(cache, cache.sync_token, current_space_id, current_environment, new_hash)
+        site.config['contentful_data_changed'] = true
+        Jekyll.logger.info 'Contentful:', 'No previous content hash — setting change flag to true'
         return
       end
 
@@ -68,6 +76,10 @@ module Jekyll
         Jekyll.logger.info 'Contentful:', "Performing full sync — environment mismatch " \
           "(cached: #{cache.space_id}/#{cache.environment}, current: #{current_space_id}/#{current_environment})"
         perform_full_fetch(cache, current_space_id, current_environment)
+        new_hash = cache.compute_content_hash(yaml_file_paths)
+        save_cache(cache, cache.sync_token, current_space_id, current_environment, new_hash)
+        site.config['contentful_data_changed'] = true
+        Jekyll.logger.info 'Contentful:', 'Content hash changed — setting change flag to true'
         return
       end
 
@@ -77,17 +89,23 @@ module Jekyll
       unless result.success?
         Jekyll.logger.warn 'Contentful:', "Sync API error: #{result.error&.message} — falling back to full fetch"
         perform_full_fetch(cache, current_space_id, current_environment)
+        new_hash = cache.compute_content_hash(yaml_file_paths)
+        save_cache(cache, cache.sync_token, current_space_id, current_environment, new_hash)
+        site.config['contentful_data_changed'] = true
+        Jekyll.logger.info 'Contentful:', 'Content hash changed — setting change flag to true'
         return
       end
 
       unless result.has_changes
         Jekyll.logger.info 'Contentful:', "Using cached content (last synced: #{cache.last_sync_at})"
+        site.config['contentful_data_changed'] = false
+        Jekyll.logger.info 'Contentful:', 'Sync API reports no changes — setting change flag to false'
         return
       end
 
       Jekyll.logger.info 'Contentful:', "Sync API detected #{result.items_count} changed entries — fetching content"
       fetch_and_write_content
-      save_cache(cache, result.new_token, current_space_id, current_environment)
+      compute_and_set_change_flag(cache, result.new_token, current_space_id, current_environment)
     end
 
     private
@@ -122,7 +140,7 @@ module Jekyll
       fetch_and_write_content
 
       new_token = sync_result.success? ? sync_result.new_token : nil
-      save_cache(cache, new_token, space_id, environment)
+      cache.sync_token = new_token
     end
 
     def fetch_and_write_content
@@ -160,12 +178,36 @@ module Jekyll
       end
     end
 
-    def save_cache(cache, sync_token, space_id, environment)
+    def save_cache(cache, sync_token, space_id, environment, content_hash = nil)
       cache.sync_token   = sync_token
       cache.last_sync_at = Time.now.iso8601
       cache.space_id     = space_id
       cache.environment  = environment
+      cache.content_hash = content_hash unless content_hash.nil?
       cache.save
+    end
+
+    def yaml_file_paths
+      CONTENT_TYPES.values.map { |c| File.join(@data_dir, "#{c[:filename]}.yml") }
+                          .select { |p| File.exist?(p) }
+    end
+
+    def compute_and_set_change_flag(cache, sync_token, space_id, environment)
+      new_hash = cache.compute_content_hash(yaml_file_paths)
+      previous_hash = cache.content_hash
+
+      if previous_hash.nil?
+        @site.config['contentful_data_changed'] = true
+        Jekyll.logger.info 'Contentful:', 'No previous content hash — setting change flag to true'
+      elsif new_hash == previous_hash
+        @site.config['contentful_data_changed'] = false
+        Jekyll.logger.info 'Contentful:', 'Content hash unchanged — setting change flag to false'
+      else
+        @site.config['contentful_data_changed'] = true
+        Jekyll.logger.info 'Contentful:', 'Content hash changed — setting change flag to true'
+      end
+
+      save_cache(cache, sync_token, space_id, environment, new_hash)
     end
   end
 end

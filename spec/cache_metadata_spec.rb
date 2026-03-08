@@ -103,4 +103,48 @@ RSpec.describe CacheMetadata do
       expect(File.exist?(File.join(nested_dir, '.contentful_sync_cache.yml'))).to be true
     end
   end
+
+  describe '#compute_content_hash' do
+    it 'produces expected SHA-256 digest for known file contents' do
+      file_a = File.join(tmpdir, 'a.yml')
+      file_b = File.join(tmpdir, 'b.yml')
+      File.write(file_a, 'content_a')
+      File.write(file_b, 'content_b')
+
+      # Manually compute expected digest: sorted paths are a.yml, b.yml
+      expected = Digest::SHA256.new
+      expected.update('content_a')
+      expected.update('content_b')
+
+      result = cache.compute_content_hash([file_a, file_b])
+      expect(result).to eq(expected.hexdigest)
+    end
+
+    it 'only hashes existing files and skips missing ones' do
+      existing = File.join(tmpdir, 'exists.yml')
+      missing  = File.join(tmpdir, 'missing.yml')
+      File.write(existing, 'hello')
+
+      expected = Digest::SHA256.new
+      expected.update('hello')
+
+      result = cache.compute_content_hash([missing, existing])
+      expect(result).to eq(expected.hexdigest)
+    end
+  end
+
+  describe 'load/save round-trip with content_hash' do
+    it 'persists and restores content_hash' do
+      cache.sync_token   = 'tok'
+      cache.last_sync_at = '2025-01-15T10:30:00+00:00'
+      cache.space_id     = 'sp'
+      cache.environment  = 'master'
+      cache.content_hash = 'abc123def456'
+      cache.save
+
+      loaded = CacheMetadata.new(tmpdir)
+      expect(loaded.load).to be true
+      expect(loaded.content_hash).to eq('abc123def456')
+    end
+  end
 end
