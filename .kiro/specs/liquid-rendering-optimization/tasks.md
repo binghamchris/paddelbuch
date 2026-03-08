@@ -119,12 +119,12 @@ Externalize inline JavaScript from Liquid templates into four static external `.
 - [x] 8. Checkpoint - Verify layer control and data layers extraction
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 9. Validate no Liquid tags in external JS and no inline scripts in templates
-  - [~] 9.1 Verify external JS files contain no Liquid tags
+- [-] 9. Validate no Liquid tags in external JS and no inline scripts in templates
+  - [x] 9.1 Verify external JS files contain no Liquid tags
     - Check all four files (`layer-control.js`, `detail-map-layers.js`, `filter-panel.js`, `detail-map.js`) for absence of `{{`, `}}`, `{%`, `%}` patterns
     - _Requirements: 1.5, 2.4, 4.10, 5.6_
 
-  - [~] 9.2 Verify modified templates contain no inline script blocks with Liquid interpolation
+  - [x] 9.2 Verify modified templates contain no inline script blocks with Liquid interpolation
     - Check all seven modified files (`layer-control.html`, `detail-map-layers.html`, `filter-panel.html`, `spot.html`, `obstacle.html`, `waterway.html`, `notice.html`) for absence of `<script>` blocks containing Liquid tags
     - _Requirements: 1.6, 2.5, 3.3, 4.15_
 
