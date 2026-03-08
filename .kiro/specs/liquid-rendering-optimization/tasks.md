@@ -116,7 +116,7 @@ Externalize inline JavaScript from Liquid templates into four static external `.
     - Ensure zero inline script blocks with Liquid interpolation remain
     - _Requirements: 2.2, 2.3, 2.5_
 
-- [~] 8. Checkpoint - Verify layer control and data layers extraction
+- [x] 8. Checkpoint - Verify layer control and data layers extraction
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 9. Validate no Liquid tags in external JS and no inline scripts in templates
