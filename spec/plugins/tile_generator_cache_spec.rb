@@ -197,3 +197,151 @@ RSpec.describe Jekyll::TileGenerator, '#cache_round_trip — Property 5: Tile ge
     }
   end
 end
+
+
+# Feature: conditional-build-regeneration, Property 9: Generator cache-hit logging (Tile)
+# **Validates: Requirements 7.3, 7.4**
+
+RSpec.describe Jekyll::TileGenerator, '#cache_hit_logging — Property 9: Generator cache-hit logging (Tile)' do
+  let(:generator) { described_class.new }
+  let(:tmpdir) { Dir.mktmpdir }
+  let(:source_dir) { tmpdir }
+  let(:cache_dir) { File.join(tmpdir, '_data', '.tile_cache') }
+  let(:site_pages) { [] }
+  let(:site_data) { {} }
+  let(:site_config) { { 'default_lang' => 'de', 'lang' => 'de' } }
+  let(:site) do
+    s = double('Jekyll::Site')
+    allow(s).to receive(:source).and_return(source_dir)
+    allow(s).to receive(:pages).and_return(site_pages)
+    allow(s).to receive(:data).and_return(site_data)
+    allow(s).to receive(:config).and_return(site_config)
+    allow(s).to receive(:dest).and_return(File.join(tmpdir, '_site'))
+    allow(s).to receive(:layouts).and_return({})
+    allow(s).to receive(:converters).and_return([])
+    allow(s).to receive(:in_theme_dir) { |*args| args.compact.first }
+    allow(s).to receive(:in_source_dir) { |*args| File.join(source_dir, *args.compact) }
+    allow(s).to receive(:in_dest_dir) { |*args| File.join(tmpdir, '_site', *args.compact) }
+    allow(s).to receive(:theme).and_return(nil)
+    allow(s).to receive(:frontmatter_defaults).and_return(
+      double('FrontmatterDefaults').tap do |fd|
+        allow(fd).to receive(:all).and_return({})
+        allow(fd).to receive(:find).and_return(nil)
+      end
+    )
+    s
+  end
+
+  before do
+    FileUtils.mkdir_p(File.join(tmpdir, '_data'))
+    allow(Jekyll.logger).to receive(:info)
+    allow(Jekyll.logger).to receive(:warn)
+  end
+
+  after { FileUtils.remove_entry(tmpdir) if File.exist?(tmpdir) }
+
+  # Helper: populate tile cache with N random JSON files in nested directories
+  def populate_tile_cache(dir, files)
+    FileUtils.rm_rf(dir)
+    files.each do |relative_path, content|
+      full_path = File.join(dir, relative_path)
+      FileUtils.mkdir_p(File.dirname(full_path))
+      File.write(full_path, content)
+    end
+  end
+
+  # Property 9 (Tile part): For any cache-hit scenario, TileGenerator must emit an
+  # info-level log message including the number of cached files loaded. For any
+  # cache-miss or fresh-generation scenario, it must emit a message indicating
+  # full generation.
+  #
+  # Scenarios tested per iteration:
+  #   :fresh_generation — data_changed=true → "Generating spatial tile files"
+  #   :cache_hit        — data_changed=false + cache populated → "Using cached tile files (N files loaded)"
+  #   :cache_miss       — data_changed=false + empty/missing cache → "Cache empty/missing — performing full generation"
+  it 'emits correct log messages for fresh generation, cache hit, and cache miss' do
+    property_of {
+      # Generate random tile JSON files for cache population
+      layers = %w[spots notices obstacles protected]
+      locales = %w[de en]
+      num_files = range(1, 10)
+      files = Array.new(num_files) do |i|
+        layer = choose(*layers)
+        locale = choose(*locales)
+        filename = choose("index.json", "#{range(0, 9)}_#{range(0, 7)}.json")
+        relative_path = "api/tiles/#{layer}/#{locale}/#{filename}"
+        content = JSON.pretty_generate({
+          'tile' => { 'x' => range(0, 9), 'y' => range(0, 7) },
+          'data' => Array.new(range(0, 3)) {
+            { 'slug' => sized(range(3, 10)) { string(:alpha) }.downcase,
+              'name' => sized(range(3, 12)) { string(:alpha) } }
+          }
+        })
+        [relative_path, content]
+      end
+      # Deduplicate by relative_path (keep last)
+      files = files.reverse.uniq { |f| f[0] }.reverse
+
+      scenario = choose(:fresh_generation, :cache_hit, :cache_miss)
+      [files, scenario]
+    }.check(100) { |files, scenario|
+      # Clean state
+      FileUtils.rm_rf(cache_dir)
+      site_pages.clear
+      site_data.clear
+
+      # Reset logger mock so we can assert per-iteration
+      RSpec::Mocks.space.proxy_for(Jekyll.logger).reset
+      allow(Jekyll.logger).to receive(:info)
+      allow(Jekyll.logger).to receive(:warn)
+
+      case scenario
+      when :fresh_generation
+        # data_changed = true → full generation path
+        site_config['contentful_data_changed'] = true
+
+        # Provide empty arrays for layer data keys so generate doesn't error
+        site_data['spots'] = []
+        site_data['notices'] = []
+        site_data['obstacles'] = []
+        site_data['protected_areas'] = []
+
+        generator.generate(site)
+
+        expect(Jekyll.logger).to have_received(:info).with(
+          'Tile Generator:', 'Generating spatial tile files'
+        ), "Expected 'Generating spatial tile files' log for fresh generation scenario"
+
+      when :cache_hit
+        # data_changed = false + cache populated → cache hit path
+        site_config['contentful_data_changed'] = false
+
+        # Populate cache with the randomly generated tile files
+        populate_tile_cache(cache_dir, files)
+
+        generator.generate(site)
+
+        expected_msg = "Using cached tile files (#{files.size} files loaded)"
+        expect(Jekyll.logger).to have_received(:info).with('Tile Generator:', expected_msg),
+          "Expected '#{expected_msg}' log for cache hit scenario with #{files.size} files"
+
+      when :cache_miss
+        # data_changed = false + empty/missing cache → cache miss path
+        site_config['contentful_data_changed'] = false
+        FileUtils.rm_rf(cache_dir)
+
+        # Provide empty arrays for layer data keys so generate doesn't error
+        site_data['spots'] = []
+        site_data['notices'] = []
+        site_data['obstacles'] = []
+        site_data['protected_areas'] = []
+
+        generator.generate(site)
+
+        expect(Jekyll.logger).to have_received(:info).with(
+          'Tile Generator:', 'Cache empty/missing — performing full generation'
+        ), "Expected 'Cache empty/missing — performing full generation' log for cache miss scenario"
+      end
+    }
+  end
+end
