@@ -30,7 +30,7 @@ Replace the existing Leaflet `L.control.layers` with a custom Filter_Panel that 
     - **Validates: Requirements 4.3, 9.3**
 
 - [ ] 2. Implement Filter Engine module
-  - [~] 2.1 Create `assets/js/filter-engine.js` with `init`, `getFilterState`, `setOption`, `applyFilters`, and `evaluateMarker` methods
+  - [x] 2.1 Create `assets/js/filter-engine.js` with `init`, `getFilterState`, `setOption`, `applyFilters`, and `evaluateMarker` methods
     - Expose as `window.PaddelbuchFilterEngine`
     - `init(dimensionConfigs, map)` stores config and map reference, initializes filter state with all options selected per dimension
     - `getFilterState()` returns object of `{ dimensionKey: Set of selected slugs }`
