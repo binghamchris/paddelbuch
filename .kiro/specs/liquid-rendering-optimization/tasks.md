@@ -148,7 +148,7 @@ Externalize inline JavaScript from Liquid templates into four static external `.
     - Verify that the number of characters inside `<script>` blocks requiring Liquid processing is strictly less after extraction than before
     - **Validates: Requirements 7.1**
 
-- [~] 10. Final checkpoint - Ensure all tests pass and build completes
+- [x] 10. Final checkpoint - Ensure all tests pass and build completes
   - Ensure all tests pass, ask the user if questions arise.
   - Run a full Jekyll build and verify it completes successfully
   - Compare build time against the pre-extraction baseline of ~648 seconds
