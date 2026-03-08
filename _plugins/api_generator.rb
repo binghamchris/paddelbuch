@@ -20,8 +20,8 @@ module Jekyll
     FACT_TABLES = {
       'spots' => { data_key: 'spots', exclude_rejected: true },
       'obstacles' => { data_key: 'obstacles' },
-      'notices' => { data_key: 'notices' },
-      'protected-areas' => { data_key: 'protected_areas' },
+      'waterwayevents' => { data_key: 'notices' },
+      'protectedareas' => { data_key: 'protected_areas' },
       'waterways' => { data_key: 'waterways' }
     }.freeze
 
