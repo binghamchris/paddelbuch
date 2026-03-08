@@ -56,7 +56,7 @@ Externalize inline JavaScript from Liquid templates into four static external `.
     - Ensure zero inline script blocks with Liquid interpolation remain
     - _Requirements: 4.2, 4.3, 4.6, 4.15_
 
-  - [~] 4.3 Update `_layouts/obstacle.html` to use external JS
+  - [x] 4.3 Update `_layouts/obstacle.html` to use external JS
     - Add `data-page-type="obstacle"`, `data-locale`, `data-geometry`, `data-portage-route` attributes to the map container `<div>`
     - Replace inline `<script>` block with `<script src="...">` tag for `detail-map.js`
     - Ensure zero inline script blocks with Liquid interpolation remain
