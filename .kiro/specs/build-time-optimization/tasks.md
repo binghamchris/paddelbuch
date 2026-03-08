@@ -32,7 +32,7 @@ Extract repeated Liquid-generated map configuration into a shared JS file produc
     - Assert output contains both `"de"` and `"en"` locale keys
     - Assert each locale has `dimensions` with `"spotType"` and `"paddleCraftType"` entries (each with non-empty `options`), `layerLabels` with all four keys, and `protectedAreaTypeNames`
 
-  - [~] 1.4 Write property test: Generator data fidelity (Property 2)
+  - [x] 1.4 Write property test: Generator data fidelity (Property 2)
     - **Property 2: Generator data fidelity**
     - **Validates: Requirements 1.4, 4.2**
     - Use Rantly to generate random type data entries with `slug`, `name_de`, `name_en`

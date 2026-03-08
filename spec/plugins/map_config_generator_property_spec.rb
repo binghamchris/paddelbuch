@@ -148,3 +148,175 @@ RSpec.describe Jekyll::MapConfigGenerator, 'Property 1: Generator output complet
     }
   end
 end
+
+# Feature: build-time-optimization, Property 2: Generator data fidelity
+# **Validates: Requirements 1.4, 4.2**
+
+RSpec.describe Jekyll::MapConfigGenerator, 'Property 2: Generator data fidelity' do
+  let(:tmpdir) { Dir.mktmpdir }
+  let(:site) do
+    config = Jekyll.configuration(
+      'source' => tmpdir,
+      'destination' => File.join(tmpdir, '_site'),
+      'quiet' => true
+    )
+    Jekyll::Site.new(config)
+  end
+
+  after { FileUtils.remove_entry(tmpdir) }
+
+  let(:generator) { described_class.new }
+
+  def run_generator
+    generator.generate(site)
+  end
+
+  def find_map_config_page
+    site.pages.find { |p| p.name == 'map-config.js' }
+  end
+
+  def parse_config_from_page(page)
+    json_str = page.content.sub('window.paddelbuchMapConfig = ', '').chomp(';')
+    JSON.parse(json_str)
+  end
+
+  it 'paddle_craft_types slugs and labels match source data for any random entries (100 iterations)' do
+    property_of {
+      slug_gen = proc {
+        len = range(3, 15)
+        letters = ('a'..'z').to_a
+        chars = letters + ['-']
+        first = letters.sample
+        middle = Array.new([len - 2, 0].max) { chars.sample }.join
+        last = letters.sample
+        "#{first}#{middle}#{last}"
+      }
+
+      label_gen = proc {
+        len = range(2, 20)
+        chars = ('a'..'z').to_a + ('A'..'Z').to_a + [' ', 'ä', 'ö', 'ü']
+        result = Array.new(len) { chars.sample }.join.strip
+        result.empty? ? 'Label' : result
+      }
+
+      # Generate 1-8 unique paddle craft type entries
+      count = range(1, 8)
+      slugs = Array.new(count) { slug_gen.call }.uniq
+      entries = slugs.map do |s|
+        { 'slug' => s, 'name_de' => label_gen.call, 'name_en' => label_gen.call }
+      end
+
+      guard slugs.length >= 1
+      entries
+    }.check(100) { |entries|
+      site.pages.clear
+
+      # Create data entries duplicated per locale (matching existing data format)
+      paddle_craft_types = entries.flat_map do |e|
+        %w[de en].map do |loc|
+          { 'locale' => loc, 'slug' => e['slug'], 'name_de' => e['name_de'], 'name_en' => e['name_en'] }
+        end
+      end
+
+      site.data['types'] = {
+        'spot_types' => [],
+        'paddle_craft_types' => paddle_craft_types,
+        'protected_area_types' => []
+      }
+
+      run_generator
+
+      page = find_map_config_page
+      expect(page).not_to be_nil
+      config = parse_config_from_page(page)
+
+      source_slugs = entries.map { |e| e['slug'] }
+
+      %w[de en].each do |locale|
+        pct_dim = config[locale]['dimensions'].find { |d| d['key'] == 'paddleCraftType' }
+        output_options = pct_dim['options']
+
+        # Assert generated option slugs match source data slugs exactly
+        output_slugs = output_options.map { |o| o['slug'] }
+        expect(output_slugs).to match_array(source_slugs)
+
+        # Assert generated labels match name_{locale} of corresponding source entries
+        entries.each do |entry|
+          option = output_options.find { |o| o['slug'] == entry['slug'] }
+          expect(option).not_to be_nil, "Expected slug '#{entry['slug']}' in output for locale '#{locale}'"
+          expect(option['label']).to eq(entry["name_#{locale}"]),
+            "Expected label '#{entry["name_#{locale}"]}' for slug '#{entry['slug']}' in locale '#{locale}', got '#{option['label']}'"
+        end
+      end
+    }
+  end
+
+  it 'protected_area_types slugs and labels match source data for any random entries (100 iterations)' do
+    property_of {
+      slug_gen = proc {
+        len = range(3, 15)
+        letters = ('a'..'z').to_a
+        chars = letters + ['-']
+        first = letters.sample
+        middle = Array.new([len - 2, 0].max) { chars.sample }.join
+        last = letters.sample
+        "#{first}#{middle}#{last}"
+      }
+
+      label_gen = proc {
+        len = range(2, 20)
+        chars = ('a'..'z').to_a + ('A'..'Z').to_a + [' ', 'ä', 'ö', 'ü']
+        result = Array.new(len) { chars.sample }.join.strip
+        result.empty? ? 'Label' : result
+      }
+
+      # Generate 1-8 unique protected area type entries
+      count = range(1, 8)
+      slugs = Array.new(count) { slug_gen.call }.uniq
+      entries = slugs.map do |s|
+        { 'slug' => s, 'name_de' => label_gen.call, 'name_en' => label_gen.call }
+      end
+
+      guard slugs.length >= 1
+      entries
+    }.check(100) { |entries|
+      site.pages.clear
+
+      # Create data entries duplicated per locale (matching existing data format)
+      protected_area_types = entries.flat_map do |e|
+        %w[de en].map do |loc|
+          { 'locale' => loc, 'slug' => e['slug'], 'name_de' => e['name_de'], 'name_en' => e['name_en'] }
+        end
+      end
+
+      site.data['types'] = {
+        'spot_types' => [],
+        'paddle_craft_types' => [],
+        'protected_area_types' => protected_area_types
+      }
+
+      run_generator
+
+      page = find_map_config_page
+      expect(page).not_to be_nil
+      config = parse_config_from_page(page)
+
+      source_slugs = entries.map { |e| e['slug'] }
+
+      %w[de en].each do |locale|
+        pat_names = config[locale]['protectedAreaTypeNames']
+
+        # Assert generated slugs match source data slugs exactly
+        expect(pat_names.keys).to match_array(source_slugs)
+
+        # Assert generated labels match name_{locale} of corresponding source entries
+        entries.each do |entry|
+          expect(pat_names).to have_key(entry['slug']),
+            "Expected slug '#{entry['slug']}' in protectedAreaTypeNames for locale '#{locale}'"
+          expect(pat_names[entry['slug']]).to eq(entry["name_#{locale}"]),
+            "Expected name '#{entry["name_#{locale}"]}' for slug '#{entry['slug']}' in locale '#{locale}', got '#{pat_names[entry['slug']]}'"
+        end
+      end
+    }
+  end
+end
