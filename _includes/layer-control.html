@@ -1,14 +1,15 @@
 <!--
   Layer Control Include
   
-  Implements Leaflet LayersControl for toggling spot types and other map layers.
-  Creates layer groups for each spot type, event notices, obstacles, and protected areas.
+  Creates non-spot layer groups (rejected spots, event notices, obstacles, protected areas)
+  and marker/layer creation functions. Spot markers are managed individually via the
+  Marker Registry and Filter Engine instead of LayerGroups.
   
   Parameters:
   - include.map_var: JavaScript variable name for the map (default: 'window.paddelbuchMap')
   - include.locale: Current locale for filtering data (default: site.lang or 'de')
   
-  Requirements: 2.7, 2.8, 8.3
+  Requirements: 4.1, 6.1, 8.3, 9.1, 9.2, 9.3
 -->
 
 {% assign map_var = include.map_var | default: 'window.paddelbuchMap' %}
@@ -42,42 +43,12 @@
     var currentLocale = '{{ current_locale }}';
     var localePrefix = (currentLocale !== 'de') ? '/' + currentLocale : '';
     
-    // Layer groups for each spot type (Requirements 2.7, 2.8)
+    // Layer groups for non-spot layers (spot markers are now managed individually via Marker Registry)
     var layerGroups = {
-      entryExit: L.layerGroup(),      // Entry & Exit spots (einstieg-ausstieg)
-      entryOnly: L.layerGroup(),      // Entry Only spots (nur-einstieg)
-      exitOnly: L.layerGroup(),       // Exit Only spots (nur-ausstieg)
-      rest: L.layerGroup(),           // Rest spots (rasthalte)
-      emergency: L.layerGroup(),      // Emergency spots (notauswasserungsstelle)
       noEntry: L.layerGroup(),        // Rejected/No Entry spots
       eventNotices: L.layerGroup(),   // Waterway event notices
       obstacles: L.layerGroup(),      // Obstacles
       protectedAreas: L.layerGroup()  // Protected areas
-    };
-    
-    // Localized layer names for the control panel
-    var layerLabels = {
-      {% if current_locale == 'en' %}
-      entryExit: '{{ site.data.translations.en.layers.entry_exit_spots | default: "Entry & Exit Spots" }}',
-      entryOnly: '{{ site.data.translations.en.layers.entry_only_spots | default: "Entry Only Spots" }}',
-      exitOnly: '{{ site.data.translations.en.layers.exit_only_spots | default: "Exit Only Spots" }}',
-      rest: '{{ site.data.translations.en.layers.rest_spots | default: "Rest Spots" }}',
-      emergency: '{{ site.data.translations.en.layers.emergency_spots | default: "Emergency Exit Spots" }}',
-      noEntry: '{{ site.data.translations.en.layers.no_entry_spots | default: "No Entry Spots" }}',
-      eventNotices: '{{ site.data.translations.en.layers.event_notices | default: "Event Notices" }}',
-      obstacles: '{{ site.data.translations.en.layers.obstacles | default: "Obstacles" }}',
-      protectedAreas: '{{ site.data.translations.en.layers.protected_areas | default: "Protected Areas" }}'
-      {% else %}
-      entryExit: '{{ site.data.translations.de.layers.entry_exit_spots | default: "Ein-/Ausstiegsorte" }}',
-      entryOnly: '{{ site.data.translations.de.layers.entry_only_spots | default: "Einstiegsorte" }}',
-      exitOnly: '{{ site.data.translations.de.layers.exit_only_spots | default: "Ausstiegsorte" }}',
-      rest: '{{ site.data.translations.de.layers.rest_spots | default: "Rasthalte" }}',
-      emergency: '{{ site.data.translations.de.layers.emergency_spots | default: "Notauswasserungsstelle" }}',
-      noEntry: '{{ site.data.translations.de.layers.no_entry_spots | default: "Keine Zutritt Orte" }}',
-      eventNotices: '{{ site.data.translations.de.layers.event_notices | default: "Gewässerereignisse" }}',
-      obstacles: '{{ site.data.translations.de.layers.obstacles | default: "Hindernisse" }}',
-      protectedAreas: '{{ site.data.translations.de.layers.protected_areas | default: "Schutzgebiete" }}'
-      {% endif %}
     };
     
     // Build a lookup map from protected area type slugs to translated names
@@ -89,15 +60,6 @@
     protectedAreaTypeNames['{{ pat.slug }}'] = '{{ pat[pa_type_key] | default: pat.name_de }}';
     {% endfor %}
 
-    // Map spot type slugs to layer groups
-    var spotTypeToLayerGroup = {
-      'einstieg-ausstieg': layerGroups.entryExit,
-      'nur-einstieg': layerGroups.entryOnly,
-      'nur-ausstieg': layerGroups.exitOnly,
-      'rasthalte': layerGroups.rest,
-      'notauswasserungsstelle': layerGroups.emergency
-    };
-    
     /**
      * Filters data by locale (Requirement 8.3)
      * Only returns items matching the current language locale
@@ -125,30 +87,26 @@
     }
     
     /**
-     * Gets the appropriate layer group for a spot based on its type and rejection status
+     * Gets the layer group for a rejected spot.
+     * Only used for rejected spots — non-rejected spots are managed via Marker Registry.
      * 
      * @param {Object} spot - The spot object
-     * @returns {L.LayerGroup} The layer group for this spot
+     * @returns {L.LayerGroup|null} The noEntry layer group if rejected, null otherwise
      */
     function getLayerGroupForSpot(spot) {
-      // Rejected spots go to the noEntry layer group
       if (spot.rejected === true || spot.rejected === 'true') {
         return layerGroups.noEntry;
       }
-      
-      var spotTypeSlug = spot.spotType_slug || spot.spotTypeSlug || spot.spot_type_slug;
-      
-      // Use hasOwnProperty to safely check the mapping
-      if (spotTypeSlug && Object.prototype.hasOwnProperty.call(spotTypeToLayerGroup, spotTypeSlug)) {
-        return spotTypeToLayerGroup[spotTypeSlug];
-      }
-      
-      // Default to entry/exit if unknown type
-      return layerGroups.entryExit;
+      return null;
     }
     
     /**
-     * Creates a marker for a spot and adds it to the appropriate layer group
+     * Creates a marker for a spot.
+     * - Rejected spots: added to the noEntry LayerGroup (not registered in Marker Registry)
+     * - Non-rejected spots: registered in PaddelbuchMarkerRegistry with metadata,
+     *   then evaluated by PaddelbuchFilterEngine for initial visibility
+     * 
+     * Requirements: 4.1, 6.1, 9.1, 9.2, 9.3
      * 
      * @param {Object} spot - The spot data object
      */
@@ -197,9 +155,23 @@
         marker.bindPopup(popupContent, { maxWidth: 350 });
       }
       
-      // Add to appropriate layer group
-      var layerGroup = getLayerGroupForSpot(spot);
-      marker.addTo(layerGroup);
+      if (isRejected) {
+        // Rejected spots go to the noEntry LayerGroup — not registered in Marker Registry
+        marker.addTo(layerGroups.noEntry);
+      } else {
+        // Register in marker registry (Requirements 4.1, 9.1, 9.3)
+        var metadata = {
+          spotType_slug: spotTypeSlug,
+          paddleCraftTypes: spot.paddleCraftTypes || [],
+          paddlingEnvironmentType_slug: spot.paddlingEnvironmentType_slug || ''
+        };
+        PaddelbuchMarkerRegistry.register(spot.slug, marker, metadata);
+
+        // Evaluate against current filter state for initial visibility (Requirement 9.2)
+        if (PaddelbuchFilterEngine.evaluateMarker(metadata)) {
+          marker.addTo(map);
+        }
+      }
     }
     
     /**
@@ -435,54 +407,14 @@
       }
     }
     
-    // Build overlay layers object for the control
-    // Note: noEntry layer is NOT added by default (Requirement 2.8 - unchecked by default)
-    var overlayLayers = {};
-    overlayLayers[layerLabels.entryExit] = layerGroups.entryExit;
-    overlayLayers[layerLabels.entryOnly] = layerGroups.entryOnly;
-    overlayLayers[layerLabels.exitOnly] = layerGroups.exitOnly;
-    overlayLayers[layerLabels.rest] = layerGroups.rest;
-    overlayLayers[layerLabels.emergency] = layerGroups.emergency;
-    overlayLayers[layerLabels.noEntry] = layerGroups.noEntry;
-    overlayLayers[layerLabels.eventNotices] = layerGroups.eventNotices;
-    overlayLayers[layerLabels.obstacles] = layerGroups.obstacles;
-    overlayLayers[layerLabels.protectedAreas] = layerGroups.protectedAreas;
-    
-    // Create the layer control (Requirement 2.7)
-    var layerControl = L.control.layers(null, overlayLayers, {
-      collapsed: true,
-      position: 'topright'
-    });
-    
-    layerControl.addTo(map);
-    
-    // Lower the layer control's stacking context when a popup opens so it doesn't
-    // cover popup content. The control container (.leaflet-top.leaflet-right) has
-    // z-index: 1000 while the popup pane is trapped inside .leaflet-map-pane at
-    // z-index: 400, so CSS alone cannot fix this overlap.
-    var controlContainer = layerControl.getContainer().parentNode;
-    map.on('popupopen', function() {
-      layerControl.collapse();
-      controlContainer.style.zIndex = '0';
-    });
-    map.on('popupclose', function() {
-      controlContainer.style.zIndex = '';
-    });
-    
-    // Add default layers to map (all except noEntry which is unchecked by default)
-    layerGroups.entryExit.addTo(map);
-    layerGroups.entryOnly.addTo(map);
-    layerGroups.exitOnly.addTo(map);
-    layerGroups.rest.addTo(map);
-    layerGroups.emergency.addTo(map);
+    // Add non-spot layers to map (spot markers are managed individually by Filter Engine)
     layerGroups.eventNotices.addTo(map);
     layerGroups.obstacles.addTo(map);
     layerGroups.protectedAreas.addTo(map);
     // Note: layerGroups.noEntry is NOT added to map by default (Requirement 2.8)
     
-    // Store layer groups and control globally for other scripts to access
+    // Store layer groups globally for other scripts to access
     window.paddelbuchLayerGroups = layerGroups;
-    window.paddelbuchLayerControl = layerControl;
     window.paddelbuchFilterByLocale = filterByLocale;
     window.paddelbuchAddSpotMarker = addSpotMarker;
     window.paddelbuchAddEventNoticeMarker = addEventNoticeMarker;
