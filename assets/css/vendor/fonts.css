@@ -23,6 +23,14 @@
 }
 
 @font-face {
+  font-family: 'Murecho';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../../fonts/murecho-400.woff2') format('woff2');
+}
+
+@font-face {
   font-family: 'Quicksand';
   font-style: normal;
   font-weight: 400;
