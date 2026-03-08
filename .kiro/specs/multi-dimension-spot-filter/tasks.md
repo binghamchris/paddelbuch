@@ -52,7 +52,7 @@ Replace the existing Leaflet `L.control.layers` with a custom Filter_Panel that 
     - Create `_tests/property/filter-engine-spot-type-match.property.test.js`
     - **Validates: Requirements 2.5**
 
-  - [~] 2.4 Write property test for paddle craft type match function
+  - [x] 2.4 Write property test for paddle craft type match function
     - **Property 3: Paddle craft type match function — set intersection**
     - Generate random `paddleCraftTypes` array and random selected set; assert match returns true iff intersection is non-empty
     - Create `_tests/property/filter-engine-craft-type-match.property.test.js`
