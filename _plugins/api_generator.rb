@@ -211,6 +211,24 @@ module Jekyll
       ts.to_s
     end
 
+    # Return the raw millisecond-precision timestamp if available, otherwise
+    # fall back to the regular timestamp and add .000 milliseconds.
+    def raw_timestamp(item, raw_key, fallback_key)
+      raw = item[raw_key]
+      return raw unless raw.nil? || raw.to_s.strip.empty?
+
+      ts = item[fallback_key]
+      return nil if ts.nil? || ts.to_s.strip.empty?
+
+      # Convert second-precision "2023-11-23T09:28:19Z" to "2023-11-23T09:28:19.000Z"
+      begin
+        time = ts.is_a?(Time) ? ts : Time.parse(ts.to_s)
+        time.utc.strftime('%Y-%m-%dT%H:%M:%S.%3NZ')
+      rescue ArgumentError
+        ts.to_s
+      end
+    end
+
     # -------------------------------------------------------------------------
     # Fact table transformer helpers
     # -------------------------------------------------------------------------
@@ -283,8 +301,8 @@ module Jekyll
       result = {}
       result['slug'] = item['slug']
       result['node_locale'] = item['locale']
-      result['createdAt'] = item['_raw_createdAt']
-      result['updatedAt'] = item['_raw_updatedAt']
+      result['createdAt'] = raw_timestamp(item, '_raw_createdAt', 'createdAt')
+      result['updatedAt'] = raw_timestamp(item, '_raw_updatedAt', 'updatedAt')
       result['name'] = item['name']
       result['description'] = wrap_raw_description(item['_raw_description'])
       result['location'] = item['location']
@@ -307,8 +325,8 @@ module Jekyll
       result = {}
       result['slug'] = item['slug']
       result['node_locale'] = item['locale']
-      result['createdAt'] = item['_raw_createdAt']
-      result['updatedAt'] = item['_raw_updatedAt']
+      result['createdAt'] = raw_timestamp(item, '_raw_createdAt', 'createdAt')
+      result['updatedAt'] = raw_timestamp(item, '_raw_updatedAt', 'updatedAt')
       result['name'] = item['name']
       result['description'] = wrap_raw_description(item['_raw_description'])
       result['geometry'] = wrap_internal_content(item['geometry'])
@@ -338,8 +356,8 @@ module Jekyll
       result = {}
       result['slug'] = item['slug']
       result['node_locale'] = item['locale']
-      result['createdAt'] = item['_raw_createdAt']
-      result['updatedAt'] = item['_raw_updatedAt']
+      result['createdAt'] = raw_timestamp(item, '_raw_createdAt', 'createdAt')
+      result['updatedAt'] = raw_timestamp(item, '_raw_updatedAt', 'updatedAt')
       result['name'] = item['name']
       result['description'] = wrap_raw_description(item['_raw_description'])
       result['affectedArea'] = wrap_internal_content(item['affectedArea'])
@@ -356,8 +374,8 @@ module Jekyll
       result = {}
       result['slug'] = item['slug']
       result['node_locale'] = item['locale']
-      result['createdAt'] = item['_raw_createdAt']
-      result['updatedAt'] = item['_raw_updatedAt']
+      result['createdAt'] = raw_timestamp(item, '_raw_createdAt', 'createdAt')
+      result['updatedAt'] = raw_timestamp(item, '_raw_updatedAt', 'updatedAt')
       result['name'] = item['name']
       result['length'] = item['length']
       result['area'] = item['area']
@@ -379,8 +397,8 @@ module Jekyll
       result = {}
       result['slug'] = item['slug']
       result['node_locale'] = item['locale']
-      result['createdAt'] = item['_raw_createdAt']
-      result['updatedAt'] = item['_raw_updatedAt']
+      result['createdAt'] = raw_timestamp(item, '_raw_createdAt', 'createdAt')
+      result['updatedAt'] = raw_timestamp(item, '_raw_updatedAt', 'updatedAt')
       result['name'] = item['name']
       result['description'] = wrap_raw_description_nullable(item['_raw_description'])
       result['geometry'] = wrap_internal_content(item['geometry'])
@@ -402,8 +420,8 @@ module Jekyll
       result = {}
       result['slug'] = item['slug']
       result['node_locale'] = locale
-      result['createdAt'] = item['_raw_createdAt']
-      result['updatedAt'] = item['_raw_updatedAt']
+      result['createdAt'] = raw_timestamp(item, '_raw_createdAt', 'createdAt')
+      result['updatedAt'] = raw_timestamp(item, '_raw_updatedAt', 'updatedAt')
       result['name'] = item['name']
 
       case table_name
