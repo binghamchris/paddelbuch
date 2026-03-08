@@ -79,12 +79,12 @@ Externalize inline JavaScript from Liquid templates into four static external `.
     - For any randomly generated page type and valid data attributes, verify the map init function produces the correct center, zoom, and layer configuration
     - **Validates: Requirements 4.4, 4.11, 4.12, 4.13, 4.14, 6.4**
 
-  - [-] 4.7 Write property test for map center and zoom equivalence (Property 6)
+  - [x] 4.7 Write property test for map center and zoom equivalence (Property 6)
     - **Property 6: Map center and zoom equivalence**
     - For any randomly generated spot coordinates, obstacle geometry bounds, waterway geometry bounds, or notice geometry/location, verify the external JS produces the same center and zoom as the original inline code
     - **Validates: Requirements 6.1**
 
-  - [~] 4.8 Write property test for spot popup content equivalence (Property 7)
+  - [x] 4.8 Write property test for spot popup content equivalence (Property 7)
     - **Property 7: Spot popup content equivalence**
     - For any randomly generated spot data object (name, slug, type, rejected status, description, address, paddle craft types, coordinates), verify the popup HTML from the external JS matches the original inline code
     - **Validates: Requirements 6.2**
