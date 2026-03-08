@@ -30,13 +30,13 @@
     {% if notice.startDate %}
     <tr>
       <th>{% if current_locale == 'en' %}Approx. Start Date{% else %}Ungefähres Startdatum{% endif %}:</th>
-      <td>{{ notice.startDate | localized_date: 'iso' }}</td>
+      <td>{{ notice.startDate | localized_date }}</td>
     </tr>
     {% endif %}
     {% if notice.endDate %}
     <tr>
       <th>{% if current_locale == 'en' %}Approx. End Date{% else %}Ungefähres Enddatum{% endif %}:</th>
-      <td>{{ notice.endDate | localized_date: 'iso' }}</td>
+      <td>{{ notice.endDate | localized_date }}</td>
     </tr>
     {% endif %}
   </tbody>
