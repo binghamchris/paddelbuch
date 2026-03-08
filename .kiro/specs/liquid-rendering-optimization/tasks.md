@@ -92,7 +92,7 @@ Externalize inline JavaScript from Liquid templates into four static external `.
 - [x] 5. Checkpoint - Verify detail map extraction
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 6. Create `assets/js/layer-control.js` and update `_includes/layer-control.html`
+- [x] 6. Create `assets/js/layer-control.js` and update `_includes/layer-control.html`
   - [x] 6.1 Extract layer control JavaScript into `assets/js/layer-control.js`
     - Move the layer control initialization logic from `_includes/layer-control.html` into `assets/js/layer-control.js`
     - Replace Liquid `{{ current_locale }}` references with reads from `document.currentScript.getAttribute('data-locale')` or `window.paddelbuchMapConfig`
@@ -106,7 +106,7 @@ Externalize inline JavaScript from Liquid templates into four static external `.
     - _Requirements: 1.2, 1.6_
 
 - [ ] 7. Create `assets/js/detail-map-layers.js` and update `_includes/detail-map-layers.html`
-  - [~] 7.1 Extract detail map layers JavaScript into `assets/js/detail-map-layers.js`
+  - [-] 7.1 Extract detail map layers JavaScript into `assets/js/detail-map-layers.js`
     - Move the data loading bootstrap logic from `_includes/detail-map-layers.html` into `assets/js/detail-map-layers.js`
     - Replace Liquid `{{ current_locale }}` with reads from `window.paddelbuchCurrentLocale` (set by layer-control.js) or fallback to `document.currentScript.getAttribute('data-locale')`
     - _Requirements: 2.1, 2.4_
