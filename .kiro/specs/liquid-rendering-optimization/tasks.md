@@ -23,7 +23,7 @@ Externalize inline JavaScript from Liquid templates into four static external `.
     - Verify values match the corresponding `_config.yml` settings
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5_
 
-- [ ] 2. Create `assets/js/filter-panel.js` and update `_includes/filter-panel.html`
+- [x] 2. Create `assets/js/filter-panel.js` and update `_includes/filter-panel.html`
   - [x] 2.1 Extract filter panel JavaScript into `assets/js/filter-panel.js`
     - Move the IIFE from `_includes/filter-panel.html` into `assets/js/filter-panel.js`
     - Expose `window.PaddelbuchFilterPanel.init(map, dimensionConfigs, layerToggles)`
@@ -35,7 +35,7 @@ Externalize inline JavaScript from Liquid templates into four static external `.
     - Ensure zero inline script blocks with Liquid interpolation remain
     - _Requirements: 3.2, 3.3_
 
-- [~] 3. Checkpoint - Verify filter panel extraction
+- [x] 3. Checkpoint - Verify filter panel extraction
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 4. Create `assets/js/detail-map.js` and update detail layout files
