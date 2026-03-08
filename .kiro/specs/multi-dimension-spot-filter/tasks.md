@@ -6,7 +6,7 @@ Replace the existing Leaflet `L.control.layers` with a custom Filter_Panel that 
 
 ## Tasks
 
-- [ ] 1. Implement Marker Registry module
+- [x] 1. Implement Marker Registry module
   - [x] 1.1 Create `assets/js/marker-registry.js` with `register`, `has`, `forEach`, and `size` methods
     - Expose as `window.PaddelbuchMarkerRegistry`
     - Use an internal object keyed by slug for O(1) lookup
@@ -23,7 +23,7 @@ Replace the existing Leaflet `L.control.layers` with a custom Filter_Panel that 
     - Create `_tests/property/marker-registry-round-trip.property.test.js`
     - **Validates: Requirements 4.1, 4.2, 4.4**
 
-  - [-] 1.3 Write property test for Marker Registry deduplication
+  - [x] 1.3 Write property test for Marker Registry deduplication
     - **Property 5: Marker registry deduplication**
     - Generate sequences of register calls with intentional slug duplicates; assert `size()` equals unique slug count and `forEach` visits each unique slug exactly once
     - Create `_tests/property/marker-registry-deduplication.property.test.js`
