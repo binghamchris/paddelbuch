@@ -52,6 +52,20 @@ module ContentfulMappers
     slug || entry.sys[:id]
   end
 
+  # Format a timestamp (Time or DateTime) to ISO 8601 UTC string without milliseconds.
+  # Handles both Time (which has .utc) and DateTime (which does not).
+  def format_timestamp(ts)
+    return nil if ts.nil?
+
+    if ts.respond_to?(:utc)
+      ts.utc.strftime('%Y-%m-%dT%H:%M:%SZ')
+    elsif ts.respond_to?(:new_offset)
+      ts.new_offset(0).strftime('%Y-%m-%dT%H:%M:%SZ')
+    else
+      ts.to_s
+    end
+  end
+
   def extract_location(location_field)
     return nil unless location_field
     { 'lat' => location_field.lat, 'lon' => location_field.lon }
@@ -189,8 +203,8 @@ module ContentfulMappers
     LOCALES.map do |locale|
       base = {
         'locale' => locale,
-        'createdAt' => sys[:created_at]&.utc&.strftime('%Y-%m-%dT%H:%M:%SZ'),
-        'updatedAt' => sys[:updated_at]&.utc&.strftime('%Y-%m-%dT%H:%M:%SZ'),
+        'createdAt' => format_timestamp(sys[:created_at]),
+        'updatedAt' => format_timestamp(sys[:updated_at]),
       }
       mapped = send(mapper_method, entry, fields, locale, *extra_args)
       base.merge(mapped)

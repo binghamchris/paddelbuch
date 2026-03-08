@@ -162,12 +162,15 @@ RSpec.describe 'Contentful Sync Properties' do
       map_obstacle: %w[
         slug name description geometry portageRoute portageDistance portageDescription
         isPortageNecessary isPortagePossible obstacleType_slug waterway_slug spots
+        dataSourceType_slug dataLicenseType_slug
       ],
       map_protected_area: %w[
         slug name geometry isAreaMarked protectedAreaType_slug
+        dataSourceType_slug dataLicenseType_slug
       ],
       map_event_notice: %w[
         slug name description location affectedArea startDate endDate waterways
+        dataSourceType_slug dataLicenseType_slug
       ],
       map_type: %w[slug name_de name_en],
       map_static_page: %w[slug title menu menu_slug page_body menuOrder]
@@ -276,12 +279,16 @@ RSpec.describe 'Contentful Sync Properties' do
         fields[:obstacle_type] = build_reference('obstacle-type-slug')
         fields[:waterway] = build_reference('waterway-slug')
         fields[:spots] = [build_reference('spot-1'), build_reference('spot-2')]
+        fields[:data_source_type] = build_reference('source-slug')
+        fields[:data_license_type] = build_reference('license-slug')
       when :map_protected_area
         fields[:slug] = random_string(rand(3..20))
         fields[:name] = { de: random_string(rand(3..20)), en: random_string(rand(3..20)) }
         fields[:geometry] = build_geometry
         fields[:is_area_marked] = [true, false].sample
         fields[:protected_area_type] = build_reference('protected-area-type-slug')
+        fields[:data_source_type] = build_reference('source-slug')
+        fields[:data_license_type] = build_reference('license-slug')
       when :map_event_notice
         fields[:slug] = random_string(rand(3..20))
         fields[:name] = { de: random_string(rand(3..20)), en: random_string(rand(3..20)) }
@@ -291,6 +298,8 @@ RSpec.describe 'Contentful Sync Properties' do
         fields[:start_date] = build_date
         fields[:end_date] = build_date
         fields[:waterway] = [build_reference('waterway-1')]
+        fields[:data_source_type] = build_reference('source-slug')
+        fields[:data_license_type] = build_reference('license-slug')
       when :map_type
         fields[:slug] = random_string(rand(3..20))
         fields[:name] = { de: random_string(rand(3..20)), en: random_string(rand(3..20)) }
@@ -1224,12 +1233,16 @@ RSpec.describe 'Blank Static Pages Bugfix Properties' do
         fields[:obstacle_type] = build_reference('ot')
         fields[:waterway] = build_reference('ww')
         fields[:spots] = [build_reference('s1')]
+        fields[:data_source_type] = build_reference('ds')
+        fields[:data_license_type] = build_reference('dl')
       when :map_protected_area
         fields[:slug] = random_string(rand(3..15))
         fields[:name] = { de: random_string(rand(3..15)), en: random_string(rand(3..15)) }
         fields[:geometry] = build_geometry
         fields[:is_area_marked] = [true, false].sample
         fields[:protected_area_type] = build_reference('pat')
+        fields[:data_source_type] = build_reference('ds')
+        fields[:data_license_type] = build_reference('dl')
       when :map_event_notice
         fields[:slug] = random_string(rand(3..15))
         fields[:name] = { de: random_string(rand(3..15)), en: random_string(rand(3..15)) }
@@ -1239,6 +1252,8 @@ RSpec.describe 'Blank Static Pages Bugfix Properties' do
         fields[:start_date] = build_date
         fields[:end_date] = build_date
         fields[:waterway] = [build_reference('ww')]
+        fields[:data_source_type] = build_reference('ds')
+        fields[:data_license_type] = build_reference('dl')
       when :map_type
         fields[:slug] = random_string(rand(3..15))
         fields[:name] = { de: random_string(rand(3..15)), en: random_string(rand(3..15)) }
