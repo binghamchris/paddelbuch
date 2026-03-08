@@ -19,11 +19,20 @@ pageName: notice-details
 {% assign current_locale = site.lang | default: 'de' %}
 {% assign notice = page %}
 
+{% assign lat = notice.location.lat | default: notice.location.latitude %}
+{% assign lon = notice.location.lon | default: notice.location.lng | default: notice.location.longitude %}
+
 <div class="container-fluid">
   <div class="row">
     <!-- Map Column (8 cols on large screens) -->
     <div class="col-lg-8 p-0">
-      <div id="notice-map" class="map"></div>
+      <div id="notice-map" class="map"
+        data-page-type="notice"
+        data-locale="{{ current_locale }}"
+        data-geometry='{{ notice.affectedArea | jsonify }}'
+        data-location-lat="{{ lat }}"
+        data-location-lon="{{ lon }}">
+      </div>
     </div>
     
     <!-- Details Panel -->
@@ -41,145 +50,7 @@ pageName: notice-details
 
 <!-- Map Initialization Script -->
 <script src="{{ '/assets/js/layer-styles.js' | relative_url }}"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  var map;
-  
-  // Parse affected area geometry
-  {% if notice.affectedArea %}
-  var geometryData = {{ notice.affectedArea | jsonify }};
-  var geometry;
-  
-  if (typeof geometryData === 'string') {
-    try {
-      geometry = JSON.parse(geometryData);
-    } catch (e) {
-      console.error('Failed to parse affected area geometry:', e);
-      geometry = null;
-    }
-  } else {
-    geometry = geometryData;
-  }
-  
-  map = L.map('notice-map', {
-    center: [{{ site.map.center.lat }}, {{ site.map.center.lon }}],
-    zoom: {{ site.map.default_zoom }},
-    zoomControl: true
-  });
-  
-  L.tileLayer('{{ site.mapbox_url }}', {
-    attribution: '&copy; <a href="https://www.mapbox.com/about/maps/" target="_blank" rel="noopener">Mapbox</a> &copy; <a href="http://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> <strong><a href="https://www.mapbox.com/map-feedback/" target="_blank" rel="noopener">Improve this map</a></strong>',
-    maxZoom: {{ site.map.max_zoom | default: 18 }}
-  }).addTo(map);
-  
-  map.zoomControl.setPosition('bottomright');
-  
-  if (geometry) {
-    // Render affected area polygon (yellow semi-transparent)
-    var affectedAreaLayer = L.geoJSON(geometry, {
-      style: PaddelbuchLayerStyles.getLayerStyle('eventNoticeArea')
-    }).addTo(map);
-    
-    var bounds = affectedAreaLayer.getBounds();
-    if (bounds.isValid()) {
-      map.fitBounds(bounds, { padding: [50, 50] });
-    }
-  }
-  
-  // Set view to notice location if no affected area to fit bounds on
-  {% if notice.location %}
-  {% assign lat = notice.location.lat | default: notice.location.latitude %}
-  {% assign lon = notice.location.lon | default: notice.location.lng | default: notice.location.longitude %}
-  {% if lat and lon %}
-  {% unless notice.affectedArea %}
-  map.setView([{{ lat }}, {{ lon }}], 14);
-  {% endunless %}
-  {% endif %}
-  {% endif %}
-  
-  {% else %}
-  // No affected area — fall back to location or default view
-  {% if notice.location %}
-  {% assign lat = notice.location.lat | default: notice.location.latitude %}
-  {% assign lon = notice.location.lon | default: notice.location.lng | default: notice.location.longitude %}
-  {% if lat and lon %}
-  map = L.map('notice-map', {
-    center: [{{ lat }}, {{ lon }}],
-    zoom: 14,
-    zoomControl: true
-  });
-  
-  L.tileLayer('{{ site.mapbox_url }}', {
-    attribution: '&copy; <a href="https://www.mapbox.com/about/maps/" target="_blank" rel="noopener">Mapbox</a> &copy; <a href="http://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> <strong><a href="https://www.mapbox.com/map-feedback/" target="_blank" rel="noopener">Improve this map</a></strong>',
-    maxZoom: {{ site.map.max_zoom | default: 18 }}
-  }).addTo(map);
-  
-  map.zoomControl.setPosition('bottomright');
-  {% else %}
-  map = L.map('notice-map', {
-    center: [{{ site.map.center.lat }}, {{ site.map.center.lon }}],
-    zoom: {{ site.map.default_zoom }},
-    zoomControl: true
-  });
-  
-  L.tileLayer('{{ site.mapbox_url }}', {
-    attribution: '&copy; <a href="https://www.mapbox.com/about/maps/" target="_blank" rel="noopener">Mapbox</a> &copy; <a href="http://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> <strong><a href="https://www.mapbox.com/map-feedback/" target="_blank" rel="noopener">Improve this map</a></strong>',
-    maxZoom: {{ site.map.max_zoom | default: 18 }}
-  }).addTo(map);
-  
-  map.zoomControl.setPosition('bottomright');
-  {% endif %}
-  {% else %}
-  map = L.map('notice-map', {
-    center: [{{ site.map.center.lat }}, {{ site.map.center.lon }}],
-    zoom: {{ site.map.default_zoom }},
-    zoomControl: true
-  });
-  
-  L.tileLayer('{{ site.mapbox_url }}', {
-    attribution: '&copy; <a href="https://www.mapbox.com/about/maps/" target="_blank" rel="noopener">Mapbox</a> &copy; <a href="http://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> <strong><a href="https://www.mapbox.com/map-feedback/" target="_blank" rel="noopener">Improve this map</a></strong>',
-    maxZoom: {{ site.map.max_zoom | default: 18 }}
-  }).addTo(map);
-  
-  map.zoomControl.setPosition('bottomright');
-  {% endif %}
-  {% endif %}
-  
-  // Add locate control for user position finding
-  L.control.locate({
-    position: 'bottomright',
-    strings: {
-      title: '{{ site.lang | default: "de" }}' === 'de' ? 'Meinen Standort anzeigen' : 'Show my location'
-    },
-    locateOptions: {
-      enableHighAccuracy: true,
-      maxZoom: 14
-    },
-    flyTo: true,
-    showCompass: true,
-    showPopup: false,
-    drawCircle: true,
-    drawMarker: true,
-    markerStyle: {
-      weight: 2,
-      opacity: 0.8,
-      fillOpacity: 0.8
-    },
-    circleStyle: {
-      weight: 1,
-      clickable: false
-    },
-    icon: 'leaflet-control-locate-location-arrow',
-    iconLoading: 'leaflet-control-locate-spinner',
-    onLocationError: function(err) {
-      console.warn('Location error:', err.message);
-    }
-  }).addTo(map);
-
-  // Store map globally so the data layer pipeline can find it
-  window.paddelbuchMap = map;
-});
-</script>
+<script src="{{ '/assets/js/detail-map.js' | relative_url }}"></script>
 
 <!-- Load all data layers (spots, obstacles, protected areas, event notices) -->
 {% include detail-map-layers.html locale=current_locale %}
