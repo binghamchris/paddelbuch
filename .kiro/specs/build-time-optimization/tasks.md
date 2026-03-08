@@ -81,7 +81,7 @@ Extract repeated Liquid-generated map configuration into a shared JS file produc
     - Preserve all other existing buildSpec commands (nvm use, npm ci, npm run download-fonts, npm run copy-assets, bundle install)
     - _Requirements: 5.1, 5.2, 5.3_
 
-  - [~] 6.2 Write unit test for Bundler version consistency
+  - [x] 6.2 Write unit test for Bundler version consistency
     - Verify that the Bundler version in the buildSpec matches the version in `Gemfile.lock`
     - _Requirements: 5.1, 5.2_
 
