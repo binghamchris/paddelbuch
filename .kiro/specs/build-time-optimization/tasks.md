@@ -40,7 +40,7 @@ Extract repeated Liquid-generated map configuration into a shared JS file produc
     - Assert generated labels match the `name_{locale}` field of corresponding source entries
 
 
-- [~] 2. Checkpoint - Verify MapConfigGenerator
+- [x] 2. Checkpoint - Verify MapConfigGenerator
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 3. Simplify detail-map-layers.html to use shared config
