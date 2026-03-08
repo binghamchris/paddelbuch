@@ -40,7 +40,7 @@ Replace the existing Leaflet `L.control.layers` with a custom Filter_Panel that 
     - Wrap each dimension's `matchFn` call in try/catch; on error treat dimension as not matched and log warning
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.4, 2.5, 3.4, 3.5, 8.1, 8.2_
 
-  - [~] 2.2 Write property test for AND-logic evaluation
+  - [x] 2.2 Write property test for AND-logic evaluation
     - **Property 1: AND-logic evaluation across active dimensions**
     - Generate random metadata and random filter states with 1–5 dimensions; assert `evaluateMarker` result matches manual AND-logic check
     - Create `_tests/property/filter-engine-and-logic.property.test.js`
