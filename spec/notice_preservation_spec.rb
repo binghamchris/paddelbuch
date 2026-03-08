@@ -140,10 +140,18 @@ RSpec.describe 'Notice Page Preservation' do
           ctx = make_liquid_context(site_de, { 'date_val' => iso_date })
           rendered = render_liquid("{{ date_val | localized_date: 'long' }}", ctx).strip
 
-          # The localized_date filter uses Ruby strftime('%d. %B %Y') which produces
-          # English month names (e.g., "July" not "Juli") — this is the actual behavior to preserve
+          # The localized_date filter uses Ruby strftime('%d. %B %Y') and then
+          # localizes month names to German (e.g., "Juli" not "July")
           parsed = Date.parse(iso_date)
           expected = parsed.strftime('%d. %B %Y')
+          # Apply German month name localization (same as the filter does)
+          german_months = {
+            'January' => 'Januar', 'February' => 'Februar', 'March' => 'März',
+            'April' => 'April', 'May' => 'Mai', 'June' => 'Juni',
+            'July' => 'Juli', 'August' => 'August', 'September' => 'September',
+            'October' => 'Oktober', 'November' => 'November', 'December' => 'Dezember'
+          }
+          german_months.each { |en, de| expected = expected.gsub(en, de) }
 
           expect(rendered).to eq(expected),
             "DE 'long': '#{iso_date}' rendered as '#{rendered}', expected '#{expected}'"
@@ -208,10 +216,18 @@ RSpec.describe 'Notice Page Preservation' do
           ctx = make_liquid_context(site_de, { 'dt_val' => iso_datetime })
           rendered = render_liquid("{{ dt_val | localized_datetime: 'long' }}", ctx).strip
 
-          # The localized_datetime filter uses Ruby strftime('%d. %B %Y, %H:%M Uhr')
-          # which produces English month names — this is the actual behavior to preserve
+          # The localized_datetime filter uses Ruby strftime('%-d. %B %Y um %H:%M')
+          # and then localizes month names to German (e.g., "Juli" not "July")
           parsed = Time.parse(iso_datetime)
-          expected = parsed.strftime('%d. %B %Y, %H:%M Uhr')
+          expected = parsed.strftime('%-d. %B %Y um %H:%M')
+          # Apply German month name localization (same as the filter does)
+          german_months = {
+            'January' => 'Januar', 'February' => 'Februar', 'March' => 'März',
+            'April' => 'April', 'May' => 'Mai', 'June' => 'Juni',
+            'July' => 'Juli', 'August' => 'August', 'September' => 'September',
+            'October' => 'Oktober', 'November' => 'November', 'December' => 'Dezember'
+          }
+          german_months.each { |en, de| expected = expected.gsub(en, de) }
 
           expect(rendered).to eq(expected),
             "DE datetime 'long': '#{iso_datetime}' rendered as '#{rendered}', expected '#{expected}'"
