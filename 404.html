@@ -22,18 +22,6 @@ permalink: /404.html
 <div class="container error-page-container">
   <div class="row justify-content-center align-items-center min-vh-75">
     <div class="col-lg-6 col-md-8 text-center">
-      <!-- Error Icon -->
-      <div class="error-icon mb-4">
-        <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-muted">
-          <circle cx="12" cy="12" r="10"></circle>
-          <path d="M16 16s-1.5-2-4-2-4 2-4 2"></path>
-          <line x1="9" y1="9" x2="9.01" y2="9"></line>
-          <line x1="15" y1="9" x2="15.01" y2="9"></line>
-        </svg>
-      </div>
-      
-      <!-- Error Code -->
-      <h1 class="error-code display-1 fw-bold text-primary mb-3">404</h1>
       
       <!-- Error Title -->
       <h2 class="error-title h3 mb-3">{% t errors.not_found_title %}</h2>
@@ -42,35 +30,13 @@ permalink: /404.html
       <p class="error-message text-muted mb-4">{% t errors.not_found_message %}</p>
       
       <!-- Back to Home Button -->
-      <a href="{{ '/' | relative_url }}" class="btn btn-primary btn-lg">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-2">
-          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-          <polyline points="9 22 9 12 15 12 15 22"></polyline>
-        </svg>
-        {% t errors.back_home %}
+      <a href="{{ '/' | relative_url }}" class="btn btn-sm navigate-btn error-page-btn">
+        {% if current_locale == 'en' %}
+          Return to the map
+        {% else %}
+          Zurück zur Karte
+        {% endif %}
       </a>
-      
-      <!-- Optional: Search or Navigation Suggestions -->
-      <div class="mt-5 pt-4 border-top">
-        <p class="text-muted small mb-3">
-          {% if current_locale == 'en' %}
-            Or explore our map:
-          {% else %}
-            Oder erkunden Sie unsere Karte:
-          {% endif %}
-        </p>
-        <div class="d-flex justify-content-center gap-3 flex-wrap">
-          <a href="{{ '/gewaesser/seen' | relative_url }}" class="btn btn-outline-secondary btn-sm">
-            {% t nav.lakes %}
-          </a>
-          <a href="{{ '/gewaesser/fluesse' | relative_url }}" class="btn btn-outline-secondary btn-sm">
-            {% t nav.rivers %}
-          </a>
-          <a href="{{ '/offene-daten/api' | relative_url }}" class="btn btn-outline-secondary btn-sm">
-            {% t nav.open_data %}
-          </a>
-        </div>
-      </div>
     </div>
   </div>
 </div>
@@ -90,12 +56,6 @@ permalink: /404.html
   opacity: 0.5;
 }
 
-.error-code {
-  font-size: 8rem;
-  line-height: 1;
-  color: var(--paddelbuch-primary, #0d6efd);
-}
-
 .error-title {
   color: var(--bs-dark);
 }
@@ -107,11 +67,12 @@ permalink: /404.html
   margin-right: auto;
 }
 
+.error-page-btn {
+  float: none;
+  margin-top: 0;
+}
+
 @media (max-width: 576px) {
-  .error-code {
-    font-size: 5rem;
-  }
-  
   .error-icon svg {
     width: 80px;
     height: 80px;
