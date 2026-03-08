@@ -34,6 +34,9 @@
 <script src="{{ '/assets/js/data-loader.js' | relative_url }}"></script>
 <script src="{{ '/assets/js/zoom-layer-manager.js' | relative_url }}"></script>
 
+<!-- Shared map configuration (generated once at build time) -->
+<script src="{{ '/api/map-config.js' | relative_url }}"></script>
+
 <!-- Bootstrap: load tile data and populate layer groups -->
 <script>
 (function() {
@@ -77,6 +80,23 @@
     }
   }
 
+  /**
+   * Match functions for each dimension key.
+   * These cannot be serialized to JSON, so they are attached at runtime.
+   */
+  var matchFunctions = {
+    spotType: function(meta, selected) {
+      return selected.has(meta.spotType_slug);
+    },
+    paddleCraftType: function(meta, selected) {
+      var types = meta.paddleCraftTypes || [];
+      for (var i = 0; i < types.length; i++) {
+        if (selected.has(types[i])) return true;
+      }
+      return false;
+    }
+  };
+
   function initDetailMapData() {
     var map = window.paddelbuchMap;
     var layerGroups = window.paddelbuchLayerGroups;
@@ -88,76 +108,37 @@
 
     var locale = window.paddelbuchCurrentLocale || '{{ current_locale }}';
 
-    // Build dimension configuration array from Jekyll data
-    var dimensionConfigs = [
-      {
-        key: 'spotType',
-        {% if current_locale == 'en' %}
-        label: 'Spot Type',
-        {% else %}
-        label: 'Ortstyp',
-        {% endif %}
-        options: [
-          {% if current_locale == 'en' %}
-          { slug: 'einstieg-ausstieg', label: 'Entry & Exit Spots' },
-          { slug: 'nur-einstieg', label: 'Entry Only Spots' },
-          { slug: 'nur-ausstieg', label: 'Exit Only Spots' },
-          { slug: 'rasthalte', label: 'Rest Spots' },
-          { slug: 'notauswasserungsstelle', label: 'Emergency Exit Spots' }
-          {% else %}
-          { slug: 'einstieg-ausstieg', label: 'Ein-/Ausstiegsorte' },
-          { slug: 'nur-einstieg', label: 'Einstiegsorte' },
-          { slug: 'nur-ausstieg', label: 'Ausstiegsorte' },
-          { slug: 'rasthalte', label: 'Rasthalte' },
-          { slug: 'notauswasserungsstelle', label: 'Notauswasserungsstelle' }
-          {% endif %}
-        ],
-        matchFn: function(meta, selected) { return selected.has(meta.spotType_slug); }
-      },
-      {
-        key: 'paddleCraftType',
-        {% if current_locale == 'en' %}
-        label: 'Paddle Craft Type',
-        {% else %}
-        label: 'Paddelboottyp',
-        {% endif %}
-        options: [
-          {% assign craft_types = site.data.types.paddle_craft_types | where: "locale", current_locale %}
-          {% assign craft_name_key = "name_" | append: current_locale %}
-          {% for ct in craft_types %}
-          { slug: '{{ ct.slug }}', label: '{{ ct[craft_name_key] | default: ct.name_de }}' }{% unless forloop.last %},{% endunless %}
-          {% endfor %}
-        ],
-        matchFn: function(meta, selected) {
-          var types = meta.paddleCraftTypes || [];
-          for (var i = 0; i < types.length; i++) {
-            if (selected.has(types[i])) return true;
-          }
-          return false;
-        }
-      }
-    ];
+    // Read dimension configs and layer labels from shared config (generated at build time)
+    var localeConfig;
+    if (window.paddelbuchMapConfig && window.paddelbuchMapConfig[locale]) {
+      localeConfig = window.paddelbuchMapConfig[locale];
+    } else {
+      console.warn('paddelbuchMapConfig not available for locale "' + locale + '", using empty config');
+      localeConfig = { dimensions: [], layerLabels: {} };
+    }
 
-    // Build layer toggle configuration for non-spot layers
-    var layerLabels = {
-      {% if current_locale == 'en' %}
-      noEntry: 'No Entry Spots',
-      eventNotices: 'Event Notices',
-      obstacles: 'Obstacles',
-      protectedAreas: 'Protected Areas'
-      {% else %}
-      noEntry: 'Keine Zutritt Orte',
-      eventNotices: 'Gewässerereignisse',
-      obstacles: 'Hindernisse',
-      protectedAreas: 'Schutzgebiete'
-      {% endif %}
-    };
+    // Build dimension configuration array from shared config
+    var dimensionConfigs = (localeConfig.dimensions || []).map(function(dim) {
+      var config = {
+        key: dim.key,
+        label: dim.label,
+        options: dim.options || []
+      };
+      // Attach matchFn at runtime (functions cannot be serialized to JSON)
+      if (matchFunctions[dim.key]) {
+        config.matchFn = matchFunctions[dim.key];
+      }
+      return config;
+    });
+
+    // Read layer labels from shared config
+    var layerLabels = localeConfig.layerLabels || {};
 
     var layerToggles = [
-      { key: 'noEntry', label: layerLabels.noEntry, layerGroup: layerGroups.noEntry, defaultChecked: false },
-      { key: 'eventNotices', label: layerLabels.eventNotices, layerGroup: layerGroups.eventNotices, defaultChecked: true },
-      { key: 'obstacles', label: layerLabels.obstacles, layerGroup: layerGroups.obstacles, defaultChecked: true },
-      { key: 'protectedAreas', label: layerLabels.protectedAreas, layerGroup: layerGroups.protectedAreas, defaultChecked: true }
+      { key: 'noEntry', label: layerLabels.noEntry || '', layerGroup: layerGroups.noEntry, defaultChecked: false },
+      { key: 'eventNotices', label: layerLabels.eventNotices || '', layerGroup: layerGroups.eventNotices, defaultChecked: true },
+      { key: 'obstacles', label: layerLabels.obstacles || '', layerGroup: layerGroups.obstacles, defaultChecked: true },
+      { key: 'protectedAreas', label: layerLabels.protectedAreas || '', layerGroup: layerGroups.protectedAreas, defaultChecked: true }
     ];
 
     // Initialize filter engine and panel
