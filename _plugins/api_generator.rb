@@ -195,10 +195,26 @@ module Jekyll
       # Use _raw_updatedAt for millisecond-precision timestamps; fall back to updatedAt
       latest = data.map { |item| item['_raw_updatedAt'] || item['updatedAt'] }.compact.max
       return unless latest
+      # Normalize to Contentful-style millisecond precision with Z suffix
+      normalized = normalize_to_contentful_timestamp(latest)
       # Take the max across locales — track_last_update is called once per locale
-      if @last_updates[table_name].nil? || latest > @last_updates[table_name]
-        @last_updates[table_name] = latest
+      if @last_updates[table_name].nil? || normalized > @last_updates[table_name]
+        @last_updates[table_name] = normalized
       end
+    end
+
+    # Normalize any timestamp string to Contentful-style ISO 8601 with milliseconds
+    # and Z suffix: "YYYY-MM-DDTHH:MM:SS.mmmZ"
+    # Handles inputs like "2023-11-23T09:32:56+00:00" or "2023-11-23T09:32:56Z"
+    # or already-normalized "2023-11-23T09:32:56.000Z"
+    def normalize_to_contentful_timestamp(ts)
+      return ts if ts.nil?
+      # Already in correct format?
+      return ts if ts.match?(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/)
+      time = ts.is_a?(Time) ? ts : Time.parse(ts.to_s)
+      time.utc.strftime('%Y-%m-%dT%H:%M:%S.%3NZ')
+    rescue ArgumentError
+      ts.to_s
     end
 
     # Convert timestamps to Contentful-style ISO 8601 with milliseconds and Z suffix
