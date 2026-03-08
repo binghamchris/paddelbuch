@@ -66,6 +66,15 @@ module Jekyll
 
     private
 
+    # Mapping from fact table keys to their transformer method names
+    FACT_TABLE_TRANSFORMERS = {
+      'spots' => :transform_spot,
+      'obstacles' => :transform_obstacle,
+      'waterwayevents' => :transform_waterway_event,
+      'protectedareas' => :transform_protected_area,
+      'waterways' => :transform_waterway
+    }.freeze
+
     def generate_fact_tables
       FACT_TABLES.each do |table_name, config|
         LOCALES.each do |locale|
@@ -76,8 +85,14 @@ module Jekyll
           end
 
           data = data.sort_by { |item| item['slug'].to_s.downcase }
+          # Track last update from original data (reads _raw_updatedAt) BEFORE transformation
           track_last_update(table_name, data)
-          add_json_page("#{table_name}-#{locale}.json", data)
+
+          # Apply the appropriate transformer to produce Gatsby-compatible output
+          transformer = FACT_TABLE_TRANSFORMERS[table_name]
+          transformed_data = data.map { |item| send(transformer, item) }
+
+          add_json_page("#{table_name}-#{locale}.json", transformed_data)
         end
       end
     end
@@ -87,8 +102,13 @@ module Jekyll
         LOCALES.each do |locale|
           data = get_dimension_data(config[:data_key], locale)
           data = data.sort_by { |item| item['slug'].to_s.downcase }
+          # Track last update from original data (reads _raw_updatedAt) BEFORE transformation
           track_last_update(table_name, data)
-          add_json_page("#{table_name}-#{locale}.json", data)
+
+          # Apply dimension transformer to produce Gatsby-compatible output
+          transformed_data = data.map { |item| transform_dimension_entry(item, locale, table_name) }
+
+          add_json_page("#{table_name}-#{locale}.json", transformed_data)
         end
       end
     end

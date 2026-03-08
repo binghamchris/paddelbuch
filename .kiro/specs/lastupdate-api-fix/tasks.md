@@ -117,7 +117,7 @@
     - _Expected_Behavior: 12 entries with camelCase names, single max timestamp per content type_
     - _Requirements: 2.34, 2.35, 2.36, 2.37_
 
-  - [~] 3.7 Wire transformers into `generate_fact_tables` and `generate_dimension_tables`
+  - [x] 3.7 Wire transformers into `generate_fact_tables` and `generate_dimension_tables`
     - Update `generate_fact_tables` to apply the appropriate transformer (`transform_spot`, `transform_obstacle`, etc.) to each item before writing JSON
     - Add a transformer mapping: `'spots' => :transform_spot`, `'obstacles' => :transform_obstacle`, `'waterwayevents' => :transform_waterway_event`, `'protectedareas' => :transform_protected_area`, `'waterways' => :transform_waterway`
     - Update `generate_dimension_tables` to apply `transform_dimension_entry` to each item
