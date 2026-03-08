@@ -152,12 +152,37 @@ module ContentfulMappers
   end
 
   # ---------------------------------------------------------------------------
+  # Raw data helpers for API use
+  # ---------------------------------------------------------------------------
+
+  # Serialize a Contentful rich text field to its raw JSON string for API output.
+  # Returns nil if the field is nil, the JSON string if already in 'raw' format,
+  # or a JSON-serialized string of the rich text document.
+  def serialize_raw_rich_text(field)
+    return nil if field.nil?
+
+    if field.is_a?(Hash) && field.key?('raw')
+      # Already in Contentful raw format — return the raw JSON string
+      field['raw']
+    elsif field.is_a?(Hash) && (field.key?('content') || field.key?('nodeType'))
+      # Rich text document hash — serialize to JSON string
+      JSON.generate(field)
+    elsif field.respond_to?(:content) && field.respond_to?(:node_type)
+      # Contentful SDK rich text object — attempt to serialize
+      JSON.generate(field)
+    else
+      nil
+    end
+  end
+
+  # ---------------------------------------------------------------------------
   # Entry flattening — produces one hash per locale from a locale: '*' entry
   # ---------------------------------------------------------------------------
 
   # Flatten a single Contentful entry (fetched with locale: '*') into an array
   # of per-locale hashes using the specified mapper method.
-  def flatten_entry(entry, mapper_method)
+  # Optional extra_args are passed through to the mapper method.
+  def flatten_entry(entry, mapper_method, *extra_args)
     fields = entry.fields_with_locales
     sys = entry.sys
 
@@ -165,9 +190,11 @@ module ContentfulMappers
       base = {
         'locale' => locale,
         'createdAt' => sys[:created_at]&.utc&.strftime('%Y-%m-%dT%H:%M:%SZ'),
-        'updatedAt' => sys[:updated_at]&.utc&.strftime('%Y-%m-%dT%H:%M:%SZ')
+        'updatedAt' => sys[:updated_at]&.utc&.strftime('%Y-%m-%dT%H:%M:%SZ'),
+        '_raw_createdAt' => sys[:created_at]&.utc&.strftime('%Y-%m-%dT%H:%M:%S.%3NZ'),
+        '_raw_updatedAt' => sys[:updated_at]&.utc&.strftime('%Y-%m-%dT%H:%M:%S.%3NZ')
       }
-      mapped = send(mapper_method, entry, fields, locale)
+      mapped = send(mapper_method, entry, fields, locale, *extra_args)
       base.merge(mapped)
     end
   end
@@ -177,11 +204,13 @@ module ContentfulMappers
   # Each receives (entry, fields, locale) where fields = entry.fields_with_locales
   # ---------------------------------------------------------------------------
 
-  def map_spot(entry, fields, locale)
+  def map_spot(entry, fields, locale, *_extra)
+    desc_field = resolve_field(fields, :description, locale)
     {
       'slug' => extract_slug(fields, entry),
       'name' => resolve_field(fields, :name, locale),
-      'description' => extract_rich_text_html(resolve_field(fields, :description, locale)),
+      'description' => extract_rich_text_html(desc_field),
+      '_raw_description' => serialize_raw_rich_text(desc_field),
       'location' => extract_location(resolve_field(fields, :location, locale)),
       'approximateAddress' => resolve_field(fields, :approximate_address, locale),
       'country' => resolve_field(fields, :country, locale),
@@ -198,13 +227,15 @@ module ContentfulMappers
     }
   end
 
-  def map_waterway(entry, fields, locale)
+  def map_waterway(entry, fields, locale, *_extra)
+    geometry_field = resolve_field(fields, :geometry, locale)
     {
       'slug' => extract_slug(fields, entry),
       'name' => resolve_field(fields, :name, locale),
       'length' => resolve_field(fields, :length, locale),
       'area' => resolve_field(fields, :area, locale),
-      'geometry' => resolve_field(fields, :geometry, locale)&.to_json,
+      'geometry' => geometry_field&.to_json,
+      '_raw_geometry' => geometry_field,
       'showInMenu' => resolve_field(fields, :show_in_menu, locale) || false,
       'paddlingEnvironmentType_slug' => extract_reference_slug(resolve_field(fields, :paddling_environment_type, locale)),
       'dataSourceType_slug' => extract_reference_slug(resolve_field(fields, :data_source_type, locale)),
@@ -212,55 +243,92 @@ module ContentfulMappers
     }
   end
 
-  def map_obstacle(entry, fields, locale)
+  def map_obstacle(entry, fields, locale, *_extra)
+    desc_field = resolve_field(fields, :description, locale)
+    portage_desc_field = resolve_field(fields, :portage_description, locale)
+    geometry_field = resolve_field(fields, :geometry, locale)
+    portage_route_field = resolve_field(fields, :portage_route, locale)
     {
       'slug' => extract_slug(fields, entry),
       'name' => resolve_field(fields, :name, locale),
-      'description' => extract_rich_text_html(resolve_field(fields, :description, locale)),
-      'geometry' => resolve_field(fields, :geometry, locale)&.to_json,
-      'portageRoute' => resolve_field(fields, :portage_route, locale)&.to_json,
+      'description' => extract_rich_text_html(desc_field),
+      '_raw_description' => serialize_raw_rich_text(desc_field),
+      'geometry' => geometry_field&.to_json,
+      '_raw_geometry' => geometry_field,
+      'portageRoute' => portage_route_field&.to_json,
+      '_raw_portageRoute' => portage_route_field,
       'portageDistance' => resolve_field(fields, :portage_distance, locale),
-      'portageDescription' => extract_rich_text_html(resolve_field(fields, :portage_description, locale)),
+      'portageDescription' => extract_rich_text_html(portage_desc_field),
+      '_raw_portageDescription' => serialize_raw_rich_text(portage_desc_field),
       'isPortageNecessary' => resolve_field(fields, :is_portage_necessary, locale) || false,
       'isPortagePossible' => resolve_field(fields, :is_portage_possible, locale) || false,
       'obstacleType_slug' => extract_reference_slug(resolve_field(fields, :obstacle_type, locale)),
       'waterway_slug' => extract_reference_slug(resolve_field(fields, :waterway, locale)),
-      'spots' => extract_reference_slugs(resolve_field(fields, :spots, locale))
+      'spots' => extract_reference_slugs(resolve_field(fields, :spots, locale)),
+      'dataSourceType_slug' => extract_reference_slug(resolve_field(fields, :data_source_type, locale)),
+      'dataLicenseType_slug' => extract_reference_slug(resolve_field(fields, :data_license_type, locale))
     }
   end
 
-  def map_protected_area(entry, fields, locale)
+  def map_protected_area(entry, fields, locale, *_extra)
+    desc_field = resolve_field(fields, :description, locale)
+    geometry_field = resolve_field(fields, :geometry, locale)
     {
       'slug' => extract_slug(fields, entry),
       'name' => resolve_field(fields, :name, locale),
-      'geometry' => resolve_field(fields, :geometry, locale)&.to_json,
+      'description' => extract_rich_text_html(desc_field),
+      '_raw_description' => serialize_raw_rich_text(desc_field),
+      'geometry' => geometry_field&.to_json,
+      '_raw_geometry' => geometry_field,
       'isAreaMarked' => resolve_field(fields, :is_area_marked, locale) || false,
-      'protectedAreaType_slug' => extract_reference_slug(resolve_field(fields, :protected_area_type, locale))
+      'protectedAreaType_slug' => extract_reference_slug(resolve_field(fields, :protected_area_type, locale)),
+      'waterway' => extract_reference_slugs(resolve_field(fields, :waterway, locale)),
+      'dataSourceType_slug' => extract_reference_slug(resolve_field(fields, :data_source_type, locale)),
+      'dataLicenseType_slug' => extract_reference_slug(resolve_field(fields, :data_license_type, locale))
     }
   end
 
-  def map_event_notice(entry, fields, locale)
+  def map_event_notice(entry, fields, locale, *_extra)
+    desc_field = resolve_field(fields, :description, locale)
+    affected_area_field = resolve_field(fields, :affected_area, locale)
     {
       'slug' => extract_slug(fields, entry),
       'name' => resolve_field(fields, :name, locale),
-      'description' => extract_rich_text_html(resolve_field(fields, :description, locale)),
+      'description' => extract_rich_text_html(desc_field),
+      '_raw_description' => serialize_raw_rich_text(desc_field),
       'location' => extract_location(resolve_field(fields, :location, locale)),
-      'affectedArea' => resolve_field(fields, :affected_area, locale)&.to_json,
+      'affectedArea' => affected_area_field&.to_json,
+      '_raw_affectedArea' => affected_area_field,
       'startDate' => resolve_field(fields, :start_date, locale)&.iso8601,
       'endDate' => resolve_field(fields, :end_date, locale)&.iso8601,
-      'waterways' => extract_reference_slugs(resolve_field(fields, :waterway, locale))
+      'waterways' => extract_reference_slugs(resolve_field(fields, :waterway, locale)),
+      'spot' => extract_reference_slugs(resolve_field(fields, :spot, locale)),
+      'dataSourceType_slug' => extract_reference_slug(resolve_field(fields, :data_source_type, locale)),
+      'dataLicenseType_slug' => extract_reference_slug(resolve_field(fields, :data_license_type, locale))
     }
   end
 
-  def map_type(entry, fields, locale)
-    {
+  def map_type(entry, fields, locale, content_type = nil)
+    result = {
       'slug' => extract_slug(fields, entry),
       'name_de' => resolve_field(fields, :name, 'de'),
       'name_en' => resolve_field(fields, :name, 'en')
     }
+
+    # Add type-specific fields for API use
+    case content_type
+    when 'paddleCraftType', 'dataSourceType'
+      desc_field = resolve_field(fields, :description, locale)
+      result['_raw_description'] = serialize_raw_rich_text(desc_field)
+    when 'dataLicenseType'
+      result['summaryUrl'] = resolve_field(fields, :summary_url, locale)
+      result['fullTextUrl'] = resolve_field(fields, :full_text_url, locale)
+    end
+
+    result
   end
 
-  def map_static_page(entry, fields, locale)
+  def map_static_page(entry, fields, locale, *_extra)
     menu = resolve_field(fields, :menu, locale)
     {
       'slug' => extract_slug(fields, entry),
