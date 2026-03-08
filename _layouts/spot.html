@@ -44,11 +44,26 @@ pageName: spot-details
   {% assign waterway = site.data.waterways | where: "slug", waterway_slug | where: "locale", current_locale | first %}
 {% endif %}
 
+{% assign lat = spot.location.lat | default: spot.location.latitude %}
+{% assign lon = spot.location.lon | default: spot.location.lng | default: spot.location.longitude %}
+
+{% capture spot_json %}{"name":{{ spot.name | escape | jsonify }},"slug":{{ spot.slug | jsonify }},"spotType_slug":{{ spot_type_slug | jsonify }},"rejected":{{ is_rejected | default: false }},"description":{{ spot.description | jsonify | default: "null" }},"approximateAddress":{{ spot.approximateAddress | jsonify | default: "null" }},"paddleCraftTypes":{{ spot.paddleCraftTypes | jsonify | default: "[]" }},"location":{"lat":{{ lat | default: "null" }},"lon":{{ lon | default: "null" }}}}{% endcapture %}
+
 <div class="container-fluid">
   <div class="row">
     <!-- Map Column -->
     <div class="col-xl-8 col-lg-7 p-0">
-      <div id="spot-map" class="map"></div>
+      <div id="spot-map" class="map"
+        data-page-type="spot"
+        data-locale="{{ current_locale }}"
+        data-lat="{{ lat }}"
+        data-lon="{{ lon }}"
+        data-spot-type="{{ spot_type_slug }}"
+        data-spot-name="{{ spot.name | escape }}"
+        data-spot-slug="{{ spot.slug }}"
+        data-rejected="{{ is_rejected | default: false }}"
+        data-spot-json='{{ spot_json }}'>
+      </div>
     </div>
     
     <!-- Details Panel -->
@@ -88,98 +103,7 @@ pageName: spot-details
 <script src="{{ '/assets/js/marker-styles.js' | relative_url }}"></script>
 <script src="{{ '/assets/js/layer-styles.js' | relative_url }}"></script>
 <script src="{{ '/assets/js/clipboard.js' | relative_url }}"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  // Initialize map centered on spot location
-  {% assign lat = spot.location.lat | default: spot.location.latitude %}
-  {% assign lon = spot.location.lon | default: spot.location.lng | default: spot.location.longitude %}
-  
-  {% if lat and lon %}
-  var spotLat = {{ lat }};
-  var spotLon = {{ lon }};
-  
-  var map = L.map('spot-map', {
-    center: [spotLat, spotLon],
-    zoom: 15,
-    zoomControl: true
-  });
-  
-  // Add tile layer
-  L.tileLayer('{{ site.mapbox_url }}', {
-    attribution: '&copy; <a href="https://www.mapbox.com/about/maps/" target="_blank" rel="noopener">Mapbox</a> &copy; <a href="http://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> <strong><a href="https://www.mapbox.com/map-feedback/" target="_blank" rel="noopener">Improve this map</a></strong>',
-    maxZoom: {{ site.map.max_zoom | default: 18 }}
-  }).addTo(map);
-  
-  // Position zoom control at bottom-right
-  map.zoomControl.setPosition('bottomright');
-  
-  // Add locate control for user position finding
-  L.control.locate({
-    position: 'bottomright',
-    strings: {
-      title: '{{ site.lang | default: "de" }}' === 'de' ? 'Meinen Standort anzeigen' : 'Show my location'
-    },
-    locateOptions: {
-      enableHighAccuracy: true,
-      maxZoom: 14
-    },
-    flyTo: true,
-    showCompass: true,
-    showPopup: false,
-    drawCircle: true,
-    drawMarker: true,
-    markerStyle: {
-      weight: 2,
-      opacity: 0.8,
-      fillOpacity: 0.8
-    },
-    circleStyle: {
-      weight: 1,
-      clickable: false
-    },
-    icon: 'leaflet-control-locate-location-arrow',
-    iconLoading: 'leaflet-control-locate-spinner',
-    onLocationError: function(err) {
-      console.warn('Location error:', err.message);
-    }
-  }).addTo(map);
-
-  // Add spot marker for this page's spot
-  var spotType = '{{ spot_type_slug }}';
-  var isRejected = {{ is_rejected | default: false }};
-  var markerIcon = PaddelbuchMarkerStyles.getSpotIcon(spotType, isRejected);
-  
-  var marker = L.marker([spotLat, spotLon], { icon: markerIcon }).addTo(map);
-
-  // Build the proper popup using the spot popup module (same as tile-loaded spots)
-  var currentSpotData = {
-    name: '{{ spot.name | escape }}',
-    slug: '{{ spot.slug }}',
-    spotType_slug: spotType,
-    rejected: isRejected,
-    description: {{ spot.description | jsonify | default: 'null' }},
-    approximateAddress: {{ spot.approximateAddress | jsonify | default: 'null' }},
-    paddleCraftTypes: {{ spot.paddleCraftTypes | jsonify | default: '[]' }},
-    location: { lat: spotLat, lon: spotLon }
-  };
-  var currentLocale = '{{ current_locale }}';
-  var popupHtml;
-  if (window.PaddelbuchSpotPopup) {
-    if (isRejected) {
-      popupHtml = window.PaddelbuchSpotPopup.generateRejectedSpotPopupContent(currentSpotData, currentLocale);
-    } else {
-      popupHtml = window.PaddelbuchSpotPopup.generateSpotPopupContent(currentSpotData, currentLocale);
-    }
-  } else {
-    popupHtml = '<strong>' + currentSpotData.name + '</strong>';
-  }
-  marker.bindPopup(popupHtml, { maxWidth: 350 });
-  
-  // Store map globally so the data layer pipeline can find it
-  window.paddelbuchMap = map;
-  {% endif %}
-});
-</script>
+<script src="{{ '/assets/js/detail-map.js' | relative_url }}"></script>
 
 <!-- Load all data layers (spots, obstacles, protected areas, event notices) -->
 {% include detail-map-layers.html locale=current_locale %}
