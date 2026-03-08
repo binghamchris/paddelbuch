@@ -117,12 +117,19 @@ module Jekyll
           slug = item['slug']
           next if seen[slug]
           seen[slug] = true
-          result << {
+          entry = {
             'slug' => slug,
             'name' => item["name_#{locale}"] || item['name'],
             'createdAt' => item['createdAt'],
-            'updatedAt' => item['updatedAt']
+            'updatedAt' => item['updatedAt'],
+            '_raw_createdAt' => item['_raw_createdAt'],
+            '_raw_updatedAt' => item['_raw_updatedAt']
           }
+          # Pass through type-specific fields when present
+          entry['_raw_description'] = item['_raw_description'] if item.key?('_raw_description')
+          entry['summaryUrl'] = item['summaryUrl'] if item.key?('summaryUrl')
+          entry['fullTextUrl'] = item['fullTextUrl'] if item.key?('fullTextUrl')
+          result << entry
         end
       else
         []
@@ -333,6 +340,31 @@ module Jekyll
       result['waterway'] = waterway
       result['dataSourceType'] = wrap_slug_ref(item['dataSourceType_slug'])
       result['dataLicenseType'] = wrap_slug_ref(item['dataLicenseType_slug'])
+      result
+    end
+
+    # -------------------------------------------------------------------------
+    # Dimension table transformer — converts flattened YAML dimension hash
+    # into Gatsby-compatible structure. Creates a NEW hash; does NOT mutate
+    # the source item.
+    # -------------------------------------------------------------------------
+
+    def transform_dimension_entry(item, locale, table_name)
+      result = {}
+      result['slug'] = item['slug']
+      result['node_locale'] = locale
+      result['createdAt'] = item['_raw_createdAt']
+      result['updatedAt'] = item['_raw_updatedAt']
+      result['name'] = item['name']
+
+      case table_name
+      when 'paddlecrafttypes', 'datasourcetypes'
+        result['description'] = wrap_raw_description(item['_raw_description'])
+      when 'datalicensetypes'
+        result['summaryUrl'] = item['summaryUrl']
+        result['fullTextUrl'] = item['fullTextUrl']
+      end
+
       result
     end
   end
