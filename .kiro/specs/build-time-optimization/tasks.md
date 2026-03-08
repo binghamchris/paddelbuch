@@ -85,7 +85,7 @@ Extract repeated Liquid-generated map configuration into a shared JS file produc
     - Verify that the Bundler version in the buildSpec matches the version in `Gemfile.lock`
     - _Requirements: 5.1, 5.2_
 
-- [~] 7. Final checkpoint - Ensure all tests pass
+- [x] 7. Final checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Notes
