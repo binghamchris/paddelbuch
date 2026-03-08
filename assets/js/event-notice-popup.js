@@ -85,11 +85,19 @@
   }
 
   /**
-   * Formats a date according to the specified locale
+   * Abbreviated month names per locale
+   */
+  var monthsAbbr = {
+    de: ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'],
+    en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+  };
+
+  /**
+   * Formats a date as DD MMM YYYY with localised abbreviated month names
    * 
    * @param {string|Date} dateValue - The date to format
    * @param {string} locale - The locale ('de' or 'en')
-   * @returns {string} Formatted date string
+   * @returns {string} Formatted date string (e.g. "08 Mar 2026" or "08 Mär 2026")
    */
   function formatDate(dateValue, locale) {
     if (!dateValue) return '';
@@ -104,11 +112,11 @@
     // Check for invalid date
     if (isNaN(date.getTime())) return '';
     
-    // ISO format: YYYY-MM-DD (locale-independent)
     var day = String(date.getDate()).padStart(2, '0');
-    var month = String(date.getMonth() + 1).padStart(2, '0');
+    var months = monthsAbbr[locale] || monthsAbbr.de;
+    var month = months[date.getMonth()];
     var year = date.getFullYear();
-    return year + '-' + month + '-' + day;
+    return day + ' ' + month + ' ' + year;
   }
 
   /**
