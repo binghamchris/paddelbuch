@@ -105,13 +105,13 @@ Externalize inline JavaScript from Liquid templates into four static external `.
     - Ensure zero inline script blocks with Liquid interpolation remain
     - _Requirements: 1.2, 1.6_
 
-- [ ] 7. Create `assets/js/detail-map-layers.js` and update `_includes/detail-map-layers.html`
-  - [-] 7.1 Extract detail map layers JavaScript into `assets/js/detail-map-layers.js`
+- [x] 7. Create `assets/js/detail-map-layers.js` and update `_includes/detail-map-layers.html`
+  - [x] 7.1 Extract detail map layers JavaScript into `assets/js/detail-map-layers.js`
     - Move the data loading bootstrap logic from `_includes/detail-map-layers.html` into `assets/js/detail-map-layers.js`
     - Replace Liquid `{{ current_locale }}` with reads from `window.paddelbuchCurrentLocale` (set by layer-control.js) or fallback to `document.currentScript.getAttribute('data-locale')`
     - _Requirements: 2.1, 2.4_
 
-  - [~] 7.2 Update `_includes/detail-map-layers.html` to load external JS
+  - [x] 7.2 Update `_includes/detail-map-layers.html` to load external JS
     - Replace the inline `<script>` block with a `<script data-locale="{{ current_locale }}" src="...">` tag for `detail-map-layers.js`
     - Ensure zero inline script blocks with Liquid interpolation remain
     - _Requirements: 2.2, 2.3, 2.5_
