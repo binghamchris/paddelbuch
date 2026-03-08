@@ -100,7 +100,7 @@ Externalize inline JavaScript from Liquid templates into four static external `.
     - Set globals: `window.paddelbuchLayerGroups`, `window.paddelbuchFilterByLocale`, `window.paddelbuchAddSpotMarker`, `window.paddelbuchAddEventNoticeMarker`, `window.paddelbuchAddObstacleLayer`, `window.paddelbuchAddProtectedAreaLayer`, `window.paddelbuchCurrentLocale`
     - _Requirements: 1.1, 1.3, 1.4, 1.5_
 
-  - [~] 6.2 Update `_includes/layer-control.html` to load external JS
+  - [x] 6.2 Update `_includes/layer-control.html` to load external JS
     - Replace the inline `<script>` block with a `<script data-locale="{{ current_locale }}" src="...">` tag for `layer-control.js`
     - Ensure zero inline script blocks with Liquid interpolation remain
     - _Requirements: 1.2, 1.6_
