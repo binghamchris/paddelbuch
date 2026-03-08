@@ -36,6 +36,23 @@ module Jekyll
       'datalicensetypes' => { data_key: 'types/data_license_types', content_type: 'dataLicenseType' }
     }.freeze
 
+    # Mapping from internal content type keys to camelCase names with 's' suffix
+    # used in lastUpdateIndex.json
+    CONTENT_TYPE_NAMES = {
+      'spots' => 'spots',
+      'obstacles' => 'obstacles',
+      'waterwayevents' => 'waterwayEventNotices',
+      'protectedareas' => 'protectedAreas',
+      'waterways' => 'waterways',
+      'datalicensetypes' => 'dataLicenseTypes',
+      'datasourcetypes' => 'dataSourceTypes',
+      'obstacletypes' => 'obstacleTypes',
+      'paddlecrafttypes' => 'paddleCraftTypes',
+      'protectedareatypes' => 'protectedAreaTypes',
+      'spottypes' => 'spotTypes',
+      'paddlingenvironmenttypes' => 'paddlingEnvironmentTypes'
+    }.freeze
+
     def generate(site)
       @site = site
       @last_updates = {}
@@ -59,7 +76,7 @@ module Jekyll
           end
 
           data = data.sort_by { |item| item['slug'].to_s.downcase }
-          track_last_update("#{table_name}-#{locale}", data)
+          track_last_update(table_name, data)
           add_json_page("#{table_name}-#{locale}.json", data)
         end
       end
@@ -70,21 +87,28 @@ module Jekyll
         LOCALES.each do |locale|
           data = get_dimension_data(config[:data_key], locale)
           data = data.sort_by { |item| item['slug'].to_s.downcase }
-          track_last_update("#{table_name}-#{locale}", data)
+          track_last_update(table_name, data)
           add_json_page("#{table_name}-#{locale}.json", data)
         end
       end
     end
 
     def generate_last_update_index
-      index_data = @last_updates.map do |table, timestamp|
+      # Map internal keys to camelCase content type names for the index
+      camel_updates = {}
+      @last_updates.each do |key, timestamp|
+        camel_name = CONTENT_TYPE_NAMES[key] || key
+        camel_updates[camel_name] = timestamp
+      end
+
+      index_data = camel_updates.map do |table, timestamp|
         { 'table' => table, 'lastUpdatedAt' => timestamp }
       end.sort_by { |item| item['table'] }
 
       add_json_page('lastUpdateIndex.json', index_data)
 
       # Expose to Liquid so api.html can render timestamps at build time
-      @site.data['last_updates'] = @last_updates.dup
+      @site.data['last_updates'] = camel_updates.dup
     end
 
     def add_json_page(filename, data)
@@ -148,8 +172,13 @@ module Jekyll
 
     def track_last_update(table_name, data)
       return if data.empty?
-      latest = data.map { |item| item['updatedAt'] }.compact.max
-      @last_updates[table_name] = normalize_timestamp(latest) if latest
+      # Use _raw_updatedAt for millisecond-precision timestamps; fall back to updatedAt
+      latest = data.map { |item| item['_raw_updatedAt'] || item['updatedAt'] }.compact.max
+      return unless latest
+      # Take the max across locales — track_last_update is called once per locale
+      if @last_updates[table_name].nil? || latest > @last_updates[table_name]
+        @last_updates[table_name] = latest
+      end
     end
 
     # Convert timestamps to Contentful-style ISO 8601 with milliseconds and Z suffix
