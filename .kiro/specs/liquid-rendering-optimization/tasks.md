@@ -119,7 +119,7 @@ Externalize inline JavaScript from Liquid templates into four static external `.
 - [x] 8. Checkpoint - Verify layer control and data layers extraction
   - Ensure all tests pass, ask the user if questions arise.
 
-- [-] 9. Validate no Liquid tags in external JS and no inline scripts in templates
+- [x] 9. Validate no Liquid tags in external JS and no inline scripts in templates
   - [x] 9.1 Verify external JS files contain no Liquid tags
     - Check all four files (`layer-control.js`, `detail-map-layers.js`, `filter-panel.js`, `detail-map.js`) for absence of `{{`, `}}`, `{%`, `%}` patterns
     - _Requirements: 1.5, 2.4, 4.10, 5.6_
@@ -128,22 +128,22 @@ Externalize inline JavaScript from Liquid templates into four static external `.
     - Check all seven modified files (`layer-control.html`, `detail-map-layers.html`, `filter-panel.html`, `spot.html`, `obstacle.html`, `waterway.html`, `notice.html`) for absence of `<script>` blocks containing Liquid tags
     - _Requirements: 1.6, 2.5, 3.3, 4.15_
 
-  - [~] 9.3 Write property test for no Liquid tags in external JS (Property 1)
+  - [x] 9.3 Write property test for no Liquid tags in external JS (Property 1)
     - **Property 1: External JS files contain no Liquid tags**
     - Verify that none of the four external JS files contain `{{`, `}}`, `{%`, or `%}` patterns
     - **Validates: Requirements 1.5, 2.4, 4.10, 5.6**
 
-  - [~] 9.4 Write property test for no inline scripts with Liquid in templates (Property 2)
+  - [x] 9.4 Write property test for no inline scripts with Liquid in templates (Property 2)
     - **Property 2: Modified templates contain zero inline script blocks with Liquid interpolation**
     - Verify that all modified layout and include files have no `<script>` blocks containing Liquid interpolation tags
     - **Validates: Requirements 1.6, 2.5, 3.3, 4.15**
 
-  - [~] 9.5 Write property test for valid data-page-type attributes (Property 3)
+  - [x] 9.5 Write property test for valid data-page-type attributes (Property 3)
     - **Property 3: Map container data-page-type is valid**
     - Verify each detail layout file's map container has a `data-page-type` attribute with the correct value
     - **Validates: Requirements 4.3**
 
-  - [~] 9.6 Write property test for Liquid template content reduction (Property 8)
+  - [x] 9.6 Write property test for Liquid template content reduction (Property 8)
     - **Property 8: Liquid template content reduction**
     - Verify that the number of characters inside `<script>` blocks requiring Liquid processing is strictly less after extraction than before
     - **Validates: Requirements 7.1**
