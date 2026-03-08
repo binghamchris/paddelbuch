@@ -62,7 +62,7 @@
     {% if obstacle.updatedAt %}
     <tr>
       <th>{% t labels.last_updated %}:</th>
-      <td>{{ obstacle.updatedAt | localized_datetime: 'long' }}</td>
+      <td>{{ obstacle.updatedAt | localized_date }}</td>
     </tr>
     {% endif %}
   </tbody>
