@@ -18,6 +18,16 @@ module Jekyll
     COLLECTION_NAMES = %w[spots waterways obstacles notices static_pages].freeze
 
     def generate(site)
+      # Skip duplicate runs — with parallel_localization: true, Jekyll runs all
+      # generators once per language. This generator already produces bilingual
+      # URLs internally, so only run during the default-language pass.
+      default_lang = site.config['default_lang'] || 'de'
+      current_lang = site.config['lang'] || default_lang
+      if current_lang != default_lang
+        Jekyll.logger.info "SitemapGenerator:", "Skipping (already generated during #{default_lang} pass)"
+        return
+      end
+
       urls = collect_urls(site)
 
       sitemap_files = urls.each_slice(MAX_URLS_PER_SITEMAP).each_with_index.map do |chunk, index|
