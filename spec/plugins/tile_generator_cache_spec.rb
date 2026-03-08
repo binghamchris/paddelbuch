@@ -345,3 +345,152 @@ RSpec.describe Jekyll::TileGenerator, '#cache_hit_logging — Property 9: Genera
     }
   end
 end
+
+
+# Unit tests for TileGenerator caching
+# Requirements: 4.1, 4.2, 4.3, 4.4, 5.2
+
+RSpec.describe Jekyll::TileGenerator, 'caching unit tests' do
+  let(:generator) { described_class.new }
+  let(:tmpdir) { Dir.mktmpdir }
+  let(:source_dir) { tmpdir }
+  let(:cache_dir) { File.join(tmpdir, '_data', '.tile_cache') }
+  let(:site_pages) { [] }
+  let(:site_data) { {} }
+  let(:site_config) { { 'default_lang' => 'de', 'lang' => 'de' } }
+  let(:site) do
+    s = double('Jekyll::Site')
+    allow(s).to receive(:source).and_return(source_dir)
+    allow(s).to receive(:pages).and_return(site_pages)
+    allow(s).to receive(:data).and_return(site_data)
+    allow(s).to receive(:config).and_return(site_config)
+    allow(s).to receive(:dest).and_return(File.join(tmpdir, '_site'))
+    allow(s).to receive(:layouts).and_return({})
+    allow(s).to receive(:converters).and_return([])
+    allow(s).to receive(:in_theme_dir) { |*args| args.compact.first }
+    allow(s).to receive(:in_source_dir) { |*args| File.join(source_dir, *args.compact) }
+    allow(s).to receive(:in_dest_dir) { |*args| File.join(tmpdir, '_site', *args.compact) }
+    allow(s).to receive(:theme).and_return(nil)
+    allow(s).to receive(:frontmatter_defaults).and_return(
+      double('FrontmatterDefaults').tap do |fd|
+        allow(fd).to receive(:all).and_return({})
+        allow(fd).to receive(:find).and_return(nil)
+      end
+    )
+    s
+  end
+
+  before do
+    FileUtils.mkdir_p(File.join(tmpdir, '_data'))
+    allow(Jekyll.logger).to receive(:info)
+    allow(Jekyll.logger).to receive(:warn)
+  end
+
+  after { FileUtils.remove_entry(tmpdir) if File.exist?(tmpdir) }
+
+  # Requirement 5.2: Cache directory is _data/.tile_cache/
+  describe 'cache directory path' do
+    it 'uses _data/.tile_cache/ as the cache directory' do
+      site_config['contentful_data_changed'] = true
+      site_data['spots'] = []
+      site_data['notices'] = []
+      site_data['obstacles'] = []
+      site_data['protected_areas'] = []
+
+      generator.generate(site)
+
+      expect(Dir.exist?(cache_dir)).to be true
+    end
+  end
+
+  # Requirements 4.1, 4.2: Cache preserves directory structure
+  describe 'cache directory structure' do
+    it 'preserves nested directory structure matching tile output paths' do
+      site_config['contentful_data_changed'] = true
+      site_data['spots'] = [
+        { 'slug' => 'test-spot', 'name' => 'Test Spot', 'locale' => 'de',
+          'location' => { 'lat' => 47.0, 'lon' => 8.0 } }
+      ]
+      site_data['notices'] = []
+      site_data['obstacles'] = []
+      site_data['protected_areas'] = []
+
+      generator.generate(site)
+
+      # Verify cache has nested directory structure like api/tiles/spots/de/
+      cached_files = Dir.glob(File.join(cache_dir, '**', '*.json'))
+      expect(cached_files).not_to be_empty
+
+      # Check that at least one file has the expected nested path structure
+      relative_paths = cached_files.map { |f| f.sub("#{cache_dir}/", '') }
+      expect(relative_paths).to include(a_string_matching(%r{^api/tiles/spots/de/index\.json$}))
+
+      # Verify the directory structure mirrors the output (api/tiles/<layer>/<locale>/)
+      relative_paths.each do |path|
+        expect(path).to match(%r{^api/tiles/\w+/\w+/})
+      end
+    end
+  end
+
+  # Requirement 4.3: Cache miss (empty directory) falls back to full generation
+  describe 'cache miss fallback' do
+    it 'falls back to full generation when cache directory is empty' do
+      site_config['contentful_data_changed'] = false
+      FileUtils.mkdir_p(cache_dir)
+      # cache_dir exists but has no JSON files
+
+      site_data['spots'] = []
+      site_data['notices'] = []
+      site_data['obstacles'] = []
+      site_data['protected_areas'] = []
+
+      generator.generate(site)
+
+      expect(Jekyll.logger).to have_received(:info).with(
+        'Tile Generator:', 'Cache empty/missing — performing full generation'
+      )
+    end
+
+    it 'falls back to full generation when cache directory is missing' do
+      site_config['contentful_data_changed'] = false
+      FileUtils.rm_rf(cache_dir)
+
+      site_data['spots'] = []
+      site_data['notices'] = []
+      site_data['obstacles'] = []
+      site_data['protected_areas'] = []
+
+      generator.generate(site)
+
+      expect(Jekyll.logger).to have_received(:info).with(
+        'Tile Generator:', 'Cache empty/missing — performing full generation'
+      )
+    end
+  end
+
+  # Requirement 4.3, 4.4: Corrupted cache file falls back to full generation
+  describe 'corrupted cache fallback' do
+    it 'falls back to full generation when a cache file cannot be read' do
+      tile_dir = File.join(cache_dir, 'api', 'tiles', 'spots', 'de')
+      FileUtils.mkdir_p(tile_dir)
+      # Write a valid file so cache_available? returns true
+      File.write(File.join(tile_dir, 'index.json'), '{"valid": true}')
+
+      site_config['contentful_data_changed'] = false
+
+      site_data['spots'] = []
+      site_data['notices'] = []
+      site_data['obstacles'] = []
+      site_data['protected_areas'] = []
+
+      # Stub load_tile_from_cache to raise an error simulating corrupted cache
+      allow(generator).to receive(:load_tile_from_cache).and_raise(Errno::EIO.new('Input/output error'))
+
+      generator.generate(site)
+
+      expect(Jekyll.logger).to have_received(:warn).with(
+        'Tile Generator:', a_string_matching(/Corrupted cache file.*falling back to full generation/)
+      )
+    end
+  end
+end

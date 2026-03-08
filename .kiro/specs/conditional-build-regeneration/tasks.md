@@ -148,7 +148,7 @@ Add content-hash-based change detection to the Jekyll build pipeline so that `Ap
     - Minimum 100 iterations
     - **Validates: Requirements 7.3, 7.4**
 
-  - [~] 7.4 Write unit tests for TileGenerator caching
+  - [x] 7.4 Write unit tests for TileGenerator caching
     - Test cache directory is `_data/.tile_cache/` (Requirement 5.2)
     - Test cache preserves directory structure (`api/tiles/spots/de/index.json`, etc.)
     - Test cache miss (empty directory) falls back to full generation
