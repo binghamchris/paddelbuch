@@ -40,7 +40,9 @@ coverage
 
 # Contentful generated data files
 _data/*.yml
-_data/*/*.yml
+_data/**/*.yml
+_data/*.json
+_data/**/*.json
 
 # Generated reference docs
 docs/reference
