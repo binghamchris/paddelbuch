@@ -58,7 +58,7 @@ Replace the existing Leaflet `L.control.layers` with a custom Filter_Panel that 
     - Create `_tests/property/filter-engine-craft-type-match.property.test.js`
     - **Validates: Requirements 3.5**
 
-  - [~] 2.5 Write property test for non-spot layer isolation
+  - [x] 2.5 Write property test for non-spot layer isolation
     - **Property 7: Filter engine does not alter non-spot layers**
     - Set up mock map with non-spot LayerGroups, call `applyFilters()` with various filter states, assert non-spot LayerGroup add/remove was never called
     - Create `_tests/property/filter-engine-non-spot-isolation.property.test.js`
