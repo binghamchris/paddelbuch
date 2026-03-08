@@ -114,7 +114,7 @@ Replace the existing Leaflet `L.control.layers` with a custom Filter_Panel that 
 - [x] 6. Checkpoint
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 7. Unit tests for integration and edge cases
+- [x] 7. Unit tests for integration and edge cases
   - [x] 7.1 Write unit tests for filter system integration
     - Test default filter state: all spot types and craft types selected on load
     - Test toggling a single spot type hides only spots of that type
