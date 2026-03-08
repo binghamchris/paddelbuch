@@ -135,7 +135,7 @@ Add content-hash-based change detection to the Jekyll build pipeline so that `Ap
     - Handle corrupted cache files: log warning, fall back to full generation, clear and repopulate cache
     - _Requirements: 2.2, 4.1, 4.2, 4.3, 4.4, 5.2, 5.3, 7.3, 7.4, 8.1, 8.2, 8.3, 8.4_
 
-  - [~] 7.2 Write property test for Tile generator cache round-trip (Property 5)
+  - [x] 7.2 Write property test for Tile generator cache round-trip (Property 5)
     - **Property 5: Tile generator cache round-trip**
     - Create `spec/plugins/tile_generator_cache_spec.rb`
     - Generate random geolocated data within Switzerland bounds, run fresh generation, write cache, load cache, compare page contents byte-for-byte and directory/filename paths
