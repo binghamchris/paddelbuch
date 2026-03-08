@@ -321,3 +321,247 @@ RSpec.describe Jekyll::ContentfulFetcher, '#change_flag_logging — Property 8: 
     }
   end
 end
+
+# ─── Unit Tests: ContentfulFetcher change flag logic ─────────────────────────
+# Task 4.5: Unit tests for ContentfulFetcher change flag
+# Validates: Requirements 1.2, 1.3, 1.4, 1.5, 2.1, 2.2, 6.1, 6.2
+
+RSpec.describe Jekyll::ContentfulFetcher, '#generate — change flag unit tests' do
+  let(:fetcher) { described_class.new }
+  let(:tmpdir) { Dir.mktmpdir }
+  let(:data_dir) { File.join(tmpdir, '_data') }
+  let(:site_config) { {} }
+  let(:site_data) { {} }
+  let(:site) do
+    s = double('Jekyll::Site')
+    allow(s).to receive(:source).and_return(tmpdir)
+    allow(s).to receive(:config).and_return(site_config)
+    allow(s).to receive(:data).and_return(site_data)
+    s
+  end
+
+  let(:mock_client) { double('Contentful::Client') }
+
+  # ENV management: save and restore around each test
+  around do |example|
+    saved_env = {
+      'CONTENTFUL_SPACE_ID'     => ENV['CONTENTFUL_SPACE_ID'],
+      'CONTENTFUL_ACCESS_TOKEN' => ENV['CONTENTFUL_ACCESS_TOKEN'],
+      'CONTENTFUL_ENVIRONMENT'  => ENV['CONTENTFUL_ENVIRONMENT'],
+      'CONTENTFUL_FORCE_SYNC'   => ENV['CONTENTFUL_FORCE_SYNC']
+    }
+    example.run
+  ensure
+    saved_env.each { |k, v| ENV[k] = v }
+  end
+
+  before do
+    FileUtils.mkdir_p(data_dir)
+    allow(Jekyll.logger).to receive(:info)
+    allow(Jekyll.logger).to receive(:warn)
+  end
+
+  after { FileUtils.remove_entry(tmpdir) if File.exist?(tmpdir) }
+
+  # ── Helpers ──────────────────────────────────────────────────────────
+
+  def set_credentials(space_id: 'test_space', token: 'test_token', environment: nil)
+    ENV['CONTENTFUL_SPACE_ID'] = space_id
+    ENV['CONTENTFUL_ACCESS_TOKEN'] = token
+    ENV['CONTENTFUL_ENVIRONMENT'] = environment
+  end
+
+  def clear_credentials
+    ENV.delete('CONTENTFUL_SPACE_ID')
+    ENV.delete('CONTENTFUL_ACCESS_TOKEN')
+    ENV.delete('CONTENTFUL_ENVIRONMENT')
+    ENV.delete('CONTENTFUL_FORCE_SYNC')
+  end
+
+  def build_mock_page(items:, has_next: false, next_page_mock: nil, sync_url: nil)
+    page = double('SyncPage')
+    allow(page).to receive(:items).and_return(items)
+    allow(page).to receive(:next_page?).and_return(has_next)
+    allow(page).to receive(:next_page).and_return(next_page_mock) if has_next
+    allow(page).to receive(:next_sync_url).and_return(sync_url) unless has_next
+    page
+  end
+
+  def sync_url_with_token(token)
+    "https://cdn.contentful.com/spaces/test_space/sync?sync_token=#{token}"
+  end
+
+  def stub_client
+    allow(fetcher).to receive(:client).and_return(mock_client)
+  end
+
+  def stub_initial_sync(token: 'new_sync_token')
+    page = build_mock_page(items: [], sync_url: sync_url_with_token(token))
+    sync = double('Sync')
+    allow(sync).to receive(:first_page).and_return(page)
+    allow(mock_client).to receive(:sync).with(initial: true).and_return(sync)
+  end
+
+  def stub_incremental_sync(items: [], token: 'new_token')
+    page = build_mock_page(items: items, sync_url: sync_url_with_token(token))
+    sync = double('Sync')
+    allow(sync).to receive(:first_page).and_return(page)
+    allow(mock_client).to receive(:sync).with(hash_including(:sync_token)).and_return(sync)
+  end
+
+  def stub_empty_fetches
+    allow(mock_client).to receive(:entries).and_return([])
+  end
+
+  def write_cache(space_id: 'test_space', environment: 'master', sync_token: 'cached_token',
+                  last_sync_at: '2025-01-15T10:30:00+00:00', content_hash: nil)
+    data = {
+      'sync_token'   => sync_token,
+      'last_sync_at' => last_sync_at,
+      'space_id'     => space_id,
+      'environment'  => environment
+    }
+    data['content_hash'] = content_hash if content_hash
+    File.write(File.join(data_dir, '.contentful_sync_cache.yml'), YAML.dump(data))
+  end
+
+  # ── Test: First build with no cache metadata → flag is true ──────────
+  # Requirement 1.5: No previously stored Content_Hash → flag is true
+  # Requirement 2.1: Flag stored in site.config before lower-priority generators
+
+  describe 'first build with no cache metadata' do
+    before do
+      set_credentials
+      stub_client
+      stub_initial_sync
+      stub_empty_fetches
+      ENV.delete('CONTENTFUL_FORCE_SYNC')
+    end
+
+    it 'sets contentful_data_changed to true' do
+      fetcher.generate(site)
+      expect(site_config['contentful_data_changed']).to eq(true)
+    end
+
+    it 'logs that no previous content hash exists' do
+      expect(Jekyll.logger).to receive(:info).with('Contentful:', /No previous content hash/)
+      fetcher.generate(site)
+    end
+  end
+
+  # ── Test: Missing credentials → flag is not set (nil) ────────────────
+  # Requirement 2.2: When ContentfulFetcher did not run due to missing credentials,
+  # generators treat data as changed (flag defaults to true via fetch default)
+
+  describe 'missing credentials' do
+    before { clear_credentials }
+
+    it 'does not set contentful_data_changed (remains nil)' do
+      fetcher.generate(site)
+      expect(site_config['contentful_data_changed']).to be_nil
+    end
+
+    it 'returns early without error' do
+      expect { fetcher.generate(site) }.not_to raise_error
+    end
+  end
+
+  # ── Test: Sync API reports no changes → flag is false, hash not recomputed ──
+  # Requirement 1.4: Sync API no changes → flag false without recomputing hash
+
+  describe 'sync API reports no changes' do
+    before do
+      set_credentials
+      stub_client
+      stub_empty_fetches
+      ENV.delete('CONTENTFUL_FORCE_SYNC')
+      write_cache(content_hash: 'abc123previoushash')
+      stub_incremental_sync(items: [], token: 'same_token')
+    end
+
+    it 'sets contentful_data_changed to false' do
+      fetcher.generate(site)
+      expect(site_config['contentful_data_changed']).to eq(false)
+    end
+
+    it 'does not recompute the content hash' do
+      # The cache metadata should not have compute_content_hash called
+      # We verify by checking the stored hash remains unchanged
+      fetcher.generate(site)
+
+      cache = CacheMetadata.new(data_dir)
+      cache.load
+      # The original hash should be preserved (not overwritten)
+      expect(cache.content_hash).to eq('abc123previoushash')
+    end
+
+    it 'logs sync API no changes reason' do
+      expect(Jekyll.logger).to receive(:info).with('Contentful:', /Sync API reports no changes/)
+      fetcher.generate(site)
+    end
+
+    it 'does not call fetch_and_write_content' do
+      expect(fetcher).not_to receive(:fetch_and_write_content)
+      fetcher.generate(site)
+    end
+  end
+
+  # ── Test: Force sync via env var → flag is true ──────────────────────
+  # Requirement 6.1: CONTENTFUL_FORCE_SYNC=true → flag is true
+
+  describe 'force sync via CONTENTFUL_FORCE_SYNC env var' do
+    before do
+      set_credentials
+      stub_client
+      stub_initial_sync
+      stub_empty_fetches
+      ENV['CONTENTFUL_FORCE_SYNC'] = 'true'
+      write_cache(content_hash: 'existing_hash')
+    end
+
+    it 'sets contentful_data_changed to true' do
+      fetcher.generate(site)
+      expect(site_config['contentful_data_changed']).to eq(true)
+    end
+
+    it 'logs force sync reason' do
+      expect(Jekyll.logger).to receive(:info).with('Contentful:', /Force sync — setting change flag to true/)
+      fetcher.generate(site)
+    end
+
+    it 'performs a full fetch regardless of cache state' do
+      expect(fetcher).to receive(:fetch_and_write_content).once
+      fetcher.generate(site)
+    end
+  end
+
+  # ── Test: Force sync via config → flag is true ──────────────────────
+  # Requirement 6.2: force_contentful_sync config → flag is true
+
+  describe 'force sync via force_contentful_sync config' do
+    before do
+      set_credentials
+      stub_client
+      stub_initial_sync
+      stub_empty_fetches
+      ENV.delete('CONTENTFUL_FORCE_SYNC')
+      site_config['force_contentful_sync'] = true
+      write_cache(content_hash: 'existing_hash')
+    end
+
+    it 'sets contentful_data_changed to true' do
+      fetcher.generate(site)
+      expect(site_config['contentful_data_changed']).to eq(true)
+    end
+
+    it 'logs force sync reason' do
+      expect(Jekyll.logger).to receive(:info).with('Contentful:', /Force sync — setting change flag to true/)
+      fetcher.generate(site)
+    end
+
+    it 'performs a full fetch regardless of cache state' do
+      expect(fetcher).to receive(:fetch_and_write_content).once
+      fetcher.generate(site)
+    end
+  end
+end
