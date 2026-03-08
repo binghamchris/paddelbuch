@@ -112,7 +112,7 @@
     {% if spot.updatedAt %}
     <tr>
       <th>{% t labels.last_updated %}</th>
-      <td colspan="2">{{ spot.updatedAt | localized_datetime: 'long' }}</td>
+      <td colspan="2">{{ spot.updatedAt | localized_date }}</td>
     </tr>
     {% endif %}
   </tbody>

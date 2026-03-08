@@ -53,7 +53,7 @@
     {% if notice.updatedAt %}
     <tr>
       <th>{% t labels.last_updated %}</th>
-      <td>{{ notice.updatedAt | localized_datetime: 'notice_updated' }}</td>
+      <td>{{ notice.updatedAt | localized_date }}</td>
     </tr>
     {% endif %}
   </tbody>

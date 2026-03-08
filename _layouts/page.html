@@ -34,30 +34,10 @@ pageName: static-page
       {% if static_page.updatedAt %}
       <div class="static-page-meta">
         <small class="text-muted">
-          {% t labels.last_updated %}: 
-          <span class="last-updated-date" data-date="{{ static_page.updatedAt }}">
-            {{ static_page.updatedAt | date: "%d.%m.%Y" }}
-          </span>
+          {% t labels.last_updated %}: {{ static_page.updatedAt | localized_date }}
         </small>
       </div>
       {% endif %}
     </div>
   </div>
 </div>
-
-<!-- Date formatting script for locale-aware display -->
-<script src="{{ '/assets/js/date-utils.js' | relative_url }}"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  // Format dates according to current locale
-  var locale = '{{ current_locale }}';
-  var dateElements = document.querySelectorAll('.last-updated-date');
-  
-  dateElements.forEach(function(el) {
-    var dateStr = el.getAttribute('data-date');
-    if (dateStr && window.PaddelbuchDateUtils) {
-      el.textContent = PaddelbuchDateUtils.formatDate(dateStr, locale);
-    }
-  });
-});
-</script>
