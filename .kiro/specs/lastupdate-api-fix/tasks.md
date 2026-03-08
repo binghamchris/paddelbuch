@@ -92,7 +92,7 @@
     - _Preservation: Source YAML data must not be mutated_
     - _Requirements: 2.27, 2.28, 2.29, 2.30, 2.31, 2.32_
 
-  - [~] 3.4 Fix file naming in `api_generator.rb`
+  - [x] 3.4 Fix file naming in `api_generator.rb`
     - Change `FACT_TABLES` key `'notices'` to `'waterwayevents'` with `data_key: 'notices'` (YAML file is still `notices`)
     - Change `FACT_TABLES` key `'protected-areas'` to `'protectedareas'` with `data_key: 'protected_areas'`
     - This produces output files `waterwayevents-de.json`, `waterwayevents-en.json`, `protectedareas-de.json`, `protectedareas-en.json`
