@@ -72,7 +72,7 @@ Extract repeated Liquid-generated map configuration into a shared JS file produc
     - Use Rantly to generate random protected area type entries with `slug` and `name_{locale}`
     - Assert that generating the config and looking up a slug in `protectedAreaTypeNames[locale]` returns the same `name_{locale}` from the source entry
 
-- [~] 5. Checkpoint - Verify template simplifications
+- [x] 5. Checkpoint - Verify template simplifications
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 6. Fix Bundler version mismatch in Amplify build spec
