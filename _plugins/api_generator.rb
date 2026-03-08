@@ -85,7 +85,6 @@ module Jekyll
           end
 
           data = data.sort_by { |item| item['slug'].to_s.downcase }
-          # Track last update from original data (reads _raw_updatedAt) BEFORE transformation
           track_last_update(table_name, data)
 
           # Apply the appropriate transformer to produce Gatsby-compatible output
@@ -102,7 +101,6 @@ module Jekyll
         LOCALES.each do |locale|
           data = get_dimension_data(config[:data_key], locale)
           data = data.sort_by { |item| item['slug'].to_s.downcase }
-          # Track last update from original data (reads _raw_updatedAt) BEFORE transformation
           track_last_update(table_name, data)
 
           # Apply dimension transformer to produce Gatsby-compatible output
@@ -165,9 +163,7 @@ module Jekyll
             'slug' => slug,
             'name' => item["name_#{locale}"] || item['name'],
             'createdAt' => item['createdAt'],
-            'updatedAt' => item['updatedAt'],
-            '_raw_createdAt' => item['_raw_createdAt'],
-            '_raw_updatedAt' => item['_raw_updatedAt']
+            'updatedAt' => item['updatedAt']
           }
           # Pass through type-specific fields when present
           entry['_raw_description'] = item['_raw_description'] if item.key?('_raw_description')
@@ -192,10 +188,9 @@ module Jekyll
 
     def track_last_update(table_name, data)
       return if data.empty?
-      # Use _raw_updatedAt for millisecond-precision timestamps; fall back to updatedAt
-      latest = data.map { |item| item['_raw_updatedAt'] || item['updatedAt'] }.compact.max
+      latest = data.map { |item| item['updatedAt'] }.compact.max
       return unless latest
-      # Normalize to Contentful-style millisecond precision with Z suffix
+      # Normalize to ISO 8601 with Z suffix
       normalized = normalize_to_contentful_timestamp(latest)
       # Take the max across locales — track_last_update is called once per locale
       if @last_updates[table_name].nil? || normalized > @last_updates[table_name]
@@ -203,16 +198,13 @@ module Jekyll
       end
     end
 
-    # Normalize any timestamp string to Contentful-style ISO 8601 with milliseconds
-    # and Z suffix: "YYYY-MM-DDTHH:MM:SS.mmmZ"
-    # Handles inputs like "2023-11-23T09:32:56+00:00" or "2023-11-23T09:32:56Z"
-    # or already-normalized "2023-11-23T09:32:56.000Z"
+    # Normalize any timestamp string to ISO 8601 with Z suffix: "YYYY-MM-DDTHH:MM:SSZ"
+    # Handles inputs like "2023-11-23T09:32:56+00:00" or "2023-11-23T09:32:56.000Z"
     def normalize_to_contentful_timestamp(ts)
       return ts if ts.nil?
-      # Already in correct format?
-      return ts if ts.match?(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/)
+      return ts if ts.match?(/\A\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z\z/)
       time = ts.is_a?(Time) ? ts : Time.parse(ts.to_s)
-      time.utc.strftime('%Y-%m-%dT%H:%M:%S.%3NZ')
+      time.utc.strftime('%Y-%m-%dT%H:%M:%SZ')
     rescue ArgumentError
       ts.to_s
     end
@@ -227,22 +219,15 @@ module Jekyll
       ts.to_s
     end
 
-    # Return the raw millisecond-precision timestamp if available, otherwise
-    # fall back to the regular timestamp and add .000 milliseconds.
+    # Return the timestamp with Z suffix. Prefers _raw key, falls back to regular key.
     def raw_timestamp(item, raw_key, fallback_key)
       raw = item[raw_key]
-      return raw unless raw.nil? || raw.to_s.strip.empty?
+      return normalize_to_contentful_timestamp(raw) unless raw.nil? || raw.to_s.strip.empty?
 
       ts = item[fallback_key]
       return nil if ts.nil? || ts.to_s.strip.empty?
 
-      # Convert second-precision "2023-11-23T09:28:19Z" to "2023-11-23T09:28:19.000Z"
-      begin
-        time = ts.is_a?(Time) ? ts : Time.parse(ts.to_s)
-        time.utc.strftime('%Y-%m-%dT%H:%M:%S.%3NZ')
-      rescue ArgumentError
-        ts.to_s
-      end
+      normalize_to_contentful_timestamp(ts)
     end
 
     # -------------------------------------------------------------------------

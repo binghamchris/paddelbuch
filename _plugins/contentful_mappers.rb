@@ -191,8 +191,6 @@ module ContentfulMappers
         'locale' => locale,
         'createdAt' => sys[:created_at]&.utc&.strftime('%Y-%m-%dT%H:%M:%SZ'),
         'updatedAt' => sys[:updated_at]&.utc&.strftime('%Y-%m-%dT%H:%M:%SZ'),
-        '_raw_createdAt' => sys[:created_at]&.utc&.strftime('%Y-%m-%dT%H:%M:%S.%3NZ'),
-        '_raw_updatedAt' => sys[:updated_at]&.utc&.strftime('%Y-%m-%dT%H:%M:%S.%3NZ')
       }
       mapped = send(mapper_method, entry, fields, locale, *extra_args)
       base.merge(mapped)

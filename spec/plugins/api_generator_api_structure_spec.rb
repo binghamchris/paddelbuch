@@ -587,33 +587,33 @@ RSpec.describe 'ApiGenerator API structure (Bug Condition Exploration)' do
   describe 'timestamp format' do
     let(:spots_data) { parse_page('spots-de.json') }
 
-    it 'all createdAt/updatedAt match millisecond precision with Z suffix' do
-      ts_regex = /\A\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\z/
+    it 'all createdAt/updatedAt match ISO 8601 with Z suffix' do
+      ts_regex = /\A\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z\z/
 
       # Check spots
       spots_data.each do |item|
         expect(item['createdAt']).to match(ts_regex),
-          "Spot createdAt '#{item['createdAt']}' does not match YYYY-MM-DDTHH:MM:SS.mmmZ"
+          "Spot createdAt '#{item['createdAt']}' does not match YYYY-MM-DDTHH:MM:SSZ"
         expect(item['updatedAt']).to match(ts_regex),
-          "Spot updatedAt '#{item['updatedAt']}' does not match YYYY-MM-DDTHH:MM:SS.mmmZ"
+          "Spot updatedAt '#{item['updatedAt']}' does not match YYYY-MM-DDTHH:MM:SSZ"
       end
 
       # Check obstacles
       obstacles_data = parse_page('obstacles-de.json')
       obstacles_data.each do |item|
         expect(item['createdAt']).to match(ts_regex),
-          "Obstacle createdAt '#{item['createdAt']}' does not match YYYY-MM-DDTHH:MM:SS.mmmZ"
+          "Obstacle createdAt '#{item['createdAt']}' does not match YYYY-MM-DDTHH:MM:SSZ"
         expect(item['updatedAt']).to match(ts_regex),
-          "Obstacle updatedAt '#{item['updatedAt']}' does not match YYYY-MM-DDTHH:MM:SS.mmmZ"
+          "Obstacle updatedAt '#{item['updatedAt']}' does not match YYYY-MM-DDTHH:MM:SSZ"
       end
 
       # Check dimension tables
       st_data = parse_page('spottypes-de.json')
       st_data.each do |item|
         expect(item['createdAt']).to match(ts_regex),
-          "SpotType createdAt '#{item['createdAt']}' does not match YYYY-MM-DDTHH:MM:SS.mmmZ"
+          "SpotType createdAt '#{item['createdAt']}' does not match YYYY-MM-DDTHH:MM:SSZ"
         expect(item['updatedAt']).to match(ts_regex),
-          "SpotType updatedAt '#{item['updatedAt']}' does not match YYYY-MM-DDTHH:MM:SS.mmmZ"
+          "SpotType updatedAt '#{item['updatedAt']}' does not match YYYY-MM-DDTHH:MM:SSZ"
       end
     end
   end
