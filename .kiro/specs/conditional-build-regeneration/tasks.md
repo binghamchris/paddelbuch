@@ -90,7 +90,7 @@ Add content-hash-based change detection to the Jekyll build pipeline so that `Ap
 - [x] 5. Checkpoint
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 6. Add conditional regeneration to ApiGenerator
+- [x] 6. Add conditional regeneration to ApiGenerator
   - [x] 6.1 Modify `_plugins/api_generator.rb` to include GeneratorCache and add cache-or-generate logic
     - `include GeneratorCache` in the class
     - At the start of `generate`, read `site.config.fetch('contentful_data_changed', true)`
@@ -123,8 +123,8 @@ Add content-hash-based change detection to the Jekyll build pipeline so that `Ap
     - Test `@@cached_last_updates` is set correctly from cache
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 5.1_
 
-- [ ] 7. Add conditional regeneration to TileGenerator
-  - [~] 7.1 Modify `_plugins/tile_generator.rb` to include GeneratorCache and add cache-or-generate logic
+- [-] 7. Add conditional regeneration to TileGenerator
+  - [x] 7.1 Modify `_plugins/tile_generator.rb` to include GeneratorCache and add cache-or-generate logic
     - `include GeneratorCache` in the class
     - At the start of `generate`, read `site.config.fetch('contentful_data_changed', true)`
     - Set `cache_dir` to `File.join(site.source, '_data', '.tile_cache')`
