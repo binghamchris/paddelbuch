@@ -87,7 +87,7 @@ Replace the existing Leaflet `L.control.layers` with a custom Filter_Panel that 
     - Create `_tests/property/filter-panel-rendering.property.test.js`
     - **Validates: Requirements 8.3**
 
-- [ ] 5. Integrate with existing data pipeline
+- [x] 5. Integrate with existing data pipeline
   - [x] 5.1 Modify `_includes/layer-control.html` to remove spot-type LayerGroups and Leaflet `L.control.layers`, keep non-spot LayerGroups and marker/layer creation functions
     - Remove `spotTypeToLayerGroup` mapping and spot LayerGroups (`entryExit`, `entryOnly`, `exitOnly`, `rest`, `emergency`)
     - Remove `L.control.layers` creation and the `overlayLayers` object
@@ -104,7 +104,7 @@ Replace the existing Leaflet `L.control.layers` with a custom Filter_Panel that 
     - Create `_tests/property/filter-rejected-spots-exclusion.property.test.js`
     - **Validates: Requirements 6.1**
 
-  - [~] 5.3 Modify `_includes/map-init.html` to include new module scripts and initialize the filter system
+  - [x] 5.3 Modify `_includes/map-init.html` to include new module scripts and initialize the filter system
     - Add `<script>` tags for `marker-registry.js` and `filter-engine.js` before `layer-control.html` include
     - Replace `{% include layer-control.html %}` with `{% include filter-panel.html %}`
     - In the `initMapData` function, after `layerGroups` is available: build dimension config array from Jekyll data (spot types with localized labels, paddle craft types with localized labels from `paddle_craft_types.yml`), build layer toggles config for non-spot layers, call `PaddelbuchFilterEngine.init(dimensionConfigs, map)`, call `PaddelbuchFilterPanel.init(map, dimensionConfigs, layerToggles)`
