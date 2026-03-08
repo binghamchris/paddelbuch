@@ -56,8 +56,20 @@ module Jekyll
 
     def generate(site)
       @site = site
+
+      # Skip duplicate runs — with parallel_localization: true, Jekyll runs all
+      # generators once per language. This generator already handles both locales
+      # internally, so only run during the default-language pass.
+      default_lang = site.config['default_lang'] || 'de'
+      current_lang = site.config['lang'] || default_lang
+      if current_lang != default_lang
+        Jekyll.logger.info "Tile Generator:", "Skipping (already generated during #{default_lang} pass)"
+        return
+      end
+
       @grid_cols = ((SWITZERLAND_BOUNDS[:east] - SWITZERLAND_BOUNDS[:west]) / TILE_SIZE[:lon]).ceil
       @grid_rows = ((SWITZERLAND_BOUNDS[:north] - SWITZERLAND_BOUNDS[:south]) / TILE_SIZE[:lat]).ceil
+      @locale_cache = {}
 
       Jekyll.logger.info "Tile Generator:", "Generating #{@grid_cols}x#{@grid_rows} tile grid"
 
@@ -258,15 +270,19 @@ module Jekyll
     end
 
     def get_data_for_locale(data_key, locale)
+      cache_key = "#{data_key}:#{locale}"
+      return @locale_cache[cache_key] if @locale_cache.key?(cache_key)
+
       data = @site.data[data_key]
-      return [] unless data
-      if data.is_a?(Array)
-        data.select { |item| item['locale'] == locale || item['node_locale'] == locale }
-      elsif data.is_a?(Hash)
-        data[locale] || []
-      else
-        []
-      end
+      result = if data.is_a?(Array)
+                 data.select { |item| item['locale'] == locale || item['node_locale'] == locale }
+               elsif data.is_a?(Hash)
+                 data[locale] || []
+               else
+                 []
+               end
+
+      @locale_cache[cache_key] = result
     end
   end
 end

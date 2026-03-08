@@ -55,7 +55,24 @@ module Jekyll
 
     def generate(site)
       @site = site
+
+      # Skip duplicate runs — with parallel_localization: true, Jekyll runs all
+      # generators once per language. This generator already handles both locales
+      # internally, so only run during the default-language pass.
+      # However, site.data['last_updates'] must be set on every pass so Liquid
+      # templates can render timestamps regardless of the current language.
+      default_lang = site.config['default_lang'] || 'de'
+      current_lang = site.config['lang'] || default_lang
+      if current_lang != default_lang
+        # Re-expose cached last_updates for Liquid templates in this language pass
+        site.data['last_updates'] = @@cached_last_updates.dup if defined?(@@cached_last_updates) && @@cached_last_updates
+        Jekyll.logger.info "API Generator:", "Skipping (already generated during #{default_lang} pass)"
+        return
+      end
+
       @last_updates = {}
+      @timestamp_cache = {}
+      @locale_cache = {}
 
       generate_fact_tables
       generate_dimension_tables
@@ -85,11 +102,24 @@ module Jekyll
           end
 
           data = data.sort_by { |item| item['slug'].to_s.downcase }
-          track_last_update(table_name, data)
 
-          # Apply the appropriate transformer to produce Gatsby-compatible output
+          # Track last update and transform in a single pass
           transformer = FACT_TABLE_TRANSFORMERS[table_name]
-          transformed_data = data.map { |item| send(transformer, item) }
+          latest_ts = nil
+          transformed_data = data.map do |item|
+            ts = item['updatedAt']
+            if ts && (latest_ts.nil? || ts > latest_ts)
+              latest_ts = ts
+            end
+            send(transformer, item)
+          end
+
+          if latest_ts
+            normalized = normalize_to_contentful_timestamp(latest_ts)
+            if @last_updates[table_name].nil? || normalized > @last_updates[table_name]
+              @last_updates[table_name] = normalized
+            end
+          end
 
           add_json_page("#{table_name}-#{locale}.json", transformed_data)
         end
@@ -101,10 +131,23 @@ module Jekyll
         LOCALES.each do |locale|
           data = get_dimension_data(config[:data_key], locale)
           data = data.sort_by { |item| item['slug'].to_s.downcase }
-          track_last_update(table_name, data)
 
-          # Apply dimension transformer to produce Gatsby-compatible output
-          transformed_data = data.map { |item| transform_dimension_entry(item, locale, table_name) }
+          # Track last update and transform in a single pass
+          latest_ts = nil
+          transformed_data = data.map do |item|
+            ts = item['updatedAt']
+            if ts && (latest_ts.nil? || ts > latest_ts)
+              latest_ts = ts
+            end
+            transform_dimension_entry(item, locale, table_name)
+          end
+
+          if latest_ts
+            normalized = normalize_to_contentful_timestamp(latest_ts)
+            if @last_updates[table_name].nil? || normalized > @last_updates[table_name]
+              @last_updates[table_name] = normalized
+            end
+          end
 
           add_json_page("#{table_name}-#{locale}.json", transformed_data)
         end
@@ -127,6 +170,9 @@ module Jekyll
 
       # Expose to Liquid so api.html can render timestamps at build time
       @site.data['last_updates'] = camel_updates.dup
+
+      # Cache for reuse during non-default language passes
+      @@cached_last_updates = camel_updates.dup
     end
 
     def add_json_page(filename, data)
@@ -137,16 +183,19 @@ module Jekyll
     end
 
     def get_data_for_locale(data_key, locale)
-      data = resolve_data_key(data_key)
-      return [] unless data
+      cache_key = "#{data_key}:#{locale}"
+      return @locale_cache[cache_key] if @locale_cache.key?(cache_key)
 
-      if data.is_a?(Array)
-        data.select { |item| item['locale'] == locale || item['node_locale'] == locale }
-      elsif data.is_a?(Hash)
-        data[locale] || []
-      else
-        []
-      end
+      data = resolve_data_key(data_key)
+      result = if data.is_a?(Array)
+                 data.select { |item| item['locale'] == locale || item['node_locale'] == locale }
+               elsif data.is_a?(Hash)
+                 data[locale] || []
+               else
+                 []
+               end
+
+      @locale_cache[cache_key] = result
     end
 
     def get_dimension_data(data_key, locale)
@@ -177,36 +226,34 @@ module Jekyll
     end
 
     def resolve_data_key(data_key)
+      return @data_key_cache[data_key] if @data_key_cache&.key?(data_key)
+      @data_key_cache ||= {}
+
       keys = data_key.split('/')
       data = @site.data
       keys.each do |key|
         return nil unless data.is_a?(Hash)
         data = data[key]
       end
-      data
-    end
-
-    def track_last_update(table_name, data)
-      return if data.empty?
-      latest = data.map { |item| item['updatedAt'] }.compact.max
-      return unless latest
-      # Normalize to ISO 8601 with Z suffix
-      normalized = normalize_to_contentful_timestamp(latest)
-      # Take the max across locales — track_last_update is called once per locale
-      if @last_updates[table_name].nil? || normalized > @last_updates[table_name]
-        @last_updates[table_name] = normalized
-      end
+      @data_key_cache[data_key] = data
     end
 
     # Normalize any timestamp string to ISO 8601 with Z suffix: "YYYY-MM-DDTHH:MM:SSZ"
     # Handles inputs like "2023-11-23T09:32:56+00:00" or "2023-11-23T09:32:56.000Z"
+    # Results are memoized since the same timestamps appear across many items.
     def normalize_to_contentful_timestamp(ts)
       return ts if ts.nil?
-      return ts if ts.match?(/\A\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z\z/)
-      time = ts.is_a?(Time) ? ts : Time.parse(ts.to_s)
-      time.utc.strftime('%Y-%m-%dT%H:%M:%SZ')
+      return @timestamp_cache[ts] if @timestamp_cache.key?(ts)
+
+      result = if ts.match?(/\A\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z\z/)
+                 ts
+               else
+                 time = ts.is_a?(Time) ? ts : Time.parse(ts.to_s)
+                 time.utc.strftime('%Y-%m-%dT%H:%M:%SZ')
+               end
+      @timestamp_cache[ts] = result
     rescue ArgumentError
-      ts.to_s
+      @timestamp_cache[ts] = ts.to_s
     end
 
     # Convert timestamps to Contentful-style ISO 8601 with milliseconds and Z suffix
