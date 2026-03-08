@@ -43,7 +43,7 @@ Extract repeated Liquid-generated map configuration into a shared JS file produc
 - [x] 2. Checkpoint - Verify MapConfigGenerator
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 3. Simplify detail-map-layers.html to use shared config
+- [x] 3. Simplify detail-map-layers.html to use shared config
   - [x] 3.1 Modify `_includes/detail-map-layers.html` to load shared config
     - Add `<script src="/api/map-config.js"></script>` tag before the bootstrap script
     - Replace Liquid `for` loops over `site.data.types.spot_types` and `site.data.types.paddle_craft_types` with runtime reads from `window.paddelbuchMapConfig[locale].dimensions`
