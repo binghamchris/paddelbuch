@@ -46,7 +46,7 @@ Replace the existing Leaflet `L.control.layers` with a custom Filter_Panel that 
     - Create `_tests/property/filter-engine-and-logic.property.test.js`
     - **Validates: Requirements 1.2, 1.5**
 
-  - [~] 2.3 Write property test for spot type match function
+  - [x] 2.3 Write property test for spot type match function
     - **Property 2: Spot type match function**
     - Generate random `spotType_slug` and random set of selected slugs; assert match function returns `selectedSet.has(slug)`
     - Create `_tests/property/filter-engine-spot-type-match.property.test.js`
