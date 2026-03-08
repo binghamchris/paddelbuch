@@ -46,7 +46,7 @@
 
 - [ ] 3. Fix API JSON output to match Gatsby structure
 
-  - [~] 3.1 Modify `contentful_mappers.rb` to preserve raw data for API use
+  - [x] 3.1 Modify `contentful_mappers.rb` to preserve raw data for API use
     - Add `_raw_createdAt` and `_raw_updatedAt` fields in `flatten_entry` that store the original Contentful timestamp string with millisecond precision (`sys[:created_at]&.utc&.strftime('%Y-%m-%dT%H:%M:%S.%3NZ')`) alongside the existing `createdAt`/`updatedAt` fields
     - Add `_raw_description` field in `map_spot`, `map_obstacle`, `map_event_notice` that stores the raw Contentful rich text JSON string (from `resolve_field(fields, :description, locale)`) before HTML rendering — if the field is a rich text object, serialize it to JSON string; if nil, store nil
     - Add `_raw_portageDescription` field in `map_obstacle` that stores the raw rich text JSON string for portage description
