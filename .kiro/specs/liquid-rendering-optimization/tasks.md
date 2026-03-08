@@ -74,7 +74,7 @@ Externalize inline JavaScript from Liquid templates into four static external `.
     - Ensure zero inline script blocks with Liquid interpolation remain
     - _Requirements: 4.2, 4.3, 4.9, 4.15_
 
-  - [~] 4.6 Write property test for map initialization per page type (Property 4)
+  - [x] 4.6 Write property test for map initialization per page type (Property 4)
     - **Property 4: detail-map.js initializes map correctly per page type**
     - For any randomly generated page type and valid data attributes, verify the map init function produces the correct center, zoom, and layer configuration
     - **Validates: Requirements 4.4, 4.11, 4.12, 4.13, 4.14, 6.4**
