@@ -8,9 +8,12 @@
 # the cleanup phase (important for multi-language builds).
 
 require 'json'
+require_relative 'generator_cache'
 
 module Jekyll
   class ApiGenerator < Generator
+    include GeneratorCache
+
     safe true
     priority :low
 
@@ -70,6 +73,34 @@ module Jekyll
         return
       end
 
+      data_changed = site.config.fetch('contentful_data_changed', true)
+      cache_dir = File.join(site.source, '_data', '.api_cache')
+
+      # Attempt cache hit when data hasn't changed
+      cache_hit = false
+      if !data_changed && cache_available?(cache_dir)
+        begin
+          load_api_from_cache(site, cache_dir)
+          cache_hit = true
+        rescue => e
+          Jekyll.logger.warn "API Generator:", "Corrupted cache file: #{e.message} — falling back to full generation"
+          clear_cache(cache_dir)
+        end
+      end
+
+      return if cache_hit
+
+      # Log the appropriate message for the generation path
+      if !data_changed
+        Jekyll.logger.info "API Generator:", "Cache empty/missing — performing full generation"
+      else
+        Jekyll.logger.info "API Generator:", "Generating JSON API files"
+      end
+
+      # Full generation with cache writing
+      @cache_dir = cache_dir
+      clear_cache(cache_dir)
+
       @last_updates = {}
       @timestamp_cache = {}
       @locale_cache = {}
@@ -78,7 +109,7 @@ module Jekyll
       generate_dimension_tables
       generate_last_update_index
 
-      Jekyll.logger.info "API Generator:", "Generated JSON API files"
+      @cache_dir = nil
     end
 
     private
@@ -175,11 +206,41 @@ module Jekyll
       @@cached_last_updates = camel_updates.dup
     end
 
+    def load_api_from_cache(site, cache_dir)
+      cached_files = read_cache_files(cache_dir)
+      cached_files.each do |entry|
+        filename = entry[:relative_path]
+        content = entry[:content]
+
+        page = PageWithoutAFile.new(site, site.source, 'api', filename)
+        page.content = content
+        page.data['layout'] = nil
+        site.pages << page
+
+        # Reconstruct last_updates from the cached lastUpdateIndex.json
+        if filename == 'lastUpdateIndex.json'
+          index_data = JSON.parse(content)
+          camel_updates = {}
+          index_data.each do |entry_item|
+            camel_updates[entry_item['table']] = entry_item['lastUpdatedAt']
+          end
+          site.data['last_updates'] = camel_updates.dup
+          @@cached_last_updates = camel_updates.dup
+        end
+      end
+
+      Jekyll.logger.info "API Generator:", "Using cached API files (#{cached_files.size} files loaded)"
+    end
+
     def add_json_page(filename, data)
       page = PageWithoutAFile.new(@site, @site.source, 'api', filename)
-      page.content = JSON.generate(data)
+      json_content = JSON.generate(data)
+      page.content = json_content
       page.data['layout'] = nil
       @site.pages << page
+
+      # Write to cache during fresh generation
+      write_cache_file(@cache_dir, filename, json_content) if @cache_dir
     end
 
     def get_data_for_locale(data_key, locale)
