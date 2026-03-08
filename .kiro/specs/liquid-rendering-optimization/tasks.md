@@ -93,7 +93,7 @@ Externalize inline JavaScript from Liquid templates into four static external `.
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 6. Create `assets/js/layer-control.js` and update `_includes/layer-control.html`
-  - [~] 6.1 Extract layer control JavaScript into `assets/js/layer-control.js`
+  - [x] 6.1 Extract layer control JavaScript into `assets/js/layer-control.js`
     - Move the layer control initialization logic from `_includes/layer-control.html` into `assets/js/layer-control.js`
     - Replace Liquid `{{ current_locale }}` references with reads from `document.currentScript.getAttribute('data-locale')` or `window.paddelbuchMapConfig`
     - Replace Liquid `{{ map_var }}` references with `window.paddelbuchMap`
