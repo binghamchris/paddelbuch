@@ -97,15 +97,16 @@
     border-color: $swisscanoe-blue;
 
     &::after {
-      content: '✓';
+      content: '';
       position: absolute;
-      top: 50%;
+      top: 45%;
       left: 50%;
-      transform: translate(-50%, -50%);
-      color: $white;
-      font-family: 'Murecho', sans-serif;
-      font-size: 0.9em;
-      line-height: 1;
+      width: 0.35em;
+      height: 0.65em;
+      border: solid $white;
+      border-width: 0 2px 2px 0;
+      border-radius: 0;
+      transform: translate(-50%, -55%) rotate(45deg);
     }
   }
 

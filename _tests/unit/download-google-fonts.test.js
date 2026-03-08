@@ -9,7 +9,6 @@ const EXPECTED_FACES = [
   { family: 'Fredoka', weight: '300' },
   { family: 'Fredoka', weight: '400' },
   { family: 'Fredoka', weight: '500' },
-  { family: 'Murecho', weight: '400' },
   { family: 'Quicksand', weight: '400' },
   { family: 'Quicksand', weight: '500' },
   { family: 'Quicksand', weight: '700' },
@@ -22,10 +21,10 @@ describe('download-google-fonts.js output', () => {
     css = fs.readFileSync(FONTS_CSS, 'utf-8');
   });
 
-  test('fonts.css contains exactly 7 @font-face declarations', () => {
+  test('fonts.css contains exactly 6 @font-face declarations', () => {
     const matches = css.match(/@font-face\s*\{/g);
     expect(matches).not.toBeNull();
-    expect(matches).toHaveLength(7);
+    expect(matches).toHaveLength(6);
   });
 
   test.each(EXPECTED_FACES)(
