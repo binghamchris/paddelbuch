@@ -126,7 +126,7 @@ Replace the existing Leaflet `L.control.layers` with a custom Filter_Panel that 
     - Create `_tests/unit/filter-system.test.js`
     - _Requirements: 1.1, 1.2, 1.5, 2.4, 3.4, 4.3, 9.2_
 
-  - [~] 7.2 Write unit tests for non-spot layer toggles and rejected spots
+  - [x] 7.2 Write unit tests for non-spot layer toggles and rejected spots
     - Test rejected spot toggle adds/removes noEntry LayerGroup independently
     - Test non-spot layer toggles each add/remove their LayerGroup
     - Test popup open collapses the filter panel
