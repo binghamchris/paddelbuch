@@ -66,7 +66,7 @@ Extract repeated Liquid-generated map configuration into a shared JS file produc
     - Ensure the same lookup data is available as the current Liquid-generated implementation
     - _Requirements: 3.1, 3.2, 4.6_
 
-  - [~] 4.2 Write property test: Protected area type name round-trip (Property 4)
+  - [x] 4.2 Write property test: Protected area type name round-trip (Property 4)
     - **Property 4: Protected area type name round-trip**
     - **Validates: Requirements 3.2, 4.6**
     - Use Rantly to generate random protected area type entries with `slug` and `name_{locale}`

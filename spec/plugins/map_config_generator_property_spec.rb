@@ -552,3 +552,108 @@ RSpec.describe Jekyll::MapConfigGenerator, 'Property 3: Runtime config structure
     }
   end
 end
+
+# Feature: build-time-optimization, Property 4: Protected area type name round-trip
+# **Validates: Requirements 3.2, 4.6**
+
+RSpec.describe Jekyll::MapConfigGenerator, 'Property 4: Protected area type name round-trip' do
+  let(:tmpdir) { Dir.mktmpdir }
+  let(:site) do
+    config = Jekyll.configuration(
+      'source' => tmpdir,
+      'destination' => File.join(tmpdir, '_site'),
+      'quiet' => true
+    )
+    Jekyll::Site.new(config)
+  end
+
+  after { FileUtils.remove_entry(tmpdir) }
+
+  let(:generator) { described_class.new }
+
+  def run_generator
+    generator.generate(site)
+  end
+
+  def find_map_config_page
+    site.pages.find { |p| p.name == 'map-config.js' }
+  end
+
+  def parse_config_from_page(page)
+    json_str = page.content.sub('window.paddelbuchMapConfig = ', '').chomp(';')
+    JSON.parse(json_str)
+  end
+
+  it 'looking up a slug in protectedAreaTypeNames returns the original name_{locale} (100 iterations)' do
+    property_of {
+      slug_gen = proc {
+        len = range(3, 15)
+        letters = ('a'..'z').to_a
+        chars = letters + ['-']
+        first = letters.sample
+        middle = Array.new([len - 2, 0].max) { chars.sample }.join
+        last = letters.sample
+        "#{first}#{middle}#{last}"
+      }
+
+      label_gen = proc {
+        len = range(2, 20)
+        chars = ('a'..'z').to_a + ('A'..'Z').to_a + [' ', 'ä', 'ö', 'ü']
+        result = Array.new(len) { chars.sample }.join.strip
+        result.empty? ? 'Label' : result
+      }
+
+      # Generate 1-10 unique protected area type entries
+      count = range(1, 10)
+      slugs = Array.new(count) { slug_gen.call }.uniq
+      entries = slugs.map do |s|
+        { 'slug' => s, 'name_de' => label_gen.call, 'name_en' => label_gen.call }
+      end
+
+      guard slugs.length >= 1
+      entries
+    }.check(100) { |entries|
+      site.pages.clear
+
+      # Create data entries duplicated per locale (matching existing data format)
+      protected_area_types = entries.flat_map do |e|
+        %w[de en].map do |loc|
+          { 'locale' => loc, 'slug' => e['slug'], 'name_de' => e['name_de'], 'name_en' => e['name_en'] }
+        end
+      end
+
+      site.data['types'] = {
+        'spot_types' => [],
+        'paddle_craft_types' => [],
+        'protected_area_types' => protected_area_types
+      }
+
+      run_generator
+
+      page = find_map_config_page
+      expect(page).not_to be_nil, 'Generator should produce a map-config.js page'
+
+      config = parse_config_from_page(page)
+
+      # Round-trip: for each source entry, look up its slug in the generated
+      # protectedAreaTypeNames for each locale and verify it returns the
+      # original name_{locale} value.
+      %w[de en].each do |locale|
+        pat_names = config[locale]['protectedAreaTypeNames']
+        expect(pat_names).to be_a(Hash)
+
+        entries.each do |entry|
+          slug = entry['slug']
+          expected_name = entry["name_#{locale}"]
+
+          expect(pat_names).to have_key(slug),
+            "Expected slug '#{slug}' in protectedAreaTypeNames for locale '#{locale}'"
+
+          expect(pat_names[slug]).to eq(expected_name),
+            "Round-trip failed for slug '#{slug}' in locale '#{locale}': " \
+            "expected '#{expected_name}', got '#{pat_names[slug]}'"
+        end
+      end
+    }
+  end
+end
