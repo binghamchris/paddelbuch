@@ -2,7 +2,7 @@
 
 .filter-panel {
   background: $white;
-  border: 1px solid $secondary-blue;
+  border: 1px solid $secondary-blue !important;
   border-radius: 0;
   box-shadow: none;
   font: 1.2em/1.4 $font-sans-serif;
@@ -63,9 +63,8 @@
 }
 
 .filter-panel legend {
-  font-weight: 600;
-  font-size: 0.85em;
-  padding: 0 4px;
+  font-weight: 500;
+  font-size: 1.2em;
   color: $swisscanoe-blue;
 }
 
@@ -80,12 +79,39 @@
 }
 
 .filter-panel input[type="checkbox"] {
+  -webkit-appearance: none;
+  appearance: none;
   height: 1.3em;
   width: 1.3em;
   margin-right: 0.5em;
   vertical-align: middle;
+  border: 2px solid $secondary-blue;
   border-radius: 0;
-  accent-color: $swisscanoe-blue;
+  background: $white;
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+
+  &:checked {
+    background: $swisscanoe-blue;
+    border-color: $swisscanoe-blue;
+
+    &::after {
+      content: '✓';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: $white;
+      font-size: 0.9em;
+      line-height: 1;
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid $secondary-blue;
+    outline-offset: 1px;
+  }
 }
 
 .filter-panel-separator {
