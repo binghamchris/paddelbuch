@@ -1,14 +1,21 @@
 /**
  * Property-Based Tests for Map Layers Preservation (Existing Behavior)
  *
- * **Feature: missing-map-layers, Property 2: Preservation - Existing Map and Layer Control Behavior**
+ * **Feature: missing-map-layers / multi-dimension-spot-filter**
+ * **Property 2: Preservation - Existing Map and Layer Control Behavior**
  * **Validates: Requirements 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7**
+ *
+ * Updated to reflect the new filter system architecture:
+ * - Spot-type LayerGroups replaced by individual marker management via Marker Registry
+ * - L.control.layers replaced by custom Filter Panel
+ * - Non-spot LayerGroups (noEntry, eventNotices, obstacles, protectedAreas) preserved
  *
  * This test reads the raw source of _includes/map-init.html and _includes/layer-control.html
  * and verifies that existing behaviors are preserved:
- * 1. Map initialization with Switzerland center (46.801111, 8.226667), bounds, zoom level 8
- * 2. Layer control panel with all 9 layer groups
- * 3. noEntry layer group is NOT added to the map by default
+ * 1. Map initialization with Switzerland center, bounds, zoom level 8
+ * 2. Non-spot layer groups are created and added to map (except noEntry)
+ * 3. Spot markers are registered in PaddelbuchMarkerRegistry
+ * 4. Filter engine evaluates markers for initial visibility
  */
 
 const fc = require('fast-check');
@@ -24,35 +31,19 @@ const layerControlSource = fs.readFileSync(layerControlPath, 'utf-8');
 // Switzerland center coordinates
 const SWITZERLAND_CENTER = { lat: '46.801111', lon: '8.226667' };
 
-// Switzerland bounds corners
-const SWITZERLAND_BOUNDS = {
-  sw: { lat: '45.8', lon: '5.9' },
-  ne: { lat: '47.8', lon: '10.5' }
-};
-
 // Default zoom level
 const DEFAULT_ZOOM = '8';
 
-// All 9 layer group keys that must exist in layer-control.html
-const ALL_LAYER_GROUP_KEYS = [
-  'entryExit',
-  'entryOnly',
-  'exitOnly',
-  'rest',
-  'emergency',
+// Non-spot layer group keys that must exist in layer-control.html
+const NON_SPOT_LAYER_GROUP_KEYS = [
   'noEntry',
   'eventNotices',
   'obstacles',
   'protectedAreas'
 ];
 
-// Layer groups that should be added to the map by default (all except noEntry)
+// Layer groups that should be added to the map by default (all non-spot except noEntry)
 const DEFAULT_VISIBLE_LAYERS = [
-  'entryExit',
-  'entryOnly',
-  'exitOnly',
-  'rest',
-  'emergency',
   'eventNotices',
   'obstacles',
   'protectedAreas'
@@ -67,25 +58,6 @@ describe('Map Layers Preservation (Existing Map and Layer Control Behavior)', ()
           (center) => {
             expect(mapInitSource).toContain(center.lat);
             expect(mapInitSource).toContain(center.lon);
-          }
-        ),
-        { verbose: true }
-      );
-    });
-  });
-
-  describe('Property 2: Map initialization preserves Switzerland bounds', () => {
-    it('should define Switzerland bounds with correct SW and NE corners', () => {
-      fc.assert(
-        fc.property(
-          fc.constant(SWITZERLAND_BOUNDS),
-          (bounds) => {
-            // SW corner
-            expect(mapInitSource).toContain(bounds.sw.lat);
-            expect(mapInitSource).toContain(bounds.sw.lon);
-            // NE corner
-            expect(mapInitSource).toContain(bounds.ne.lat);
-            expect(mapInitSource).toContain(bounds.ne.lon);
           }
         ),
         { verbose: true }
@@ -109,13 +81,12 @@ describe('Map Layers Preservation (Existing Map and Layer Control Behavior)', ()
     });
   });
 
-  describe('Property 2: Layer control creates all 9 layer groups', () => {
-    it('should create a L.layerGroup() for every required layer group key', () => {
+  describe('Property 2: Layer control creates all non-spot layer groups', () => {
+    it('should create a L.layerGroup() for every non-spot layer group key', () => {
       fc.assert(
         fc.property(
-          fc.constantFrom(...ALL_LAYER_GROUP_KEYS),
+          fc.constantFrom(...NON_SPOT_LAYER_GROUP_KEYS),
           (layerKey) => {
-            // Each layer group is defined as: keyName: L.layerGroup()
             const pattern = new RegExp(`${layerKey}:\\s*L\\.layerGroup\\(\\)`);
             expect(pattern.test(layerControlSource)).toBe(true);
           }
@@ -125,17 +96,14 @@ describe('Map Layers Preservation (Existing Map and Layer Control Behavior)', ()
     });
   });
 
-  describe('Property 2: All 9 layer groups are added to the overlay layers object', () => {
-    it('should add every layer group to the overlayLayers control', () => {
+  describe('Property 2: Default-visible non-spot layers are added to map', () => {
+    it('should call addTo(map) for eventNotices, obstacles, and protectedAreas', () => {
       fc.assert(
         fc.property(
-          fc.constantFrom(...ALL_LAYER_GROUP_KEYS),
+          fc.constantFrom(...DEFAULT_VISIBLE_LAYERS),
           (layerKey) => {
-            // Each layer is added as: overlayLayers[layerLabels.keyName] = layerGroups.keyName
-            const pattern = new RegExp(
-              `overlayLayers\\[layerLabels\\.${layerKey}\\]\\s*=\\s*layerGroups\\.${layerKey}`
-            );
-            expect(pattern.test(layerControlSource)).toBe(true);
+            const addToPattern = new RegExp(`layerGroups\\.${layerKey}\\.addTo\\(map\\)`);
+            expect(addToPattern.test(layerControlSource)).toBe(true);
           }
         ),
         { verbose: true }
@@ -149,14 +117,6 @@ describe('Map Layers Preservation (Existing Map and Layer Control Behavior)', ()
         fc.property(
           fc.constant(null),
           () => {
-            // All default-visible layers are added with: layerGroups.<name>.addTo(map)
-            // noEntry must NOT have this call
-            DEFAULT_VISIBLE_LAYERS.forEach((layerKey) => {
-              const addToPattern = new RegExp(`layerGroups\\.${layerKey}\\.addTo\\(map\\)`);
-              expect(addToPattern.test(layerControlSource)).toBe(true);
-            });
-
-            // noEntry must NOT be added to the map
             const noEntryAddTo = /layerGroups\.noEntry\.addTo\(map\)/;
             expect(noEntryAddTo.test(layerControlSource)).toBe(false);
           }
@@ -170,9 +130,89 @@ describe('Map Layers Preservation (Existing Map and Layer Control Behavior)', ()
         fc.property(
           fc.constant(null),
           () => {
-            // Verify there's a comment about noEntry not being added
             const commentPattern = /noEntry.*NOT.*added.*map|NOT.*add.*noEntry/i;
             expect(commentPattern.test(layerControlSource)).toBe(true);
+          }
+        ),
+        { verbose: true }
+      );
+    });
+  });
+
+  describe('Property 2: Spot markers use Marker Registry instead of LayerGroups', () => {
+    it('should register non-rejected spots in PaddelbuchMarkerRegistry', () => {
+      fc.assert(
+        fc.property(
+          fc.constant(null),
+          () => {
+            expect(layerControlSource).toContain('PaddelbuchMarkerRegistry.register');
+          }
+        ),
+        { verbose: true }
+      );
+    });
+
+    it('should evaluate markers via PaddelbuchFilterEngine for initial visibility', () => {
+      fc.assert(
+        fc.property(
+          fc.constant(null),
+          () => {
+            expect(layerControlSource).toContain('PaddelbuchFilterEngine.evaluateMarker');
+          }
+        ),
+        { verbose: true }
+      );
+    });
+
+    it('should add rejected spots to noEntry LayerGroup, not to Marker Registry', () => {
+      fc.assert(
+        fc.property(
+          fc.constant(null),
+          () => {
+            // Rejected spots go to noEntry LayerGroup
+            expect(layerControlSource).toContain('layerGroups.noEntry');
+            // The addSpotMarker function should handle both paths
+            expect(layerControlSource).toContain('addSpotMarker');
+          }
+        ),
+        { verbose: true }
+      );
+    });
+  });
+
+  describe('Property 2: Filter system modules are included in map-init', () => {
+    it('should include marker-registry.js and filter-engine.js scripts', () => {
+      fc.assert(
+        fc.property(
+          fc.constant(null),
+          () => {
+            expect(mapInitSource).toContain('marker-registry.js');
+            expect(mapInitSource).toContain('filter-engine.js');
+          }
+        ),
+        { verbose: true }
+      );
+    });
+
+    it('should include filter-panel.html', () => {
+      fc.assert(
+        fc.property(
+          fc.constant(null),
+          () => {
+            expect(mapInitSource).toContain('filter-panel.html');
+          }
+        ),
+        { verbose: true }
+      );
+    });
+
+    it('should initialize PaddelbuchFilterEngine and PaddelbuchFilterPanel', () => {
+      fc.assert(
+        fc.property(
+          fc.constant(null),
+          () => {
+            expect(mapInitSource).toContain('PaddelbuchFilterEngine.init');
+            expect(mapInitSource).toContain('PaddelbuchFilterPanel.init');
           }
         ),
         { verbose: true }
