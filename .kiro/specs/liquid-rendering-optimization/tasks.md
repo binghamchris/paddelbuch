@@ -30,7 +30,7 @@ Externalize inline JavaScript from Liquid templates into four static external `.
     - No Liquid interpolation exists in this code, so it's a direct move
     - _Requirements: 3.1_
 
-  - [~] 2.2 Update `_includes/filter-panel.html` to load external JS
+  - [x] 2.2 Update `_includes/filter-panel.html` to load external JS
     - Replace the inline `<script>` block with a `<script src="...">` tag pointing to `filter-panel.js`
     - Ensure zero inline script blocks with Liquid interpolation remain
     - _Requirements: 3.2, 3.3_
