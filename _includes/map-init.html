@@ -11,6 +11,7 @@
   Requirements: 1.1, 1.2, 1.3, 1.4
 -->
 
+{% assign current_locale = include.locale | default: site.lang | default: 'de' %}
 {% assign map_id = include.map_id | default: 'map' %}
 {% assign center_lat = include.center_lat | default: 46.801111 %}
 {% assign center_lon = include.center_lon | default: 8.226667 %}
@@ -94,8 +95,15 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
+<!-- Include marker registry and filter engine modules (loaded before layer-control so they are available during marker creation) -->
+<script src="{{ '/assets/js/marker-registry.js' | relative_url }}"></script>
+<script src="{{ '/assets/js/filter-engine.js' | relative_url }}"></script>
+
 <!-- Include layer controls (Requirements 2.7, 2.8, 8.3) -->
 {% include layer-control.html locale=site.lang %}
+
+<!-- Include filter panel UI (Requirements 5.1, 5.2, 7.1, 7.2, 7.5, 8.3) -->
+{% include filter-panel.html %}
 
 <!-- Include marker and layer style modules (Requirements 2.5, 2.6) -->
 <script src="{{ '/assets/js/marker-styles.js' | relative_url }}"></script>
@@ -172,6 +180,82 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     var locale = window.paddelbuchCurrentLocale || 'de';
+
+    // Build dimension configuration array from Jekyll data (Requirements 8.1, 8.2)
+    var dimensionConfigs = [
+      {
+        key: 'spotType',
+        {% if current_locale == 'en' %}
+        label: 'Spot Type',
+        {% else %}
+        label: 'Ortstyp',
+        {% endif %}
+        options: [
+          {% if current_locale == 'en' %}
+          { slug: 'einstieg-ausstieg', label: 'Entry & Exit Spots' },
+          { slug: 'nur-einstieg', label: 'Entry Only Spots' },
+          { slug: 'nur-ausstieg', label: 'Exit Only Spots' },
+          { slug: 'rasthalte', label: 'Rest Spots' },
+          { slug: 'notauswasserungsstelle', label: 'Emergency Exit Spots' }
+          {% else %}
+          { slug: 'einstieg-ausstieg', label: 'Ein-/Ausstiegsorte' },
+          { slug: 'nur-einstieg', label: 'Einstiegsorte' },
+          { slug: 'nur-ausstieg', label: 'Ausstiegsorte' },
+          { slug: 'rasthalte', label: 'Rasthalte' },
+          { slug: 'notauswasserungsstelle', label: 'Notauswasserungsstelle' }
+          {% endif %}
+        ],
+        matchFn: function(meta, selected) { return selected.has(meta.spotType_slug); }
+      },
+      {
+        key: 'paddleCraftType',
+        {% if current_locale == 'en' %}
+        label: 'Paddle Craft Type',
+        {% else %}
+        label: 'Paddelboottyp',
+        {% endif %}
+        options: [
+          {% assign craft_types = site.data.types.paddle_craft_types | where: "locale", current_locale %}
+          {% assign craft_name_key = "name_" | append: current_locale %}
+          {% for ct in craft_types %}
+          { slug: '{{ ct.slug }}', label: '{{ ct[craft_name_key] | default: ct.name_de }}' }{% unless forloop.last %},{% endunless %}
+          {% endfor %}
+        ],
+        matchFn: function(meta, selected) {
+          var types = meta.paddleCraftTypes || [];
+          for (var i = 0; i < types.length; i++) {
+            if (selected.has(types[i])) return true;
+          }
+          return false;
+        }
+      }
+    ];
+
+    // Build layer toggle configuration for non-spot layers (Requirements 7.1, 7.2, 7.5)
+    var layerLabels = {
+      {% if current_locale == 'en' %}
+      noEntry: 'No Entry Spots',
+      eventNotices: 'Event Notices',
+      obstacles: 'Obstacles',
+      protectedAreas: 'Protected Areas'
+      {% else %}
+      noEntry: 'Keine Zutritt Orte',
+      eventNotices: 'Gewässerereignisse',
+      obstacles: 'Hindernisse',
+      protectedAreas: 'Schutzgebiete'
+      {% endif %}
+    };
+
+    var layerToggles = [
+      { key: 'noEntry', label: layerLabels.noEntry, layerGroup: layerGroups.noEntry, defaultChecked: false },
+      { key: 'eventNotices', label: layerLabels.eventNotices, layerGroup: layerGroups.eventNotices, defaultChecked: true },
+      { key: 'obstacles', label: layerLabels.obstacles, layerGroup: layerGroups.obstacles, defaultChecked: true },
+      { key: 'protectedAreas', label: layerLabels.protectedAreas, layerGroup: layerGroups.protectedAreas, defaultChecked: true }
+    ];
+
+    // Initialize filter engine and panel (Requirements 5.1, 5.2, 8.1, 8.2, 9.1)
+    PaddelbuchFilterEngine.init(dimensionConfigs, map);
+    PaddelbuchFilterPanel.init(map, dimensionConfigs, layerToggles);
 
     // Initial data load for the current viewport
     var bounds = PaddelbuchSpatialUtils.leafletBoundsToObject(map.getBounds());
