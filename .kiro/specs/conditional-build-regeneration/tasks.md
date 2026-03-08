@@ -185,7 +185,7 @@ Add content-hash-based change detection to the Jekyll build pipeline so that `Ap
     - Test that `page.data['layout']` is `nil` for all cached pages (same as fresh)
     - _Requirements: 8.1, 8.2, 8.4_
 
-- [~] 10. Final checkpoint
+- [x] 10. Final checkpoint
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Notes
