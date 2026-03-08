@@ -154,5 +154,186 @@ module Jekyll
     rescue ArgumentError
       ts.to_s
     end
+
+    # -------------------------------------------------------------------------
+    # Fact table transformer helpers
+    # -------------------------------------------------------------------------
+
+    EMPTY_DOCUMENT_JSON = '{"data":{},"content":[],"nodeType":"document"}'.freeze
+
+    # Wrap a raw rich text JSON string in the Gatsby {"raw": "..."} structure.
+    # Returns {"raw": empty_document_json} when the raw value is nil or empty.
+    def wrap_raw_description(raw_json)
+      if raw_json.nil? || raw_json.to_s.strip.empty?
+        { 'raw' => EMPTY_DOCUMENT_JSON }
+      else
+        { 'raw' => raw_json }
+      end
+    end
+
+    # Wrap a raw rich text JSON string for fields where null is acceptable
+    # (e.g. protected area description). Returns nil when raw is nil.
+    def wrap_raw_description_nullable(raw_json)
+      return nil if raw_json.nil?
+      raw_json.to_s.strip.empty? ? nil : { 'raw' => raw_json }
+    end
+
+    # Wrap a JSON string in the Gatsby {"internal": {"content": "..."}} structure.
+    # Returns nil when the value is nil.
+    def wrap_internal_content(json_string)
+      return nil if json_string.nil?
+      { 'internal' => { 'content' => json_string } }
+    end
+
+    # Wrap a single slug string in a {"slug": "..."} object. Returns nil if slug is nil.
+    def wrap_slug_ref(slug)
+      return nil if slug.nil?
+      { 'slug' => slug }
+    end
+
+    # Convert an array of slug strings to an array of {"slug": "..."} objects.
+    # Returns nil when the array is nil or empty.
+    def wrap_slug_refs(slugs)
+      return nil if slugs.nil? || slugs.empty?
+      slugs.map { |s| { 'slug' => s } }
+    end
+
+    # -------------------------------------------------------------------------
+    # Fact table transformers — convert flattened YAML hashes to Gatsby structure
+    # These create NEW hashes and do NOT mutate the source item.
+    # -------------------------------------------------------------------------
+
+    def transform_spot(item)
+      event_notices = item['eventNotices']
+      waterway_event_notice = if event_notices.nil? || event_notices.empty?
+                                nil
+                              else
+                                event_notices.map do |en_item|
+                                  if en_item.is_a?(Hash)
+                                    { 'slug' => en_item['slug'], 'startDate' => en_item['startDate'], 'endDate' => en_item['endDate'] }
+                                  else
+                                    { 'slug' => en_item }
+                                  end
+                                end
+                              end
+
+      obstacles_arr = item['obstacles']
+      obstacle = if obstacles_arr.nil? || obstacles_arr.empty?
+                   nil
+                 else
+                   obstacles_arr.map { |s| { 'slug' => s } }
+                 end
+
+      result = {}
+      result['slug'] = item['slug']
+      result['node_locale'] = item['locale']
+      result['createdAt'] = item['_raw_createdAt']
+      result['updatedAt'] = item['_raw_updatedAt']
+      result['name'] = item['name']
+      result['description'] = wrap_raw_description(item['_raw_description'])
+      result['location'] = item['location']
+      result['approximateAddress'] = item['approximateAddress'].nil? ? nil : { 'approximateAddress' => item['approximateAddress'] }
+      result['country'] = item['country']
+      result['confirmed'] = item['confirmed']
+      result['rejected'] = item['rejected']
+      result['waterway'] = wrap_slug_ref(item['waterway_slug'])
+      result['spotType'] = wrap_slug_ref(item['spotType_slug'])
+      result['paddlingEnvironmentType'] = wrap_slug_ref(item['paddlingEnvironmentType_slug'])
+      result['paddleCraftType'] = wrap_slug_refs(item['paddleCraftTypes']) || []
+      result['waterway_event_notice'] = waterway_event_notice
+      result['obstacle'] = obstacle
+      result['dataSourceType'] = wrap_slug_ref(item['dataSourceType_slug'])
+      result['dataLicenseType'] = wrap_slug_ref(item['dataLicenseType_slug'])
+      result
+    end
+
+    def transform_obstacle(item)
+      result = {}
+      result['slug'] = item['slug']
+      result['node_locale'] = item['locale']
+      result['createdAt'] = item['_raw_createdAt']
+      result['updatedAt'] = item['_raw_updatedAt']
+      result['name'] = item['name']
+      result['description'] = wrap_raw_description(item['_raw_description'])
+      result['geometry'] = wrap_internal_content(item['geometry'])
+      result['portageRoute'] = wrap_internal_content(item['portageRoute'])
+      result['portageDistance'] = item['portageDistance']
+      result['portageDescription'] = wrap_raw_description(item['_raw_portageDescription'])
+      result['isPortageNecessary'] = item['isPortageNecessary']
+      result['isPortagePossible'] = item['isPortagePossible']
+      result['obstacleType'] = wrap_slug_ref(item['obstacleType_slug'])
+      result['waterway'] = wrap_slug_ref(item['waterway_slug'])
+      result['dataSourceType'] = wrap_slug_ref(item['dataSourceType_slug'])
+      result['dataLicenseType'] = wrap_slug_ref(item['dataLicenseType_slug'])
+      result
+    end
+
+    def transform_waterway_event(item)
+      waterways = item['waterways']
+      waterway = wrap_slug_refs(waterways) || []
+
+      spots = item['spot']
+      spot = if spots.nil? || spots.empty?
+               nil
+             else
+               spots.map { |s| { 'slug' => s } }
+             end
+
+      result = {}
+      result['slug'] = item['slug']
+      result['node_locale'] = item['locale']
+      result['createdAt'] = item['_raw_createdAt']
+      result['updatedAt'] = item['_raw_updatedAt']
+      result['name'] = item['name']
+      result['description'] = wrap_raw_description(item['_raw_description'])
+      result['affectedArea'] = wrap_internal_content(item['affectedArea'])
+      result['startDate'] = item['startDate']&.to_s&.slice(0, 10)
+      result['endDate'] = item['endDate']&.to_s&.slice(0, 10)
+      result['waterway'] = waterway
+      result['spot'] = spot
+      result['dataSourceType'] = wrap_slug_ref(item['dataSourceType_slug'])
+      result['dataLicenseType'] = wrap_slug_ref(item['dataLicenseType_slug'])
+      result
+    end
+
+    def transform_waterway(item)
+      result = {}
+      result['slug'] = item['slug']
+      result['node_locale'] = item['locale']
+      result['createdAt'] = item['_raw_createdAt']
+      result['updatedAt'] = item['_raw_updatedAt']
+      result['name'] = item['name']
+      result['length'] = item['length']
+      result['area'] = item['area']
+      result['geometry'] = wrap_internal_content(item['geometry'])
+      result['paddlingEnvironmentType'] = wrap_slug_ref(item['paddlingEnvironmentType_slug'])
+      result['dataSourceType'] = wrap_slug_ref(item['dataSourceType_slug'])
+      result['dataLicenseType'] = wrap_slug_ref(item['dataLicenseType_slug'])
+      result
+    end
+
+    def transform_protected_area(item)
+      waterway_refs = item['waterway']
+      waterway = if waterway_refs.nil? || waterway_refs.empty?
+                   nil
+                 else
+                   waterway_refs.map { |s| { 'slug' => s } }
+                 end
+
+      result = {}
+      result['slug'] = item['slug']
+      result['node_locale'] = item['locale']
+      result['createdAt'] = item['_raw_createdAt']
+      result['updatedAt'] = item['_raw_updatedAt']
+      result['name'] = item['name']
+      result['description'] = wrap_raw_description_nullable(item['_raw_description'])
+      result['geometry'] = wrap_internal_content(item['geometry'])
+      result['isAreaMarked'] = item['isAreaMarked']
+      result['protectedAreaType'] = wrap_slug_ref(item['protectedAreaType_slug'])
+      result['waterway'] = waterway
+      result['dataSourceType'] = wrap_slug_ref(item['dataSourceType_slug'])
+      result['dataLicenseType'] = wrap_slug_ref(item['dataLicenseType_slug'])
+      result
+    end
   end
 end
