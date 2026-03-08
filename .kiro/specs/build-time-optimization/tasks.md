@@ -60,7 +60,7 @@ Extract repeated Liquid-generated map configuration into a shared JS file produc
     - Assert that reading `window.paddelbuchMapConfig[locale]` and attaching `matchFn` produces the same `dimensionConfigs` and `layerToggles` structure as the current Liquid-generated implementation
 
 - [ ] 4. Simplify layer-control.html to use shared config
-  - [~] 4.1 Modify `_includes/layer-control.html` to read from shared config
+  - [x] 4.1 Modify `_includes/layer-control.html` to read from shared config
     - Remove the Liquid `for` loop over `site.data.types.protected_area_types` that builds the `protectedAreaTypeNames` JS object
     - Replace with runtime read from `window.paddelbuchMapConfig[locale].protectedAreaTypeNames`
     - Ensure the same lookup data is available as the current Liquid-generated implementation

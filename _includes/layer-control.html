@@ -51,14 +51,13 @@
       protectedAreas: L.layerGroup()  // Protected areas
     };
     
-    // Build a lookup map from protected area type slugs to translated names
-    // Uses the types data filtered by current locale
+    // Read protected area type name translations from shared config (generated at build time)
     var protectedAreaTypeNames = {};
-    {% assign pa_type_key = "name_" | append: current_locale %}
-    {% assign pa_types = site.data.types.protected_area_types | where: "locale", current_locale %}
-    {% for pat in pa_types %}
-    protectedAreaTypeNames['{{ pat.slug }}'] = '{{ pat[pa_type_key] | default: pat.name_de }}';
-    {% endfor %}
+    if (window.paddelbuchMapConfig && window.paddelbuchMapConfig[currentLocale] && window.paddelbuchMapConfig[currentLocale].protectedAreaTypeNames) {
+      protectedAreaTypeNames = window.paddelbuchMapConfig[currentLocale].protectedAreaTypeNames;
+    } else {
+      console.warn('paddelbuchMapConfig protectedAreaTypeNames not available for locale "' + currentLocale + '", using empty lookup');
+    }
 
     /**
      * Filters data by locale (Requirement 8.3)
