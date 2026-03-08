@@ -27,7 +27,7 @@
   - Mark task complete when test is written, run, and failure is documented
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 1.10, 1.11, 1.12, 1.13, 1.14, 1.15, 1.16, 1.17, 1.18, 1.19, 1.20, 1.21, 1.22, 1.23, 1.24, 1.25, 1.26, 1.27, 1.28, 1.29, 1.30, 1.31, 1.32, 1.33, 1.34, 1.35, 1.36, 1.37, 1.38, 1.39, 1.40, 1.41, 1.42, 1.43, 1.44, 1.45, 1.46_
 
-- [-] 2. Write preservation property tests (BEFORE implementing fix)
+- [x] 2. Write preservation property tests (BEFORE implementing fix)
   - **Property 2: Preservation** — YAML Data, HTML Rendering, and Liquid Template Data Unchanged
   - **IMPORTANT**: Follow observation-first methodology
   - Write an RSpec test in `spec/plugins/api_generator_preservation_spec.rb` that:
@@ -46,7 +46,7 @@
 
 - [ ] 3. Fix API JSON output to match Gatsby structure
 
-  - [ ] 3.1 Modify `contentful_mappers.rb` to preserve raw data for API use
+  - [~] 3.1 Modify `contentful_mappers.rb` to preserve raw data for API use
     - Add `_raw_createdAt` and `_raw_updatedAt` fields in `flatten_entry` that store the original Contentful timestamp string with millisecond precision (`sys[:created_at]&.utc&.strftime('%Y-%m-%dT%H:%M:%S.%3NZ')`) alongside the existing `createdAt`/`updatedAt` fields
     - Add `_raw_description` field in `map_spot`, `map_obstacle`, `map_event_notice` that stores the raw Contentful rich text JSON string (from `resolve_field(fields, :description, locale)`) before HTML rendering — if the field is a rich text object, serialize it to JSON string; if nil, store nil
     - Add `_raw_portageDescription` field in `map_obstacle` that stores the raw rich text JSON string for portage description
@@ -60,7 +60,7 @@
     - _Preservation: All existing fields in flatten_entry and all mapper methods must remain unchanged — only new `_raw_*` and missing fields are added_
     - _Requirements: 1.5, 1.13, 1.14, 1.15, 1.16, 1.20, 1.21, 1.24, 1.26, 1.33, 1.35, 1.36, 1.39, 1.40, 1.41, 1.42, 2.5, 2.6, 2.14, 2.15, 2.19, 2.20, 2.22, 2.24, 2.25, 2.26, 2.29, 2.30, 2.31, 2.32_
 
-  - [ ] 3.2 Add fact table transformer methods to `api_generator.rb`
+  - [~] 3.2 Add fact table transformer methods to `api_generator.rb`
     - Add `transform_spot(item)` method that converts a flattened YAML spot hash into Gatsby-compatible structure:
       - Field order: `slug`, `node_locale` (from `locale`), `createdAt` (from `_raw_createdAt`), `updatedAt` (from `_raw_updatedAt`), `name`, `description` (as `{"raw": raw_json}` from `_raw_description`, or `{"raw": "{\"data\":{},\"content\":[],\"nodeType\":\"document\"}"}` when empty), `location`, `approximateAddress` (as `{"approximateAddress": value}`), `country`, `confirmed`, `rejected` (preserve null — do not default to false), `waterway` (as `{"slug": item['waterway_slug']}`), `spotType` (as `{"slug": item['spotType_slug']}`), `paddlingEnvironmentType` (as `{"slug": ...}`), `paddleCraftType` (array of `{"slug": ...}` objects from `paddleCraftTypes`), `waterway_event_notice` (null when empty, else array of objects with `slug`, `startDate`, `endDate`), `obstacle` (null when empty, else array of `{"slug": ...}`), `dataSourceType` (as `{"slug": ...}`), `dataLicenseType` (as `{"slug": ...}`)
     - Add `transform_obstacle(item)` method:
@@ -80,7 +80,7 @@
     - _Preservation: The source YAML data (site.data) must not be mutated; transformers create new hashes_
     - _Requirements: 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 2.10, 2.11, 2.12, 2.13, 2.14, 2.15, 2.16, 2.17, 2.18, 2.19, 2.20, 2.21, 2.22, 2.23, 2.24, 2.25, 2.26, 2.32_
 
-  - [ ] 3.3 Add dimension table transformer methods to `api_generator.rb`
+  - [~] 3.3 Add dimension table transformer methods to `api_generator.rb`
     - Add `transform_dimension_entry(item, locale, table_name)` method that converts a flattened YAML dimension hash into Gatsby-compatible structure:
       - Field order: `slug`, `node_locale` (set to `locale`), `createdAt` (from `_raw_createdAt`), `updatedAt` (from `_raw_updatedAt`), `name`, then additional fields based on `table_name`
       - For `paddlecrafttypes`: add `description` as `{"raw": ...}` from `_raw_description`
@@ -92,7 +92,7 @@
     - _Preservation: Source YAML data must not be mutated_
     - _Requirements: 2.27, 2.28, 2.29, 2.30, 2.31, 2.32_
 
-  - [ ] 3.4 Fix file naming in `api_generator.rb`
+  - [~] 3.4 Fix file naming in `api_generator.rb`
     - Change `FACT_TABLES` key `'notices'` to `'waterwayevents'` with `data_key: 'notices'` (YAML file is still `notices`)
     - Change `FACT_TABLES` key `'protected-areas'` to `'protectedareas'` with `data_key: 'protected_areas'`
     - This produces output files `waterwayevents-de.json`, `waterwayevents-en.json`, `protectedareas-de.json`, `protectedareas-en.json`
@@ -100,14 +100,14 @@
     - _Expected_Behavior: Files named waterwayevents-{locale}.json and protectedareas-{locale}.json_
     - _Requirements: 2.1, 2.2_
 
-  - [ ] 3.5 Fix JSON formatting in `api_generator.rb`
+  - [~] 3.5 Fix JSON formatting in `api_generator.rb`
     - Replace `JSON.pretty_generate(data)` with `JSON.generate(data)` in `add_json_page` method
     - This produces compact single-line JSON for all API files
     - _Bug_Condition: jsonFormattingMismatch(input) where isPrettyPrinted == true_
     - _Expected_Behavior: All API JSON files are compact single-line_
     - _Requirements: 2.33_
 
-  - [ ] 3.6 Fix last update index in `api_generator.rb`
+  - [~] 3.6 Fix last update index in `api_generator.rb`
     - Restructure `generate_last_update_index` to produce exactly 12 entries (one per content type, not per locale)
     - Define a mapping from content types to camelCase names with `s` suffix: `spots`, `obstacles`, `waterwayEventNotices`, `protectedAreas`, `waterways`, `dataLicenseTypes`, `dataSourceTypes`, `obstacleTypes`, `paddleCraftTypes`, `protectedAreaTypes`, `spotTypes`, `paddlingEnvironmentTypes`
     - For each content type, compute the maximum `updatedAt` across both locales (de and en)
@@ -117,7 +117,7 @@
     - _Expected_Behavior: 12 entries with camelCase names, single max timestamp per content type_
     - _Requirements: 2.34, 2.35, 2.36, 2.37_
 
-  - [ ] 3.7 Wire transformers into `generate_fact_tables` and `generate_dimension_tables`
+  - [~] 3.7 Wire transformers into `generate_fact_tables` and `generate_dimension_tables`
     - Update `generate_fact_tables` to apply the appropriate transformer (`transform_spot`, `transform_obstacle`, etc.) to each item before writing JSON
     - Add a transformer mapping: `'spots' => :transform_spot`, `'obstacles' => :transform_obstacle`, `'waterwayevents' => :transform_waterway_event`, `'protectedareas' => :transform_protected_area`, `'waterways' => :transform_waterway`
     - Update `generate_dimension_tables` to apply `transform_dimension_entry` to each item
@@ -127,7 +127,7 @@
     - _Preservation: site.data entries must not be mutated; only the JSON output changes_
     - _Requirements: 2.1–2.37_
 
-  - [ ] 3.8 Verify bug condition exploration test now passes
+  - [~] 3.8 Verify bug condition exploration test now passes
     - **Property 1: Expected Behavior** — API JSON Structure Matches Gatsby Output
     - **IMPORTANT**: Re-run the SAME test from task 1 — do NOT write a new test
     - The test from task 1 encodes the expected behavior (correct file names, field structure, timestamps, formatting, last update index)
@@ -136,13 +136,13 @@
     - **EXPECTED OUTCOME**: Test PASSES (confirms bug is fixed)
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 2.10, 2.11, 2.12, 2.13, 2.14, 2.15, 2.16, 2.17, 2.18, 2.19, 2.20, 2.21, 2.22, 2.23, 2.24, 2.25, 2.26, 2.27, 2.28, 2.29, 2.30, 2.31, 2.32, 2.33, 2.34, 2.35, 2.36, 2.37_
 
-  - [ ] 3.9 Verify preservation tests still pass
+  - [~] 3.9 Verify preservation tests still pass
     - **Property 2: Preservation** — YAML Data, HTML Rendering, and Liquid Template Data Unchanged
     - **IMPORTANT**: Re-run the SAME tests from task 2 — do NOT write new tests
     - Run: `source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.1 && bundle exec rspec spec/plugins/api_generator_preservation_spec.rb`
     - **EXPECTED OUTCOME**: Tests PASS (confirms no regressions)
     - Confirm all preservation tests still pass after fix (YAML data unchanged, Liquid template data still exposed, no side effects on site.data)
 
-- [ ] 4. Checkpoint — Ensure all tests pass
+- [~] 4. Checkpoint — Ensure all tests pass
   - Run full test suite: `source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.1 && bundle exec rspec`
   - Ensure all tests pass, ask the user if questions arise
