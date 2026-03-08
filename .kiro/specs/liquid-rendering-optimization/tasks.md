@@ -39,7 +39,7 @@ Externalize inline JavaScript from Liquid templates into four static external `.
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 4. Create `assets/js/detail-map.js` and update detail layout files
-  - [~] 4.1 Create `assets/js/detail-map.js` with unified map initialization
+  - [-] 4.1 Create `assets/js/detail-map.js` with unified map initialization
     - Implement shared map setup: tile layer creation from `window.paddelbuchMapConfig.tileUrl`, attribution, zoom control positioning, locate control with locale-specific tooltip
     - Read `data-page-type` from the map container element to determine initialization path
     - Implement spot init: center on `data-lat`/`data-lon` at zoom 15, add marker with popup from `data-spot-json`
