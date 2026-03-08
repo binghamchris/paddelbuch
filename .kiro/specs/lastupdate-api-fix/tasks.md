@@ -44,7 +44,7 @@
   - Mark task complete when tests are written, run, and passing on unfixed code
   - _Requirements: 3.1, 3.2, 3.3, 3.4_
 
-- [ ] 3. Fix API JSON output to match Gatsby structure
+- [x] 3. Fix API JSON output to match Gatsby structure
 
   - [x] 3.1 Modify `contentful_mappers.rb` to preserve raw data for API use
     - Add `_raw_createdAt` and `_raw_updatedAt` fields in `flatten_entry` that store the original Contentful timestamp string with millisecond precision (`sys[:created_at]&.utc&.strftime('%Y-%m-%dT%H:%M:%S.%3NZ')`) alongside the existing `createdAt`/`updatedAt` fields
@@ -136,7 +136,7 @@
     - **EXPECTED OUTCOME**: Test PASSES (confirms bug is fixed)
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 2.10, 2.11, 2.12, 2.13, 2.14, 2.15, 2.16, 2.17, 2.18, 2.19, 2.20, 2.21, 2.22, 2.23, 2.24, 2.25, 2.26, 2.27, 2.28, 2.29, 2.30, 2.31, 2.32, 2.33, 2.34, 2.35, 2.36, 2.37_
 
-  - [~] 3.9 Verify preservation tests still pass
+  - [x] 3.9 Verify preservation tests still pass
     - **Property 2: Preservation** — YAML Data, HTML Rendering, and Liquid Template Data Unchanged
     - **IMPORTANT**: Re-run the SAME tests from task 2 — do NOT write new tests
     - Run: `source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.1 && bundle exec rspec spec/plugins/api_generator_preservation_spec.rb`
