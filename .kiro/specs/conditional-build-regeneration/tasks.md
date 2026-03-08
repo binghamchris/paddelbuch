@@ -172,7 +172,7 @@ Add content-hash-based change detection to the Jekyll build pipeline so that `Ap
     - Minimum 100 iterations
     - **Validates: Requirements 9.1**
 
-  - [~] 9.3 Write property test for build output invariance (Property 6)
+  - [-] 9.3 Write property test for build output invariance (Property 6)
     - **Property 6: Build output invariance**
     - Create `spec/plugins/build_output_invariance_spec.rb`
     - Generate random data, run full pipeline fresh, then run with cache, compare all page objects (content, filename, directory) for byte-identical output
