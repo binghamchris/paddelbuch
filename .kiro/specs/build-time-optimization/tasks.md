@@ -53,7 +53,7 @@ Extract repeated Liquid-generated map configuration into a shared JS file produc
     - Add fallback handling: if `window.paddelbuchMapConfig` is undefined, use empty config and log `console.warn`
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 4.1, 4.2, 4.3, 4.4, 4.5_
 
-  - [~] 3.2 Write property test: Runtime config structure equivalence (Property 3)
+  - [x] 3.2 Write property test: Runtime config structure equivalence (Property 3)
     - **Property 3: Runtime config structure equivalence**
     - **Validates: Requirements 2.2, 2.5**
     - Use Rantly to generate valid map config JSON objects for random locales
