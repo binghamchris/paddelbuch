@@ -158,7 +158,7 @@ Add content-hash-based change detection to the Jekyll build pipeline so that `Ap
 - [x] 8. Checkpoint
   - Ensure all tests pass, ask the user if questions arise.
 
-- [-] 9. Verify CollectionGenerator independence and build output invariance
+- [x] 9. Verify CollectionGenerator independence and build output invariance
   - [x] 9.1 Verify `_plugins/collection_generator.rb` does NOT reference the change flag or any cache directory
     - Confirm CollectionGenerator has no dependency on `site.config['contentful_data_changed']`
     - Confirm CollectionGenerator does not read from or write to `.api_cache/` or `.tile_cache/`
@@ -172,14 +172,14 @@ Add content-hash-based change detection to the Jekyll build pipeline so that `Ap
     - Minimum 100 iterations
     - **Validates: Requirements 9.1**
 
-  - [-] 9.3 Write property test for build output invariance (Property 6)
+  - [x] 9.3 Write property test for build output invariance (Property 6)
     - **Property 6: Build output invariance**
     - Create `spec/plugins/build_output_invariance_spec.rb`
     - Generate random data, run full pipeline fresh, then run with cache, compare all page objects (content, filename, directory) for byte-identical output
     - Minimum 100 iterations
     - **Validates: Requirements 8.1, 8.2, 8.3**
 
-  - [~] 9.4 Write unit tests for build output invariance edge cases
+  - [x] 9.4 Write unit tests for build output invariance edge cases
     - Test that no extra files are added to `site.pages` when using cache
     - Test that no files are missing from `site.pages` when using cache
     - Test that `page.data['layout']` is `nil` for all cached pages (same as fresh)
