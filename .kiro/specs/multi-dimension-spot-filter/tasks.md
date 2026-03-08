@@ -17,13 +17,13 @@ Replace the existing Leaflet `L.control.layers` with a custom Filter_Panel that 
     - Store `spotType_slug`, `paddleCraftTypes`, and `paddlingEnvironmentType_slug` in metadata
     - _Requirements: 4.1, 4.2, 4.3, 4.4_
 
-  - [-] 1.2 Write property test for Marker Registry round-trip
+  - [x] 1.2 Write property test for Marker Registry round-trip
     - **Property 4: Marker registry round-trip**
     - Generate random slug, mock marker, and metadata; register then forEach and verify entry exists with correct values
     - Create `_tests/property/marker-registry-round-trip.property.test.js`
     - **Validates: Requirements 4.1, 4.2, 4.4**
 
-  - [~] 1.3 Write property test for Marker Registry deduplication
+  - [-] 1.3 Write property test for Marker Registry deduplication
     - **Property 5: Marker registry deduplication**
     - Generate sequences of register calls with intentional slug duplicates; assert `size()` equals unique slug count and `forEach` visits each unique slug exactly once
     - Create `_tests/property/marker-registry-deduplication.property.test.js`
