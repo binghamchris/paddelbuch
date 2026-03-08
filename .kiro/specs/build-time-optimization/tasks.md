@@ -75,7 +75,7 @@ Extract repeated Liquid-generated map configuration into a shared JS file produc
 - [x] 5. Checkpoint - Verify template simplifications
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 6. Fix Bundler version mismatch in Amplify build spec
+- [x] 6. Fix Bundler version mismatch in Amplify build spec
   - [x] 6.1 Update Amplify buildSpec via AWS CLI
     - Run `aws amplify update-app` with `--profile paddelbuch-dev --region eu-central-1` to add `gem install bundler:2.6.2` before `bundle install` in the preBuild phase
     - Preserve all other existing buildSpec commands (nvm use, npm ci, npm run download-fonts, npm run copy-assets, bundle install)
