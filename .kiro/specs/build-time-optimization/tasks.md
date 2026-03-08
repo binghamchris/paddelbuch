@@ -25,7 +25,7 @@ Extract repeated Liquid-generated map configuration into a shared JS file produc
     - Test missing `name_en` falls back to `name_de`
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5_
 
-  - [~] 1.3 Write property test: Generator output completeness (Property 1)
+  - [x] 1.3 Write property test: Generator output completeness (Property 1)
     - **Property 1: Generator output completeness**
     - **Validates: Requirements 1.1, 1.2**
     - Use Rantly to generate random sets of spot types, paddle craft types, and protected area types
