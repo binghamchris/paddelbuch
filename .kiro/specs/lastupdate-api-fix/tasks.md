@@ -80,7 +80,7 @@
     - _Preservation: The source YAML data (site.data) must not be mutated; transformers create new hashes_
     - _Requirements: 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 2.10, 2.11, 2.12, 2.13, 2.14, 2.15, 2.16, 2.17, 2.18, 2.19, 2.20, 2.21, 2.22, 2.23, 2.24, 2.25, 2.26, 2.32_
 
-  - [~] 3.3 Add dimension table transformer methods to `api_generator.rb`
+  - [x] 3.3 Add dimension table transformer methods to `api_generator.rb`
     - Add `transform_dimension_entry(item, locale, table_name)` method that converts a flattened YAML dimension hash into Gatsby-compatible structure:
       - Field order: `slug`, `node_locale` (set to `locale`), `createdAt` (from `_raw_createdAt`), `updatedAt` (from `_raw_updatedAt`), `name`, then additional fields based on `table_name`
       - For `paddlecrafttypes`: add `description` as `{"raw": ...}` from `_raw_description`
