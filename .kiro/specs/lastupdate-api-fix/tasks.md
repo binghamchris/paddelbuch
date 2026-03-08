@@ -60,7 +60,7 @@
     - _Preservation: All existing fields in flatten_entry and all mapper methods must remain unchanged — only new `_raw_*` and missing fields are added_
     - _Requirements: 1.5, 1.13, 1.14, 1.15, 1.16, 1.20, 1.21, 1.24, 1.26, 1.33, 1.35, 1.36, 1.39, 1.40, 1.41, 1.42, 2.5, 2.6, 2.14, 2.15, 2.19, 2.20, 2.22, 2.24, 2.25, 2.26, 2.29, 2.30, 2.31, 2.32_
 
-  - [~] 3.2 Add fact table transformer methods to `api_generator.rb`
+  - [x] 3.2 Add fact table transformer methods to `api_generator.rb`
     - Add `transform_spot(item)` method that converts a flattened YAML spot hash into Gatsby-compatible structure:
       - Field order: `slug`, `node_locale` (from `locale`), `createdAt` (from `_raw_createdAt`), `updatedAt` (from `_raw_updatedAt`), `name`, `description` (as `{"raw": raw_json}` from `_raw_description`, or `{"raw": "{\"data\":{},\"content\":[],\"nodeType\":\"document\"}"}` when empty), `location`, `approximateAddress` (as `{"approximateAddress": value}`), `country`, `confirmed`, `rejected` (preserve null — do not default to false), `waterway` (as `{"slug": item['waterway_slug']}`), `spotType` (as `{"slug": item['spotType_slug']}`), `paddlingEnvironmentType` (as `{"slug": ...}`), `paddleCraftType` (array of `{"slug": ...}` objects from `paddleCraftTypes`), `waterway_event_notice` (null when empty, else array of objects with `slug`, `startDate`, `endDate`), `obstacle` (null when empty, else array of `{"slug": ...}`), `dataSourceType` (as `{"slug": ...}`), `dataLicenseType` (as `{"slug": ...}`)
     - Add `transform_obstacle(item)` method:
