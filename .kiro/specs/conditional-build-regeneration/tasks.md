@@ -142,7 +142,7 @@ Add content-hash-based change detection to the Jekyll build pipeline so that `Ap
     - Minimum 100 iterations
     - **Validates: Requirements 4.1, 4.2, 4.4**
 
-  - [~] 7.3 Write property test for Tile generator cache-hit logging (Property 9 — Tile part)
+  - [x] 7.3 Write property test for Tile generator cache-hit logging (Property 9 — Tile part)
     - **Property 9: Generator cache-hit logging (Tile)**
     - Run TileGenerator with/without cache, capture log output, assert correct messages with file count
     - Minimum 100 iterations
