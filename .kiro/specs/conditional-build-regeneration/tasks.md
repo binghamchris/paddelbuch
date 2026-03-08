@@ -115,7 +115,7 @@ Add content-hash-based change detection to the Jekyll build pipeline so that `Ap
     - Minimum 100 iterations
     - **Validates: Requirements 7.1, 7.2**
 
-  - [-] 6.4 Write unit tests for ApiGenerator caching
+  - [x] 6.4 Write unit tests for ApiGenerator caching
     - Test cache directory is `_data/.api_cache/` (Requirement 5.1)
     - Test `lastUpdateIndex.json` is correctly reconstructed from cache for `site.data['last_updates']`
     - Test cache miss (empty directory) falls back to full generation
