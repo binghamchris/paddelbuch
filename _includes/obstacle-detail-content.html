@@ -1,0 +1,117 @@
+<!--
+  Obstacle Detail Content Include
+  
+  Displays the full content for an obstacle on the detail page.
+  Shows: obstacle type, GPS (center of geometry), waterway link, last updated.
+  Also displays portage information when available.
+  
+  Parameters:
+  - include.obstacle: The obstacle object containing all obstacle data
+  - include.waterway: The waterway object (optional)
+  - include.obstacle_type_name: The resolved obstacle type name (optional)
+  
+  Requirements: 5.4, 5.5
+  Property 10: Obstacle Detail Page Contains Required Information
+  Property 11: Obstacle Portage Information Display
+-->
+
+{% assign obstacle = include.obstacle %}
+{% assign waterway = include.waterway %}
+{% assign obstacle_type_name = include.obstacle_type_name %}
+{% assign current_locale = site.lang | default: 'de' %}
+
+{% if site.lang != site.default_lang %}
+  {% assign locale_prefix = '/' | append: site.lang %}
+{% else %}
+  {% assign locale_prefix = '' %}
+{% endif %}
+
+<!-- Obstacle Details Table (Requirement 5.4) -->
+<table>
+  <tbody>
+    <!-- Obstacle Type -->
+    {% if obstacle_type_name %}
+    <tr>
+      <th>{% t labels.type %}:</th>
+      <td>{{ obstacle_type_name }}</td>
+    </tr>
+    {% endif %}
+
+    <!-- GPS Coordinates (center of geometry) -->
+    {% if obstacle.centerLat and obstacle.centerLon %}
+    <tr>
+      <th>{% t labels.gps %}:</th>
+      <td>{{ obstacle.centerLat }}, {{ obstacle.centerLon }}</td>
+    </tr>
+    {% endif %}
+
+    <!-- Waterway Link -->
+    {% if waterway %}
+    <tr>
+      <th>{% t labels.waterway %}:</th>
+      <td>
+        <a hreflang="{{ current_locale }}" href="{{ locale_prefix | append: '/gewaesser/' | append: waterway.slug | append: '/' }}">
+          {{ waterway.name }}
+        </a>
+      </td>
+    </tr>
+    {% endif %}
+
+    <!-- Last Updated Timestamp -->
+    <!-- Property 19: Date Locale Formatting - using localized_date filter -->
+    {% if obstacle.updatedAt %}
+    <tr>
+      <th>{% t labels.last_updated %}:</th>
+      <td>{{ obstacle.updatedAt | localized_date }}</td>
+    </tr>
+    {% endif %}
+  </tbody>
+</table>
+
+<!-- Portage Information Section (Requirement 5.5) -->
+{% if obstacle.portageRoute or obstacle.portageDescription or obstacle.portageDistance %}
+<h2>{% t obstacles.portage_route %}</h2>
+
+<!-- Portage Description -->
+{% if obstacle.portageDescription %}
+<div>
+  {{ obstacle.portageDescription }}
+</div>
+{% endif %}
+
+<table>
+  <tbody>
+    <!-- Portage Distance -->
+    {% if obstacle.portageDistance %}
+    <tr>
+      <th>{% t obstacles.portage_distance %}:</th>
+      <td>{{ obstacle.portageDistance }}m</td>
+    </tr>
+    {% endif %}
+
+    <!-- Exit Spot Link -->
+    {% if obstacle.exitSpot_slug %}
+    <tr>
+      <th>{% t obstacles.exit_spot %}:</th>
+      <td>
+        <a hreflang="{{ current_locale }}" href="{{ locale_prefix | append: '/einstiegsorte/' | append: obstacle.exitSpot_slug | append: '/' }}">
+          {{ obstacle.exitSpot_name }}
+        </a>
+      </td>
+    </tr>
+    {% endif %}
+
+    <!-- Re-entry Spot Link -->
+    {% if obstacle.reentrySpot_slug %}
+    <tr>
+      <th>{% t obstacles.reentry_spot %}:</th>
+      <td>
+        <a hreflang="{{ current_locale }}" href="{{ locale_prefix | append: '/einstiegsorte/' | append: obstacle.reentrySpot_slug | append: '/' }}">
+          {{ obstacle.reentrySpot_name }}
+        </a>
+      </td>
+    </tr>
+    {% endif %}
+  </tbody>
+</table>
+{% endif %}

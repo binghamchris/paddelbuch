@@ -1,0 +1,53 @@
+<!--
+  Event Notice Popup Include
+  
+  Displays waterway event notice information in a Leaflet popup.
+  Matches the original Gatsby site layout: title, date table, right-aligned button.
+  
+  Parameters:
+  - include.notice: The event notice object containing all notice data
+  - include.locale: Current locale (default: site.lang or 'de')
+  
+  Requirements: 7.3
+  Property 15: Event Notice Popup Contains Required Information
+-->
+
+{% if site.lang != site.default_lang %}
+  {% assign locale_prefix = '/' | append: site.lang %}
+{% else %}
+  {% assign locale_prefix = '' %}
+{% endif %}
+
+{% assign notice = include.notice %}
+{% assign current_locale = include.locale | default: site.lang | default: 'de' %}
+
+<!-- Notice Name (Requirement 7.3) -->
+<span class="popup-title"><h1>{{ notice.name }}</h1></span>
+
+<!-- Dates Table (Requirement 7.3) -->
+<table class="popup-details-table popup-eventnotice-table">
+  <tbody>
+    {% if notice.startDate %}
+    <tr>
+      <th>{% if current_locale == 'en' %}Approx. Start Date{% else %}Ungefähres Startdatum{% endif %}:</th>
+      <td>{{ notice.startDate | localized_date }}</td>
+    </tr>
+    {% endif %}
+    {% if notice.endDate %}
+    <tr>
+      <th>{% if current_locale == 'en' %}Approx. End Date{% else %}Ungefähres Enddatum{% endif %}:</th>
+      <td>{{ notice.endDate | localized_date }}</td>
+    </tr>
+    {% endif %}
+  </tbody>
+</table>
+
+<!-- More Details Button (Requirement 7.3) -->
+{% if notice.slug %}
+<button class="popup-btn popup-btn-right">
+  <a class="popup-btn-right" hreflang="{{ current_locale }}"
+     href="{{ locale_prefix }}/gewaesserereignisse/{{ notice.slug }}/">
+    {% if current_locale == 'en' %}More details{% else %}Weitere Details{% endif %}
+  </a>
+</button>
+{% endif %}

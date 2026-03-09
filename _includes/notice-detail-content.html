@@ -1,0 +1,60 @@
+<!--
+  Event Notice Detail Content Include
+  
+  Displays the full content for an event notice on the detail page.
+  Shows: full description, start date, end date, last updated timestamp.
+  
+  Parameters:
+  - include.notice: The event notice object containing all notice data
+  
+  Requirements: 7.4
+  Property 16: Event Notice Detail Page Contains Required Information
+  
+  For any event notice, the detail page shall display the full description,
+  start date, end date, and last updated timestamp.
+-->
+
+{% assign notice = include.notice %}
+{% assign current_locale = site.lang | default: 'de' %}
+
+{% if site.lang != site.default_lang %}
+  {% assign locale_prefix = '/' | append: site.lang %}
+{% else %}
+  {% assign locale_prefix = '' %}
+{% endif %}
+
+<!-- Full Description (Requirement 7.4) -->
+{% if notice.description %}
+<div>
+  {{ notice.description }}
+</div>
+{% endif %}
+
+<!-- Event Notice Details Table (Requirement 7.4) -->
+<table class="notice-details-table">
+  <tbody>
+    <!-- Start Date (Requirement 7.4) -->
+    {% if notice.startDate %}
+    <tr>
+      <th>{% t event_notices.approx_start_date %}</th>
+      <td>{{ notice.startDate | localized_date }}</td>
+    </tr>
+    {% endif %}
+
+    <!-- End Date (Requirement 7.4) -->
+    {% if notice.endDate %}
+    <tr>
+      <th>{% t event_notices.approx_end_date %}</th>
+      <td>{{ notice.endDate | localized_date }}</td>
+    </tr>
+    {% endif %}
+
+    <!-- Last Updated Timestamp (Requirement 7.4) -->
+    {% if notice.updatedAt %}
+    <tr>
+      <th>{% t labels.last_updated %}</th>
+      <td>{{ notice.updatedAt | localized_date }}</td>
+    </tr>
+    {% endif %}
+  </tbody>
+</table>

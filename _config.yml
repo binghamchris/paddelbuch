@@ -1,0 +1,158 @@
+# Site Settings
+title: Paddel Buch
+description: Interactive map for Swiss paddle sports enthusiasts
+url: https://www.paddelbuch.ch
+baseurl: ""
+
+# Build Settings
+markdown: kramdown
+sass:
+  sass_dir: _sass
+  style: compressed
+  load_paths:
+    - node_modules
+
+# Exclude from processing
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules/
+  - vendor/
+  - .git/
+  - .gitignore
+  - .env.development
+  - .env.production
+  - package.json
+  - package-lock.json
+  - amplify.yml
+  - README.md
+  - LICENSE.md
+
+# Plugins
+plugins:
+  - jekyll-multiple-languages-plugin
+
+# Collections Configuration
+collections:
+  spots:
+    output: true
+    permalink: /einstiegsorte/:slug/
+  waterways:
+    output: true
+    permalink: /gewaesser/:slug/
+  obstacles:
+    output: true
+    permalink: /hindernisse/:slug/
+  notices:
+    output: true
+    permalink: /gewaesserereignisse/:slug/
+  static_pages:
+    output: true
+    permalink: /:slug/
+
+# Default front matter
+defaults:
+  - scope:
+      path: ""
+      type: "spots"
+    values:
+      layout: "spot"
+  - scope:
+      path: ""
+      type: "waterways"
+    values:
+      layout: "waterway"
+  - scope:
+      path: ""
+      type: "obstacles"
+    values:
+      layout: "obstacle"
+  - scope:
+      path: ""
+      type: "notices"
+    values:
+      layout: "notice"
+  - scope:
+      path: ""
+      type: "static_pages"
+    values:
+      layout: "page"
+  - scope:
+      path: ""
+      type: "pages"
+    values:
+      layout: "default"
+
+# Multiple Languages Plugin Configuration
+languages: ["de", "en"]
+default_lang: "de"
+exclude_from_localizations: ["assets", "api"]
+parallel_localization: true
+
+# Tile layer URL (Leaflet template — {s}, {z}, {x}, {y} are Leaflet placeholders)
+mapbox_url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+
+# Map Configuration
+map:
+  center:
+    lat: 46.801111
+    lon: 8.226667
+  bounds:
+    north: 47.8
+    south: 45.8
+    east: 10.5
+    west: 5.9
+  default_zoom: 8
+  min_zoom: 7
+  max_zoom: 20
+  detail_layer_min_zoom: 12
+
+# Contentful Configuration (loaded from environment variables)
+contentful:
+  spaces:
+    - space: ""
+      access_token: ""
+      environment: "master"
+      cda_query:
+        locale: "*"
+      all_entries: true
+      content_types:
+        spot:
+          mapper: SpotMapper
+          filename: "spots"
+        waterway:
+          mapper: WaterwayMapper
+          filename: "waterways"
+        obstacle:
+          mapper: ObstacleMapper
+          filename: "obstacles"
+        protectedArea:
+          mapper: ProtectedAreaMapper
+          filename: "protected_areas"
+        waterwayEventNotice:
+          mapper: WaterwayEventNoticeMapper
+          filename: "notices"
+        spotType:
+          mapper: TypeMapper
+          filename: "types/spot_types"
+        obstacleType:
+          mapper: TypeMapper
+          filename: "types/obstacle_types"
+        paddleCraftType:
+          mapper: TypeMapper
+          filename: "types/paddle_craft_types"
+        paddlingEnvironmentType:
+          mapper: TypeMapper
+          filename: "types/paddling_environment_types"
+        protectedAreaType:
+          mapper: TypeMapper
+          filename: "types/protected_area_types"
+        dataSourceType:
+          mapper: TypeMapper
+          filename: "types/data_source_types"
+        dataLicenseType:
+          mapper: TypeMapper
+          filename: "types/data_license_types"
+        staticPage:
+          mapper: StaticPageMapper
+          filename: "static_pages"

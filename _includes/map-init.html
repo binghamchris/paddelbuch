@@ -1,0 +1,299 @@
+<!--
+  Map Initialization Include
+  
+  Parameters:
+  - include.center_lat: Latitude for map center (default: 46.801111 - Switzerland center)
+  - include.center_lon: Longitude for map center (default: 8.226667 - Switzerland center)
+  - include.zoom: Initial zoom level (default: 8)
+  - include.map_id: ID for the map container (default: 'map')
+  - include.bounds: Optional bounds object to fit map to
+  
+  Requirements: 1.1, 1.2, 1.3, 1.4
+-->
+
+{% assign current_locale = include.locale | default: site.lang | default: 'de' %}
+{% assign map_id = include.map_id | default: 'map' %}
+{% assign center_lat = include.center_lat | default: 46.801111 %}
+{% assign center_lon = include.center_lon | default: 8.226667 %}
+{% assign zoom = include.zoom | default: 8 %}
+
+<div id="{{ map_id }}" class="map"></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Switzerland bounds with padding so the map can pan freely at low zoom levels
+  var switzerlandBounds = L.latLngBounds(
+    L.latLng(45.0, 4.5),   // Southwest corner (padded)
+    L.latLng(49.4, 11.8)   // Northeast corner (padded, extra north for popups)
+  );
+
+  // Initialize the map
+  var map = L.map('{{ map_id }}', {
+    center: [{{ center_lat }}, {{ center_lon }}],
+    zoom: {{ zoom }},
+    maxBounds: switzerlandBounds,
+    maxBoundsViscosity: 1.0,
+    minZoom: 7,
+    maxZoom: {{ site.map.max_zoom | default: 20 }},
+    zoomControl: false  // We'll add it manually at bottom-right
+  });
+
+  // Add tile layer with attribution
+  L.tileLayer('{{ site.mapbox_url }}', {
+    attribution: '&copy; <a href="https://www.mapbox.com/about/maps/" target="_blank" rel="noopener">Mapbox</a> &copy; <a href="http://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> <strong><a href="https://www.mapbox.com/map-feedback/" target="_blank" rel="noopener">Improve this map</a></strong>',
+    maxZoom: {{ site.map.max_zoom | default: 20 }}
+  }).addTo(map);
+
+  // Add zoom control at bottom-right position (Requirement 1.3)
+  L.control.zoom({
+    position: 'bottomright'
+  }).addTo(map);
+
+  // Add locate control for user position finding (Requirement 1.5)
+  L.control.locate({
+    position: 'bottomright',
+    strings: {
+      title: '{{ site.lang | default: "de" }}' === 'de' ? 'Meinen Standort anzeigen' : 'Show my location'
+    },
+    locateOptions: {
+      enableHighAccuracy: true,
+      maxZoom: 14
+    },
+    flyTo: true,
+    showCompass: true,
+    showPopup: false,
+    drawCircle: true,
+    drawMarker: true,
+    markerStyle: {
+      weight: 2,
+      opacity: 0.8,
+      fillOpacity: 0.8
+    },
+    circleStyle: {
+      weight: 1,
+      clickable: false
+    },
+    icon: 'leaflet-control-locate-location-arrow',
+    iconLoading: 'leaflet-control-locate-spinner',
+    onLocationError: function(err) {
+      console.warn('Location error:', err.message);
+    }
+  }).addTo(map);
+
+  {% if include.bounds %}
+  // Fit map to provided bounds
+  var bounds = L.latLngBounds(
+    L.latLng({{ include.bounds.south }}, {{ include.bounds.west }}),
+    L.latLng({{ include.bounds.north }}, {{ include.bounds.east }})
+  );
+  map.fitBounds(bounds);
+  {% endif %}
+
+  // Store map instance globally for other scripts to access
+  window.paddelbuchMap = map;
+  window.switzerlandBounds = switzerlandBounds;
+});
+</script>
+
+<!-- Include marker registry and filter engine modules (loaded before layer-control so they are available during marker creation) -->
+<script src="{{ '/assets/js/marker-registry.js' | relative_url }}"></script>
+<script src="{{ '/assets/js/filter-engine.js' | relative_url }}"></script>
+
+<!-- Include layer controls (Requirements 2.7, 2.8, 8.3) -->
+{% include layer-control.html locale=site.lang %}
+
+<!-- Include filter panel UI (Requirements 5.1, 5.2, 7.1, 7.2, 7.5, 8.3) -->
+{% include filter-panel.html %}
+
+<!-- Include marker and layer style modules (Requirements 2.5, 2.6) -->
+<script src="{{ '/assets/js/marker-styles.js' | relative_url }}"></script>
+<script src="{{ '/assets/js/layer-styles.js' | relative_url }}"></script>
+
+<!-- Include data loading pipeline modules in dependency order (Requirements 2.1, 2.2, 2.3, 2.4) -->
+<script src="{{ '/assets/js/spatial-utils.js' | relative_url }}"></script>
+<script src="{{ '/assets/js/data-loader.js' | relative_url }}"></script>
+<script src="{{ '/assets/js/zoom-layer-manager.js' | relative_url }}"></script>
+
+<!-- Map data initialization: loads tile data and populates layer groups (Requirements 2.1-2.6) -->
+<script>
+(function() {
+  'use strict';
+
+  // Slug-based deduplication sets to prevent duplicate markers/layers
+  var loadedSlugs = {
+    spots: new Set(),
+    notices: new Set(),
+    obstacles: new Set(),
+    protected: new Set()
+  };
+
+  /**
+   * Populate layer groups with data from the data loader response.
+   * Skips items whose slug has already been added (deduplication).
+   *
+   * @param {Object} data - Data object with spots, notices, obstacles, protected arrays
+   */
+  function populateLayers(data) {
+    if (data.spots) {
+      data.spots.forEach(function(spot) {
+        if (spot.slug && loadedSlugs.spots.has(spot.slug)) return;
+        if (spot.slug) loadedSlugs.spots.add(spot.slug);
+        window.paddelbuchAddSpotMarker(spot);
+      });
+    }
+
+    if (data.notices) {
+      data.notices.forEach(function(notice) {
+        if (notice.slug && loadedSlugs.notices.has(notice.slug)) return;
+        if (notice.slug) loadedSlugs.notices.add(notice.slug);
+        window.paddelbuchAddEventNoticeMarker(notice);
+      });
+    }
+
+    if (data.obstacles) {
+      data.obstacles.forEach(function(obstacle) {
+        if (obstacle.slug && loadedSlugs.obstacles.has(obstacle.slug)) return;
+        if (obstacle.slug) loadedSlugs.obstacles.add(obstacle.slug);
+        window.paddelbuchAddObstacleLayer(obstacle);
+      });
+    }
+
+    if (data.protected) {
+      data.protected.forEach(function(area) {
+        if (area.slug && loadedSlugs.protected.has(area.slug)) return;
+        if (area.slug) loadedSlugs.protected.add(area.slug);
+        window.paddelbuchAddProtectedAreaLayer(area);
+      });
+    }
+  }
+
+  /**
+   * Wait for map and layer groups to be available, then bootstrap data loading.
+   */
+  function initMapData() {
+    var map = window.paddelbuchMap;
+    var layerGroups = window.paddelbuchLayerGroups;
+
+    if (!map || !layerGroups) {
+      setTimeout(initMapData, 100);
+      return;
+    }
+
+    var locale = window.paddelbuchCurrentLocale || 'de';
+
+    // Build dimension configuration array from Jekyll data (Requirements 8.1, 8.2)
+    var dimensionConfigs = [
+      {
+        key: 'spotType',
+        {% if current_locale == 'en' %}
+        label: 'Spot Type',
+        {% else %}
+        label: 'Ortstyp',
+        {% endif %}
+        options: [
+          {% if current_locale == 'en' %}
+          { slug: 'einstieg-ausstieg', label: 'Entry & Exit Spots' },
+          { slug: 'nur-einstieg', label: 'Entry Only Spots' },
+          { slug: 'nur-ausstieg', label: 'Exit Only Spots' },
+          { slug: 'rasthalte', label: 'Rest Spots' },
+          { slug: 'notauswasserungsstelle', label: 'Emergency Exit Spots' }
+          {% else %}
+          { slug: 'einstieg-ausstieg', label: 'Ein-/Ausstiegsorte' },
+          { slug: 'nur-einstieg', label: 'Einstiegsorte' },
+          { slug: 'nur-ausstieg', label: 'Ausstiegsorte' },
+          { slug: 'rasthalte', label: 'Rasthalte' },
+          { slug: 'notauswasserungsstelle', label: 'Notauswasserungsstelle' }
+          {% endif %}
+        ],
+        matchFn: function(meta, selected) { return selected.has(meta.spotType_slug); }
+      },
+      {
+        key: 'paddleCraftType',
+        {% if current_locale == 'en' %}
+        label: 'Paddle Craft Type',
+        {% else %}
+        label: 'Paddelboottyp',
+        {% endif %}
+        options: [
+          {% assign craft_types = site.data.types.paddle_craft_types | where: "locale", current_locale %}
+          {% assign craft_name_key = "name_" | append: current_locale %}
+          {% for ct in craft_types %}
+          { slug: '{{ ct.slug }}', label: '{{ ct[craft_name_key] | default: ct.name_de }}' }{% unless forloop.last %},{% endunless %}
+          {% endfor %}
+        ],
+        matchFn: function(meta, selected) {
+          var types = meta.paddleCraftTypes || [];
+          for (var i = 0; i < types.length; i++) {
+            if (selected.has(types[i])) return true;
+          }
+          return false;
+        }
+      }
+    ];
+
+    // Build layer toggle configuration for non-spot layers (Requirements 7.1, 7.2, 7.5)
+    var layerLabels = {
+      {% if current_locale == 'en' %}
+      noEntry: 'No Entry Spots',
+      eventNotices: 'Event Notices',
+      obstacles: 'Obstacles',
+      protectedAreas: 'Protected Areas'
+      {% else %}
+      noEntry: 'Keine Zutritt Orte',
+      eventNotices: 'Gewässerereignisse',
+      obstacles: 'Hindernisse',
+      protectedAreas: 'Schutzgebiete'
+      {% endif %}
+    };
+
+    var layerToggles = [
+      { key: 'noEntry', label: layerLabels.noEntry, layerGroup: layerGroups.noEntry, defaultChecked: false },
+      { key: 'eventNotices', label: layerLabels.eventNotices, layerGroup: layerGroups.eventNotices, defaultChecked: true },
+      { key: 'obstacles', label: layerLabels.obstacles, layerGroup: layerGroups.obstacles, defaultChecked: true },
+      { key: 'protectedAreas', label: layerLabels.protectedAreas, layerGroup: layerGroups.protectedAreas, defaultChecked: true }
+    ];
+
+    // Initialize filter engine and panel (Requirements 5.1, 5.2, 8.1, 8.2, 9.1)
+    PaddelbuchFilterEngine.init(dimensionConfigs, map);
+    PaddelbuchFilterPanel.init(map, dimensionConfigs, layerToggles);
+
+    // Initial data load for the current viewport
+    var bounds = PaddelbuchSpatialUtils.leafletBoundsToObject(map.getBounds());
+    var zoom = map.getZoom();
+
+    PaddelbuchDataLoader.loadDataForBounds(bounds, zoom, locale)
+      .then(function(data) {
+        populateLayers(data);
+      })
+      .catch(function(err) {
+        console.warn('Initial map data load failed:', err);
+      });
+
+    // Bind moveend event for subsequent viewport changes (debounced)
+    map.on('moveend', function() {
+      var newBounds = PaddelbuchSpatialUtils.leafletBoundsToObject(map.getBounds());
+      var newZoom = map.getZoom();
+
+      PaddelbuchDataLoader.loadDataForBoundsDebounced(newBounds, newZoom, locale, function(err, data) {
+        if (err) {
+          console.warn('Map data load on move failed:', err);
+          return;
+        }
+        populateLayers(data);
+      });
+    });
+
+    // Initialize zoom-based layer manager for obstacle/protected area visibility
+    PaddelbuchZoomLayerManager.initZoomLayerManager(map, layerGroups, { locale: locale });
+
+    console.log('Map data initialization complete');
+  }
+
+  // Start initialization
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initMapData);
+  } else {
+    setTimeout(initMapData, 100);
+  }
+})();
+</script>

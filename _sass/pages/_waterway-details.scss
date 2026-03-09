@@ -1,0 +1,56 @@
+.page-waterway-details {
+
+  main {
+    padding: 0;
+  }
+
+  td, th {
+    padding-top: 0.5em;
+    padding-bottom: 0.1em;
+  }
+
+  th {
+    padding-right: 1.5em;
+    font-weight: 500;
+  }
+
+  @media screen and (min-width: 992px) {
+    .map {
+      height: calc(100svh - $menu-height) !important;
+    }
+  }
+  @media screen and (max-width: 992px) {
+    .map {
+      height: 60vh;
+    }
+  }
+
+  .waterway-details {
+    padding-right: 1.5em;
+    padding-left: 1.5em;
+  }
+
+  .waterway-details > div {
+    padding-right: 1em;
+  }
+
+  .waterway-title {
+    padding-top: 0.7em;
+    margin-bottom: 0.5em;
+    border-bottom: 1px solid $swisscanoe-blue;
+  }
+
+  .event-notices-section {
+    padding-right: 0 !important;
+  }
+
+  .event-notices-table {
+    border: none;
+
+    th, td {
+      border: none;
+      padding-left: 0 !important;
+      padding-right: 0.3em;
+    }
+  }
+}

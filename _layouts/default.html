@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="{{ site.lang | default: page.lang | default: site.default_lang }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="{% if page.description %}{{ page.description | strip_html | truncate: 160 | escape }}{% else %}{{ site.description | strip_html | truncate: 160 | escape }}{% endif %}">
+  
+  <title>{% if page.title %}{{ page.title }} | {% endif %}{{ site.title }}</title>
+  
+  <!-- Fonts -->
+  <link rel="stylesheet" href="{{ '/assets/css/vendor/fonts.css' | relative_url }}">
+  
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="{{ '/assets/css/vendor/leaflet.css' | relative_url }}">
+  
+  <!-- Leaflet Locate Control CSS -->
+  <link rel="stylesheet" href="{{ '/assets/css/vendor/L.Control.Locate.min.css' | relative_url }}">
+  
+  <!-- Site Stylesheet -->
+  <link rel="stylesheet" href="{{ '/assets/css/application.css' | relative_url }}">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="{{ '/assets/images/logo-favicon.svg' | relative_url }}">
+  <link rel="apple-touch-icon" href="{{ '/assets/images/apple-touch-icon.png' | relative_url }}">
+</head>
+<body class="{% if page.pageName %}page-{{ page.pageName }}{% endif %}{% if page.slug %} slug-{{ page.slug }}{% endif %}">
+  <div class="wrapper">
+    {% include header.html %}
+    
+    <main>
+      {{ content }}
+    </main>
+    
+    {% include footer.html %}
+  </div>
+  
+  <!-- Bootstrap JS Bundle -->
+  <script src="{{ '/assets/js/vendor/bootstrap.bundle.min.js' | relative_url }}"></script>
+  
+  <!-- Leaflet JS -->
+  <script src="{{ '/assets/js/vendor/leaflet.js' | relative_url }}"></script>
+  
+  <!-- Leaflet Locate Control JS -->
+  <script src="{{ '/assets/js/vendor/L.Control.Locate.min.js' | relative_url }}"></script>
+  
+  <!-- Page-specific scripts -->
+  {% if page.scripts %}
+    {% for script in page.scripts %}
+    <script src="{{ script | relative_url }}"></script>
+    {% endfor %}
+  {% endif %}
+</body>
+</html>

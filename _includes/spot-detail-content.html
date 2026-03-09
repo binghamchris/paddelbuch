@@ -1,0 +1,119 @@
+<!--
+  Spot Detail Content Include
+  
+  Displays the full content for a non-rejected spot on the detail page.
+  Shows: description, then details table with paddle craft types, GPS,
+  approximate address, waterway link, and last updated timestamp.
+  
+  Parameters:
+  - include.spot: The spot object containing all spot data
+  - include.waterway: The waterway object (optional)
+  
+  Requirements: 3.6
+-->
+
+{% if site.lang != site.default_lang %}
+  {% assign locale_prefix = '/' | append: site.lang %}
+{% else %}
+  {% assign locale_prefix = '' %}
+{% endif %}
+
+{% assign spot = include.spot %}
+{% assign waterway = include.waterway %}
+{% assign current_locale = site.lang | default: 'de' %}
+
+<!-- Description (between title and table, matching Gatsby layout) -->
+{% if spot.description %}
+<div class="spot-description-text">
+  {{ spot.description }}
+</div>
+{% endif %}
+
+<!-- Spot Details Table -->
+<table class="spot-details-table">
+  <tbody>
+    <!-- Paddle Craft Types (first row, matching Gatsby order) -->
+    {% if spot.paddleCraftTypes and spot.paddleCraftTypes.size > 0 %}
+    <tr>
+      <th>{% t labels.potentially_usable_by %}</th>
+      <td colspan="2">
+        <ul class="mb-0 ps-3">
+          {% for craft_slug in spot.paddleCraftTypes %}
+            {% assign craft_type = site.data.types.paddle_craft_types | where: "slug", craft_slug | first %}
+            <li>
+              {% if craft_type %}
+                {% if current_locale == 'en' %}{{ craft_type.name_en }}{% else %}{{ craft_type.name_de }}{% endif %}
+              {% else %}
+                {{ craft_slug }}
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      </td>
+    </tr>
+    {% endif %}
+
+    <!-- GPS Coordinates -->
+    {% if spot.location %}
+    {% assign lat = spot.location.lat | default: spot.location.latitude %}
+    {% assign lon = spot.location.lon | default: spot.location.lng | default: spot.location.longitude %}
+    {% if lat and lon %}
+    <tr>
+      <th>{% t labels.gps %}</th>
+      <td>
+        <span id="gps-coords">{{ lat }}, {{ lon }}</span>
+      </td>
+      <td class="clipboard-cell">
+        <button type="button" 
+                class="btn btn-sm clipboard-btn copy-btn" 
+                onclick="PaddelbuchClipboard.copyGPS('{{ lat }}', '{{ lon }}')"
+                title="{% t actions.copy_gps %}"
+                aria-label="{% t actions.copy_gps %}">
+          {% t actions.copy %}
+        </button>
+      </td>
+    </tr>
+    {% endif %}
+    {% endif %}
+
+    <!-- Approximate Address -->
+    {% if spot.approximateAddress %}
+    <tr>
+      <th>{% t labels.approx_address %}</th>
+      <td>
+        <span id="approx-address">{{ spot.approximateAddress }}</span>
+      </td>
+      <td class="clipboard-cell">
+        <button type="button" 
+                class="btn btn-sm clipboard-btn copy-btn" 
+                onclick="PaddelbuchClipboard.copyAddress('{{ spot.approximateAddress | escape }}')"
+                title="{% t actions.copy_address %}"
+                aria-label="{% t actions.copy_address %}">
+          {% t actions.copy %}
+        </button>
+      </td>
+    </tr>
+    {% endif %}
+
+    <!-- Waterway Link -->
+    {% if waterway %}
+    <tr>
+      <th>{% t labels.waterway %}</th>
+      <td colspan="2">
+        <a href="{{ locale_prefix | append: '/gewaesser/' | append: waterway.slug | append: '/' }}">
+          {{ waterway.name }}
+        </a>
+      </td>
+    </tr>
+    {% endif %}
+
+    <!-- Last Updated Timestamp -->
+    <!-- Property 19: Date Locale Formatting - using localized_datetime with 'long' format to match Gatsby -->
+    {% if spot.updatedAt %}
+    <tr>
+      <th>{% t labels.last_updated %}</th>
+      <td colspan="2">{{ spot.updatedAt | localized_date }}</td>
+    </tr>
+    {% endif %}
+  </tbody>
+</table>
