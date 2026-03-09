@@ -65,11 +65,11 @@
       </tr>
       {% endif %}
       <!-- Last Updated Timestamp -->
-      <!-- Property 19: Date Locale Formatting - using localized_datetime with 'long' format to match spot detail -->
+      <!-- Property 19: Date Locale Formatting - using localized_date to show date only (no time) -->
       {% if spot.updatedAt %}
       <tr>
         <th>{% t labels.last_updated %}</th>
-        <td colspan="2">{{ spot.updatedAt | localized_datetime: 'long' }}</td>
+        <td colspan="2">{{ spot.updatedAt | localized_date }}</td>
       </tr>
       {% endif %}
     </tbody>
