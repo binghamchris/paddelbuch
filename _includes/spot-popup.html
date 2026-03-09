@@ -47,49 +47,9 @@
 
 <!-- Details table: craft types, GPS, address -->
 <table class="popup-details-table"><tbody>
-  {% if spot.paddleCraftTypes and spot.paddleCraftTypes.size > 0 %}
-  <tr>
-    <th>{% t labels.potentially_usable_by %}:</th>
-    <td colspan="2">
-      <ul>
-        {% for craft_slug in spot.paddleCraftTypes %}
-          {% assign craft_type = site.data.types.paddle_craft_types | where: "slug", craft_slug | first %}
-          {% if craft_type %}
-            {% if current_locale == 'en' %}<li>{{ craft_type.name_en }}</li>{% else %}<li>{{ craft_type.name_de }}</li>{% endif %}
-          {% else %}
-            <li>{{ craft_slug }}</li>
-          {% endif %}
-        {% endfor %}
-      </ul>
-    </td>
-  </tr>
-  {% endif %}
 
-  {% if spot.location %}
-  {% assign lat = spot.location.lat | default: spot.location.latitude %}
-  {% assign lon = spot.location.lon | default: spot.location.lng | default: spot.location.longitude %}
-  {% if lat and lon %}
-  <tr>
-    <th>{% t labels.gps %}:</th>
-    <td>{{ lat }}, {{ lon }}</td>
-    <td class="clipboard-cell-popup">
-      <button title="{% t actions.copy_gps %}" type="button" class="popup-btn"
-              onclick="PaddelbuchClipboard.copyGPS('{{ lat }}', '{{ lon }}')">{% t actions.copy %}</button>
-    </td>
-  </tr>
-  {% endif %}
-  {% endif %}
 
-  {% if spot.approximateAddress %}
-  <tr>
-    <th>{% t labels.approx_address %}:</th>
-    <td>{{ spot.approximateAddress }}</td>
-    <td class="clipboard-cell-popup">
-      <button title="{% t actions.copy_address %}" type="button" class="popup-btn"
-              onclick="PaddelbuchClipboard.copyAddress('{{ spot.approximateAddress | escape }}')">{% t actions.copy %}</button>
-    </td>
-  </tr>
-  {% endif %}
+
 </tbody></table>
 
 <!-- Action buttons -->

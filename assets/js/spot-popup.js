@@ -202,43 +202,11 @@
       // Details table (matches Gatsby .popup-details-table)
       html.push('<table class="popup-details-table"><tbody>');
 
-      // Craft types row
-      if (spot.paddleCraftTypes && spot.paddleCraftTypes.length > 0) {
-        html.push('<tr><th>' + labels.potentiallyUsableBy + ':</th><td colspan="2"><ul>');
-        for (var i = 0; i < spot.paddleCraftTypes.length; i++) {
-          var craftSlug = spot.paddleCraftTypes[i];
-          var craftName = craftSlug;
-          if (Object.prototype.hasOwnProperty.call(paddleCraftTypeNames, craftSlug)) {
-            craftName = paddleCraftTypeNames[craftSlug][locale] || paddleCraftTypeNames[craftSlug]['de'] || craftSlug;
-          }
-          html.push('<li>' + escapeHtml(craftName) + '</li>');
-        }
-        html.push('</ul></td></tr>');
-      }
-
-      // GPS row
+      // GPS coordinates (used for navigate button below)
       var lat = spot.location ? (spot.location.lat || spot.location.latitude) : null;
       var lon = spot.location ? (spot.location.lon || spot.location.lng || spot.location.longitude) : null;
 
-      if (lat !== null && lon !== null) {
-        html.push('<tr><th>' + labels.gps + ':</th>');
-        html.push('<td>' + lat + ', ' + lon + '</td>');
-        html.push('<td class="clipboard-cell-popup">');
-        html.push('<button title="' + labels.copyGps + '" type="button" class="popup-btn" ');
-        html.push('onclick="PaddelbuchClipboard.copyGPS(\'' + lat + '\', \'' + lon + '\', this)">');
-        html.push(labels.copy + '</button></td></tr>');
-      }
 
-      // Address row
-      if (spot.approximateAddress) {
-        var escapedAddress = escapeHtml(spot.approximateAddress).replace(/'/g, "\\'");
-        html.push('<tr><th>' + labels.approxAddress + ':</th>');
-        html.push('<td>' + escapeHtml(spot.approximateAddress) + '</td>');
-        html.push('<td class="clipboard-cell-popup">');
-        html.push('<button title="' + labels.copyAddress + '" type="button" class="popup-btn" ');
-        html.push('onclick="PaddelbuchClipboard.copyAddress(\'' + escapedAddress + '\', this)">');
-        html.push(labels.copy + '</button></td></tr>');
-      }
 
       html.push('</tbody></table>');
 
