@@ -1,0 +1,81 @@
+---
+layout: default
+title: Page Not Found
+pageName: error-404
+permalink: /404.html
+---
+<!--
+  404 Error Page
+  
+  Displays a user-friendly error message when a page is not found.
+  Styled consistently with the site design.
+  
+  Requirements: 13.6
+  
+  When a URL is shared, the URL_System shall ensure the URL remains persistent 
+  and accessible as long as the content exists. This page handles cases where 
+  content no longer exists or URLs are invalid.
+-->
+
+{% assign current_locale = site.lang | default: 'de' %}
+
+<div class="container error-page-container">
+  <div class="row justify-content-center align-items-center min-vh-75">
+    <div class="col-lg-6 col-md-8 text-center">
+      
+      <!-- Error Title -->
+      <h2 class="error-title h3 mb-3">{% t errors.not_found_title %}</h2>
+      
+      <!-- Error Message -->
+      <p class="error-message text-muted mb-4">{% t errors.not_found_message %}</p>
+      
+      <!-- Back to Home Button -->
+      <a href="{{ '/' | relative_url }}" class="btn btn-sm navigate-btn error-page-btn">
+        {% if current_locale == 'en' %}
+          Return to the map
+        {% else %}
+          Zurück zur Karte
+        {% endif %}
+      </a>
+    </div>
+  </div>
+</div>
+
+<style>
+.error-page-container {
+  padding-top: 2rem;
+  padding-bottom: 4rem;
+}
+
+.min-vh-75 {
+  min-height: 75vh;
+}
+
+.error-icon svg {
+  color: var(--bs-secondary);
+  opacity: 0.5;
+}
+
+.error-title {
+  color: var(--bs-dark);
+}
+
+.error-message {
+  font-size: 1.1rem;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.error-page-btn {
+  float: none;
+  margin-top: 0;
+}
+
+@media (max-width: 576px) {
+  .error-icon svg {
+    width: 80px;
+    height: 80px;
+  }
+}
+</style>

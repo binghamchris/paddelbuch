@@ -1,0 +1,31 @@
+<!--
+  Navigate Button Include
+  
+  Renders a button that opens an external mapping application with directions
+  to the specified coordinates.
+  
+  Parameters:
+  - include.lat: Latitude coordinate (required)
+  - include.lon: Longitude coordinate (required)
+  - include.class: Additional CSS classes to apply (optional)
+  - include.size: Button size - 'sm', 'md', 'lg' (default: 'sm')
+  
+  Requirements: 11.1
+-->
+
+{% assign lat = include.lat %}
+{% assign lon = include.lon %}
+{% assign btn_class = include.class | default: '' %}
+{% assign btn_size = include.size | default: 'sm' %}
+{% assign current_locale = site.lang | default: 'de' %}
+
+{% if lat and lon %}
+<a href="https://www.google.com/maps/dir/?api=1&destination={{ lat }},{{ lon }}" 
+   target="_blank" 
+   rel="noopener noreferrer"
+   class="btn btn-{{ btn_size }} navigate-btn {{ btn_class }}"
+   title="{% t actions.navigate %}"
+   aria-label="{% t actions.navigate %}">
+  {% t actions.navigate %}
+</a>
+{% endif %}

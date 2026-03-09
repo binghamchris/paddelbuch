@@ -1,0 +1,57 @@
+<!--
+  Obstacle Popup Include
+  
+  Displays obstacle information in a Leaflet popup.
+  
+  Parameters:
+  - include.obstacle: The obstacle object containing all obstacle data
+  - include.locale: Current locale (default: site.lang or 'de')
+  
+  Shows:
+  - Obstacle name
+  - Portage possibility status (Yes, No, or Unknown)
+  - "More details" link to obstacle detail page
+  
+  Requirements: 5.3
+-->
+
+{% if site.lang != site.default_lang %}
+  {% assign locale_prefix = '/' | append: site.lang %}
+{% else %}
+  {% assign locale_prefix = '' %}
+{% endif %}
+
+{% assign obstacle = include.obstacle %}
+{% assign current_locale = include.locale | default: site.lang | default: 'de' %}
+
+<span class="popup-title"><h1>{{ obstacle.name }}</h1></span>
+
+<!-- Portage Possibility Status (Requirement 5.3) -->
+<table>
+  <tbody>
+    <tr>
+      <th>
+        {% if current_locale == 'en' %}Portage Possible{% else %}Umtragen möglich{% endif %}:
+      </th>
+      <td>
+        {% if obstacle.isPortagePossible == true %}
+          {% if current_locale == 'en' %}Yes{% else %}Ja{% endif %}
+        {% elsif obstacle.isPortagePossible == false %}
+          {% if current_locale == 'en' %}No{% else %}Nein{% endif %}
+        {% else %}
+          {% if current_locale == 'en' %}Unknown{% else %}Unbekannt{% endif %}
+        {% endif %}
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- More Details Link (Requirement 5.3) -->
+{% if obstacle.slug %}
+<button class="popup-btn popup-btn-right obstacle-details-btn">
+  <a class="popup-btn-right" hreflang="{{ current_locale }}"
+     href="{{ locale_prefix | append: '/hindernisse/' | append: obstacle.slug | append: '/' }}">
+    {% if current_locale == 'en' %}More details{% else %}Weitere Details{% endif %}
+  </a>
+</button>
+{% endif %}
