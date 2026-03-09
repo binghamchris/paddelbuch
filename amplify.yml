@@ -3,15 +3,21 @@ frontend:
   phases:
     preBuild:
       commands:
+        - nvm install 18
         - npm ci
+        - npm run download-fonts
+        - npm run copy-assets
+        - bundle install
     build:
       commands:
-        - npm run clean
-        - npm run build
+        - bundle exec jekyll build --verbose
+        - npm test || true
   artifacts:
-    baseDirectory: public
+    baseDirectory: _site
     files:
       - '**/*'
   cache:
     paths:
+      - vendor/**/*
       - node_modules/**/*
+      - _data/**/*

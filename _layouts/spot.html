@@ -1,0 +1,185 @@
+---
+layout: default
+pageName: spot-details
+---
+<!--
+  Spot Detail Layout
+  
+  Displays a spot detail page with map (8 cols) + details panel (4 cols).
+  Shows: full description, GPS, approximate address, waterway link, 
+  paddle craft types, and last updated timestamp.
+  All data layers (spots, obstacles, protected areas, event notices) are loaded.
+  
+  Collection permalink: /einstiegsorte/:slug/
+  
+  Requirements: 3.6, 13.1
+-->
+
+{% assign current_locale = site.lang | default: 'de' %}
+{% assign spot = page %}
+{% assign spot_type_slug = spot.spotType_slug | default: spot.spot_type_slug %}
+{% assign is_rejected = spot.rejected %}
+
+<!-- Get spot type name -->
+{% assign spot_type = site.data.types.spot_types | where: "slug", spot_type_slug | first %}
+{% if spot_type %}
+  {% if current_locale == 'en' %}
+    {% assign spot_type_name = spot_type.name_en %}
+  {% else %}
+    {% assign spot_type_name = spot_type.name_de %}
+  {% endif %}
+{% else %}
+  {% assign spot_type_name = spot_type_slug %}
+{% endif %}
+
+<!-- Override spot type name for rejected spots -->
+{% if is_rejected %}
+  {% capture spot_type_name %}{% t spot_types.no_entry %}{% endcapture %}
+  {% assign spot_type_name = spot_type_name | strip %}
+{% endif %}
+
+<!-- Get waterway information -->
+{% assign waterway_slug = spot.waterway_slug %}
+{% if waterway_slug %}
+  {% assign waterway = site.data.waterways | where: "slug", waterway_slug | where: "locale", current_locale | first %}
+{% endif %}
+
+<div class="container-fluid">
+  <div class="row">
+    <!-- Map Column -->
+    <div class="col-xl-8 col-lg-7 p-0">
+      <div id="spot-map" class="map"></div>
+    </div>
+    
+    <!-- Details Panel -->
+    <div class="col-xl-4 col-lg-5 col-md-12 col-sm-12 col-12 spot-description">
+      <!-- Navigate Button (top, matching Gatsby layout) -->
+      {% unless is_rejected %}
+        {% if spot.location %}
+          {% assign lat = spot.location.lat | default: spot.location.latitude %}
+          {% assign lon = spot.location.lon | default: spot.location.lng | default: spot.location.longitude %}
+          {% if lat and lon %}
+            {% include navigate-btn.html lat=lat lon=lon size="md" %}
+          {% endif %}
+        {% endif %}
+      {% endunless %}
+
+      <!-- Spot Icon and Type -->
+      <div class="spot-icon-div align-items-center">
+        {% include spot-icon.html type=spot_type_slug rejected=is_rejected variant="dark" size=20 %}
+        <span class="ms-2">{{ spot_type_name }}</span>
+      </div>
+      
+      <!-- Spot Title -->
+      <div class="spot-title"><h1>{{ spot.name }}</h1></div>
+      
+      {% if is_rejected %}
+        <!-- Rejected Spot: Show rejection reason (Requirement 3.7) -->
+        {% include rejected-spot-content.html spot=spot %}
+      {% else %}
+        <!-- Normal Spot: Show standard information (Requirement 3.6) -->
+        {% include spot-detail-content.html spot=spot waterway=waterway %}
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Map Initialization Script -->
+<script src="{{ '/assets/js/marker-styles.js' | relative_url }}"></script>
+<script src="{{ '/assets/js/layer-styles.js' | relative_url }}"></script>
+<script src="{{ '/assets/js/clipboard.js' | relative_url }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize map centered on spot location
+  {% assign lat = spot.location.lat | default: spot.location.latitude %}
+  {% assign lon = spot.location.lon | default: spot.location.lng | default: spot.location.longitude %}
+  
+  {% if lat and lon %}
+  var spotLat = {{ lat }};
+  var spotLon = {{ lon }};
+  
+  var map = L.map('spot-map', {
+    center: [spotLat, spotLon],
+    zoom: 15,
+    zoomControl: true
+  });
+  
+  // Add tile layer
+  L.tileLayer('{{ site.mapbox_url }}', {
+    attribution: '&copy; <a href="https://www.mapbox.com/about/maps/" target="_blank" rel="noopener">Mapbox</a> &copy; <a href="http://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> <strong><a href="https://www.mapbox.com/map-feedback/" target="_blank" rel="noopener">Improve this map</a></strong>',
+    maxZoom: {{ site.map.max_zoom | default: 18 }}
+  }).addTo(map);
+  
+  // Position zoom control at bottom-right
+  map.zoomControl.setPosition('bottomright');
+  
+  // Add locate control for user position finding
+  L.control.locate({
+    position: 'bottomright',
+    strings: {
+      title: '{{ site.lang | default: "de" }}' === 'de' ? 'Meinen Standort anzeigen' : 'Show my location'
+    },
+    locateOptions: {
+      enableHighAccuracy: true,
+      maxZoom: 14
+    },
+    flyTo: true,
+    showCompass: true,
+    showPopup: false,
+    drawCircle: true,
+    drawMarker: true,
+    markerStyle: {
+      weight: 2,
+      opacity: 0.8,
+      fillOpacity: 0.8
+    },
+    circleStyle: {
+      weight: 1,
+      clickable: false
+    },
+    icon: 'leaflet-control-locate-location-arrow',
+    iconLoading: 'leaflet-control-locate-spinner',
+    onLocationError: function(err) {
+      console.warn('Location error:', err.message);
+    }
+  }).addTo(map);
+
+  // Add spot marker for this page's spot
+  var spotType = '{{ spot_type_slug }}';
+  var isRejected = {{ is_rejected | default: false }};
+  var markerIcon = PaddelbuchMarkerStyles.getSpotIcon(spotType, isRejected);
+  
+  var marker = L.marker([spotLat, spotLon], { icon: markerIcon }).addTo(map);
+
+  // Build the proper popup using the spot popup module (same as tile-loaded spots)
+  var currentSpotData = {
+    name: '{{ spot.name | escape }}',
+    slug: '{{ spot.slug }}',
+    spotType_slug: spotType,
+    rejected: isRejected,
+    description: {{ spot.description | jsonify | default: 'null' }},
+    approximateAddress: {{ spot.approximateAddress | jsonify | default: 'null' }},
+    paddleCraftTypes: {{ spot.paddleCraftTypes | jsonify | default: '[]' }},
+    location: { lat: spotLat, lon: spotLon }
+  };
+  var currentLocale = '{{ current_locale }}';
+  var popupHtml;
+  if (window.PaddelbuchSpotPopup) {
+    if (isRejected) {
+      popupHtml = window.PaddelbuchSpotPopup.generateRejectedSpotPopupContent(currentSpotData, currentLocale);
+    } else {
+      popupHtml = window.PaddelbuchSpotPopup.generateSpotPopupContent(currentSpotData, currentLocale);
+    }
+  } else {
+    popupHtml = '<strong>' + currentSpotData.name + '</strong>';
+  }
+  marker.bindPopup(popupHtml, { maxWidth: 350 });
+  
+  // Store map globally so the data layer pipeline can find it
+  window.paddelbuchMap = map;
+  {% endif %}
+});
+</script>
+
+<!-- Load all data layers (spots, obstacles, protected areas, event notices) -->
+{% include detail-map-layers.html locale=current_locale %}

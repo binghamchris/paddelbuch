@@ -1,0 +1,153 @@
+# English - Secondary Language
+# Locale: en-GB
+
+# Site metadata
+site:
+  title: "Paddel Buch"
+  description: "Interactive map for Swiss paddle sports enthusiasts"
+  language: "English"
+  locale: "en-GB"
+
+# Navigation
+nav:
+  spots: "Spots"
+  lakes: "Lakes"
+  rivers: "Rivers"
+  about: "About"
+  open_data: "Open Data"
+  public_database_api: "Public Database/API"
+  language: "Language"
+  more_lakes: "More lakes"
+  more_rivers: "More rivers"
+
+# Spot types
+spot_types:
+  entry_exit: "Entry & Exit Spots"
+  entry_only: "Entry Only Spots"
+  exit_only: "Exit Only Spots"
+  rest: "Rest Spots"
+  emergency: "Emergency Exit Spots"
+  no_entry: "No Entry Spot"
+
+# Rejected spots
+rejected:
+  not_accessible: "This location is not accessible for paddlers."
+  reason: "Reason"
+
+# Spot type icons (alt text)
+spot_icons:
+  entry_exit: "Entry and exit spot icon"
+  entry_only: "Entry spot icon"
+  exit_only: "Exit spot icon"
+  rest: "Rest spot icon"
+  emergency: "Emergency exit spot icon"
+
+# Layer controls
+layers:
+  entry_exit_spots: "Entry & Exit Spots"
+  entry_only_spots: "Entry Only Spots"
+  exit_only_spots: "Exit Only Spots"
+  rest_spots: "Rest Spots"
+  emergency_spots: "Emergency Exit Spots"
+  no_entry_spots: "No Entry Spots"
+  event_notices: "Event Notices"
+  obstacles: "Obstacles"
+  protected_areas: "Protected Areas"
+
+# Common labels
+labels:
+  spot: "Spot"
+  more_details: "More details"
+  gps: "GPS"
+  type: "Type"
+  approx_address: "Approx. Address"
+  waterway: "Waterway"
+  name: "Name"
+  data_source: "Data Source"
+  last_updated: "Last Updated"
+  "yes": "Yes"
+  "no": "No"
+  unknown: "Unknown"
+  summary: "Summary"
+  potentially_usable_by: "Potentially Usable By"
+
+# Actions
+actions:
+  copy: "Copy"
+  copy_gps: "Copy GPS to clipboard"
+  copy_address: "Copy approx. address to clipboard"
+  navigate: "Navigate To"
+
+# Obstacles
+obstacles:
+  title: "Obstacles"
+  portage_route: "Portage Route"
+  portage_route_for: "Portage route for"
+  portage_possible: "Portage Possible"
+  portage_distance: "Distance"
+  portage_description: "Portage Description"
+  exit_spot: "Exit Spot"
+  reentry_spot: "Re-entry Spot"
+
+# Protected areas
+protected_areas:
+  title: "Protected Areas"
+
+# Event notices
+event_notices:
+  title: "Event Notices"
+  waterway_notices: "Event Notices"
+  no_notices: "There are presently no event notices for this waterway"
+  approx_start_date: "Approx. Start Date"
+  approx_end_date: "Approx. End Date"
+  affected_area: "Area affected by a waterway event notice"
+
+# Waterways
+waterways:
+  title: "Waterways"
+  lakes: "Lakes"
+  rivers: "Rivers"
+
+# API page
+api:
+  title: "Data Download / API"
+  intro: "All of Paddel Buch's data is available here for download and reuse under the terms described in the"
+  intro_link_text: "Data Licensing"
+  intro_suffix: "page."
+  intro_json: "Data is published as JSON files which are updated automatically when Paddel Buch's data is changed. German and English data is available in separate files, which can be joined using their slug fields."
+  last_update_index: "Last Update Index"
+  last_update_index_description: "This file provides a list of all the tables and the ISO timestamp for when each was last updated."
+  fact_tables: "Fact Tables"
+  fact_tables_description: "These tables contain Paddel Buch's primary data and are updated most frequently."
+  dimension_tables: "Dimension Tables"
+  dimension_tables_description: "These tables contain dimension data referenced by entries in the fact tables via their slugs."
+  table_name: "Table Name"
+  german: "German"
+  english: "English"
+  german_download: "German Download"
+  english_download: "English Download"
+  data_licensing: "Data Licensing"
+  spots: "Spots"
+  obstacles: "Obstacles"
+  protected_areas: "Protected Areas"
+  waterways: "Waterways"
+  waterway_event_notices: "Waterway Event Notices"
+  event_notices: "Event Notices"
+  data_license_types: "Data Licenses Types"
+  data_source_types: "Data Source Types"
+  obstacle_types: "Obstacle Types"
+  paddle_craft_types: "Paddle Craft Types"
+  protected_area_types: "Protected Area Types"
+  spot_types: "Spot Types"
+  paddling_environment_types: "Paddling Envrionment Types"
+
+# Error pages
+errors:
+  not_found_title: "Page Not Found"
+  not_found_message: "The requested page could not be found."
+  back_home: "Back to Home"
+
+# Date formats
+date:
+  format: "%d/%m/%Y"
+  format_long: "%d %B %Y"

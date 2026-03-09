@@ -1,0 +1,93 @@
+header {
+  position: relative;
+  z-index: 1050;
+  width: 100%;
+  color: $white;
+  background-color: $swisscanoe-blue;
+  padding-right: 10px;
+  padding-left: 0.2em;
+
+  #site-navbar > .container-fluid {
+    padding-right: 0;
+    padding-left: 0;
+  }
+  
+  .container {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  ul,
+  li,
+  a {
+    display: flex;
+    align-items: center;
+  }
+
+  ul {
+    justify-content: flex-end;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  a {
+    text-decoration: none;
+    padding: 0 .5em;
+  }
+
+  p {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin: 0;
+  }
+
+  .dropdown-menu {
+    --bs-dropdown-divider-bg: #{$white};
+    --bs-dropdown-divider-margin-y: 0;
+    color: $white;
+    background-color: $swisscanoe-blue;
+
+    hr.dropdown-divider {
+      width: 100%;
+      border-top: 1px solid $white !important;
+      opacity: 1 !important;
+      margin: 0;
+    }
+  }
+
+  .dropdown-item:hover .nav-link{
+    color: $swisscanoe-blue !important;
+  }
+
+  .nav-link {
+    color: $white !important;
+  }
+
+  .paddelbuch-logo {
+    margin-right: 12px !important;
+    display: inline-block;
+    vertical-align:middle;
+  }
+
+  .navbar-brand {
+    font-family: $font-brand;
+    font-size: 1.6em;
+    font-weight: 400;
+  }
+
+  .navbar-nav {
+    font-size: 1.2em;
+
+    @media (max-width: 991.98px) {
+      align-items: flex-start;
+    }
+  }
+
+  @media (max-width: 991.98px) {
+    .nav-item.dropdown {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+}
