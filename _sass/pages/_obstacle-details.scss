@@ -1,0 +1,57 @@
+.page-obstacle-details {
+
+  main {
+    padding: 0;
+  }
+
+  td, th {
+    padding-top: 0.5em;
+    padding-bottom: 0.1em;
+  }
+
+  th {
+    padding-right: 1.5em;
+    font-weight: 500;
+  }
+
+  @media screen and (min-width: 992px) {
+    .map {
+      height: calc(100svh - $menu-height) !important;
+    }
+  }
+  @media screen and (max-width: 992px) {
+    .map {
+      height: 60vh;
+    }
+  }
+
+  .obstacle-description {
+    padding-right: 1.5em;
+    padding-left: 1.5em;
+    overflow-x: hidden;
+  }
+
+  .obstacle-description > div {
+    padding-right: 1em;
+  }
+
+  .obstacle-title {
+    padding-top: 0.7em;
+    border-bottom: 1px solid $swisscanoe-blue;
+    margin-bottom: 1em;
+
+    h1 {
+      margin-bottom: 0;
+    }
+  }
+
+  table {
+    width: 100%;
+
+    td {
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+    }
+  }
+
+}

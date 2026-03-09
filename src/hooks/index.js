@@ -1,1 +1,0 @@
-export { default as useConfigureLeaflet } from "./useConfigureLeaflet";

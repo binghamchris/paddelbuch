@@ -1,0 +1,70 @@
+<!--
+  Spot Popup Include — matches original Gatsby popup HTML structure
+  
+  Parameters:
+  - include.spot: The spot object containing all spot data
+  - include.locale: Current locale (default: site.lang or 'de')
+-->
+
+{% if site.lang != site.default_lang %}
+  {% assign locale_prefix = '/' | append: site.lang %}
+{% else %}
+  {% assign locale_prefix = '' %}
+{% endif %}
+
+{% assign spot = include.spot %}
+{% assign current_locale = include.locale | default: site.lang | default: 'de' %}
+{% assign spot_type_slug = spot.spotType_slug | default: spot.spot_type_slug %}
+{% assign is_rejected = spot.rejected %}
+
+{% comment %} Look up translated spot type category label {% endcomment %}
+{% assign spot_type_entry = site.data.types.spot_types | where: "slug", spot_type_slug | first %}
+{% if spot_type_entry %}
+  {% if current_locale == 'en' %}
+    {% assign spot_type_label = spot_type_entry.name_en %}
+  {% else %}
+    {% assign spot_type_label = spot_type_entry.name_de %}
+  {% endif %}
+{% else %}
+  {% assign spot_type_label = spot_type_slug %}
+{% endif %}
+
+<!-- Header: icon + category label (matches .popup-icon-div from Gatsby) -->
+<div class="popup-icon-div">
+  <span class="popup-icon">{% include spot-icon.html type=spot_type_slug rejected=is_rejected variant="light" %}</span>{{ spot_type_label }}
+</div>
+
+<!-- Title -->
+<span class="popup-title"><h1>{{ spot.name }}</h1></span>
+
+<!-- Description -->
+{% if spot.description %}
+<div>
+  {% assign description_text = spot.description | strip_html | truncate: 150 %}
+  <p>{{ description_text }}</p>
+</div>
+{% endif %}
+
+<!-- Details table: craft types, GPS, address -->
+<table class="popup-details-table"><tbody>
+
+
+
+</tbody></table>
+
+<!-- Action buttons -->
+{% if spot.location %}
+{% assign lat = spot.location.lat | default: spot.location.latitude %}
+{% assign lon = spot.location.lon | default: spot.location.lng | default: spot.location.longitude %}
+{% if lat and lon %}
+<button type="button" class="popup-btn">
+  <a href="https://www.google.com/maps/dir/?api=1&destination={{ lat }},{{ lon }}" target="_blank" rel="noopener noreferrer">{% t actions.navigate %}</a>
+</button>
+{% endif %}
+{% endif %}
+
+{% if spot.slug %}
+<button class="popup-btn popup-btn-right">
+  <a href="{{ locale_prefix | append: '/einstiegsorte/' | append: spot.slug | append: '/' }}">{% t labels.more_details %}</a>
+</button>
+{% endif %}

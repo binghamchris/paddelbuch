@@ -1,0 +1,43 @@
+---
+layout: default
+pageName: static-page
+---
+<!--
+  Static Page Layout
+  
+  Displays CMS-driven static content pages from Contentful.
+  Renders the page title and content in a clean, readable format.
+  
+  Collection permalink: /:menu/:slug/
+  
+  Requirements: 12.3, 13.5
+  
+  For any static content page, the Content_System shall render the page 
+  content from Contentful CMS. URLs follow the pattern /{menu}/{slug}.
+-->
+
+{% assign current_locale = site.lang | default: 'de' %}
+{% assign static_page = page %}
+
+<div class="container static-page-container">
+  <div class="row justify-content-center">
+    <div class="col-12">
+      <!-- Page Title -->
+      <h1 class="static-page-title">{{ static_page.title }}</h1>
+      
+      <!-- Page Content from Contentful -->
+      <div class="static-page-content">
+        {{ static_page.page_body }}
+      </div>
+      
+      <!-- Last Updated (if available) -->
+      {% if static_page.updatedAt %}
+      <div class="static-page-meta">
+        <small class="text-muted">
+          {% t labels.last_updated %}: {{ static_page.updatedAt | localized_date }}
+        </small>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>

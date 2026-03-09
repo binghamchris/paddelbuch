@@ -1,0 +1,123 @@
+// Filter Panel — styled to match leaflet-control-zoom / leaflet-control-locate
+
+.filter-panel {
+  background: $white;
+  border: 1px solid $secondary-blue !important;
+  border-radius: 0;
+  box-shadow: none;
+  font: 1.2em/1.4 $font-sans-serif;
+  max-height: calc(100vh - 120px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.filter-panel-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  cursor: pointer;
+  background: $swisscanoe-blue;
+  border: none;
+  border-radius: 0;
+  font-size: 18px;
+  line-height: 1;
+  padding: 0;
+  color: $white;
+
+  &:hover {
+    background-color: $secondary-blue;
+    color: $white;
+  }
+}
+
+.filter-panel-content {
+  display: none;
+  padding: 0.7em 0.7em 0.5em;
+  overflow-y: auto;
+  max-height: calc(100vh - 160px);
+  min-width: 200px;
+}
+
+.filter-panel.expanded {
+  .filter-panel-toggle {
+    border-bottom: 1px solid $secondary-blue;
+    border-radius: 0;
+    width: 100%;
+    justify-content: flex-start;
+    padding-left: 10px;
+  }
+
+  .filter-panel-content {
+    display: block;
+  }
+}
+
+.filter-panel fieldset {
+  border: 1px solid $secondary-blue;
+  border-radius: 0;
+  margin: 0 0 8px 0;
+  padding: 4px 8px 8px;
+}
+
+.filter-panel legend {
+  font-weight: 500;
+  font-size: 1.2em;
+  color: $swisscanoe-blue;
+}
+
+.filter-panel label {
+  display: block;
+  padding: 2px 0;
+  cursor: pointer;
+  font-size: 1em;
+  white-space: nowrap;
+  margin-bottom: 5px;
+  color: $swisscanoe-blue;
+}
+
+.filter-panel input[type="checkbox"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 1.3em;
+  width: 1.3em;
+  margin-right: 0.5em;
+  vertical-align: middle;
+  border: 2px solid $secondary-blue;
+  border-radius: 0;
+  background: $white;
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+
+  &:checked {
+    background: $swisscanoe-blue;
+    border-color: $swisscanoe-blue;
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 45%;
+      left: 50%;
+      width: 0.35em;
+      height: 0.65em;
+      border: solid $white;
+      border-width: 0 2px 2px 0;
+      border-radius: 0;
+      transform: translate(-50%, -55%) rotate(45deg);
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid $secondary-blue;
+    outline-offset: 1px;
+  }
+}
+
+.filter-panel-separator {
+  border: none;
+  border-top: 1px solid $secondary-blue;
+  margin: 8px 0;
+}

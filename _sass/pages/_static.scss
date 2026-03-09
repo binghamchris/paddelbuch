@@ -1,0 +1,152 @@
+// Static page layout styles
+// Requirements: 12.3, 13.5
+
+.static-page-container {
+  padding-top: 1.5rem;
+  padding-bottom: 2rem;
+}
+
+.static-page-title {
+  color: $swisscanoe-blue;
+  font-weight: 400;
+}
+
+.static-page-content {
+  line-height: 1.7;
+  
+  h1, h2, h3, h4, h5, h6 {
+    color: $swisscanoe-blue;
+    margin-bottom: 0.5rem;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+  }
+  
+  h3 {
+    font-size: 1.25rem;
+  }
+  
+  p {
+    margin-bottom: 1rem;
+  }
+  
+  a {   
+    text-decoration: underline;
+    
+    &:hover {
+      color: darken($swisscanoe-blue, 10%);
+    }
+  }
+  
+  ul, ol {
+    margin-bottom: 1rem;
+    padding-left: 1.5rem;
+    
+    li {
+      margin-bottom: 0.5rem;
+    }
+  }
+  
+  blockquote {
+    border-left: 4px solid $secondary-blue;
+    padding-left: 1rem;
+    margin-left: 0;
+    color: $text-muted;
+    font-style: italic;
+  }
+  
+  img {
+    max-width: 100%;
+    height: auto;
+    margin: 1rem 0;
+  }
+  
+}
+
+.static-page-meta {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid $secondary-blue-20;
+}
+
+.page-api, .page-static, .page-static-page {
+  table {
+    display: block !important;
+    overflow-x: scroll !important;
+  }
+  table tbody tr:nth-child(even) {
+    background-color: $secondary-blue-20;
+  }
+  table tbody tr:nth-child(1) {
+    border-bottom: 2px solid $secondary-blue;
+    margin-bottom: 0.2em;
+  }
+  td {
+    padding-right: 1.5em;
+    padding-bottom: 0.4em;
+    padding-top: 0.4em;
+  }
+  th {
+    padding-right: 1.5em;
+    padding-bottom: 0.5em;
+    color: $swisscanoe-blue;
+  }
+}
+
+.page-api {
+  table tbody tr th:nth-child(1) {
+    min-width: 256px;
+  }
+  table tbody tr td:nth-child(1) {
+    min-width: 256px;
+  }
+}
+
+.page-static, .page-static-page {
+  table tbody tr th p {
+    margin: 0;
+  }
+  table tbody tr th:nth-child(2) {
+    min-width: 410px;
+  }
+  table tbody tr td:nth-child(2) {
+    min-width: 410px;
+  }
+}
+
+// Data schema page: full-width content on mobile, with horizontally scrollable tables
+@media screen and (max-width: 991.98px) {
+  .slug-daten-schema {
+    .static-page-container {
+      max-width: 100%;
+      padding-left: 1rem;
+      padding-right: 1rem;
+      overflow-x: hidden;
+    }
+
+    .static-page-content {
+      overflow-x: hidden;
+
+      table {
+        overflow-x: auto;
+        max-width: calc(100vw - 2rem);
+      }
+    }
+  }
+
+  // API page: same full-width + scrollable table treatment (targets .container directly)
+  .page-api {
+    .container {
+      max-width: 100%;
+      padding-left: 1rem;
+      padding-right: 1rem;
+      overflow-x: hidden;
+    }
+
+    table {
+      overflow-x: auto;
+      max-width: calc(100vw - 2rem);
+    }
+  }
+}

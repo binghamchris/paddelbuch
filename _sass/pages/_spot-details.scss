@@ -1,0 +1,153 @@
+.page-spot-details {
+
+  main {
+    padding: 0;
+  }
+
+  td, th {
+    padding-top: 0.5em;
+    padding-bottom: 0.1em;
+  }
+
+  th {
+    padding-right: 1.5em;
+    font-weight: 500;
+  }
+
+  @media screen and (min-width: 992px) {
+    .map {
+      height: calc(100svh - $menu-height) !important;
+    }
+  }
+  @media screen and (max-width: 992px) {
+    .map {
+      height: 60vh;
+    }
+  }
+
+  .spot-description {
+    padding-right: 1.5em;
+    padding-left: 1.5em;
+    overflow-x: hidden;
+  }
+
+  .spot-description > div {
+    padding-right: 1em;
+  }
+
+  .spot-title {
+    padding-top: 0.7em;
+    margin-bottom: 1em;
+
+    h1 {
+      margin-bottom: 0;
+    }
+  }
+
+  .spot-icon-div {
+    border-bottom: 1px solid $secondary-blue;
+    padding-bottom: 1em;
+    font-family: $font-brand;
+    font-size: 1.2em;
+    font-weight: 400;
+    height: 40px;
+    margin-top: 1em;
+    color: $swisscanoe-blue;
+    line-height: 0.8em;
+  }
+
+  .spot-icon {
+    height: 20px;
+  }
+  
+  .spot-icon img {
+    width: 20px !important;
+  }
+
+  .spot-details-table {
+    width: 100%;
+  }
+
+  .spot-details-table ul {
+    margin-bottom: 0;
+    padding-left: 1rem;
+  }
+
+  // Add colons after table header labels (matching Gatsby)
+  .spot-details-table th::after {
+    content: ":";
+  }
+
+  // Rejected spot styling (Requirement 3.7)
+  .rejected-spot-content {
+    .alert-warning {
+      background-color: rgba($warning-yellow, 0.15);
+      border-color: $warning-yellow;
+      color: darken($warning-yellow, 30%);
+      border-radius: 0;
+
+      .bi {
+        margin-right: 1.5em !important;
+      }
+    }
+
+    .rejection-reason {
+      h2 {
+        font-size: 1.2rem;
+        color: $swisscanoe-blue;
+        margin-bottom: 0.75rem;
+      }
+
+      .rejection-description {
+        color: $swisscanoe-blue;
+        line-height: 1.6;
+      }
+    }
+  }
+
+  // Description text (between title and table, matching Gatsby layout)
+  .spot-description-text {
+    margin-bottom: 1em;
+
+    p {
+      margin-bottom: 0.5rem;
+    }
+  }
+
+  // Clipboard cell in details table (matching Gatsby layout)
+  .clipboard-cell {
+    text-align: right;
+    white-space: nowrap;
+    width: 1px;
+    padding-left: 0.5em;
+  }
+
+  // Wrap long content in table cells
+  .spot-details-table td {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+  }
+
+  // Copy buttons: filled style matching Gatsby
+  .clipboard-btn.copy-btn {
+    background-color: $secondary-blue;
+    border-color: $secondary-blue;
+    color: white;
+
+    &:hover {
+      background-color: darken($secondary-blue, 8%);
+      border-color: darken($secondary-blue, 8%);
+      color: white;
+    }
+
+    &:active {
+      background-color: $green-1;
+      border-color: $green-1;
+    }
+  }
+
+  .navigate-btn {
+    margin-bottom: 0.5em;
+  }
+
+}

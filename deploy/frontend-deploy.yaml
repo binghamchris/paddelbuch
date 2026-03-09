@@ -6,8 +6,8 @@ Parameters:
     Description: The name for the app in Amplify
   AppDomainName:
     Type: String
-    Description: The domain name the app should be served on
-    AllowedPattern: ^(((?!-)[A-Za-z0-9-]{0,62}[A-Za-z0-9])\.)+((?!-)[A-Za-z0-9-]{1,62}[A-Za-z0-9])(\.)?$
+    Description: The domain name the app should be served on (only required for PRODUCTION stage)
+    Default: ""
   AppDescription:
     Type: String
     Description: The description for the app in Amplify
@@ -22,17 +22,21 @@ Parameters:
       - PULL_REQUEST
   EnvVarMapboxUrl:
     Type: String
-    Description: The URL for the MapBox map style to be used during the Gatsby build process
+    Description: The URL for the MapBox map style to be used during the Jekyll build process
   EnvVarContentfulToken:
     Type: String
-    Description: The API token for accessing the Contentful API during the Gatsby build process
+    Description: The API token for accessing the Contentful API during the Jekyll build process
     NoEcho: true
   EnvVarContentfulSpace:
     Type: String
-    Description: The Contentful space ID to use for accessing the Contentful API during the Gatsby build process
+    Description: The Contentful space ID to use for accessing the Contentful API during the Jekyll build process
   EnvVarContentfulEnv:
     Type: String
-    Description: The Contentful environment ID for accessing the Contentful API during the Gatsby build process
+    Description: The Contentful environment ID for accessing the Contentful API during the Jekyll build process
+  EnvVarSiteUrl:
+    Type: String
+    Description: The production site URL for Jekyll build (only required for PRODUCTION stage)
+    Default: ""
   GithubRepoUrl:
     Type: String
     Description: The URL of the GitHub repo to be deployed
@@ -43,6 +47,11 @@ Parameters:
     Type: String
     Description: The GitHub personal access token to be used during the setup of the Amplify app
     NoEcho: true
+Conditions:
+  IsProduction:
+    !Equals
+      - !Ref AppStage
+      - PRODUCTION
 Resources:
   PaddelBuchApp:
     Type: AWS::Amplify::App
@@ -51,10 +60,11 @@ Resources:
         Ref: GithubToken
       CustomHeaders: |-
         customHeaders:
-          - pattern: '*'
+          # Security and default cache headers for all files (recursive)
+          - pattern: '**/*'
             headers:
               - key: Cache-Control
-                value: max-age=21600, s-maxage=21600
+                value: public, max-age=21600, s-maxage=21600
               - key: Strict-Transport-Security
                 value: max-age=31536000
               - key: X-Frame-Options
@@ -67,9 +77,9 @@ Resources:
                 value: strict-origin-when-cross-origin
               - key: Content-Security-Policy
                 value: >-
-                  default-src 'self'; img-src 'self' data: unpkg.com
+                  default-src 'self'; img-src 'self' data:
                   raw.githubusercontent.com api.mapbox.com; style-src 'self'
-                  'unsafe-inline' unpkg.com; script-src 'self' 'unsafe-inline'; font-src
+                  'unsafe-inline'; script-src 'self' 'unsafe-inline'; font-src
                   'self' data:
               - key: Permissions-Policy
                 value: >-
@@ -86,23 +96,46 @@ Resources:
                   focus-without-user-activation=(), hid=(), idle-detection=(),
                   serial=(), sync-script=(), trust-token-redemption=(),
                   vertical-scroll=(self)
+          # HTML pages - 1 day TTL - site changes infrequently
+          - pattern: '*.html'
+            headers:
+              - key: Cache-Control
+                value: public, max-age=86400, s-maxage=86400, must-revalidate
+          # Spatial tile JSON files - long TTL (7 days) as they only change on rebuild
+          - pattern: '/api/tiles/**/*.json'
+            headers:
+              - key: Cache-Control
+                value: public, max-age=604800, s-maxage=604800, immutable
+          # API JSON files - 1 day TTL
+          - pattern: '/api/*.json'
+            headers:
+              - key: Cache-Control
+                value: public, max-age=86400, s-maxage=86400
+          # Static assets (CSS, JS, images) - long TTL (30 days)
+          - pattern: '/assets/**/*'
+            headers:
+              - key: Cache-Control
+                value: public, max-age=2592000, s-maxage=2592000, immutable
       CustomRules:
-        - Source:
-            !Join
-              - ""
-              - - https://
-                - Ref: AppDomainName 
-          Status: 302
-          Target:
-            !Join
-              - "."
-              - - https://www
-                - Ref: AppDomainName
+        !If
+          - IsProduction
+          - - Source:
+                !Join
+                  - ""
+                  - - https://
+                    - Ref: AppDomainName 
+              Status: 302
+              Target:
+                !Join
+                  - "."
+                  - - https://www
+                    - Ref: AppDomainName
+          - !Ref AWS::NoValue
       Description:
         Ref: AppDescription
       EnableBranchAutoDeletion: False
       EnvironmentVariables: 
-        - Name: GATSBY_MAPBOX_URL
+        - Name: MAPBOX_URL
           Value:
             Ref: EnvVarMapboxUrl
         - Name: CONTENTFUL_ACCESS_TOKEN
@@ -114,8 +147,8 @@ Resources:
         - Name: CONTENTFUL_ENVIRONMENT
           Value:
             Ref: EnvVarContentfulEnv
-        - Name: _CUSTOM_IMAGE
-          Value: public.ecr.aws/docker/library/node:24.11.0
+        - Name: JEKYLL_ENV
+          Value: production
       Name:
         Ref: AppName
       Repository:
@@ -137,6 +170,13 @@ Resources:
       EnableAutoBuild: True
       EnablePerformanceMode: False
       EnablePullRequestPreview: True
+      EnvironmentVariables:
+        - Name: SITE_URL
+          Value:
+            !If
+              - IsProduction
+              - !Ref EnvVarSiteUrl
+              - !Sub "https://${GithubBranchName}.${PaddelBuchApp.AppId}.amplifyapp.com"
       Stage:
         Ref: AppStage
       Tags: 
@@ -148,6 +188,7 @@ Resources:
             Ref: AppStage
   PaddelBuchDomain:
     Type: AWS::Amplify::Domain
+    Condition: IsProduction
     Properties: 
       AppId:
         !GetAtt PaddelBuchApp.AppId

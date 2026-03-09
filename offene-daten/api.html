@@ -1,0 +1,141 @@
+---
+layout: default
+title: API
+pageName: api
+permalink: /offene-daten/api/
+---
+<!--
+  API Documentation Page
+  
+  Displays download links for all fact tables and dimension tables
+  with last updated timestamps for each table.
+  
+  Path: /offene-daten/api
+  
+  Requirements: 9.1, 9.2, 9.3
+-->
+
+{% assign locale_prefix = "" %}
+{% if site.lang == "en" %}
+  {% assign locale_prefix = "/en" %}
+{% endif %}
+
+<div class="container">
+  <h1>{% t api.title %}</h1>
+  
+  <!-- Intro paragraph with data licensing link -->
+  <p>
+    {% t api.intro %}
+    <a href="{{ locale_prefix | append: '/offene-daten/datenlizenzen/' | relative_url }}">{% t api.intro_link_text %}</a>
+    {% t api.intro_suffix %}
+  </p>
+  <p>{% t api.intro_json %}</p>
+
+  <!-- Last Update Index -->
+  <h2>{% t api.last_update_index %}</h2>
+  <p>{% t api.last_update_index_description %}<p></p>
+  <a href="{{ '/api/lastUpdateIndex.json' | relative_url }}">{% t api.last_update_index %}</a>
+  </p>
+
+  <!-- Fact Tables Section -->
+  <h2>{% t api.fact_tables %}</h2>
+  <p>{% t api.fact_tables_description %}</p>
+
+  <table>
+    <tbody>
+      <tr>
+        <th>{% t api.table_name %}</th>
+        <th>{% t api.german_download %}</th>
+        <th>{% t api.english_download %}</th>
+        <th>{% t labels.last_updated %}</th>
+      </tr>
+      <tr>
+        <td>{% t api.spots %}</td>
+        <td><a href="{{ '/api/spots-de.json' | relative_url }}">{% t api.german %} </a></td>
+        <td><a href="{{ '/api/spots-en.json' | relative_url }}">{% t api.english %} </a></td>
+        <td>{{ site.data.last_updates['spots'] }}</td>
+      </tr>
+      <tr>
+        <td>{% t api.waterway_event_notices %}</td>
+        <td><a href="{{ '/api/waterwayevents-de.json' | relative_url }}">{% t api.german %} </a></td>
+        <td><a href="{{ '/api/waterwayevents-en.json' | relative_url }}">{% t api.english %} </a></td>
+        <td>{{ site.data.last_updates['waterwayEventNotices'] }}</td>
+      </tr>
+      <tr>
+        <td>{% t api.obstacles %}</td>
+        <td><a href="{{ '/api/obstacles-de.json' | relative_url }}">{% t api.german %} </a></td>
+        <td><a href="{{ '/api/obstacles-en.json' | relative_url }}">{% t api.english %} </a></td>
+        <td>{{ site.data.last_updates['obstacles'] }}</td>
+      </tr>
+      <tr>
+        <td>{% t api.protected_areas %}</td>
+        <td><a href="{{ '/api/protectedareas-de.json' | relative_url }}">{% t api.german %} </a></td>
+        <td><a href="{{ '/api/protectedareas-en.json' | relative_url }}">{% t api.english %} </a></td>
+        <td>{{ site.data.last_updates['protectedAreas'] }}</td>
+      </tr>
+      <tr>
+        <td>{% t api.waterways %}</td>
+        <td><a href="{{ '/api/waterways-de.json' | relative_url }}">{% t api.german %} </a></td>
+        <td><a href="{{ '/api/waterways-en.json' | relative_url }}">{% t api.english %} </a></td>
+        <td>{{ site.data.last_updates['waterways'] }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Dimension Tables Section -->
+  <h2>{% t api.dimension_tables %}</h2>
+  <p>{% t api.dimension_tables_description %}</p>
+
+  <table>
+    <tbody>
+      <tr>
+        <th>{% t api.table_name %}</th>
+        <th>{% t api.german_download %}</th>
+        <th>{% t api.english_download %}</th>
+        <th>{% t labels.last_updated %}</th>
+      </tr>
+      <tr>
+        <td>{% t api.data_license_types %}</td>
+        <td><a href="{{ '/api/datalicensetypes-de.json' | relative_url }}">{% t api.german %} </a></td>
+        <td><a href="{{ '/api/datalicensetypes-en.json' | relative_url }}">{% t api.english %} </a></td>
+        <td>{{ site.data.last_updates['dataLicenseTypes'] }}</td>
+      </tr>
+      <tr>
+        <td>{% t api.data_source_types %}</td>
+        <td><a href="{{ '/api/datasourcetypes-de.json' | relative_url }}">{% t api.german %} </a></td>
+        <td><a href="{{ '/api/datasourcetypes-en.json' | relative_url }}">{% t api.english %} </a></td>
+        <td>{{ site.data.last_updates['dataSourceTypes'] }}</td>
+      </tr>
+      <tr>
+        <td>{% t api.obstacle_types %}</td>
+        <td><a href="{{ '/api/obstacletypes-de.json' | relative_url }}">{% t api.german %} </a></td>
+        <td><a href="{{ '/api/obstacletypes-en.json' | relative_url }}">{% t api.english %} </a></td>
+        <td>{{ site.data.last_updates['obstacleTypes'] }}</td>
+      </tr>
+      <tr>
+        <td>{% t api.paddle_craft_types %}</td>
+        <td><a href="{{ '/api/paddlecrafttypes-de.json' | relative_url }}">{% t api.german %} </a></td>
+        <td><a href="{{ '/api/paddlecrafttypes-en.json' | relative_url }}">{% t api.english %} </a></td>
+        <td>{{ site.data.last_updates['paddleCraftTypes'] }}</td>
+      </tr>
+      <tr>
+        <td>{% t api.paddling_environment_types %}</td>
+        <td><a href="{{ '/api/paddlingenvironmenttypes-de.json' | relative_url }}">{% t api.german %} </a></td>
+        <td><a href="{{ '/api/paddlingenvironmenttypes-en.json' | relative_url }}">{% t api.english %} </a></td>
+        <td>{{ site.data.last_updates['paddlingEnvironmentTypes'] }}</td>
+      </tr>
+      <tr>
+        <td>{% t api.protected_area_types %}</td>
+        <td><a href="{{ '/api/protectedareatypes-de.json' | relative_url }}">{% t api.german %} </a></td>
+        <td><a href="{{ '/api/protectedareatypes-en.json' | relative_url }}">{% t api.english %} </a></td>
+        <td>{{ site.data.last_updates['protectedAreaTypes'] }}</td>
+      </tr>
+      <tr>
+        <td>{% t api.spot_types %}</td>
+        <td><a href="{{ '/api/spottypes-de.json' | relative_url }}">{% t api.german %} </a></td>
+        <td><a href="{{ '/api/spottypes-en.json' | relative_url }}">{% t api.english %} </a></td>
+        <td>{{ site.data.last_updates['spotTypes'] }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
