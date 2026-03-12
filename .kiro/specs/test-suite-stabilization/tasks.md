@@ -15,7 +15,7 @@ Changes:
 
 Verify: `source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.1 && bundle exec rspec spec/notice_preservation_spec.rb`
 
-- [x] Done
+- [-] Done
 
 ## Task 2: Fix updatedAt test expectation in notice_page_fixes_spec.rb
 
