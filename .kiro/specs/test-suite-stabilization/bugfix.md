@@ -2,7 +2,9 @@
 
 ## Introduction
 
-The paddelbuch project has 13 failing tests across two test suites (RSpec and Jest). The current implementation is correct — the tests are outdated and need to be updated to match the current behavior. Additionally, several plugins and JavaScript modules have zero test coverage that should be filled. This bugfix stabilizes the test suite by aligning test expectations with the actual (correct) implementation and closing coverage gaps.
+The paddelbuch project has 5 failing tests in the RSpec suite. The current implementation is correct — the tests are outdated and need to be updated to match the current behavior. Additionally, several plugins and JavaScript modules have zero test coverage that should be filled. This bugfix stabilizes the test suite by aligning test expectations with the actual (correct) implementation and closing coverage gaps.
+
+Note: The 8 Jest spot popup test failures (previously tracked as issues 1.6 and 1.7) have been resolved. Both `spot-popup-design-bug.exploration.test.js` and `spot-popup-design-bug.preservation.test.js` have been rewritten to match the current simplified popup design (no details table, no GPS/address/craft type rows, no clipboard buttons), and `spot-popup.js` was updated to remove the empty `<table>` element. All 15 spot popup tests now pass.
 
 ## Bug Analysis
 
@@ -20,11 +22,11 @@ The paddelbuch project has 13 failing tests across two test suites (RSpec and Je
 
 1.5 WHEN `notice_page_fixes_spec.rb` tests the `updatedAt` format THEN the test expects `d. MMMM YYYY um HH:MM` (e.g. `10. Mai 2025 um 14:30`) but the implementation correctly produces `DD MMM YYYY um HH:MM` (e.g. `10 Mai 2025 um 14:30`), causing the test to fail
 
-**Jest Spot Popup Tests (8 failures)**
+**Jest Spot Popup Tests (RESOLVED — 0 remaining failures)**
 
-1.6 WHEN `spot-popup-design-bug.exploration.test.js` checks for `<ul>` craft types list, clipboard copy buttons, and `<th>` elements in the popup details table THEN the tests fail because the current implementation intentionally produces an empty `<tbody>` with no GPS rows, address rows, craft type lists, or clipboard copy buttons inside the popup details table
+1.6 ~~RESOLVED~~ — `spot-popup-design-bug.exploration.test.js` has been rewritten to assert that craft types, GPS, and address are NOT rendered in spot popups, and that the popup uses the simplified structure (icon header, title, description, navigate button, detail link). All 4 tests pass.
 
-1.7 WHEN `spot-popup-design-bug.preservation.test.js` checks for `>GPS:<` label, address label, craft types label, `PaddelbuchClipboard.copyGPS()` calls, and `PaddelbuchClipboard.copyAddress()` calls in the popup HTML THEN the tests fail because the current implementation intentionally omits all detail rows and clipboard functionality from the popup table body
+1.7 ~~RESOLVED~~ — `spot-popup-design-bug.preservation.test.js` has been rewritten to validate the simplified popup design: description conditional rendering, navigate button conditional rendering, rejected spot layout, detail page link locale prefixes, and navigation URL format. All 11 property-based tests pass.
 
 **Test Coverage Gaps**
 
@@ -52,11 +54,9 @@ Note: All dates displayed on the site (with the exception of API JSON files and 
 
 2.4 WHEN `notice_page_fixes_spec.rb` tests the `updatedAt` format THEN the test SHALL expect `DD MMM YYYY um HH:MM` format (e.g. `10 Mai 2025 um 14:30`), matching the `notice_updated` format `%d %b %Y um %H:%M` in `locale_filter.rb`
 
-**Jest Spot Popup Tests**
+**Jest Spot Popup Tests (RESOLVED)**
 
-2.6 WHEN `spot-popup-design-bug.exploration.test.js` validates the popup structure THEN the tests SHALL assert that the popup details table body is empty (no GPS rows, address rows, craft type lists, or clipboard copy buttons), matching the current `generateSpotPopupContent()` implementation
-
-2.7 WHEN `spot-popup-design-bug.preservation.test.js` validates preserved behavior THEN the tests SHALL remove assertions for `>GPS:<` label, address label, craft types label, `PaddelbuchClipboard.copyGPS()`, and `PaddelbuchClipboard.copyAddress()` from the popup table, and instead assert that the table body is intentionally empty while other preserved behaviors (description, detail links, navigate button, rejected popup layout) remain validated
+2.5 ~~RESOLVED~~ — Both `spot-popup-design-bug.exploration.test.js` and `spot-popup-design-bug.preservation.test.js` have been rewritten and all 15 tests pass. No further action needed.
 
 **Test Coverage Gaps**
 
