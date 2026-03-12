@@ -199,18 +199,9 @@
         }
       }
 
-      // Details table (matches Gatsby .popup-details-table)
-      html.push('<table class="popup-details-table"><tbody>');
-
-      // GPS coordinates (used for navigate button below)
+      // Navigate button (matches Gatsby structure: button > a)
       var lat = spot.location ? (spot.location.lat || spot.location.latitude) : null;
       var lon = spot.location ? (spot.location.lon || spot.location.lng || spot.location.longitude) : null;
-
-
-
-      html.push('</tbody></table>');
-
-      // Navigate button (matches Gatsby structure: button > a)
       if (lat !== null && lon !== null) {
         html.push('<button type="button" class="popup-btn">');
         html.push('<a href="https://www.google.com/maps/dir/?api=1&destination=' + lat + ',' + lon + '" ');
