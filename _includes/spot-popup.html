@@ -31,11 +31,11 @@
 
 <!-- Header: icon + category label (matches .popup-icon-div from Gatsby) -->
 <div class="popup-icon-div">
-  <span class="popup-icon">{% include spot-icon.html type=spot_type_slug rejected=is_rejected variant="light" %}</span>{{ spot_type_label }}
+  <span class="popup-icon">{% include spot-icon.html type=spot_type_slug rejected=is_rejected variant="light" %}</span>{{ spot_type_label | escape }}
 </div>
 
 <!-- Title -->
-<span class="popup-title"><h1>{{ spot.name }}</h1></span>
+<span class="popup-title"><h1>{{ spot.name | escape }}</h1></span>
 
 <!-- Description -->
 {% if spot.description %}

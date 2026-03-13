@@ -61,7 +61,7 @@
       {% if spot.approximateAddress %}
       <tr>
         <th>{% t labels.approx_address %}</th>
-        <td>{{ spot.approximateAddress }}</td>
+        <td>{{ spot.approximateAddress | escape }}</td>
       </tr>
       {% endif %}
       <!-- Last Updated Timestamp -->

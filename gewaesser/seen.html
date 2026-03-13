@@ -26,7 +26,7 @@ permalink: /gewaesser/seen/
     {% for lake in lakes %}
     <li>
       <a href="{{ '/gewaesser/' | append: lake.slug | append: '/' | relative_url }}">
-        {{ lake.name }}
+        {{ lake.name | escape }}
       </a>
     </li>
     {% endfor %}

@@ -67,11 +67,11 @@ pageName: spot-details
       <!-- Spot Icon and Type -->
       <div class="spot-icon-div align-items-center">
         {% include spot-icon.html type=spot_type_slug rejected=is_rejected variant="dark" size=20 %}
-        <span class="ms-2">{{ spot_type_name }}</span>
+        <span class="ms-2">{{ spot_type_name | escape }}</span>
       </div>
       
       <!-- Spot Title -->
-      <div class="spot-title"><h1>{{ spot.name }}</h1></div>
+      <div class="spot-title"><h1>{{ spot.name | escape }}</h1></div>
       
       {% if is_rejected %}
         <!-- Rejected Spot: Show rejection reason (Requirement 3.7) -->

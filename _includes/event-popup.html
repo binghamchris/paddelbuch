@@ -22,7 +22,7 @@
 {% assign current_locale = include.locale | default: site.lang | default: 'de' %}
 
 <!-- Notice Name (Requirement 7.3) -->
-<span class="popup-title"><h1>{{ notice.name }}</h1></span>
+<span class="popup-title"><h1>{{ notice.name | escape }}</h1></span>
 
 <!-- Dates Table (Requirement 7.3) -->
 <table class="popup-details-table popup-eventnotice-table">
