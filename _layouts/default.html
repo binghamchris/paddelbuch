@@ -22,6 +22,8 @@
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="{{ '/assets/images/logo-favicon.svg' | relative_url }}">
   <link rel="apple-touch-icon" href="{{ '/assets/images/apple-touch-icon.png' | relative_url }}">
+  
+  {% include color-vars.html %}
 </head>
 <body class="{% if page.pageName %}page-{{ page.pageName }}{% endif %}{% if page.slug %} slug-{{ page.slug }}{% endif %}">
   <div class="wrapper">
