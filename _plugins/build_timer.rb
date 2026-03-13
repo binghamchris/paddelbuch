@@ -95,6 +95,8 @@ end
 # generator timing. The original process method loops over languages and
 # calls process_org for each one — we wrap process_org to time generators.
 # ---------------------------------------------------------------------------
+
+# Depends on jekyll-multiple-languages-plugin providing process_org on Jekyll::Site
 module BuildTimerSiteExtension
   def process
     super
@@ -102,11 +104,15 @@ module BuildTimerSiteExtension
     BuildTimer.log "Build finished at #{Time.now.strftime('%H:%M:%S')}"
   end
 
-  def process_org
-    lang = config['lang']
-    BuildTimer.log "--- Language pass: #{lang} (read + generate) ---"
-    BuildTimer.start("read_and_generate:#{lang}")
-    super
+  if Jekyll::Site.method_defined?(:process_org)
+    def process_org
+      lang = config['lang']
+      BuildTimer.log "--- Language pass: #{lang} (read + generate) ---"
+      BuildTimer.start("read_and_generate:#{lang}")
+      super
+    end
+  else
+    Jekyll.logger.warn 'BuildTimer:', 'Jekyll::Site#process_org not found (jekyll-multiple-languages-plugin missing?) — skipping per-language generator timing'
   end
 end
 
