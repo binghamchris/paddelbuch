@@ -27,6 +27,14 @@ exclude:
   - amplify.yml
   - README.md
   - LICENSE.md
+  - Rakefile
+  - spec/
+  - _tests/
+  - _scripts/
+  - jest.config.js
+  - deploy/
+  - docs/
+  - scripts/
 
 # Plugins
 plugins:
