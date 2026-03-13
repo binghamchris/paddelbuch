@@ -35,39 +35,6 @@
   };
 
   /**
-   * Checks if a date string represents a date in the future (or today)
-   * 
-   * Property 13: Event Notice Date Filtering
-   * For any set of waterway event notices, only notices where the end date 
-   * is in the future (relative to current date) shall be displayed on the map.
-   * 
-   * @param {string|Date} dateValue - The date to check (ISO string or Date object)
-   * @param {Date} [referenceDate] - Optional reference date (defaults to current date)
-   * @returns {boolean} True if the date is today or in the future
-   */
-  function isDateInFuture(dateValue, referenceDate) {
-    if (!dateValue) return false;
-    
-    var date;
-    if (dateValue instanceof Date) {
-      date = dateValue;
-    } else {
-      date = new Date(dateValue);
-    }
-    
-    // Check for invalid date
-    if (isNaN(date.getTime())) return false;
-    
-    var refDate = referenceDate instanceof Date ? referenceDate : new Date();
-    
-    // Compare dates only (ignore time) by comparing YYYY-MM-DD strings
-    var dateStr = date.toISOString().split('T')[0];
-    var refDateStr = refDate.toISOString().split('T')[0];
-    
-    return dateStr >= refDateStr;
-  }
-
-  /**
    * Filters event notices to only include those with future end dates
    * 
    * Property 13: Event Notice Date Filtering
@@ -80,80 +47,8 @@
     if (!Array.isArray(notices)) return [];
     
     return notices.filter(function(notice) {
-      return isDateInFuture(notice.endDate, referenceDate);
+      return PaddelbuchDateUtils.isDateInFuture(notice.endDate, referenceDate);
     });
-  }
-
-  /**
-   * Abbreviated month names per locale
-   */
-  var monthsAbbr = {
-    de: ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'],
-    en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-  };
-
-  /**
-   * Formats a date as DD MMM YYYY with localised abbreviated month names
-   * 
-   * @param {string|Date} dateValue - The date to format
-   * @param {string} locale - The locale ('de' or 'en')
-   * @returns {string} Formatted date string (e.g. "08 Mar 2026" or "08 Mär 2026")
-   */
-  function formatDate(dateValue, locale) {
-    if (!dateValue) return '';
-    
-    var date;
-    if (dateValue instanceof Date) {
-      date = dateValue;
-    } else {
-      date = new Date(dateValue);
-    }
-    
-    // Check for invalid date
-    if (isNaN(date.getTime())) return '';
-    
-    var day = String(date.getDate()).padStart(2, '0');
-    var months = monthsAbbr[locale] || monthsAbbr.de;
-    var month = months[date.getMonth()];
-    var year = date.getFullYear();
-    return day + ' ' + month + ' ' + year;
-  }
-
-  /**
-   * Escapes HTML special characters to prevent XSS
-   * 
-   * @param {string} text - The text to escape
-   * @returns {string} The escaped text
-   */
-  function escapeHtml(text) {
-    if (!text) return '';
-    var div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-  }
-
-  /**
-   * Strips HTML tags from a string
-   * 
-   * @param {string} html - HTML string
-   * @returns {string} Plain text
-   */
-  function stripHtml(html) {
-    if (!html) return '';
-    return html.replace(/<[^>]*>/g, '');
-  }
-
-  /**
-   * Truncates text to a maximum length with ellipsis
-   * 
-   * @param {string} text - Text to truncate
-   * @param {number} maxLength - Maximum length
-   * @returns {string} Truncated text
-   */
-  function truncate(text, maxLength) {
-    if (!text) return '';
-    if (text.length <= maxLength) return text;
-    return text.substring(0, maxLength) + '...';
   }
 
   /**
@@ -174,7 +69,7 @@
     var localePrefix = (locale && locale !== 'de') ? '/' + locale : '';
     
     // Title (Requirement 7.3)
-    var html = '<span class="popup-title"><h1>' + escapeHtml(notice.name || '') + '</h1></span>';
+    var html = '<span class="popup-title"><h1>' + PaddelbuchHtmlUtils.escapeHtml(notice.name || '') + '</h1></span>';
     
     // Dates in a table matching the original Gatsby layout (Requirement 7.3)
     html += '<table class="popup-details-table popup-eventnotice-table"><tbody>';
@@ -183,7 +78,7 @@
     if (notice.startDate) {
       html += '<tr>';
       html += '<th>' + localeStrings.startDate + ':</th>';
-      html += '<td>' + formatDate(notice.startDate, locale) + '</td>';
+      html += '<td>' + PaddelbuchDateUtils.formatDate(notice.startDate, locale, 'short') + '</td>';
       html += '</tr>';
     }
     
@@ -191,7 +86,7 @@
     if (notice.endDate) {
       html += '<tr>';
       html += '<th>' + localeStrings.endDate + ':</th>';
-      html += '<td>' + formatDate(notice.endDate, locale) + '</td>';
+      html += '<td>' + PaddelbuchDateUtils.formatDate(notice.endDate, locale, 'short') + '</td>';
       html += '</tr>';
     }
     
@@ -217,7 +112,7 @@
    */
   function shouldRenderNotice(notice, referenceDate) {
     // Must have a future end date
-    if (!isDateInFuture(notice.endDate, referenceDate)) {
+    if (!PaddelbuchDateUtils.isDateInFuture(notice.endDate, referenceDate)) {
       return false;
     }
     
@@ -249,15 +144,10 @@
   // Export to global scope
   global.PaddelbuchEventNoticePopup = {
     generateEventNoticePopupContent: generateEventNoticePopupContent,
-    isDateInFuture: isDateInFuture,
     filterActiveNotices: filterActiveNotices,
-    formatDate: formatDate,
     shouldRenderNotice: shouldRenderNotice,
     hasAffectedArea: hasAffectedArea,
-    strings: strings,
-    escapeHtml: escapeHtml,
-    stripHtml: stripHtml,
-    truncate: truncate
+    strings: strings
   };
 
 })(typeof window !== 'undefined' ? window : this);
