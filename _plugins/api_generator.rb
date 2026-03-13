@@ -307,16 +307,6 @@ module Jekyll
       @timestamp_cache[ts] = ts.to_s
     end
 
-    # Convert timestamps to Contentful-style ISO 8601 with milliseconds and Z suffix
-    # e.g. "2025-11-23T11:39:50+00:00" => "2025-11-23T11:39:50.000Z"
-    def normalize_timestamp(ts)
-      return ts if ts.nil?
-      time = ts.is_a?(Time) ? ts : Time.parse(ts.to_s)
-      time.utc.strftime('%Y-%m-%dT%H:%M:%SZ')
-    rescue ArgumentError
-      ts.to_s
-    end
-
     # Return the timestamp with Z suffix. Prefers _raw key, falls back to regular key.
     def raw_timestamp(item, raw_key, fallback_key)
       raw = item[raw_key]
