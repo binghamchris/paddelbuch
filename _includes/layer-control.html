@@ -19,6 +19,10 @@
 <script src="{{ '/assets/js/locale-filter.js' | relative_url }}"></script>
 <!-- Include clipboard module for copy functionality (Requirements 3.2, 3.3) -->
 <script src="{{ '/assets/js/clipboard.js' | relative_url }}"></script>
+<!-- Include shared HTML utility functions (escapeHtml, stripHtml, truncate) before popup modules -->
+<script src="{{ '/assets/js/html-utils.js' | relative_url }}"></script>
+<!-- Include shared date utility functions before event notice popup module -->
+<script src="{{ '/assets/js/date-utils.js' | relative_url }}"></script>
 <!-- Include spot popup module for generating popup content (Requirements 3.1-3.5) -->
 <script src="{{ '/assets/js/spot-popup.js' | relative_url }}"></script>
 <!-- Include obstacle popup module for generating obstacle popup content (Requirement 5.3) -->
