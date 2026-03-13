@@ -101,7 +101,8 @@
       'portageRoute': portageStyle,
       'eventNotice': waterwayEventNoticeAreaStyle,
       'waterwayEvent': waterwayEventNoticeAreaStyle,
-      'eventArea': waterwayEventNoticeAreaStyle
+      'eventArea': waterwayEventNoticeAreaStyle,
+      'eventNoticeArea': waterwayEventNoticeAreaStyle
     };
 
     // Use hasOwnProperty to avoid inherited properties

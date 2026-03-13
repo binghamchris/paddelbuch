@@ -339,8 +339,8 @@
       
       // Property 13: Event Notice Date Filtering
       // Only display notices where endDate is in the future (Requirement 7.1)
-      if (window.PaddelbuchEventNoticePopup) {
-        if (!window.PaddelbuchEventNoticePopup.isDateInFuture(notice.endDate)) {
+      if (window.PaddelbuchDateUtils) {
+        if (!window.PaddelbuchDateUtils.isDateInFuture(notice.endDate)) {
           return; // Skip expired notices
         }
       } else {
