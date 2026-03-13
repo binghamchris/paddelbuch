@@ -15,6 +15,8 @@ module Jekyll
     safe true
     priority :highest
 
+    PAGE_SIZE = 1000
+
     CONTENT_TYPES = {
       'spot'                    => { filename: 'spots',                            mapper: :map_spot },
       'waterway'                => { filename: 'waterways',                        mapper: :map_waterway },
@@ -157,7 +159,24 @@ module Jekyll
     end
 
     def fetch_entries(content_type)
-      client.entries(content_type: content_type, locale: '*', include: 2, limit: 1000)
+      all_entries = []
+      skip = 0
+
+      loop do
+        page = client.entries(
+          content_type: content_type,
+          locale: '*',
+          include: 2,
+          limit: PAGE_SIZE,
+          skip: skip
+        )
+        all_entries.concat(page.to_a)
+        break if page.to_a.size < PAGE_SIZE
+
+        skip += PAGE_SIZE
+      end
+
+      all_entries
     end
 
     def write_yaml(filename, data)
