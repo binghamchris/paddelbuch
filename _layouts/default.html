@@ -5,6 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="{% if page.description %}{{ page.description | strip_html | truncate: 160 | escape }}{% else %}{{ site.description | strip_html | truncate: 160 | escape }}{% endif %}">
   
+  <!-- Canonical URL -->
+  <link rel="canonical" href="{{ site.url }}{{ page.url | replace: 'index.html', '' }}">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="{% if page.title %}{{ page.title | escape }}{% else %}{{ site.title | escape }}{% endif %}">
+  <meta property="og:description" content="{% if page.description %}{{ page.description | strip_html | truncate: 160 | escape }}{% else %}{{ site.description | strip_html | truncate: 160 | escape }}{% endif %}">
+  <meta property="og:url" content="{{ site.url }}{{ page.url | replace: 'index.html', '' }}">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="{% if site.lang == 'en' %}en_GB{% else %}de_CH{% endif %}">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="{% if page.title %}{{ page.title | escape }}{% else %}{{ site.title | escape }}{% endif %}">
+  <meta name="twitter:description" content="{% if page.description %}{{ page.description | strip_html | truncate: 160 | escape }}{% else %}{{ site.description | strip_html | truncate: 160 | escape }}{% endif %}">
+
   <title>{% if page.title %}{{ page.title }} | {% endif %}{{ site.title }}</title>
   
   <!-- Fonts -->
