@@ -118,7 +118,7 @@ module Jekyll
     private
 
     def generate_layer_tiles(layer_name, config, locale)
-      data = get_data_for_locale(config[:data_key], locale)
+      data = get_data_for_locale(@site.data, config[:data_key], locale, @locale_cache)
       
       if config[:exclude_rejected]
         data = data.reject { |item| item['rejected'] == true }
@@ -325,20 +325,6 @@ module Jekyll
       text.length > 200 ? "#{text[0..197]}..." : text
     end
 
-    def get_data_for_locale(data_key, locale)
-      cache_key = "#{data_key}:#{locale}"
-      return @locale_cache[cache_key] if @locale_cache.key?(cache_key)
 
-      data = @site.data[data_key]
-      result = if data.is_a?(Array)
-                 data.select { |item| item['locale'] == locale || item['node_locale'] == locale }
-               elsif data.is_a?(Hash)
-                 data[locale] || []
-               else
-                 []
-               end
-
-      @locale_cache[cache_key] = result
-    end
   end
 end

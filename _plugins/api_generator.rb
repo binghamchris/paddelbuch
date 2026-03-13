@@ -14,6 +14,10 @@ module Jekyll
   class ApiGenerator < Generator
     include GeneratorCache
 
+    class << self
+      attr_accessor :cached_last_updates
+    end
+
     safe true
     priority :low
 
@@ -68,7 +72,7 @@ module Jekyll
       current_lang = site.config['lang'] || default_lang
       if current_lang != default_lang
         # Re-expose cached last_updates for Liquid templates in this language pass
-        site.data['last_updates'] = @@cached_last_updates.dup if defined?(@@cached_last_updates) && @@cached_last_updates
+        site.data['last_updates'] = self.class.cached_last_updates.dup if self.class.cached_last_updates
         Jekyll.logger.info "API Generator:", "Skipping (already generated during #{default_lang} pass)"
         return
       end
@@ -126,7 +130,7 @@ module Jekyll
     def generate_fact_tables
       FACT_TABLES.each do |table_name, config|
         LOCALES.each do |locale|
-          data = get_data_for_locale(config[:data_key], locale)
+          data = get_data_for_locale(@site.data, config[:data_key], locale, @locale_cache)
           
           if config[:exclude_rejected]
             data = data.reject { |item| item['rejected'] == true }
@@ -203,7 +207,7 @@ module Jekyll
       @site.data['last_updates'] = camel_updates.dup
 
       # Cache for reuse during non-default language passes
-      @@cached_last_updates = camel_updates.dup
+      self.class.cached_last_updates = camel_updates.dup
     end
 
     def load_api_from_cache(site, cache_dir)
@@ -225,7 +229,7 @@ module Jekyll
             camel_updates[entry_item['table']] = entry_item['lastUpdatedAt']
           end
           site.data['last_updates'] = camel_updates.dup
-          @@cached_last_updates = camel_updates.dup
+          self.class.cached_last_updates = camel_updates.dup
         end
       end
 
@@ -241,22 +245,6 @@ module Jekyll
 
       # Write to cache during fresh generation
       write_cache_file(@cache_dir, filename, json_content) if @cache_dir
-    end
-
-    def get_data_for_locale(data_key, locale)
-      cache_key = "#{data_key}:#{locale}"
-      return @locale_cache[cache_key] if @locale_cache.key?(cache_key)
-
-      data = resolve_data_key(data_key)
-      result = if data.is_a?(Array)
-                 data.select { |item| item['locale'] == locale || item['node_locale'] == locale }
-               elsif data.is_a?(Hash)
-                 data[locale] || []
-               else
-                 []
-               end
-
-      @locale_cache[cache_key] = result
     end
 
     def get_dimension_data(data_key, locale)
