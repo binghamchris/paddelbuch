@@ -1632,6 +1632,123 @@ RSpec.describe ContentfulMappers do
     end
   end
 
+  # --- html_escape ---
+
+  describe '.html_escape' do
+    it 'escapes ampersands' do
+      expect(ContentfulMappers.html_escape('a & b')).to eq('a &amp; b')
+    end
+
+    it 'escapes angle brackets' do
+      expect(ContentfulMappers.html_escape('<script>alert("xss")</script>')).to eq('&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;')
+    end
+
+    it 'escapes double quotes' do
+      expect(ContentfulMappers.html_escape('say "hello"')).to eq('say &quot;hello&quot;')
+    end
+
+    it 'escapes single quotes' do
+      expect(ContentfulMappers.html_escape("it's")).to eq('it&#39;s')
+    end
+
+    it 'returns empty string for nil via to_s' do
+      expect(ContentfulMappers.html_escape(nil)).to eq('')
+    end
+
+    it 'passes through safe text unchanged' do
+      expect(ContentfulMappers.html_escape('Hello world')).to eq('Hello world')
+    end
+  end
+
+  # --- safe_uri? ---
+
+  describe '.safe_uri?' do
+    it 'allows http URIs' do
+      expect(ContentfulMappers.safe_uri?('http://example.com')).to be true
+    end
+
+    it 'allows https URIs' do
+      expect(ContentfulMappers.safe_uri?('https://example.com')).to be true
+    end
+
+    it 'allows mailto URIs' do
+      expect(ContentfulMappers.safe_uri?('mailto:user@example.com')).to be true
+    end
+
+    it 'allows tel URIs' do
+      expect(ContentfulMappers.safe_uri?('tel:+1234567890')).to be true
+    end
+
+    it 'allows relative URIs (no scheme)' do
+      expect(ContentfulMappers.safe_uri?('/path/to/page')).to be true
+    end
+
+    it 'rejects javascript URIs' do
+      expect(ContentfulMappers.safe_uri?('javascript:alert(1)')).to be false
+    end
+
+    it 'rejects data URIs' do
+      expect(ContentfulMappers.safe_uri?('data:text/html,<script>alert(1)</script>')).to be false
+    end
+
+    it 'returns false for nil' do
+      expect(ContentfulMappers.safe_uri?(nil)).to be false
+    end
+
+    it 'returns false for empty string' do
+      expect(ContentfulMappers.safe_uri?('')).to be false
+    end
+
+    it 'returns false for whitespace-only string' do
+      expect(ContentfulMappers.safe_uri?('   ')).to be false
+    end
+  end
+
+  # --- render_rich_text sanitization ---
+
+  describe 'render_rich_text sanitization' do
+    it 'escapes HTML entities in text nodes' do
+      content = [{ 'nodeType' => 'paragraph', 'content' => [
+        { 'nodeType' => 'text', 'value' => '<script>alert("xss")</script>' }
+      ] }]
+      result = ContentfulMappers.render_rich_text(content)
+      expect(result).to eq('<p>&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;</p>')
+      expect(result).not_to include('<script>')
+    end
+
+    it 'escapes text before applying marks' do
+      content = [{ 'nodeType' => 'paragraph', 'content' => [
+        { 'nodeType' => 'text', 'value' => 'a & b', 'marks' => [{ 'type' => 'bold' }] }
+      ] }]
+      result = ContentfulMappers.render_rich_text(content)
+      expect(result).to eq('<p><strong>a &amp; b</strong></p>')
+    end
+
+    it 'renders safe hyperlinks with escaped URI' do
+      content = [{ 'nodeType' => 'hyperlink', 'data' => { 'uri' => 'https://example.com/path?q=a&b=c' },
+                   'content' => [{ 'nodeType' => 'text', 'value' => 'link' }] }]
+      result = ContentfulMappers.render_rich_text(content)
+      expect(result).to include('href="https://example.com/path?q=a&amp;b=c"')
+    end
+
+    it 'renders unsafe javascript URIs as span' do
+      content = [{ 'nodeType' => 'hyperlink', 'data' => { 'uri' => 'javascript:alert(1)' },
+                   'content' => [{ 'nodeType' => 'text', 'value' => 'click me' }] }]
+      result = ContentfulMappers.render_rich_text(content)
+      expect(result).to eq('<span>click me</span>')
+      expect(result).not_to include('<a')
+      expect(result).not_to include('javascript')
+    end
+
+    it 'renders data URIs as span' do
+      content = [{ 'nodeType' => 'hyperlink', 'data' => { 'uri' => 'data:text/html,<script>alert(1)</script>' },
+                   'content' => [{ 'nodeType' => 'text', 'value' => 'bad link' }] }]
+      result = ContentfulMappers.render_rich_text(content)
+      expect(result).to eq('<span>bad link</span>')
+      expect(result).not_to include('<a')
+    end
+  end
+
   # --- Integration: original bug scenario - code marks in table ---
 
   describe 'Integration: original bug scenario - code marks in table' do
