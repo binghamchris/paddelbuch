@@ -40,8 +40,8 @@
   padding-right: 10px;
 }
 
-.popup-icon img {
-  width: 20px !important;
+.popup-icon > img {
+  width: 20px;
 }
 
 .popup-icon-div {
@@ -112,9 +112,14 @@
   color: white;
 }
 
-.popup-btn-right, .popup-btn-right a {
+.popup-btn-right {
   float: right;
-  text-decoration: none !important;
+}
+
+a.popup-btn-right,
+.popup-btn-right a {
+  float: right;
+  text-decoration: none;
 }
 
 /* Clearfix for floated popup buttons */
@@ -124,6 +129,7 @@
   clear: both;
 }
 
+/* Override Leaflet default control-layers styles */
 .leaflet-control-layers {
   background-color: $swisscanoe-blue !important;
   border: 0 !important;
@@ -131,6 +137,7 @@
   border-radius: 0 !important;
 }
 
+/* Override Leaflet default zoom/locate button border-radius */
 .leaflet-control-zoom a, .leaflet-control-locate a {
   border-radius: 0 !important;
 }
@@ -140,17 +147,20 @@
   color: white;
 }
 
+/* Override Leaflet default zoom/locate control border and radius */
 .leaflet-control-zoom, .leaflet-control-locate {
   border: 1px solid $secondary-blue !important;
   border-radius: 0 !important;
 }
 
+/* Override Leaflet default popup wrapper styles */
 .leaflet-popup-content-wrapper {
   border-radius: 0px !important;
   color: $white !important;
   background-color: $swisscanoe-blue !important;
   font-family: $font-default;
 }
+/* Override Leaflet default popup link colors */
 .leaflet-popup-content-wrapper a, .leaflet-popup a.leaflet-popup-close-button {
   color: $white !important;
 }
@@ -159,6 +169,7 @@
   overflow: auto;
 }
 
+/* Override Leaflet default popup tip color */
 .leaflet-popup-tip {
   background-color: $swisscanoe-blue !important;
 }
@@ -196,7 +207,7 @@
   margin-top: 1.5em;
 }
 
-/* Obstacle popup table — cells sized to content */
+/* Obstacle popup table — cells sized to content; override Bootstrap table width */
 .leaflet-popup-content table:not(.popup-details-table) {
   width: min-content !important;
 
