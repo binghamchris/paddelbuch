@@ -23,6 +23,7 @@ Parameters:
   EnvVarMapboxUrl:
     Type: String
     Description: The URL for the MapBox map style to be used during the Jekyll build process
+    NoEcho: true
   EnvVarContentfulToken:
     Type: String
     Description: The API token for accessing the Contentful API during the Jekyll build process
