@@ -9,8 +9,10 @@
  * @jest-environment jsdom
  */
 
+require('../../assets/js/html-utils.js');
 require('../../assets/js/spot-popup.js');
-const { escapeHtml, stripHtml, truncate, getIconPath, getLabels } = window.PaddelbuchSpotPopup;
+const { escapeHtml, stripHtml, truncate } = global.PaddelbuchHtmlUtils;
+const { getIconPath, getLabels } = global.PaddelbuchSpotPopup;
 
 describe('escapeHtml', () => {
   test('escapes < and > characters', () => {
