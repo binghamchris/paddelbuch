@@ -1,3 +1,5 @@
+require 'uri'
+
 # Custom mappers for Contentful entries
 # Transforms Contentful entries into Jekyll-friendly data structures (hashes)
 # Each mapper is a module method that takes a Contentful entry and returns a hash
@@ -17,7 +19,30 @@ module ContentfulMappers
     'underline' => 'u'
   }.freeze
 
+  SAFE_URI_SCHEMES = %w[http https mailto tel].freeze
+
   module_function
+
+  # ---------------------------------------------------------------------------
+  # HTML sanitization helpers
+  # ---------------------------------------------------------------------------
+
+  def html_escape(text)
+    text.to_s
+        .gsub('&', '&amp;')
+        .gsub('<', '&lt;')
+        .gsub('>', '&gt;')
+        .gsub('"', '&quot;')
+        .gsub("'", '&#39;')
+  end
+
+  def safe_uri?(uri)
+    return false if uri.nil? || uri.strip.empty?
+    scheme = URI.parse(uri).scheme&.downcase
+    scheme.nil? || SAFE_URI_SCHEMES.include?(scheme)
+  rescue URI::InvalidURIError
+    false
+  end
 
   # ---------------------------------------------------------------------------
   # Locale-aware field helpers
@@ -129,7 +154,7 @@ module ContentfulMappers
       when 'paragraph'
         "<p>#{render_rich_text(node_content)}</p>"
       when 'text'
-        text = node_value.to_s
+        text = html_escape(node_value)
         node_marks = node.is_a?(Hash) ? (node['marks'] || []) : []
         node_marks.each do |mark|
           tag = MARK_TAG_MAP[mark['type']]
@@ -138,7 +163,12 @@ module ContentfulMappers
         text
       when 'hyperlink'
         uri = node_data.is_a?(Hash) ? node_data['uri'] : (node_data.respond_to?(:uri) ? node_data.uri : '')
-        "<a href=\"#{uri}\">#{render_rich_text(node_content)}</a>"
+        inner = render_rich_text(node_content)
+        if safe_uri?(uri)
+          "<a href=\"#{html_escape(uri)}\">#{inner}</a>"
+        else
+          "<span>#{inner}</span>"
+        end
       when 'unordered-list'
         "<ul>#{render_rich_text(node_content)}</ul>"
       when 'ordered-list'
