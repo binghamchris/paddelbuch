@@ -78,9 +78,8 @@ Resources:
               - key: Content-Security-Policy
                 value: >-
                   default-src 'self'; img-src 'self' data:
-                  raw.githubusercontent.com api.mapbox.com; style-src 'self'
-                  'unsafe-inline'; script-src 'self'; font-src
-                  'self' data:
+                  raw.githubusercontent.com api.mapbox.com; style-src 'self';
+                  script-src 'self'; font-src 'self' data:
               - key: Permissions-Policy
                 value: >-
                   accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(),
