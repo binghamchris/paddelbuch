@@ -37,87 +37,19 @@ pageName: waterway-details
   </div>
 </div>
 
-<!-- Map Initialization Script -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  // Parse waterway geometry for bounds calculation only
-  {% if waterway.geometry %}
-  var geometryData = {{ waterway.geometry | jsonify }};
-  var geometry;
-  
-  if (typeof geometryData === 'string') {
-    try {
-      geometry = JSON.parse(geometryData);
-    } catch (e) {
-      console.error('Failed to parse waterway geometry:', e);
-      geometry = null;
-    }
-  } else {
-    geometry = geometryData;
-  }
-  {% else %}
-  var geometry = null;
-  {% endif %}
-  
-  // Initialize map with default Switzerland center
-  var map = L.map('waterway-map', {
-    center: [{{ site.map.center.lat }}, {{ site.map.center.lon }}],
-    zoom: {{ site.map.default_zoom }},
-    zoomControl: true
-  });
-  
-  // Add tile layer
-  L.tileLayer('{{ site.mapbox_url }}', {
-    attribution: '&copy; <a href="https://www.mapbox.com/about/maps/" target="_blank" rel="noopener">Mapbox</a> &copy; <a href="http://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> <strong><a href="https://www.mapbox.com/map-feedback/" target="_blank" rel="noopener">Improve this map</a></strong>',
-    maxZoom: {{ site.map.max_zoom | default: 18 }}
-  }).addTo(map);
-  
-  map.zoomControl.setPosition('bottomright');
-  
-  // Add locate control for user position finding
-  L.control.locate({
-    position: 'bottomright',
-    strings: {
-      title: '{{ site.lang | default: "de" }}' === 'de' ? 'Meinen Standort anzeigen' : 'Show my location'
-    },
-    locateOptions: {
-      enableHighAccuracy: true,
-      maxZoom: 14
-    },
-    flyTo: true,
-    showCompass: true,
-    showPopup: false,
-    drawCircle: true,
-    drawMarker: true,
-    markerStyle: {
-      weight: 2,
-      opacity: 0.8,
-      fillOpacity: 0.8
-    },
-    circleStyle: {
-      weight: 1,
-      clickable: false
-    },
-    icon: 'leaflet-control-locate-location-arrow',
-    iconLoading: 'leaflet-control-locate-spinner',
-    onLocationError: function(err) {
-      console.warn('Location error:', err.message);
-    }
-  }).addTo(map);
-
-  // Fit bounds from waterway geometry (Property 7) without rendering the polygon
-  if (geometry) {
-    var tempLayer = L.geoJSON(geometry);
-    var bounds = tempLayer.getBounds();
-    if (bounds.isValid()) {
-      map.fitBounds(bounds, { padding: [20, 20] });
-    }
-  }
-  
-  // Store map globally so the data layer pipeline can find it
-  window.paddelbuchMap = map;
-});
+<!-- Map Configuration (CSP-safe JSON, not executed) -->
+<script type="application/json" id="map-config">
+{
+  "center": { "lat": {{ site.map.center.lat }}, "lon": {{ site.map.center.lon }} },
+  "zoom": {{ site.map.default_zoom }},
+  "maxZoom": {{ site.map.max_zoom | default: 18 }},
+  "mapboxUrl": "{{ site.mapbox_url }}",
+  "locale": "{{ current_locale }}",
+  "geometry": {% if waterway.geometry %}{{ waterway.geometry | jsonify }}{% else %}null{% endif %}
+}
 </script>
+<script src="{{ '/assets/js/paddelbuch-map.js' | relative_url }}"></script>
+<script src="{{ '/assets/js/waterway-map.js' | relative_url }}"></script>
 
 <!-- Load all data layers (spots, obstacles, protected areas, event notices) -->
 {% include detail-map-layers.html locale=current_locale %}
