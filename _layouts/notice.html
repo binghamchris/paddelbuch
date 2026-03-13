@@ -43,13 +43,26 @@ pageName: notice-details
 <script src="{{ '/assets/js/layer-styles.js' | relative_url }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  var map;
-  
-  // Parse affected area geometry
+  // Create map once with default Switzerland center/zoom
+  var map = L.map('notice-map', {
+    center: [{{ site.map.center.lat }}, {{ site.map.center.lon }}],
+    zoom: {{ site.map.default_zoom }},
+    zoomControl: true
+  });
+
+  L.tileLayer('{{ site.mapbox_url }}', {
+    attribution: '&copy; <a href="https://www.mapbox.com/about/maps/" target="_blank" rel="noopener">Mapbox</a> &copy; <a href="http://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> <strong><a href="https://www.mapbox.com/map-feedback/" target="_blank" rel="noopener">Improve this map</a></strong>',
+    maxZoom: {{ site.map.max_zoom | default: 18 }}
+  }).addTo(map);
+
+  map.zoomControl.setPosition('bottomright');
+
+  // Conditionally adjust view based on available data
   {% if notice.affectedArea %}
+  // (a) Fit bounds to affected area geometry if present
   var geometryData = {{ notice.affectedArea | jsonify }};
   var geometry;
-  
+
   if (typeof geometryData === 'string') {
     try {
       geometry = JSON.parse(geometryData);
@@ -60,92 +73,28 @@ document.addEventListener('DOMContentLoaded', function() {
   } else {
     geometry = geometryData;
   }
-  
-  map = L.map('notice-map', {
-    center: [{{ site.map.center.lat }}, {{ site.map.center.lon }}],
-    zoom: {{ site.map.default_zoom }},
-    zoomControl: true
-  });
-  
-  L.tileLayer('{{ site.mapbox_url }}', {
-    attribution: '&copy; <a href="https://www.mapbox.com/about/maps/" target="_blank" rel="noopener">Mapbox</a> &copy; <a href="http://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> <strong><a href="https://www.mapbox.com/map-feedback/" target="_blank" rel="noopener">Improve this map</a></strong>',
-    maxZoom: {{ site.map.max_zoom | default: 18 }}
-  }).addTo(map);
-  
-  map.zoomControl.setPosition('bottomright');
-  
+
   if (geometry) {
-    // Render affected area polygon (yellow semi-transparent)
     var affectedAreaLayer = L.geoJSON(geometry, {
       style: PaddelbuchLayerStyles.getLayerStyle('eventNoticeArea')
     }).addTo(map);
-    
+
     var bounds = affectedAreaLayer.getBounds();
     if (bounds.isValid()) {
       map.fitBounds(bounds, { padding: [50, 50] });
     }
   }
-  
-  // Set view to notice location if no affected area to fit bounds on
-  {% if notice.location %}
+  {% elsif notice.location %}
+  // (b) Center on notice location if no affected area but location exists
   {% assign lat = notice.location.lat | default: notice.location.latitude %}
   {% assign lon = notice.location.lon | default: notice.location.lng | default: notice.location.longitude %}
   {% if lat and lon %}
-  {% unless notice.affectedArea %}
   map.setView([{{ lat }}, {{ lon }}], 14);
-  {% endunless %}
   {% endif %}
   {% endif %}
-  
-  {% else %}
-  // No affected area — fall back to location or default view
-  {% if notice.location %}
-  {% assign lat = notice.location.lat | default: notice.location.latitude %}
-  {% assign lon = notice.location.lon | default: notice.location.lng | default: notice.location.longitude %}
-  {% if lat and lon %}
-  map = L.map('notice-map', {
-    center: [{{ lat }}, {{ lon }}],
-    zoom: 14,
-    zoomControl: true
-  });
-  
-  L.tileLayer('{{ site.mapbox_url }}', {
-    attribution: '&copy; <a href="https://www.mapbox.com/about/maps/" target="_blank" rel="noopener">Mapbox</a> &copy; <a href="http://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> <strong><a href="https://www.mapbox.com/map-feedback/" target="_blank" rel="noopener">Improve this map</a></strong>',
-    maxZoom: {{ site.map.max_zoom | default: 18 }}
-  }).addTo(map);
-  
-  map.zoomControl.setPosition('bottomright');
-  {% else %}
-  map = L.map('notice-map', {
-    center: [{{ site.map.center.lat }}, {{ site.map.center.lon }}],
-    zoom: {{ site.map.default_zoom }},
-    zoomControl: true
-  });
-  
-  L.tileLayer('{{ site.mapbox_url }}', {
-    attribution: '&copy; <a href="https://www.mapbox.com/about/maps/" target="_blank" rel="noopener">Mapbox</a> &copy; <a href="http://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> <strong><a href="https://www.mapbox.com/map-feedback/" target="_blank" rel="noopener">Improve this map</a></strong>',
-    maxZoom: {{ site.map.max_zoom | default: 18 }}
-  }).addTo(map);
-  
-  map.zoomControl.setPosition('bottomright');
-  {% endif %}
-  {% else %}
-  map = L.map('notice-map', {
-    center: [{{ site.map.center.lat }}, {{ site.map.center.lon }}],
-    zoom: {{ site.map.default_zoom }},
-    zoomControl: true
-  });
-  
-  L.tileLayer('{{ site.mapbox_url }}', {
-    attribution: '&copy; <a href="https://www.mapbox.com/about/maps/" target="_blank" rel="noopener">Mapbox</a> &copy; <a href="http://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> <strong><a href="https://www.mapbox.com/map-feedback/" target="_blank" rel="noopener">Improve this map</a></strong>',
-    maxZoom: {{ site.map.max_zoom | default: 18 }}
-  }).addTo(map);
-  
-  map.zoomControl.setPosition('bottomright');
-  {% endif %}
-  {% endif %}
-  
-  // Add locate control for user position finding
+  // (c) If neither affected area nor location, default view is already set
+
+  // Add locate control once
   L.control.locate({
     position: 'bottomright',
     strings: {
