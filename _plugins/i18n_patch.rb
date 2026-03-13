@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Target: jekyll-multiple-languages-plugin 1.8.x, addresses Ruby 3.4+ String.new(nil) removal
 #
 # Ruby 3.4 no longer allows String.new(nil). The plugin's TranslatedString class

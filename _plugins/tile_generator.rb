@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Jekyll plugin to generate spatial tile files at build time
 # This plugin generates:
 # - Spatial tiles for viewport-based map data loading

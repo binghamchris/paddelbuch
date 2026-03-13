@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Jekyll plugin to generate JSON API files at build time
 # This plugin generates:
 # - Fact tables: spots, obstacles, notices, protected-areas, waterways (per locale)
