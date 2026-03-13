@@ -22,6 +22,8 @@ global.document = {
   }
 };
 
+const htmlUtilsModule = require('../../assets/js/html-utils.js');
+global.PaddelbuchHtmlUtils = global.PaddelbuchHtmlUtils || htmlUtilsModule.PaddelbuchHtmlUtils || htmlUtilsModule;
 const spotPopupModule = require('../../assets/js/spot-popup.js');
 const PaddelbuchSpotPopup = global.PaddelbuchSpotPopup || spotPopupModule.PaddelbuchSpotPopup || spotPopupModule;
 const generateSpotPopupContent = PaddelbuchSpotPopup.generateSpotPopupContent;
