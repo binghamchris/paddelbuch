@@ -176,6 +176,18 @@ npm run test:watch
 source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.1 && bundle exec rspec
 ```
 
+### Vulnerability Scanning
+
+Scan Ruby and Node.js dependencies for known vulnerabilities:
+
+```bash
+# Scan Ruby gems only
+source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.1 && bundle exec rake audit
+
+# Scan both Ruby gems and npm packages
+source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.1 && bundle exec rake audit:all
+```
+
 ## Favicon and Apple Touch Icon
 
 The site uses an SVG favicon (`assets/images/logo-favicon.svg`) for modern browsers and a 180×180 PNG Apple Touch Icon (`assets/images/apple-touch-icon.png`) for iOS devices.
