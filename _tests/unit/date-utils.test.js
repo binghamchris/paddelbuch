@@ -20,6 +20,12 @@ const localeConfig = {
   }
 };
 
+// Abbreviated month names per locale (mirrors date-utils.js)
+const monthsAbbr = {
+  de: ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'],
+  en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+};
+
 // Implementation functions (mirrors date-utils.js)
 function parseDate(dateValue) {
   if (!dateValue) return null;
@@ -30,13 +36,21 @@ function parseDate(dateValue) {
   return isNaN(date.getTime()) ? null : date;
 }
 
-function formatDate(dateValue, locale) {
+function formatDate(dateValue, locale, format) {
   const date = parseDate(dateValue);
   if (!date) return '';
-  const config = localeConfig[locale] || localeConfig.de;
   const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0');
   const year = date.getFullYear();
+
+  if (format === 'short') {
+    const months = monthsAbbr[locale] || monthsAbbr.de;
+    const monthName = months[date.getMonth()];
+    return day + ' ' + monthName + ' ' + year;
+  }
+
+  // Default: 'numeric' format
+  const config = localeConfig[locale] || localeConfig.de;
+  const month = String(date.getMonth() + 1).padStart(2, '0');
   return day + config.separator + month + config.separator + year;
 }
 
@@ -140,6 +154,59 @@ describe('Date Utilities', () => {
       const date = new Date(2025, 0, 5);
       expect(formatDate(date, 'de')).toBe('05.01.2025');
       expect(formatDate(date, 'en')).toBe('05/01/2025');
+    });
+
+    test('defaults to numeric format when format parameter is omitted', () => {
+      const date = new Date(2025, 11, 5);
+      expect(formatDate(date, 'de')).toBe('05.12.2025');
+      expect(formatDate(date, 'en')).toBe('05/12/2025');
+    });
+
+    test('formats date with short format for German locale', () => {
+      const date = new Date(2025, 2, 8); // March
+      expect(formatDate(date, 'de', 'short')).toBe('08 Mär 2025');
+    });
+
+    test('formats date with short format for English locale', () => {
+      const date = new Date(2025, 2, 8); // March
+      expect(formatDate(date, 'en', 'short')).toBe('08 Mar 2025');
+    });
+
+    test('short format defaults to German month names for unknown locale', () => {
+      const date = new Date(2025, 2, 8);
+      expect(formatDate(date, 'fr', 'short')).toBe('08 Mär 2025');
+    });
+
+    test('short format returns empty string for invalid date', () => {
+      expect(formatDate('invalid', 'de', 'short')).toBe('');
+    });
+
+    test('short format returns empty string for null date', () => {
+      expect(formatDate(null, 'de', 'short')).toBe('');
+    });
+
+    test('numeric format works explicitly', () => {
+      const date = new Date(2025, 11, 5);
+      expect(formatDate(date, 'de', 'numeric')).toBe('05.12.2025');
+      expect(formatDate(date, 'en', 'numeric')).toBe('05/12/2025');
+    });
+
+    test('short format covers all months for de locale', () => {
+      const expectedDe = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+      for (let m = 0; m < 12; m++) {
+        const date = new Date(2025, m, 15);
+        const result = formatDate(date, 'de', 'short');
+        expect(result).toBe('15 ' + expectedDe[m] + ' 2025');
+      }
+    });
+
+    test('short format covers all months for en locale', () => {
+      const expectedEn = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      for (let m = 0; m < 12; m++) {
+        const date = new Date(2025, m, 15);
+        const result = formatDate(date, 'en', 'short');
+        expect(result).toBe('15 ' + expectedEn[m] + ' 2025');
+      }
     });
   });
 
