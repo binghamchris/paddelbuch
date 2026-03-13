@@ -30,7 +30,7 @@ pageName: notice-details
     <div class="notice-description col-lg-4 col-md-12 col-sm-12 col-12">
       <!-- Notice Title -->
       <div class="notice-title">
-        <h1>{{ notice.name }}</h1>
+        <h1>{{ notice.name | escape }}</h1>
       </div>
       
       <!-- Notice Details Content -->

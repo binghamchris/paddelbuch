@@ -20,7 +20,7 @@
   <meta name="twitter:title" content="{% if page.title %}{{ page.title | escape }}{% else %}{{ site.title | escape }}{% endif %}">
   <meta name="twitter:description" content="{% if page.description %}{{ page.description | strip_html | truncate: 160 | escape }}{% else %}{{ site.description | strip_html | truncate: 160 | escape }}{% endif %}">
 
-  <title>{% if page.title %}{{ page.title }} | {% endif %}{{ site.title }}</title>
+  <title>{% if page.title %}{{ page.title | escape }} | {% endif %}{{ site.title | escape }}</title>
   
   <!-- Fonts -->
   <link rel="stylesheet" href="{{ '/assets/css/vendor/fonts.css' | relative_url }}">

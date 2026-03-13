@@ -29,7 +29,7 @@ pageName: waterway-details
     <!-- Details Panel (4 cols on large screens) -->
     <div class="col-lg-4 waterway-details">
       <!-- Waterway Title -->
-      <h1 class="waterway-title">{{ waterway.name }}</h1>
+      <h1 class="waterway-title">{{ waterway.name | escape }}</h1>
       
       <!-- Event Notices Section (Requirement 4.5, 7.5) -->
       {% include event-list.html waterway_slug=waterway.slug %}
