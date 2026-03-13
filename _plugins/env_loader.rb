@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Loads environment variables from .env files into Jekyll site config.
 #
 # Priority (highest to lowest):

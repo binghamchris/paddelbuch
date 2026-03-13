@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'uri'
 
 # Custom mappers for Contentful entries

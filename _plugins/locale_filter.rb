@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Locale filtering plugin for Jekyll
 # Provides filters and utilities for filtering content by locale
 

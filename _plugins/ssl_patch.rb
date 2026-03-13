@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # _plugins/ssl_patch.rb
 # Target: http gem ~> 5.x
 # Addresses: Ruby 3.4+ / OpenSSL 3.x CRL verification errors

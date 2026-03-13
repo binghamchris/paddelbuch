@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Build Timer Plugin
 #
 # Instruments the Jekyll build to track where time is spent, with particular
