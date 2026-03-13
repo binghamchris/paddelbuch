@@ -64,7 +64,7 @@
     var localePrefix = (locale && locale !== 'de') ? '/' + locale : '';
     
     // Obstacle name — matches Gatsby's .popup-title > h1 structure
-    var html = '<span class="popup-title"><h1>' + escapeHtml(obstacle.name || 'Obstacle') + '</h1></span>';
+    var html = '<span class="popup-title"><h1>' + PaddelbuchHtmlUtils.escapeHtml(obstacle.name || 'Obstacle') + '</h1></span>';
     
     // Portage possibility status in a table — matches Gatsby's table layout
     html += '<table><tbody>';
@@ -81,19 +81,6 @@
     }
     
     return html;
-  }
-
-  /**
-   * Escapes HTML special characters to prevent XSS
-   * 
-   * @param {string} text - The text to escape
-   * @returns {string} The escaped text
-   */
-  function escapeHtml(text) {
-    if (!text) return '';
-    var div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
   }
 
   // Export to global scope
