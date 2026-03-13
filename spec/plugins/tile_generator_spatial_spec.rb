@@ -294,10 +294,11 @@ RSpec.describe Jekyll::TileGenerator, 'spatial logic' do
       s
     end
     let(:site_data) { {} }
+    let(:locale_cache) { {} }
 
     before do
       generator.instance_variable_set(:@site, site)
-      generator.instance_variable_set(:@locale_cache, {})
+      generator.instance_variable_set(:@locale_cache, locale_cache)
     end
 
     it 'filters array data by locale field' do
@@ -306,7 +307,7 @@ RSpec.describe Jekyll::TileGenerator, 'spatial logic' do
         { 'name' => 'Spot B', 'locale' => 'en' },
         { 'name' => 'Spot C', 'locale' => 'de' }
       ]
-      result = generator.send(:get_data_for_locale, 'spots', 'de')
+      result = generator.send(:get_data_for_locale, site_data, 'spots', 'de', locale_cache)
       expect(result.size).to eq(2)
       expect(result.map { |s| s['name'] }).to contain_exactly('Spot A', 'Spot C')
     end
@@ -316,7 +317,7 @@ RSpec.describe Jekyll::TileGenerator, 'spatial logic' do
         { 'name' => 'Notice A', 'node_locale' => 'de' },
         { 'name' => 'Notice B', 'node_locale' => 'en' }
       ]
-      result = generator.send(:get_data_for_locale, 'notices', 'en')
+      result = generator.send(:get_data_for_locale, site_data, 'notices', 'en', locale_cache)
       expect(result.size).to eq(1)
       expect(result.first['name']).to eq('Notice B')
     end
@@ -326,13 +327,13 @@ RSpec.describe Jekyll::TileGenerator, 'spatial logic' do
         'de' => [{ 'name' => 'Area DE' }],
         'en' => [{ 'name' => 'Area EN' }]
       }
-      result = generator.send(:get_data_for_locale, 'protected_areas', 'de')
+      result = generator.send(:get_data_for_locale, site_data, 'protected_areas', 'de', locale_cache)
       expect(result).to eq([{ 'name' => 'Area DE' }])
     end
 
     it 'returns empty array for missing hash locale' do
       site_data['protected_areas'] = { 'de' => [{ 'name' => 'Area DE' }] }
-      result = generator.send(:get_data_for_locale, 'protected_areas', 'fr')
+      result = generator.send(:get_data_for_locale, site_data, 'protected_areas', 'fr', locale_cache)
       expect(result).to eq([])
     end
 
@@ -340,8 +341,8 @@ RSpec.describe Jekyll::TileGenerator, 'spatial logic' do
       site_data['spots'] = [
         { 'name' => 'Spot A', 'locale' => 'de' }
       ]
-      first_call = generator.send(:get_data_for_locale, 'spots', 'de')
-      second_call = generator.send(:get_data_for_locale, 'spots', 'de')
+      first_call = generator.send(:get_data_for_locale, site_data, 'spots', 'de', locale_cache)
+      second_call = generator.send(:get_data_for_locale, site_data, 'spots', 'de', locale_cache)
       expect(first_call).to equal(second_call) # same object identity
     end
   end
