@@ -140,7 +140,7 @@
       - `<script src="{{ '/assets/js/map-data-init.js' | relative_url }}"></script>`
     - _Requirements: 1.7, 2.6, 2.7_
 
-- [~] 9. Verify bug condition exploration test now passes
+- [x] 9. Verify bug condition exploration test now passes
   - **Property 1: Expected Behavior** - Zero Inline Scripts After Fix
   - **IMPORTANT**: Re-run the SAME test from task 1 - do NOT write a new test
   - The test from task 1 asserts that all `<script>` elements either have a `src` attribute or `type="application/json"`
