@@ -7,8 +7,8 @@ frontend:
         - npm ci
         - npm run download-fonts
         - npm run copy-assets
-        - rvm install 3.4.1
-        - rvm use 3.4.1
+        - rvm install 3.4.9
+        - rvm use 3.4.9
         - bundle install
     build:
       commands:
