@@ -103,7 +103,7 @@
     - _Requirements: 1.3, 1.4, 2.3, 2.7_
 
 - [ ] 8. Extract `map-init.html` and `detail-map-layers.html` data bootstrap to external JS
-  - [~] 8.1 Create `assets/js/map-data-init.js`
+  - [x] 8.1 Create `assets/js/map-data-init.js`
     - Consolidate the data bootstrap logic from both `map-init.html` (second inline script) and `detail-map-layers.html` (inline script) into one external file
     - Read `#map-data-config` JSON for locale-dependent `dimensionConfigs` (spot type labels, paddle craft type labels) and `layerLabels`
     - Attach `matchFn` functions programmatically after reading config:
@@ -121,7 +121,7 @@
     - _Expected_Behavior: Data pipeline bootstraps from external JS reading JSON config_
     - _Preservation: Dimension configs, filter engine init, data loading, moveend handler, zoom layer manager all behave identically_
     - _Requirements: 1.6, 1.7, 2.5, 2.6, 3.2, 3.3, 3.5_
-  - [~] 8.2 Update `_includes/map-init.html`
+  - [x] 8.2 Update `_includes/map-init.html`
     - Replace the first inline script (map init) with:
       - `<script type="application/json" id="map-config">` containing `center` (lat/lon), `zoom`, `maxZoom`, `mapboxUrl`, `locale`, and home-page-specific options: `maxBounds` (Switzerland bounds `[[45.0, 4.5], [49.4, 11.8]]`), `maxBoundsViscosity: 1.0`, `minZoom: 7`, `zoomControl: false`
       - `<script src="paddelbuch-map.js">` and `<script src="home-map.js">`
@@ -132,7 +132,7 @@
       - `<script type="application/json" id="map-data-config">` containing locale-dependent dimension labels/options and layer labels (all the Jekyll `{% if %}` / `{% for %}` data)
       - `<script src="map-data-init.js">`
     - _Requirements: 1.1, 1.6, 2.1, 2.5, 2.7_
-  - [~] 8.3 Update `_includes/detail-map-layers.html`
+  - [x] 8.3 Update `_includes/detail-map-layers.html`
     - Keep all existing `<script src="...">` tags for `marker-registry.js`, `filter-engine.js`, `marker-styles.js`, `layer-styles.js`, `spatial-utils.js`, `data-loader.js`, `zoom-layer-manager.js`
     - Keep `{% include layer-control.html %}` and `{% include filter-panel.html %}`
     - Replace the inline `<script>` block with:
