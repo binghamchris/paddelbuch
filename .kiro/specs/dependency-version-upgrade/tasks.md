@@ -21,7 +21,7 @@ Incrementally upgrade all runtime and development dependencies (Ruby, Node.js, g
   - [x] 2.2 Update `amplify.yml` Ruby version references
     - Update the `rvm install` and `rvm use` commands in `amplify.yml` to match the new `.ruby-version`
     - _Requirements: 2.3, 8.1_
-  - [~] 2.3 Write property test for Pipeline Version Consistency (Property 2)
+  - [x] 2.3 Write property test for Pipeline Version Consistency (Property 2)
     - **Property 2: Pipeline Version Consistency**
     - Generate random valid Ruby version strings, parse `.ruby-version` and `amplify.yml`, and assert that the `rvm install` and `rvm use` version strings match the `.ruby-version` value
     - Test file: `spec/plugins/pipeline_version_consistency_spec.rb` using RSpec + Rantly
