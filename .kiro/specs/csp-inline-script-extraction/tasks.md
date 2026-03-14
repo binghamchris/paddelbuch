@@ -149,7 +149,7 @@
   - **EXPECTED OUTCOME**: Test PASSES (confirms all inline scripts have been extracted to external files)
   - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7_
 
-- [~] 10. Verify preservation tests still pass
+- [x] 10. Verify preservation tests still pass
   - **Property 2: Preservation** - Existing External Script Behavior Unchanged
   - **IMPORTANT**: Re-run the SAME tests from task 2 - do NOT write new tests
   - Build the Jekyll site and re-run preservation tests against the rebuilt `_site` output

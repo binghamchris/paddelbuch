@@ -350,29 +350,30 @@ def test_layer_styles_color_keys_match_color_generator():
 # Deterministic test: filter-panel.html is pure JavaScript (no Jekyll vars)
 # ---------------------------------------------------------------------------
 
-def test_filter_panel_has_no_jekyll_variables():
+def test_filter_panel_js_has_no_jekyll_variables():
     """
     **Validates: Requirements 3.3**
 
-    Property: filter-panel.html contains no Jekyll/Liquid template variables
-    ({{ }} or {% %}), confirming it is pure JavaScript that can be extracted
-    to an external file without any data-passing mechanism.
+    Property: The extracted filter-panel.js contains no Jekyll/Liquid template
+    variables ({{ }} or {% %}), confirming it is pure JavaScript. After the CSP
+    fix, the JS lives in assets/js/filter-panel.js (extracted from the include).
     """
-    assert os.path.isfile(FILTER_PANEL_PATH), (
-        f"filter-panel.html not found at {FILTER_PANEL_PATH}"
+    filter_panel_js = os.path.join(ASSETS_JS_DIR, 'filter-panel.js')
+    assert os.path.isfile(filter_panel_js), (
+        f"filter-panel.js not found at {filter_panel_js}"
     )
 
-    with open(FILTER_PANEL_PATH, 'r') as f:
+    with open(filter_panel_js, 'r') as f:
         content = f.read()
 
     liquid_output = re.findall(r'\{\{.*?\}\}', content)
     liquid_tags = re.findall(r'\{%.*?%\}', content)
 
     assert len(liquid_output) == 0, (
-        f"filter-panel.html contains Liquid output tags: {liquid_output}"
+        f"filter-panel.js contains Liquid output tags: {liquid_output}"
     )
     assert len(liquid_tags) == 0, (
-        f"filter-panel.html contains Liquid template tags: {liquid_tags}"
+        f"filter-panel.js contains Liquid template tags: {liquid_tags}"
     )
 
 
