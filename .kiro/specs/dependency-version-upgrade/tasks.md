@@ -15,7 +15,7 @@ Incrementally upgrade all runtime and development dependencies (Ruby, Node.js, g
     - _Requirements: 1.5, 7.5, 7.6_
 
 - [ ] 2. Upgrade Ruby version
-  - [~] 2.1 Update `.ruby-version` to the latest stable Ruby release
+  - [x] 2.1 Update `.ruby-version` to the latest stable Ruby release
     - Change the version string in `.ruby-version` (e.g. `ruby-3.4.x` → latest stable)
     - _Requirements: 2.1_
   - [~] 2.2 Update `amplify.yml` Ruby version references
