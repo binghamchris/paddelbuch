@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'yaml'
+
 # Jekyll plugin to generate collection documents from Contentful YAML data
 #
 # The ContentfulFetcher writes data to _data/*.yml but Jekyll collections
@@ -23,7 +25,17 @@ module Jekyll
       'static_pages' => { data_key: 'static_pages', page_name: 'static-page' }
     }.freeze
 
+    # Icon name and alt text mappings for all spot types
+    SPOT_ICON_MAP = {
+      'einstieg-ausstieg' => { name: 'entryexit', alt_de: 'Ein-/Ausstiegsorte Symbol', alt_en: 'Entry and exit spot icon' },
+      'nur-einstieg'      => { name: 'entry',     alt_de: 'Einstiegsorte Symbol',       alt_en: 'Entry spot icon' },
+      'nur-ausstieg'      => { name: 'exit',      alt_de: 'Ausstiegsorte Symbol',       alt_en: 'Exit spot icon' },
+      'rasthalte'         => { name: 'rest',       alt_de: 'Rasthalte Symbol',           alt_en: 'Rest spot icon' },
+      'notauswasserungsstelle' => { name: 'emergency', alt_de: 'Notauswasserungsstelle Symbol', alt_en: 'Emergency exit spot icon' }
+    }.freeze
+
     def generate(site)
+      @site = site
       current_locale = site.config['lang'] || site.config['default_lang'] || 'de'
 
       # Pre-build spot lookup hash for obstacle resolution (avoids O(n²) search)
@@ -36,6 +48,11 @@ module Jekyll
           @locale_spots_by_slug[s['slug']] = s if s['slug']
         end
       end
+
+      # Build O(1) lookup hashes once per generate call
+      @type_lookup = build_type_lookup(site.data, current_locale)
+      @waterway_lookup = build_waterway_lookup(site.data['waterways'], current_locale)
+      @craft_type_lookup = build_craft_type_lookup(site.data, current_locale)
 
       COLLECTIONS.each do |collection_name, config|
         collection = site.collections[collection_name]
@@ -180,6 +197,62 @@ module Jekyll
       else
         []
       end
+    end
+
+    # Build { type_category => { slug => translated_name } } hash for spot_types, obstacle_types, paddle_craft_types
+    def build_type_lookup(data, locale)
+      name_key = locale == 'en' ? 'name_en' : 'name_de'
+      result = {}
+      %w[spot_types obstacle_types paddle_craft_types].each do |type_key|
+        types = data.dig('types', type_key)
+        next unless types.is_a?(Array)
+        result[type_key] = {}
+        types.each do |t|
+          next unless t['locale'] == locale && t['slug']
+          result[type_key][t['slug']] = t[name_key] || t['name_de'] || t['slug']
+        end
+      end
+      result
+    end
+
+    # Build { slug => translated_name } hash for paddle_craft_types
+    def build_craft_type_lookup(data, locale)
+      name_key = locale == 'en' ? 'name_en' : 'name_de'
+      types = data.dig('types', 'paddle_craft_types')
+      return {} unless types.is_a?(Array)
+      lookup = {}
+      types.each do |t|
+        next unless t['locale'] == locale && t['slug']
+        lookup[t['slug']] = t[name_key] || t['name_de'] || t['slug']
+      end
+      lookup
+    end
+
+    # Build { slug => waterway_hash } hash for waterways filtered by locale
+    def build_waterway_lookup(waterways, locale)
+      return {} unless waterways.is_a?(Array)
+      lookup = {}
+      waterways.each do |w|
+        lookup[w['slug']] = w if w['locale'] == locale
+      end
+      lookup
+    end
+
+    # Resolve spot icon filename and alt text based on type slug and rejected status
+    def resolve_spot_icon(type_slug, is_rejected, locale)
+      if is_rejected
+        { name: 'noentry', alt: locale == 'en' ? 'No entry spot icon' : 'Kein Zutritt Symbol' }
+      else
+        entry = SPOT_ICON_MAP[type_slug] || SPOT_ICON_MAP['einstieg-ausstieg']
+        { name: entry[:name], alt: locale == 'en' ? entry[:alt_en] : entry[:alt_de] }
+      end
+    end
+
+    # Load translation value from _i18n/<locale>.yml by dotted key path
+    def get_translation(locale, key)
+      @translations ||= {}
+      @translations[locale] ||= YAML.load_file(File.join(@site.source, '_i18n', "#{locale}.yml"))
+      @translations[locale].dig(*key.split('.'))
     end
   end
 end
