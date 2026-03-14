@@ -19,6 +19,17 @@ pageName: notice-details
 {% assign current_locale = site.lang | default: 'de' %}
 {% assign notice = page %}
 
+<!-- Look up waterway objects from the notice's waterways array -->
+{% assign notice_waterways = "" | split: "" %}
+{% if notice.waterways %}
+  {% for ww_slug in notice.waterways %}
+    {% assign ww = site.data.waterways | where: "slug", ww_slug | where: "locale", current_locale | first %}
+    {% if ww %}
+      {% assign notice_waterways = notice_waterways | push: ww %}
+    {% endif %}
+  {% endfor %}
+{% endif %}
+
 <div class="container-fluid">
   <div class="row">
     <!-- Map Column (8 cols on large screens) -->
@@ -34,7 +45,7 @@ pageName: notice-details
       </div>
       
       <!-- Notice Details Content -->
-      {% include notice-detail-content.html notice=notice %}
+      {% include notice-detail-content.html notice=notice waterways=notice_waterways %}
     </div>
   </div>
 </div>
