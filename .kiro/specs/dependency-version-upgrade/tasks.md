@@ -75,7 +75,7 @@ Incrementally upgrade all runtime and development dependencies (Ruby, Node.js, g
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 8. Upgrade npm dependencies
-  - [~] 8.1 Update `package.json` dependency versions
+  - [x] 8.1 Update `package.json` dependency versions
     - Update `dependencies`: bootstrap, leaflet, leaflet.locatecontrol to latest stable
     - Update `devDependencies`: jest, jest-environment-jsdom, @types/jest, fast-check to latest stable
     - Resolve the jest (29.x) / jest-environment-jsdom (30.x) version mismatch
