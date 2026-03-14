@@ -60,7 +60,7 @@ Incrementally upgrade all runtime and development dependencies (Ruby, Node.js, g
   - [x] 6.2 Run `bundle update` to regenerate `Gemfile.lock`
     - Resolve any dependency conflicts by adjusting constraints or upgrading incrementally
     - _Requirements: 4.2_
-  - [~] 6.3 Fix any plugin compatibility issues caused by gem upgrades
+  - [x] 6.3 Fix any plugin compatibility issues caused by gem upgrades
     - Check all 17 plugins in `_plugins/` for deprecation warnings or API breakage
     - Update plugin code if any gem introduces breaking API changes (Jekyll, Liquid, Contentful, Dotenv, Sass)
     - _Requirements: 4.5, 6.1, 6.2_
