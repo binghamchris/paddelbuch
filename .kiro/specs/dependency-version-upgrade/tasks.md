@@ -34,7 +34,7 @@ Incrementally upgrade all runtime and development dependencies (Ruby, Node.js, g
     - Fix any differences or failures before proceeding
     - _Requirements: 1.5, 2.4_
 
-- [~] 3. Checkpoint — Verify Ruby upgrade
+- [x] 3. Checkpoint — Verify Ruby upgrade
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 4. Upgrade Node.js version
