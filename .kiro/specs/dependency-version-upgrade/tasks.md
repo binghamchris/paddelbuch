@@ -37,11 +37,11 @@ Incrementally upgrade all runtime and development dependencies (Ruby, Node.js, g
 - [x] 3. Checkpoint — Verify Ruby upgrade
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 4. Upgrade Node.js version
+- [x] 4. Upgrade Node.js version
   - [x] 4.1 Update `amplify.yml` Node.js version
     - Change the `nvm install` command from `18` to the latest LTS major version (e.g. `22`)
     - _Requirements: 3.1, 8.2_
-  - [~] 4.2 Verify Node.js upgrade: rebuild site, diff against baseline, run test suites
+  - [x] 4.2 Verify Node.js upgrade: rebuild site, diff against baseline, run test suites
     - Run `npm ci` to reinstall packages under the new Node.js
     - Run `npm run copy-assets` and `npm run download-fonts`
     - Run `bundle exec jekyll build` and diff `_site/` against `_site_baseline/`
@@ -50,7 +50,7 @@ Incrementally upgrade all runtime and development dependencies (Ruby, Node.js, g
     - Fix any differences or failures before proceeding
     - _Requirements: 1.5, 3.2, 3.3_
 
-- [~] 5. Checkpoint — Verify Node.js upgrade
+- [x] 5. Checkpoint — Verify Node.js upgrade
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 6. Upgrade Ruby gem dependencies
