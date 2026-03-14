@@ -59,43 +59,6 @@
   }
 
   /**
-   * Escapes HTML special characters to prevent XSS
-   * 
-   * @param {string} text - Text to escape
-   * @returns {string} Escaped text
-   */
-  function escapeHtml(text) {
-    if (!text) return '';
-    var div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-  }
-
-  /**
-   * Strips HTML tags from a string
-   * 
-   * @param {string} html - HTML string
-   * @returns {string} Plain text
-   */
-  function stripHtml(html) {
-    if (!html) return '';
-    return html.replace(/<[^>]*>/g, '');
-  }
-
-  /**
-   * Truncates text to a maximum length with ellipsis
-   * 
-   * @param {string} text - Text to truncate
-   * @param {number} maxLength - Maximum length
-   * @returns {string} Truncated text
-   */
-  function truncate(text, maxLength) {
-    if (!text) return '';
-    if (text.length <= maxLength) return text;
-    return text.substring(0, maxLength) + '...';
-  }
-
-  /**
    * Gets localized labels based on locale
    * 
    * @param {string} locale - Current locale ('de' or 'en')
@@ -183,34 +146,25 @@
       // Header: icon + category label (matches Gatsby .popup-icon-div)
       html.push('<div class="popup-icon-div">');
       html.push('<span class="popup-icon"><img src="' + iconPath + '" alt="" width="20" height="20" loading="lazy" /></span>');
-      html.push(escapeHtml(spotTypeLabel));
+      html.push(PaddelbuchHtmlUtils.escapeHtml(spotTypeLabel));
       html.push('</div>');
 
       // Title (matches Gatsby .popup-title > h1)
-      html.push('<span class="popup-title"><h1>' + escapeHtml(spot.name) + '</h1></span>');
+      html.push('<span class="popup-title"><h1>' + PaddelbuchHtmlUtils.escapeHtml(spot.name) + '</h1></span>');
 
       // Description
       var description = spot.description || spot.description_excerpt;
       if (description) {
-        var plainText = stripHtml(description);
-        var excerpt = truncate(plainText, 150);
+        var plainText = PaddelbuchHtmlUtils.stripHtml(description);
+        var excerpt = PaddelbuchHtmlUtils.truncate(plainText, 150);
         if (excerpt) {
-          html.push('<div><p>' + escapeHtml(excerpt) + '</p></div>');
+          html.push('<div><p>' + PaddelbuchHtmlUtils.escapeHtml(excerpt) + '</p></div>');
         }
       }
 
-      // Details table (matches Gatsby .popup-details-table)
-      html.push('<table class="popup-details-table"><tbody>');
-
-      // GPS coordinates (used for navigate button below)
+      // Navigate button (matches Gatsby structure: button > a)
       var lat = spot.location ? (spot.location.lat || spot.location.latitude) : null;
       var lon = spot.location ? (spot.location.lon || spot.location.lng || spot.location.longitude) : null;
-
-
-
-      html.push('</tbody></table>');
-
-      // Navigate button (matches Gatsby structure: button > a)
       if (lat !== null && lon !== null) {
         html.push('<button type="button" class="popup-btn">');
         html.push('<a href="https://www.google.com/maps/dir/?api=1&destination=' + lat + ',' + lon + '" ');
@@ -220,7 +174,7 @@
       // More details button (matches Gatsby structure: button.popup-btn-right > a)
       if (spot.slug) {
         html.push('<button class="popup-btn popup-btn-right">');
-        html.push('<a href="' + localePrefix + '/einstiegsorte/' + escapeHtml(spot.slug) + '/">');
+        html.push('<a href="' + localePrefix + '/einstiegsorte/' + PaddelbuchHtmlUtils.escapeHtml(spot.slug) + '/">');
         html.push(labels.moreDetails + '</a></button>');
       }
 
@@ -249,23 +203,23 @@
     html.push('<span class="popup-icon">');
     html.push('<img src="' + iconPath + '" alt="' + iconAlt + '" height="20" width="20" loading="lazy" />');
     html.push('</span>');
-    html.push(escapeHtml(noEntryLabel));
+    html.push(PaddelbuchHtmlUtils.escapeHtml(noEntryLabel));
     html.push('</div>');
     
     // Title
-    html.push('<span class="popup-title"><h1>' + escapeHtml(spot.name) + '</h1></span>');
+    html.push('<span class="popup-title"><h1>' + PaddelbuchHtmlUtils.escapeHtml(spot.name) + '</h1></span>');
     
     // Description (rejection reason)
     var description = spot.description || spot.description_excerpt;
     if (description) {
-      var plainText = stripHtml(description);
-      html.push('<div><p>' + escapeHtml(plainText) + '</p></div>');
+      var plainText = PaddelbuchHtmlUtils.stripHtml(description);
+      html.push('<div><p>' + PaddelbuchHtmlUtils.escapeHtml(plainText) + '</p></div>');
     }
     
     // More details button (matches regular spot popup: button.popup-btn-right > a)
     if (spot.slug) {
       html.push('<button class="popup-btn popup-btn-right">');
-      html.push('<a href="' + localePrefix + '/einstiegsorte/' + escapeHtml(spot.slug) + '/">');
+      html.push('<a href="' + localePrefix + '/einstiegsorte/' + PaddelbuchHtmlUtils.escapeHtml(spot.slug) + '/">');
       html.push(labels.moreDetails + '</a></button>');
     }
     
@@ -277,10 +231,7 @@
     generateSpotPopupContent: generateSpotPopupContent,
     generateRejectedSpotPopupContent: generateRejectedSpotPopupContent,
     getIconPath: getIconPath,
-    getLabels: getLabels,
-    escapeHtml: escapeHtml,
-    stripHtml: stripHtml,
-    truncate: truncate
+    getLabels: getLabels
   };
 
 })(typeof window !== 'undefined' ? window : this);

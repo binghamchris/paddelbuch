@@ -147,6 +147,13 @@ errors:
   not_found_message: "Die angeforderte Seite konnte nicht gefunden werden."
   back_home: "Zurück zur Startseite"
 
+# Map accessibility labels
+map:
+  spot_map_label: "Karte mit dem Standort dieses Einstiegsorts"
+  waterway_map_label: "Karte mit diesem Gewässer"
+  obstacle_map_label: "Karte mit diesem Hindernis"
+  notice_map_label: "Karte mit diesem Gewässerereignis"
+
 # Date formats
 date:
   format: "%d.%m.%Y"

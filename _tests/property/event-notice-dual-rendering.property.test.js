@@ -119,7 +119,8 @@ const slugArb = fc.string({ minLength: 1, maxLength: 50 }).filter(s => s.trim().
 // Generate dates within a reasonable range
 const dateArb = fc.date({
   min: new Date('2020-01-01'),
-  max: new Date('2030-12-31')
+  max: new Date('2030-12-31'),
+  noInvalidDate: true
 });
 
 // Generate an ISO date string
@@ -152,7 +153,8 @@ const validGeoJsonArb = fc.record({
 // Generate a reference date (today)
 const referenceDateArb = fc.date({
   min: new Date('2023-01-01'),
-  max: new Date('2027-12-31')
+  max: new Date('2027-12-31'),
+  noInvalidDate: true
 });
 
 // Generate an event notice with all fields
