@@ -110,7 +110,7 @@ Incrementally upgrade all runtime and development dependencies (Ruby, Node.js, g
     - Execute the full amplify.yml sequence locally: `npm ci`, `npm run download-fonts`, `npm run copy-assets`, `bundle install`, `bundle exec jekyll build`, `npm test`
     - Confirm `_site/` matches `_site_baseline/` with no differences
     - _Requirements: 1.5, 8.3, 8.4_
-  - [~] 10.2 Verify test count preservation (Property 3)
+  - [x] 10.2 Verify test count preservation (Property 3)
     - Run `bundle exec rspec` and compare example count against baseline count from step 1.1
     - Run `npm test` and compare test count against baseline count from step 1.1
     - Assert post-upgrade counts >= pre-upgrade counts
