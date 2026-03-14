@@ -85,8 +85,8 @@
     - Keep the HTML comment header
     - _Requirements: 1.5, 2.4, 2.7_
 
-- [ ] 7. Extract `layer-control.html` inline script to external JS
-  - [~] 7.1 Create `assets/js/layer-control.js`
+- [x] 7. Extract `layer-control.html` inline script to external JS
+  - [x] 7.1 Create `assets/js/layer-control.js`
     - Move the entire layer-control IIFE from `layer-control.html`
     - Read `#layer-control-config` JSON for `currentLocale`, `localePrefix`, and `protectedAreaTypeNames`
     - Replace all Liquid variable references (`'{{ current_locale }}'`, `{{ map_var }}`, the `{% for %}` loop for `protectedAreaTypeNames`) with values from parsed config
@@ -95,7 +95,7 @@
     - _Expected_Behavior: Layer groups and marker/layer creation functions are created from external JS reading JSON config_
     - _Preservation: All popup content, locale filtering, layer group structure unchanged_
     - _Requirements: 1.3, 1.4, 2.3, 3.1, 3.4, 3.5_
-  - [~] 7.2 Update `_includes/layer-control.html`
+  - [x] 7.2 Update `_includes/layer-control.html`
     - Keep all existing `<script src="...">` tags for `locale-filter.js`, `clipboard.js`, `html-utils.js`, `date-utils.js`, `spot-popup.js`, `obstacle-popup.js`, `event-notice-popup.js`
     - Replace the inline `<script>` block with:
       - `<script type="application/json" id="layer-control-config">` containing JSON with `currentLocale`, `localePrefix` (computed from locale), and `protectedAreaTypeNames` (the `{% for %}` loop output as a JSON object)
