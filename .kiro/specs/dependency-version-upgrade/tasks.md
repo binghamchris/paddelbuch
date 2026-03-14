@@ -102,7 +102,7 @@ Incrementally upgrade all runtime and development dependencies (Ruby, Node.js, g
     - Fix any differences or failures before proceeding
     - _Requirements: 1.5, 5.3_
 
-- [~] 9. Checkpoint — Verify npm upgrades
+- [x] 9. Checkpoint — Verify npm upgrades
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 10. Final verification and test count preservation
