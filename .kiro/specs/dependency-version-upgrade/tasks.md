@@ -80,7 +80,7 @@ Incrementally upgrade all runtime and development dependencies (Ruby, Node.js, g
     - Update `devDependencies`: jest, jest-environment-jsdom, @types/jest, fast-check to latest stable
     - Resolve the jest (29.x) / jest-environment-jsdom (30.x) version mismatch
     - _Requirements: 5.1_
-  - [~] 8.2 Run `npm install` to regenerate `package-lock.json`
+  - [x] 8.2 Run `npm install` to regenerate `package-lock.json`
     - Resolve any peer dependency conflicts
     - _Requirements: 5.2_
   - [~] 8.3 Verify `scripts/copy-vendor-assets.js` works with new package versions
