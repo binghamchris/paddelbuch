@@ -160,7 +160,7 @@
   - Confirm all tests still pass after fix (no regressions)
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7_
 
-- [~] 11. Checkpoint - Ensure all tests pass and no CSP violations
+- [x] 11. Checkpoint - Ensure all tests pass and no CSP violations
   - Build the full Jekyll site: `source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.1 && bundle exec jekyll build`
   - Verify the build succeeds without errors
   - Verify zero inline `<script>` blocks in the five modified includes' output
