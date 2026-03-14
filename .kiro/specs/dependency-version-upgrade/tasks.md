@@ -116,7 +116,7 @@ Incrementally upgrade all runtime and development dependencies (Ruby, Node.js, g
     - Assert post-upgrade counts >= pre-upgrade counts
     - **Property 3: Test Count Preservation**
     - **Validates: Requirements 7.5, 7.6**
-  - [~] 10.3 Clean up baseline artifacts
+  - [x] 10.3 Clean up baseline artifacts
     - Remove `_site_baseline/` directory
     - Remove `baseline-counts.txt`
     - _Requirements: N/A (housekeeping)_
