@@ -53,7 +53,7 @@ Incrementally upgrade all runtime and development dependencies (Ruby, Node.js, g
 - [x] 5. Checkpoint — Verify Node.js upgrade
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 6. Upgrade Ruby gem dependencies
+- [x] 6. Upgrade Ruby gem dependencies
   - [x] 6.1 Update `Gemfile` version constraints to permit latest stable releases
     - Update pessimistic version constraints (`~>`) for: jekyll, contentful, dotenv, jekyll-multiple-languages-plugin, jekyll-sass-converter, webrick, bundler-audit, rspec, rantly
     - _Requirements: 4.1_
@@ -64,14 +64,14 @@ Incrementally upgrade all runtime and development dependencies (Ruby, Node.js, g
     - Check all 17 plugins in `_plugins/` for deprecation warnings or API breakage
     - Update plugin code if any gem introduces breaking API changes (Jekyll, Liquid, Contentful, Dotenv, Sass)
     - _Requirements: 4.5, 6.1, 6.2_
-  - [~] 6.4 Verify gem upgrade: rebuild site, diff against baseline, run test suites
+  - [x] 6.4 Verify gem upgrade: rebuild site, diff against baseline, run test suites
     - Run `bundle exec jekyll build` and diff `_site/` against `_site_baseline/`
     - Run `bundle exec rspec` — all tests must pass
     - Run `npm test` — all tests must pass
     - Fix any differences or failures before proceeding
     - _Requirements: 1.5, 4.3, 4.4_
 
-- [~] 7. Checkpoint — Verify gem upgrades
+- [x] 7. Checkpoint — Verify gem upgrades
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 8. Upgrade npm dependencies
