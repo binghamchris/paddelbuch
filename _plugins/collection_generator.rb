@@ -68,7 +68,7 @@ module Jekyll
           slug = entry['slug']
           next unless slug && !slug.empty?
 
-          doc = create_document(site, collection, entry, slug, config[:page_name])
+          doc = create_document(site, collection, entry, slug, config[:page_name], current_locale)
           collection.docs << doc
         end
       end
@@ -76,7 +76,9 @@ module Jekyll
 
     private
 
-    def create_document(site, collection, entry, slug, page_name)
+    def create_document(site, collection, entry, slug, page_name, current_locale = nil)
+      current_locale ||= site.config['lang'] || site.config['default_lang'] || 'de'
+
       # Create a virtual document path (doesn't need to exist on disk)
       path = File.join(site.source, collection.relative_directory, "#{slug}.md")
 
@@ -104,10 +106,12 @@ module Jekyll
         doc.data['permalink'] = "/#{entry['menu_slug']}/#{slug}/"
       end
 
-      # For obstacles, compute center coordinates from geometry
-      # and resolve exit/re-entry spots from spots data
-      if collection.label == 'obstacles'
-        current_locale = site.config['lang'] || site.config['default_lang'] || 'de'
+      # Pre-compute per-document fields based on collection type
+      case collection.label
+      when 'spots'
+        precompute_spot_fields(doc, entry, current_locale)
+      when 'obstacles'
+        precompute_obstacle_fields(doc, entry, current_locale)
 
         if entry['geometry']
           center = compute_geometry_center(entry['geometry'])
@@ -119,6 +123,10 @@ module Jekyll
 
         # Resolve exit/re-entry spots for portage table
         resolve_obstacle_spots(doc, entry, site, current_locale)
+      when 'waterways'
+        precompute_waterway_notices(doc, entry, site, current_locale)
+      when 'notices'
+        precompute_notice_waterways(doc, entry, current_locale)
       end
 
       doc
@@ -162,6 +170,71 @@ module Jekyll
       doc.data['exitSpot_name'] = exit_spot['name'] if exit_spot
       doc.data['reentrySpot_slug'] = reentry_spot['slug'] if reentry_spot
       doc.data['reentrySpot_name'] = reentry_spot['name'] if reentry_spot
+    end
+
+    # Pre-compute spot-specific fields: type name, craft type names, icon, waterway name
+    def precompute_spot_fields(doc, entry, locale)
+      slug = entry['spotType_slug'] || entry['spot_type_slug']
+      is_rejected = entry['rejected']
+
+      # Spot type name
+      if is_rejected
+        doc.data['spot_type_name'] = get_translation(locale, 'spot_types.no_entry')
+      else
+        doc.data['spot_type_name'] = @type_lookup&.dig('spot_types', slug) || slug
+      end
+
+      # Paddle craft type names (resolved array)
+      craft_slugs = entry['paddleCraftTypes'] || []
+      doc.data['paddle_craft_type_names'] = craft_slugs.map { |cs| @craft_type_lookup&.[](cs) || cs }
+
+      # Icon name and alt text
+      icon = resolve_spot_icon(slug, is_rejected, locale)
+      doc.data['spot_icon_name'] = icon[:name]
+      doc.data['spot_icon_alt'] = icon[:alt]
+
+      # Waterway name
+      if entry['waterway_slug'] && @waterway_lookup&.[](entry['waterway_slug'])
+        doc.data['waterway_name'] = @waterway_lookup[entry['waterway_slug']]['name']
+      end
+    end
+
+    # Pre-compute obstacle-specific fields: type name, waterway name
+    def precompute_obstacle_fields(doc, entry, locale)
+      slug = entry['obstacleType_slug']
+      doc.data['obstacle_type_name'] = @type_lookup&.dig('obstacle_types', slug) || slug if slug
+
+      if entry['waterway_slug'] && @waterway_lookup&.[](entry['waterway_slug'])
+        doc.data['waterway_name'] = @waterway_lookup[entry['waterway_slug']]['name']
+      end
+    end
+
+    # Pre-compute active event notices for a waterway document
+    def precompute_waterway_notices(doc, entry, site, locale)
+      notices = site.data['notices']
+      return unless notices.is_a?(Array)
+
+      today = Date.today.strftime('%Y-%m-%d')
+      waterway_slug = entry['slug']
+
+      active = notices.select do |n|
+        n['locale'] == locale &&
+          n['endDate'] && n['endDate'].to_s >= today &&
+          n['waterways']&.include?(waterway_slug)
+      end
+
+      doc.data['active_notices'] = active.map do |n|
+        { 'name' => n['name'], 'slug' => n['slug'], 'endDate' => n['endDate'] }
+      end
+    end
+
+    # Pre-compute resolved waterway objects for a notice document
+    def precompute_notice_waterways(doc, entry, locale)
+      ww_slugs = entry['waterways'] || []
+      doc.data['notice_waterways'] = ww_slugs.filter_map do |slug|
+        ww = @waterway_lookup&.[](slug)
+        { 'name' => ww['name'], 'slug' => ww['slug'] } if ww
+      end
     end
 
     # Compute the center point of a GeoJSON geometry by averaging all coordinates
