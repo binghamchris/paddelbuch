@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Custom Liquid filters for waterway menu sorting and limiting
 # Implements Property 5: Waterway Menu Sorting and Limiting
 # Implements Property 6: Waterway List Alphabetical Sorting

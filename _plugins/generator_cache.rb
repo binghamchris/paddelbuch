@@ -25,4 +25,20 @@ module GeneratorCache
     FileUtils.rm_rf(cache_dir)
     FileUtils.mkdir_p(cache_dir)
   end
+
+  def get_data_for_locale(site_data, data_key, locale, cache)
+    cache_key = "#{data_key}:#{locale}"
+    return cache[cache_key] if cache.key?(cache_key)
+
+    data = site_data.is_a?(Hash) ? site_data[data_key] : site_data
+    result = if data.is_a?(Array)
+               data.select { |item| item['locale'] == locale || item['node_locale'] == locale }
+             elsif data.is_a?(Hash)
+               data[locale] || []
+             else
+               []
+             end
+
+    cache[cache_key] = result
+  end
 end

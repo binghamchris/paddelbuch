@@ -57,7 +57,7 @@
       <tr>
         <td>
           <a href="{{ locale_prefix | append: '/gewaesserereignisse/' | append: notice.slug | append: '/' }}">
-            {{ notice.name }}
+            {{ notice.name | escape }}
           </a>
         </td>
         <!-- Property 19: Date Locale Formatting - using localized_date filter -->

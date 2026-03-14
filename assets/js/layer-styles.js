@@ -12,27 +12,10 @@
 
   /**
    * Paddel Buch color palette
-   * Matches the colors defined in src/data/paddelbuch-colours.js
+   * Colors are injected at build time from _sass/settings/_paddelbuch_colours.scss
+   * via the color_generator.rb plugin and the color-vars.html include.
    */
-  var colors = {
-    // Base Colours
-    swisscanoeBlue: '#1b1e43',    // Space Cadet Blue
-    secondaryBlue: '#606589',      // Dark Blue Gray
-    waterBlue: '#3cc4f6',          // Vivid Sky Blue
-    
-    // Primary Data Visualisation Colours
-    warningYellow: '#ffb200',      // Honey Yellow
-    dangerRed: '#c40200',          // International Orange
-    startingspotsPurple: '#cb3cf6', // Phlox Purple
-    othersportPink: '#e693be',     // Kobu
-    routesPurple: '#4c0561',       // Blue Violet Purple
-    
-    // Secondary Data Visualisation Colours
-    purple1: '#69599b',            // Royal Purple
-    green1: '#07753f',             // Dartmouth Green
-    green2: '#38676d',             // Ming
-    green3: '#839420'              // Olive Drab 3
-  };
+  var colors = window.PaddelbuchColors || {};
 
   /**
    * Lake/Waterway style
@@ -118,7 +101,8 @@
       'portageRoute': portageStyle,
       'eventNotice': waterwayEventNoticeAreaStyle,
       'waterwayEvent': waterwayEventNoticeAreaStyle,
-      'eventArea': waterwayEventNoticeAreaStyle
+      'eventArea': waterwayEventNoticeAreaStyle,
+      'eventNoticeArea': waterwayEventNoticeAreaStyle
     };
 
     // Use hasOwnProperty to avoid inherited properties

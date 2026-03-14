@@ -37,6 +37,14 @@
   };
 
   /**
+   * Abbreviated month names per locale for 'short' date format
+   */
+  var monthsAbbr = {
+    de: ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'],
+    en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+  };
+
+  /**
    * Parses a date value into a Date object
    * 
    * @param {string|Date|number} dateValue - The date to parse
@@ -54,25 +62,32 @@
   }
 
   /**
-   * Formats a date according to the specified locale using simple format (DD.MM.YYYY or DD/MM/YYYY)
+   * Formats a date according to the specified locale and format
    * 
    * Property 19: Date Locale Formatting
    * For any date displayed in the application, the format shall match the current locale.
    * 
    * @param {string|Date|number} dateValue - The date to format
    * @param {string} locale - The locale ('de' or 'en')
-   * @returns {string} Formatted date string (DD.MM.YYYY for de, DD/MM/YYYY for en)
+   * @param {string} [format='numeric'] - Format type: 'numeric' (DD.MM.YYYY / DD/MM/YYYY) or 'short' (DD MMM YYYY)
+   * @returns {string} Formatted date string
    */
-  function formatDate(dateValue, locale) {
+  function formatDate(dateValue, locale, format) {
     var date = parseDate(dateValue);
     if (!date) return '';
     
-    var config = localeConfig[locale] || localeConfig.de;
-    
     var day = String(date.getDate()).padStart(2, '0');
-    var month = String(date.getMonth() + 1).padStart(2, '0');
     var year = date.getFullYear();
     
+    if (format === 'short') {
+      var months = monthsAbbr[locale] || monthsAbbr.de;
+      var monthName = months[date.getMonth()];
+      return day + ' ' + monthName + ' ' + year;
+    }
+    
+    // Default: 'numeric' format
+    var config = localeConfig[locale] || localeConfig.de;
+    var month = String(date.getMonth() + 1).padStart(2, '0');
     return day + config.separator + month + config.separator + year;
   }
 
@@ -198,7 +213,8 @@
     isDateInPast: isDateInPast,
     getLocaleSeparator: getLocaleSeparator,
     getFullLocale: getFullLocale,
-    localeConfig: localeConfig
+    localeConfig: localeConfig,
+    monthsAbbr: monthsAbbr
   };
 
 })(typeof window !== 'undefined' ? window : this);

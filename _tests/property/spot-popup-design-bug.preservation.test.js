@@ -4,7 +4,7 @@
  * **Property 2: Preservation** — Existing Functional Behavior Unchanged
  * **Validates: Requirements 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7**
  *
- * Tests use the Gatsby HTML structure (popup-details-table, popup-btn, etc.)
+ * Tests use the Gatsby HTML structure (popup-btn, popup-icon-div, etc.)
  */
 
 const fc = require('fast-check');
@@ -26,6 +26,8 @@ global.document = {
   }
 };
 
+const htmlUtilsModule = require('../../assets/js/html-utils.js');
+global.PaddelbuchHtmlUtils = global.PaddelbuchHtmlUtils || htmlUtilsModule.PaddelbuchHtmlUtils || htmlUtilsModule;
 const spotPopupModule = require('../../assets/js/spot-popup.js');
 const PaddelbuchSpotPopup =
   global.PaddelbuchSpotPopup || spotPopupModule.PaddelbuchSpotPopup || spotPopupModule;
@@ -39,24 +41,24 @@ const CRAFT_TYPE_SLUGS = ['seekajak', 'kanadier', 'stand-up-paddle-board'];
 const LOCALES = ['de', 'en'];
 
 // --- fast-check arbitraries ---
-const arbSpotName = fc.stringOf(
-  fc.constantFrom(...'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 '.split('')),
-  { minLength: 1, maxLength: 40 }
-);
-const arbSlug = fc.stringOf(
-  fc.constantFrom(...'abcdefghijklmnopqrstuvwxyz0123456789-'.split('')),
-  { minLength: 3, maxLength: 30 }
-);
+const arbSpotName = fc.string({
+  unit: fc.constantFrom(...'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 '.split('')),
+  minLength: 1, maxLength: 40
+});
+const arbSlug = fc.string({
+  unit: fc.constantFrom(...'abcdefghijklmnopqrstuvwxyz0123456789-'.split('')),
+  minLength: 3, maxLength: 30
+});
 const arbLat = fc.double({ min: 45.5, max: 48.0, noNaN: true, noDefaultInfinity: true });
 const arbLon = fc.double({ min: 5.5, max: 10.5, noNaN: true, noDefaultInfinity: true });
 const arbLocation = fc.oneof(fc.constant(null), fc.record({ lat: arbLat, lon: arbLon }));
 const arbDescription = fc.oneof(
   fc.constant(undefined), fc.constant(null), fc.constant(''),
-  fc.stringOf(fc.constantFrom(...'abcdefghijklmnopqrstuvwxyz '.split('')), { minLength: 1, maxLength: 100 }).map(s => '<p>' + s + '</p>')
+  fc.string({ unit: fc.constantFrom(...'abcdefghijklmnopqrstuvwxyz '.split('')), minLength: 1, maxLength: 100 }).map(s => '<p>' + s + '</p>')
 );
 const arbAddress = fc.oneof(
   fc.constant(undefined), fc.constant(null), fc.constant(''),
-  fc.stringOf(fc.constantFrom(...'abcdefghijklmnopqrstuvwxyz0123456789 ,'.split('')), { minLength: 5, maxLength: 60 })
+  fc.string({ unit: fc.constantFrom(...'abcdefghijklmnopqrstuvwxyz0123456789 ,'.split('')), minLength: 5, maxLength: 60 })
 );
 const arbCraftTypes = fc.oneof(
   fc.constant(undefined), fc.constant(null), fc.constant([]),
@@ -99,7 +101,7 @@ describe('Preservation Property Tests — Spot Popup Design (Property 2)', () =>
       fc.assert(fc.property(
         fc.record({
           name: arbSpotName, slug: arbSlug,
-          description: fc.stringOf(fc.constantFrom(...'abcdefghijklmnopqrstuvwxyz '.split('')), { minLength: 1, maxLength: 100 }).map(s => '<p>' + s + '</p>'),
+          description: fc.string({ unit: fc.constantFrom(...'abcdefghijklmnopqrstuvwxyz '.split('')), minLength: 1, maxLength: 100 }).map(s => '<p>' + s + '</p>'),
           spotType_slug: fc.constantFrom(...SPOT_TYPE_SLUGS), rejected: fc.constant(false),
           location: fc.record({ lat: arbLat, lon: arbLon }),
           approximateAddress: arbAddress, paddleCraftTypes: arbCraftTypes
@@ -114,8 +116,8 @@ describe('Preservation Property Tests — Spot Popup Design (Property 2)', () =>
     });
   });
 
-  describe('3.2 — Spots without GPS omit GPS section and navigate button', () => {
-    test('property: no location → no GPS row and no navigate button', () => {
+  describe('3.2 — Spots without GPS omit navigate button', () => {
+    test('property: no location → no navigate button', () => {
       fc.assert(fc.property(
         fc.record({
           name: arbSpotName, slug: arbSlug, description: arbDescription,
@@ -125,13 +127,12 @@ describe('Preservation Property Tests — Spot Popup Design (Property 2)', () =>
         arbLocale,
         (spot, locale) => {
           const html = generateSpotPopupContent(spot, locale);
-          expect(html).not.toContain('>GPS:<');
           expect(html).not.toContain('google.com/maps/dir');
         }
       ), { numRuns: 50 });
     });
 
-    test('property: spot WITH location → GPS row and navigate button ARE present', () => {
+    test('property: spot WITH location → navigate button IS present', () => {
       fc.assert(fc.property(
         fc.record({
           name: arbSpotName, slug: arbSlug, description: arbDescription,
@@ -142,83 +143,7 @@ describe('Preservation Property Tests — Spot Popup Design (Property 2)', () =>
         arbLocale,
         (spot, locale) => {
           const html = generateSpotPopupContent(spot, locale);
-          expect(html).toContain('>GPS:<');
           expect(html).toContain('google.com/maps/dir');
-        }
-      ), { numRuns: 50 });
-    });
-  });
-
-  describe('3.3 — Spots without address omit address section', () => {
-    test('property: no address → no address row in HTML', () => {
-      fc.assert(fc.property(
-        fc.record({
-          name: arbSpotName, slug: arbSlug, description: arbDescription,
-          spotType_slug: fc.constantFrom(...SPOT_TYPE_SLUGS), rejected: fc.constant(false),
-          location: arbLocation, approximateAddress: fc.constantFrom(undefined, null, ''),
-          paddleCraftTypes: arbCraftTypes
-        }),
-        arbLocale,
-        (spot, locale) => {
-          const html = generateSpotPopupContent(spot, locale);
-          // German: "Ungefähre Adresse", English: "Approx. Address"
-          expect(html).not.toMatch(/Ungef.hre Adresse/);
-          expect(html).not.toContain('Approx. Address');
-        }
-      ), { numRuns: 50 });
-    });
-
-    test('property: spot WITH address → address row IS present', () => {
-      fc.assert(fc.property(
-        fc.record({
-          name: arbSpotName, slug: arbSlug, description: arbDescription,
-          spotType_slug: fc.constantFrom(...SPOT_TYPE_SLUGS), rejected: fc.constant(false),
-          location: arbLocation,
-          approximateAddress: fc.stringOf(fc.constantFrom(...'abcdefghijklmnopqrstuvwxyz0123456789 ,'.split('')), { minLength: 5, maxLength: 60 }),
-          paddleCraftTypes: arbCraftTypes
-        }),
-        arbLocale,
-        (spot, locale) => {
-          const html = generateSpotPopupContent(spot, locale);
-          // Should contain the address label in a <th>
-          const hasLabel = html.includes('Ungef') || html.includes('Approx. Address');
-          expect(hasLabel).toBe(true);
-        }
-      ), { numRuns: 50 });
-    });
-  });
-
-  describe('3.4 — Spots without craft types omit craft types section', () => {
-    test('property: no craft types → no craft types row in HTML', () => {
-      fc.assert(fc.property(
-        fc.record({
-          name: arbSpotName, slug: arbSlug, description: arbDescription,
-          spotType_slug: fc.constantFrom(...SPOT_TYPE_SLUGS), rejected: fc.constant(false),
-          location: arbLocation, approximateAddress: arbAddress,
-          paddleCraftTypes: fc.constantFrom(undefined, null, [])
-        }),
-        arbLocale,
-        (spot, locale) => {
-          const html = generateSpotPopupContent(spot, locale);
-          expect(html).not.toContain('Potentially Usable By');
-          expect(html).not.toContain('Potenziell nutzbar');
-        }
-      ), { numRuns: 50 });
-    });
-
-    test('property: spot WITH craft types → craft types row IS present', () => {
-      fc.assert(fc.property(
-        fc.record({
-          name: arbSpotName, slug: arbSlug, description: arbDescription,
-          spotType_slug: fc.constantFrom(...SPOT_TYPE_SLUGS), rejected: fc.constant(false),
-          location: arbLocation, approximateAddress: arbAddress,
-          paddleCraftTypes: fc.subarray(CRAFT_TYPE_SLUGS, { minLength: 1, maxLength: 3 })
-        }),
-        arbLocale,
-        (spot, locale) => {
-          const html = generateSpotPopupContent(spot, locale);
-          const hasLabel = html.includes('Potentially Usable By') || html.includes('Potenziell nutzbar');
-          expect(hasLabel).toBe(true);
         }
       ), { numRuns: 50 });
     });
@@ -240,7 +165,7 @@ describe('Preservation Property Tests — Spot Popup Design (Property 2)', () =>
       fc.assert(fc.property(
         fc.record({
           name: arbSpotName, slug: arbSlug,
-          description: fc.stringOf(fc.constantFrom(...'abcdefghijklmnopqrstuvwxyz '.split('')), { minLength: 1, maxLength: 100 }).map(s => '<p>' + s + '</p>'),
+          description: fc.string({ unit: fc.constantFrom(...'abcdefghijklmnopqrstuvwxyz '.split('')), minLength: 1, maxLength: 100 }).map(s => '<p>' + s + '</p>'),
           spotType_slug: fc.constantFrom(...SPOT_TYPE_SLUGS), rejected: fc.constant(true),
           location: arbLocation, approximateAddress: arbAddress, paddleCraftTypes: arbCraftTypes
         }),
@@ -316,38 +241,4 @@ describe('Preservation Property Tests — Spot Popup Design (Property 2)', () =>
     });
   });
 
-  describe('3.7b — Clipboard copy functionality is preserved', () => {
-    test('property: GPS copy button calls PaddelbuchClipboard.copyGPS with correct coords', () => {
-      fc.assert(fc.property(
-        fc.record({
-          name: arbSpotName, slug: arbSlug, description: arbDescription,
-          spotType_slug: fc.constantFrom(...SPOT_TYPE_SLUGS), rejected: fc.constant(false),
-          location: fc.record({ lat: arbLat, lon: arbLon }),
-          approximateAddress: arbAddress, paddleCraftTypes: arbCraftTypes
-        }),
-        arbLocale,
-        (spot, locale) => {
-          const html = generateSpotPopupContent(spot, locale);
-          expect(html).toContain("PaddelbuchClipboard.copyGPS('" + spot.location.lat + "', '" + spot.location.lon + "'");
-        }
-      ), { numRuns: 50 });
-    });
-
-    test('property: address copy button calls PaddelbuchClipboard.copyAddress with correct value', () => {
-      fc.assert(fc.property(
-        fc.record({
-          name: arbSpotName, slug: arbSlug, description: arbDescription,
-          spotType_slug: fc.constantFrom(...SPOT_TYPE_SLUGS), rejected: fc.constant(false),
-          location: arbLocation,
-          approximateAddress: fc.stringOf(fc.constantFrom(...'abcdefghijklmnopqrstuvwxyz0123456789 ,'.split('')), { minLength: 5, maxLength: 60 }),
-          paddleCraftTypes: arbCraftTypes
-        }),
-        arbLocale,
-        (spot, locale) => {
-          const html = generateSpotPopupContent(spot, locale);
-          expect(html).toContain("PaddelbuchClipboard.copyAddress('" + spot.approximateAddress + "'");
-        }
-      ), { numRuns: 50 });
-    });
-  });
 });

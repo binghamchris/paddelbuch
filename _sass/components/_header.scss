@@ -50,22 +50,22 @@ header {
 
     hr.dropdown-divider {
       width: 100%;
-      border-top: 1px solid $white !important;
-      opacity: 1 !important;
+      border-top: 1px solid $white !important; // Override Bootstrap .dropdown-divider border color
+      opacity: 1 !important; // Override Bootstrap .dropdown-divider opacity
       margin: 0;
     }
   }
 
   .dropdown-item:hover .nav-link{
-    color: $swisscanoe-blue !important;
+    color: $swisscanoe-blue !important; // Override Bootstrap .nav-link color on hover state
   }
 
   .nav-link {
-    color: $white !important;
+    color: $white !important; // Override Bootstrap .nav-link default color
   }
 
   .paddelbuch-logo {
-    margin-right: 12px !important;
+    margin-right: 12px;
     display: inline-block;
     vertical-align:middle;
   }

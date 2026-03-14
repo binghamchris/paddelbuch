@@ -15,6 +15,8 @@ module Jekyll
     safe true
     priority :highest
 
+    PAGE_SIZE = 1000
+
     CONTENT_TYPES = {
       'spot'                    => { filename: 'spots',                            mapper: :map_spot },
       'waterway'                => { filename: 'waterways',                        mapper: :map_waterway },
@@ -53,10 +55,7 @@ module Jekyll
                    'force_contentful_sync config option is enabled'
                  end
         Jekyll.logger.info 'Contentful:', "Performing full sync — #{reason}"
-        perform_full_fetch(cache, current_space_id, current_environment)
-        new_hash = cache.compute_content_hash(yaml_file_paths)
-        save_cache(cache, cache.sync_token, current_space_id, current_environment, new_hash)
-        site.config['contentful_data_changed'] = true
+        perform_full_sync_and_cache(cache, current_space_id, current_environment)
         Jekyll.logger.info 'Contentful:', 'Force sync — setting change flag to true'
         return
       end
@@ -64,10 +63,7 @@ module Jekyll
       unless cache_loaded && cache.valid?
         reason = cache_loaded ? 'cache metadata is invalid (missing fields)' : 'no cache metadata found'
         Jekyll.logger.info 'Contentful:', "Performing full sync — #{reason}"
-        perform_full_fetch(cache, current_space_id, current_environment)
-        new_hash = cache.compute_content_hash(yaml_file_paths)
-        save_cache(cache, cache.sync_token, current_space_id, current_environment, new_hash)
-        site.config['contentful_data_changed'] = true
+        perform_full_sync_and_cache(cache, current_space_id, current_environment)
         Jekyll.logger.info 'Contentful:', 'No previous content hash — setting change flag to true'
         return
       end
@@ -75,10 +71,7 @@ module Jekyll
       unless cache.matches_config?(current_space_id, current_environment)
         Jekyll.logger.info 'Contentful:', "Performing full sync — environment mismatch " \
           "(cached: #{cache.space_id}/#{cache.environment}, current: #{current_space_id}/#{current_environment})"
-        perform_full_fetch(cache, current_space_id, current_environment)
-        new_hash = cache.compute_content_hash(yaml_file_paths)
-        save_cache(cache, cache.sync_token, current_space_id, current_environment, new_hash)
-        site.config['contentful_data_changed'] = true
+        perform_full_sync_and_cache(cache, current_space_id, current_environment)
         Jekyll.logger.info 'Contentful:', 'Content hash changed — setting change flag to true'
         return
       end
@@ -88,10 +81,7 @@ module Jekyll
 
       unless result.success?
         Jekyll.logger.warn 'Contentful:', "Sync API error: #{result.error&.message} — falling back to full fetch"
-        perform_full_fetch(cache, current_space_id, current_environment)
-        new_hash = cache.compute_content_hash(yaml_file_paths)
-        save_cache(cache, cache.sync_token, current_space_id, current_environment, new_hash)
-        site.config['contentful_data_changed'] = true
+        perform_full_sync_and_cache(cache, current_space_id, current_environment)
         Jekyll.logger.info 'Contentful:', 'Content hash changed — setting change flag to true'
         return
       end
@@ -130,6 +120,13 @@ module Jekyll
       )
     end
 
+    def perform_full_sync_and_cache(cache, space_id, environment)
+      perform_full_fetch(cache, space_id, environment)
+      new_hash = cache.compute_content_hash(yaml_file_paths)
+      save_cache(cache, cache.sync_token, space_id, environment, new_hash)
+      @site.config['contentful_data_changed'] = true
+    end
+
     def perform_full_fetch(cache, space_id, environment)
       sync_result = initial_sync(client)
 
@@ -157,7 +154,24 @@ module Jekyll
     end
 
     def fetch_entries(content_type)
-      client.entries(content_type: content_type, locale: '*', include: 2, limit: 1000)
+      all_entries = []
+      skip = 0
+
+      loop do
+        page = client.entries(
+          content_type: content_type,
+          locale: '*',
+          include: 2,
+          limit: PAGE_SIZE,
+          skip: skip
+        )
+        all_entries.concat(page.to_a)
+        break if page.to_a.size < PAGE_SIZE
+
+        skip += PAGE_SIZE
+      end
+
+      all_entries
     end
 
     def write_yaml(filename, data)
