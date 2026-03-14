@@ -74,7 +74,7 @@ Incrementally upgrade all runtime and development dependencies (Ruby, Node.js, g
 - [x] 7. Checkpoint — Verify gem upgrades
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 8. Upgrade npm dependencies
+- [x] 8. Upgrade npm dependencies
   - [x] 8.1 Update `package.json` dependency versions
     - Update `dependencies`: bootstrap, leaflet, leaflet.locatecontrol to latest stable
     - Update `devDependencies`: jest, jest-environment-jsdom, @types/jest, fast-check to latest stable
