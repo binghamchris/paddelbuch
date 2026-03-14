@@ -87,7 +87,7 @@ Incrementally upgrade all runtime and development dependencies (Ruby, Node.js, g
     - Run `npm run copy-assets` and confirm Bootstrap/Leaflet files are copied correctly to `assets/`
     - If package directory structures changed, update the copy script paths
     - _Requirements: 5.4_
-  - [~] 8.4 Update `jest.config.js` if Jest API changes require it
+  - [x] 8.4 Update `jest.config.js` if Jest API changes require it
     - Check for any deprecated config options in the new Jest version
     - Update test environment configuration if jest-environment-jsdom API changed
     - _Requirements: 7.3, 7.4_
