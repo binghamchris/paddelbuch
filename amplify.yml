@@ -23,3 +23,4 @@ frontend:
       - vendor/**/*
       - node_modules/**/*
       - _data/**/*
+      - .jekyll-cache/**/*

@@ -83,7 +83,7 @@ Incrementally upgrade all runtime and development dependencies (Ruby, Node.js, g
   - [x] 8.2 Run `npm install` to regenerate `package-lock.json`
     - Resolve any peer dependency conflicts
     - _Requirements: 5.2_
-  - [~] 8.3 Verify `scripts/copy-vendor-assets.js` works with new package versions
+  - [x] 8.3 Verify `scripts/copy-vendor-assets.js` works with new package versions
     - Run `npm run copy-assets` and confirm Bootstrap/Leaflet files are copied correctly to `assets/`
     - If package directory structures changed, update the copy script paths
     - _Requirements: 5.4_
