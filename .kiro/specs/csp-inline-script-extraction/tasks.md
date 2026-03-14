@@ -54,7 +54,7 @@
     - _Requirements: 1.2, 2.2, 2.7_
 
 - [ ] 4. Extend `paddelbuch-map.js` to support home page config options
-  - [~] 4.1 Add optional home page config fields to `paddelbuch-map.js`
+  - [x] 4.1 Add optional home page config fields to `paddelbuch-map.js`
     - Read optional `maxBounds` from config — when present, pass to `L.map()` options along with `maxBoundsViscosity: 1.0`
     - Read optional `minZoom` from config — when present, pass to `L.map()` options
     - Read optional `zoomControl` from config — when `false`, set `zoomControl: false` in `L.map()` and manually add `L.control.zoom({ position: 'bottomright' })`
