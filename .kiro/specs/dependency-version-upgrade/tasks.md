@@ -38,7 +38,7 @@ Incrementally upgrade all runtime and development dependencies (Ruby, Node.js, g
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 4. Upgrade Node.js version
-  - [~] 4.1 Update `amplify.yml` Node.js version
+  - [x] 4.1 Update `amplify.yml` Node.js version
     - Change the `nvm install` command from `18` to the latest LTS major version (e.g. `22`)
     - _Requirements: 3.1, 8.2_
   - [~] 4.2 Verify Node.js upgrade: rebuild site, diff against baseline, run test suites
