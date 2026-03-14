@@ -1,0 +1,170 @@
+# Implementation Plan
+
+- [x] 1. Write bug condition exploration test
+  - **Property 1: Bug Condition** - Inline Scripts Blocked by CSP
+  - **CRITICAL**: This test MUST FAIL on unfixed code - failure confirms the bug exists
+  - **DO NOT attempt to fix the test or the code when it fails**
+  - **NOTE**: This test encodes the expected behavior - it will validate the fix when it passes after implementation
+  - **GOAL**: Surface counterexamples that demonstrate inline `<script>` blocks exist in the five include files and would be blocked by `script-src 'self'`
+  - **Scoped PBT Approach**: For each of the five include files (`color-vars.html`, `map-init.html`, `layer-control.html`, `filter-panel.html`, `detail-map-layers.html`), assert that the rendered HTML contains zero inline `<script>` blocks (only `<script type="application/json">` data elements and `<script src="...">` external references)
+  - Write a property-based test (e.g., using Hypothesis or fast-check) that:
+    - Parses the rendered HTML output of each include file
+    - Finds all `<script>` elements
+    - Asserts every `<script>` element either has a `src` attribute OR has `type="application/json"`
+    - Since this is a Jekyll site, use a Ruby RSpec test or a Python/Node script that parses the built `_site` HTML files
+  - Run test on UNFIXED code - expect FAILURE (inline scripts exist in all five includes)
+  - **EXPECTED OUTCOME**: Test FAILS confirming `color-vars.html`, `map-init.html`, `layer-control.html`, `filter-panel.html`, and `detail-map-layers.html` all contain inline executable `<script>` blocks
+  - Document counterexamples found (e.g., "`_site/index.html` contains 3 inline script blocks from `map-init.html`, `layer-control.html`, `filter-panel.html`")
+  - Mark task complete when test is written, run, and failure is documented
+  - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 2.7_
+
+- [-] 2. Write preservation property tests (BEFORE implementing fix)
+  - **Property 2: Preservation** - Existing External Script Behavior Unchanged
+  - **IMPORTANT**: Follow observation-first methodology
+  - Observe on UNFIXED code (with CSP disabled or in dev mode):
+    - Detail page layouts (`spot.html`, `waterway.html`, `obstacle.html`, `notice.html`) already use `#map-config` JSON + external `paddelbuch-map.js` — verify these pages have zero inline scripts in their layout-specific sections
+    - `paddelbuch-map.js` reads `#map-config` and creates a Leaflet map with `center`, `zoom`, `maxZoom`, `mapboxUrl`, `locale` — verify the init function signature and config parsing
+    - `layer-styles.js` reads `window.PaddelbuchColors` and uses color values for layer styling — verify the color keys used (`secondaryBlue`, `warningYellow`, `dangerRed`, `routesPurple`)
+    - `filter-panel.html` inline script contains no Jekyll variables — verify it is pure JavaScript
+    - The script loading order in `detail-map-layers.html` is: `marker-registry.js`, `filter-engine.js`, `layer-control.html`, `filter-panel.html`, `marker-styles.js`, `layer-styles.js`, `spatial-utils.js`, `data-loader.js`, `zoom-layer-manager.js`, then the data init script
+  - Write property-based tests capturing observed behavior:
+    - For all detail page HTML files in `_site`, verify `#map-config` JSON element exists and contains required keys (`center`, `zoom`, `mapboxUrl`, `locale`)
+    - For all pages containing map scripts, verify the script loading order is preserved (dependencies before dependents)
+    - For `paddelbuch-map.js`, verify it exports `PaddelbuchMap.init` and handles the existing config fields
+    - Verify `layer-styles.js` color key references match the keys produced by `color_generator.rb`
+  - Run tests on UNFIXED code
+  - **EXPECTED OUTCOME**: Tests PASS (confirms baseline behavior to preserve)
+  - Mark task complete when tests are written, run, and passing on unfixed code
+  - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7_
+
+- [ ] 3. Extract `color-vars.html` inline script to external JS
+  - [~] 3.1 Create `assets/js/color-vars.js`
+    - IIFE that reads `#paddelbuch-colors` JSON element via `document.getElementById`
+    - Parses `textContent` with `JSON.parse`
+    - Assigns result to `window.PaddelbuchColors`
+    - No DOMContentLoaded wait needed — script runs in `<head>` after the JSON element
+    - _Bug_Condition: isBugCondition(input) where input is any page load with `color-vars.html` containing an inline script_
+    - _Expected_Behavior: `window.PaddelbuchColors` is set from JSON data element instead of inline script_
+    - _Preservation: `layer-styles.js` continues to read the same color keys from `window.PaddelbuchColors`_
+    - _Requirements: 1.2, 2.2, 3.7_
+  - [~] 3.2 Update `_includes/color-vars.html`
+    - Replace `<script>window.PaddelbuchColors = {{ site.data.paddelbuch_colors | jsonify }};</script>`
+    - With `<script type="application/json" id="paddelbuch-colors">{{ site.data.paddelbuch_colors | jsonify }}</script>`
+    - Followed by `<script src="{{ '/assets/js/color-vars.js' | relative_url }}"></script>`
+    - _Requirements: 1.2, 2.2, 2.7_
+
+- [ ] 4. Extend `paddelbuch-map.js` to support home page config options
+  - [~] 4.1 Add optional home page config fields to `paddelbuch-map.js`
+    - Read optional `maxBounds` from config — when present, pass to `L.map()` options along with `maxBoundsViscosity: 1.0`
+    - Read optional `minZoom` from config — when present, pass to `L.map()` options
+    - Read optional `zoomControl` from config — when `false`, set `zoomControl: false` in `L.map()` and manually add `L.control.zoom({ position: 'bottomright' })`
+    - When `maxBounds` is provided, store `window.switzerlandBounds = L.latLngBounds(...)` for other scripts
+    - When these optional fields are absent (detail pages), behavior is identical to current implementation
+    - _Bug_Condition: Home page map init requires `maxBounds`, `minZoom`, `zoomControl: false` which were previously set inline_
+    - _Expected_Behavior: `paddelbuch-map.js` reads these from `#map-config` JSON and applies them_
+    - _Preservation: Detail pages that don't provide these fields continue to work identically_
+    - _Requirements: 2.1, 3.1_
+
+- [ ] 5. Create `assets/js/home-map.js` for home page map initialization
+  - [~] 5.1 Create `assets/js/home-map.js`
+    - DOMContentLoaded listener
+    - Call `PaddelbuchMap.init('map')` and store result as `window.paddelbuchMap`
+    - Minimal script — home page map has no geometry to render or bounds to fit
+    - _Requirements: 2.1_
+
+- [ ] 6. Extract `filter-panel.html` inline script to external JS
+  - [~] 6.1 Create `assets/js/filter-panel.js`
+    - Move the entire `PaddelbuchFilterPanel` IIFE verbatim from `filter-panel.html` — no changes needed since it contains no Jekyll variables
+    - Exports `window.PaddelbuchFilterPanel.init(map, dimensionConfigs, layerToggles)`
+    - _Bug_Condition: isBugCondition(input) where `filter-panel.html` contains inline script_
+    - _Expected_Behavior: `PaddelbuchFilterPanel` is defined from external file_
+    - _Preservation: Filter panel DOM structure, checkbox behavior, popup collapse behavior all unchanged_
+    - _Requirements: 1.5, 2.4, 3.3_
+  - [~] 6.2 Update `_includes/filter-panel.html`
+    - Replace `<script>...</script>` with `<script src="{{ '/assets/js/filter-panel.js' | relative_url }}"></script>`
+    - Keep the HTML comment header
+    - _Requirements: 1.5, 2.4, 2.7_
+
+- [ ] 7. Extract `layer-control.html` inline script to external JS
+  - [~] 7.1 Create `assets/js/layer-control.js`
+    - Move the entire layer-control IIFE from `layer-control.html`
+    - Read `#layer-control-config` JSON for `currentLocale`, `localePrefix`, and `protectedAreaTypeNames`
+    - Replace all Liquid variable references (`'{{ current_locale }}'`, `{{ map_var }}`, the `{% for %}` loop for `protectedAreaTypeNames`) with values from parsed config
+    - Same global exports: `window.paddelbuchLayerGroups`, `window.paddelbuchFilterByLocale`, `window.paddelbuchAddSpotMarker`, `window.paddelbuchAddEventNoticeMarker`, `window.paddelbuchAddObstacleLayer`, `window.paddelbuchAddProtectedAreaLayer`, `window.paddelbuchCurrentLocale`
+    - _Bug_Condition: isBugCondition(input) where `layer-control.html` contains inline script with Jekyll variables_
+    - _Expected_Behavior: Layer groups and marker/layer creation functions are created from external JS reading JSON config_
+    - _Preservation: All popup content, locale filtering, layer group structure unchanged_
+    - _Requirements: 1.3, 1.4, 2.3, 3.1, 3.4, 3.5_
+  - [~] 7.2 Update `_includes/layer-control.html`
+    - Keep all existing `<script src="...">` tags for `locale-filter.js`, `clipboard.js`, `html-utils.js`, `date-utils.js`, `spot-popup.js`, `obstacle-popup.js`, `event-notice-popup.js`
+    - Replace the inline `<script>` block with:
+      - `<script type="application/json" id="layer-control-config">` containing JSON with `currentLocale`, `localePrefix` (computed from locale), and `protectedAreaTypeNames` (the `{% for %}` loop output as a JSON object)
+      - `<script src="{{ '/assets/js/layer-control.js' | relative_url }}"></script>`
+    - _Requirements: 1.3, 1.4, 2.3, 2.7_
+
+- [ ] 8. Extract `map-init.html` and `detail-map-layers.html` data bootstrap to external JS
+  - [~] 8.1 Create `assets/js/map-data-init.js`
+    - Consolidate the data bootstrap logic from both `map-init.html` (second inline script) and `detail-map-layers.html` (inline script) into one external file
+    - Read `#map-data-config` JSON for locale-dependent `dimensionConfigs` (spot type labels, paddle craft type labels) and `layerLabels`
+    - Attach `matchFn` functions programmatically after reading config:
+      - `spotType` dimension: `function(meta, selected) { return selected.has(meta.spotType_slug); }`
+      - `paddleCraftType` dimension: `function(meta, selected) { var types = meta.paddleCraftTypes || []; for (var i = 0; i < types.length; i++) { if (selected.has(types[i])) return true; } return false; }`
+    - Include `populateLayers` function with slug-based deduplication
+    - Include `initMapData` function that waits for `window.paddelbuchMap` and `window.paddelbuchLayerGroups`, then:
+      - Builds `layerToggles` array from `layerLabels` + `layerGroups`
+      - Calls `PaddelbuchFilterEngine.init(dimensionConfigs, map)`
+      - Calls `PaddelbuchFilterPanel.init(map, dimensionConfigs, layerToggles)`
+      - Loads initial data for current viewport
+      - Binds `moveend` event for subsequent viewport changes
+      - Calls `PaddelbuchZoomLayerManager.initZoomLayerManager(map, layerGroups, { locale })`
+    - _Bug_Condition: isBugCondition(input) where `map-init.html` second script and `detail-map-layers.html` script contain inline JS with Jekyll variables_
+    - _Expected_Behavior: Data pipeline bootstraps from external JS reading JSON config_
+    - _Preservation: Dimension configs, filter engine init, data loading, moveend handler, zoom layer manager all behave identically_
+    - _Requirements: 1.6, 1.7, 2.5, 2.6, 3.2, 3.3, 3.5_
+  - [~] 8.2 Update `_includes/map-init.html`
+    - Replace the first inline script (map init) with:
+      - `<script type="application/json" id="map-config">` containing `center` (lat/lon), `zoom`, `maxZoom`, `mapboxUrl`, `locale`, and home-page-specific options: `maxBounds` (Switzerland bounds `[[45.0, 4.5], [49.4, 11.8]]`), `maxBoundsViscosity: 1.0`, `minZoom: 7`, `zoomControl: false`
+      - `<script src="paddelbuch-map.js">` and `<script src="home-map.js">`
+    - Keep the `<script src="...">` tags for `marker-registry.js`, `filter-engine.js`
+    - Keep `{% include layer-control.html %}` and `{% include filter-panel.html %}` (now updated)
+    - Keep the `<script src="...">` tags for `marker-styles.js`, `layer-styles.js`, `spatial-utils.js`, `data-loader.js`, `zoom-layer-manager.js`
+    - Replace the second inline script (data bootstrap) with:
+      - `<script type="application/json" id="map-data-config">` containing locale-dependent dimension labels/options and layer labels (all the Jekyll `{% if %}` / `{% for %}` data)
+      - `<script src="map-data-init.js">`
+    - _Requirements: 1.1, 1.6, 2.1, 2.5, 2.7_
+  - [~] 8.3 Update `_includes/detail-map-layers.html`
+    - Keep all existing `<script src="...">` tags for `marker-registry.js`, `filter-engine.js`, `marker-styles.js`, `layer-styles.js`, `spatial-utils.js`, `data-loader.js`, `zoom-layer-manager.js`
+    - Keep `{% include layer-control.html %}` and `{% include filter-panel.html %}`
+    - Replace the inline `<script>` block with:
+      - `<script type="application/json" id="map-data-config">` containing the same locale-dependent dimension configs and layer labels (using Jekyll Liquid)
+      - `<script src="{{ '/assets/js/map-data-init.js' | relative_url }}"></script>`
+    - _Requirements: 1.7, 2.6, 2.7_
+
+- [~] 9. Verify bug condition exploration test now passes
+  - **Property 1: Expected Behavior** - Zero Inline Scripts After Fix
+  - **IMPORTANT**: Re-run the SAME test from task 1 - do NOT write a new test
+  - The test from task 1 asserts that all `<script>` elements either have a `src` attribute or `type="application/json"`
+  - Build the Jekyll site with `source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.1 && bundle exec jekyll build`
+  - Re-run the bug condition test against the rebuilt `_site` output
+  - **EXPECTED OUTCOME**: Test PASSES (confirms all inline scripts have been extracted to external files)
+  - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7_
+
+- [~] 10. Verify preservation tests still pass
+  - **Property 2: Preservation** - Existing External Script Behavior Unchanged
+  - **IMPORTANT**: Re-run the SAME tests from task 2 - do NOT write new tests
+  - Build the Jekyll site and re-run preservation tests against the rebuilt `_site` output
+  - Verify detail page `#map-config` JSON elements still contain required keys
+  - Verify script loading order is preserved
+  - Verify `paddelbuch-map.js` still works for detail pages (no regressions from added optional fields)
+  - **EXPECTED OUTCOME**: Tests PASS (confirms no regressions)
+  - Confirm all tests still pass after fix (no regressions)
+  - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7_
+
+- [~] 11. Checkpoint - Ensure all tests pass and no CSP violations
+  - Build the full Jekyll site: `source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.1 && bundle exec jekyll build`
+  - Verify the build succeeds without errors
+  - Verify zero inline `<script>` blocks in the five modified includes' output
+  - Verify all new external JS files exist in `_site/assets/js/`
+  - Verify the CSP header in `deploy/frontend-deploy.yaml` still enforces `script-src 'self'` without `'unsafe-inline'`
+  - Ask the user to manually verify in a browser with CSP enforcement that no console violations appear
+  - Ensure all tests pass, ask the user if questions arise.
