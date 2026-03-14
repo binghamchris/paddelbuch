@@ -238,7 +238,8 @@ const slugArb = fc.string({ minLength: 1, maxLength: 50 }).filter(s => s.trim().
 // Generate dates within a reasonable range
 const dateArb = fc.date({
   min: new Date('2020-01-01'),
-  max: new Date('2030-12-31')
+  max: new Date('2030-12-31'),
+  noInvalidDate: true
 });
 
 // Generate an ISO date string
@@ -343,7 +344,7 @@ describe('Event Notice Popup Content - Property 15', () => {
       fc.assert(
         fc.property(
           // Use alphanumeric strings to avoid characters that look like HTML
-          fc.stringOf(fc.constantFrom(...'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 '), { minLength: 1, maxLength: 100 }),
+          fc.string({ unit: fc.constantFrom(...'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 '), minLength: 1, maxLength: 100 }),
           localeArb,
           (text, locale) => {
             const notice = {

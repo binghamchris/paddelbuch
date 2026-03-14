@@ -75,7 +75,7 @@ describe('Property 4: HTML stripping completeness', () => {
     fc.string(),
     fc.array(
       fc.tuple(
-        fc.stringOf(fc.constantFrom(...'abcdefghijklmnopqrstuvwxyz'.split('')), { minLength: 1, maxLength: 10 }),
+        fc.string({ unit: fc.constantFrom(...'abcdefghijklmnopqrstuvwxyz'.split('')), minLength: 1, maxLength: 10 }),
         fc.string({ maxLength: 20 })
       ),
       { minLength: 1, maxLength: 5 }

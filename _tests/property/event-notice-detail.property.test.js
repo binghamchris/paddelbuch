@@ -204,7 +204,8 @@ const slugArb = fc.string({ minLength: 1, maxLength: 50 }).filter(s => s.trim().
 // Generate dates within a reasonable range
 const dateArb = fc.date({
   min: new Date('2020-01-01'),
-  max: new Date('2030-12-31')
+  max: new Date('2030-12-31'),
+  noInvalidDate: true
 });
 
 // Generate an ISO date string (YYYY-MM-DD)
@@ -301,7 +302,7 @@ describe('Event Notice Detail Page Content - Property 16', () => {
     test('HTML content in description is preserved', () => {
       fc.assert(
         fc.property(
-          fc.stringOf(fc.constantFrom(...'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 '), { minLength: 1, maxLength: 100 }),
+          fc.string({ unit: fc.constantFrom(...'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 '), minLength: 1, maxLength: 100 }),
           localeArb,
           (text, locale) => {
             const htmlDescription = `<p><strong>${text}</strong></p><ul><li>Item 1</li></ul>`;

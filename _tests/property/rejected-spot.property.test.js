@@ -140,7 +140,7 @@ const locationArb = fc.record({
   lon: fc.float({ min: Math.fround(5.9), max: Math.fround(10.5), noNaN: true })
 });
 
-const isoDateArb = fc.date({ min: new Date('2020-01-01'), max: new Date('2025-12-31') })
+const isoDateArb = fc.date({ min: new Date('2020-01-01'), max: new Date('2025-12-31'), noInvalidDate: true })
   .map(d => d.toISOString());
 
 // Rejected spot arbitrary - always has rejected: true

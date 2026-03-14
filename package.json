@@ -20,14 +20,14 @@
   ],
   "_id": "paddelbuch@0.2",
   "dependencies": {
-    "bootstrap": "5.3.2",
+    "bootstrap": "5.3.8",
     "leaflet": "1.9.4",
-    "leaflet.locatecontrol": "0.79.0"
+    "leaflet.locatecontrol": "0.89.0"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.12",
-    "fast-check": "^3.22.0",
-    "jest": "^29.7.0",
-    "jest-environment-jsdom": "^30.2.0"
+    "@types/jest": "^30.0.0",
+    "fast-check": "^4.6.0",
+    "jest": "^30.3.0",
+    "jest-environment-jsdom": "^30.3.0"
   }
 }
