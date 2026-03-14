@@ -145,7 +145,8 @@ const localeArb = fc.constantFrom('de', 'en');
 // Generate valid dates within a reasonable range
 const validDateArb = fc.date({
   min: new Date('1900-01-01'),
-  max: new Date('2100-12-31')
+  max: new Date('2100-12-31'),
+  noInvalidDate: true
 });
 
 // Generate ISO date strings

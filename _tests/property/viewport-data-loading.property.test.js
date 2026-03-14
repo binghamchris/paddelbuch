@@ -177,8 +177,8 @@ const eventNoticeEntityArb = fc.record({
   slug: fc.string({ minLength: 1, maxLength: 50 }).map(s => 'notice-' + s.replace(/[^a-z0-9]/gi, '')),
   name: fc.string({ minLength: 1, maxLength: 100 }),
   location: pointLocationArb,
-  startDate: fc.date({ min: new Date('2024-01-01'), max: new Date('2025-12-31') }).map(d => d.toISOString()),
-  endDate: fc.date({ min: new Date('2025-01-01'), max: new Date('2026-12-31') }).map(d => d.toISOString())
+  startDate: fc.date({ min: new Date('2024-01-01'), max: new Date('2025-12-31'), noInvalidDate: true }).map(d => d.toISOString()),
+  endDate: fc.date({ min: new Date('2025-01-01'), max: new Date('2026-12-31'), noInvalidDate: true }).map(d => d.toISOString())
 });
 
 // Generate viewport bounds within Switzerland

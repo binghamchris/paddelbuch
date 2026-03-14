@@ -240,7 +240,7 @@ const waterwayArb = fc.record({
   name: fc.string({ minLength: 1, maxLength: 100 }).filter(s => s.trim().length > 0)
 });
 
-const dateStringArb = fc.date({ min: new Date('2020-01-01'), max: new Date('2025-12-31') })
+const dateStringArb = fc.date({ min: new Date('2020-01-01'), max: new Date('2025-12-31'), noInvalidDate: true })
   .map(d => d.toISOString());
 
 const portageStatusArb = fc.oneof(
