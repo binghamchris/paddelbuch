@@ -18,7 +18,7 @@ Incrementally upgrade all runtime and development dependencies (Ruby, Node.js, g
   - [x] 2.1 Update `.ruby-version` to the latest stable Ruby release
     - Change the version string in `.ruby-version` (e.g. `ruby-3.4.x` → latest stable)
     - _Requirements: 2.1_
-  - [~] 2.2 Update `amplify.yml` Ruby version references
+  - [x] 2.2 Update `amplify.yml` Ruby version references
     - Update the `rvm install` and `rvm use` commands in `amplify.yml` to match the new `.ruby-version`
     - _Requirements: 2.3, 8.1_
   - [~] 2.3 Write property test for Pipeline Version Consistency (Property 2)
