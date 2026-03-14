@@ -72,15 +72,15 @@
     - Minimal script — home page map has no geometry to render or bounds to fit
     - _Requirements: 2.1_
 
-- [ ] 6. Extract `filter-panel.html` inline script to external JS
-  - [~] 6.1 Create `assets/js/filter-panel.js`
+- [x] 6. Extract `filter-panel.html` inline script to external JS
+  - [x] 6.1 Create `assets/js/filter-panel.js`
     - Move the entire `PaddelbuchFilterPanel` IIFE verbatim from `filter-panel.html` — no changes needed since it contains no Jekyll variables
     - Exports `window.PaddelbuchFilterPanel.init(map, dimensionConfigs, layerToggles)`
     - _Bug_Condition: isBugCondition(input) where `filter-panel.html` contains inline script_
     - _Expected_Behavior: `PaddelbuchFilterPanel` is defined from external file_
     - _Preservation: Filter panel DOM structure, checkbox behavior, popup collapse behavior all unchanged_
     - _Requirements: 1.5, 2.4, 3.3_
-  - [~] 6.2 Update `_includes/filter-panel.html`
+  - [x] 6.2 Update `_includes/filter-panel.html`
     - Replace `<script>...</script>` with `<script src="{{ '/assets/js/filter-panel.js' | relative_url }}"></script>`
     - Keep the HTML comment header
     - _Requirements: 1.5, 2.4, 2.7_
