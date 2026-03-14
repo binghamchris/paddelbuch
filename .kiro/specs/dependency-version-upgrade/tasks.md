@@ -57,7 +57,7 @@ Incrementally upgrade all runtime and development dependencies (Ruby, Node.js, g
   - [x] 6.1 Update `Gemfile` version constraints to permit latest stable releases
     - Update pessimistic version constraints (`~>`) for: jekyll, contentful, dotenv, jekyll-multiple-languages-plugin, jekyll-sass-converter, webrick, bundler-audit, rspec, rantly
     - _Requirements: 4.1_
-  - [~] 6.2 Run `bundle update` to regenerate `Gemfile.lock`
+  - [x] 6.2 Run `bundle update` to regenerate `Gemfile.lock`
     - Resolve any dependency conflicts by adjusting constraints or upgrading incrementally
     - _Requirements: 4.2_
   - [~] 6.3 Fix any plugin compatibility issues caused by gem upgrades
