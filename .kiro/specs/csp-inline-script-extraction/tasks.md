@@ -37,7 +37,7 @@
   - Mark task complete when tests are written, run, and passing on unfixed code
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7_
 
-- [ ] 3. Extract `color-vars.html` inline script to external JS
+- [x] 3. Extract `color-vars.html` inline script to external JS
   - [x] 3.1 Create `assets/js/color-vars.js`
     - IIFE that reads `#paddelbuch-colors` JSON element via `document.getElementById`
     - Parses `textContent` with `JSON.parse`
