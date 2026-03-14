@@ -63,8 +63,8 @@ const spotArb = fc.record({
   confirmed: fc.boolean(),
   rejected: fc.boolean(),
   spotType_slug: fc.constantFrom('einstieg-ausstieg', 'nur-einstieg', 'nur-ausstieg', 'rasthalte', 'notauswasserungsstelle'),
-  createdAt: fc.date().map(d => d.toISOString()),
-  updatedAt: fc.date().map(d => d.toISOString())
+  createdAt: fc.date({ noInvalidDate: true }).map(d => d.toISOString()),
+  updatedAt: fc.date({ noInvalidDate: true }).map(d => d.toISOString())
 });
 
 // Obstacle data arbitrary
@@ -75,8 +75,8 @@ const obstacleArb = fc.record({
   description: fc.option(fc.string({ maxLength: 500 }), { nil: undefined }),
   isPortageNecessary: fc.boolean(),
   isPortagePossible: fc.boolean(),
-  createdAt: fc.date().map(d => d.toISOString()),
-  updatedAt: fc.date().map(d => d.toISOString())
+  createdAt: fc.date({ noInvalidDate: true }).map(d => d.toISOString()),
+  updatedAt: fc.date({ noInvalidDate: true }).map(d => d.toISOString())
 });
 
 // Waterway data arbitrary
@@ -87,8 +87,8 @@ const waterwayArb = fc.record({
   length: fc.option(fc.float({ min: 0, max: 10000, noNaN: true }), { nil: undefined }),
   area: fc.option(fc.float({ min: 0, max: 1000000, noNaN: true }), { nil: undefined }),
   paddlingEnvironmentType_slug: fc.constantFrom('see', 'fluss'),
-  createdAt: fc.date().map(d => d.toISOString()),
-  updatedAt: fc.date().map(d => d.toISOString())
+  createdAt: fc.date({ noInvalidDate: true }).map(d => d.toISOString()),
+  updatedAt: fc.date({ noInvalidDate: true }).map(d => d.toISOString())
 });
 
 // Event notice data arbitrary
@@ -97,10 +97,10 @@ const noticeArb = fc.record({
   locale: localeArb,
   name: fc.string({ minLength: 1, maxLength: 100 }),
   description: fc.option(fc.string({ maxLength: 500 }), { nil: undefined }),
-  startDate: fc.date().map(d => d.toISOString()),
-  endDate: fc.date().map(d => d.toISOString()),
-  createdAt: fc.date().map(d => d.toISOString()),
-  updatedAt: fc.date().map(d => d.toISOString())
+  startDate: fc.date({ noInvalidDate: true }).map(d => d.toISOString()),
+  endDate: fc.date({ noInvalidDate: true }).map(d => d.toISOString()),
+  createdAt: fc.date({ noInvalidDate: true }).map(d => d.toISOString()),
+  updatedAt: fc.date({ noInvalidDate: true }).map(d => d.toISOString())
 });
 
 // Protected area data arbitrary
@@ -110,16 +110,16 @@ const protectedAreaArb = fc.record({
   name: fc.string({ minLength: 1, maxLength: 100 }),
   isAreaMarked: fc.boolean(),
   protectedAreaType_slug: fc.option(fc.string({ minLength: 1, maxLength: 50 }), { nil: undefined }),
-  createdAt: fc.date().map(d => d.toISOString()),
-  updatedAt: fc.date().map(d => d.toISOString())
+  createdAt: fc.date({ noInvalidDate: true }).map(d => d.toISOString()),
+  updatedAt: fc.date({ noInvalidDate: true }).map(d => d.toISOString())
 });
 
 // Dimension type data arbitrary
 const dimensionTypeArb = fc.record({
   slug: slugArb,
   name: fc.string({ minLength: 1, maxLength: 100 }),
-  createdAt: fc.date().map(d => d.toISOString()),
-  updatedAt: fc.date().map(d => d.toISOString())
+  createdAt: fc.date({ noInvalidDate: true }).map(d => d.toISOString()),
+  updatedAt: fc.date({ noInvalidDate: true }).map(d => d.toISOString())
 });
 
 // Generic data array arbitraries

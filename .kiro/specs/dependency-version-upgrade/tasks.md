@@ -91,11 +91,11 @@ Incrementally upgrade all runtime and development dependencies (Ruby, Node.js, g
     - Check for any deprecated config options in the new Jest version
     - Update test environment configuration if jest-environment-jsdom API changed
     - _Requirements: 7.3, 7.4_
-  - [~] 8.5 Fix any test failures caused by npm package upgrades
+  - [x] 8.5 Fix any test failures caused by npm package upgrades
     - Update test files in `_tests/` if assertion syntax or framework API changed
     - Ensure all property tests in `_tests/property/` still work with new fast-check version
     - _Requirements: 5.3, 7.2, 7.3_
-  - [~] 8.6 Verify npm upgrade: rebuild site, diff against baseline, run test suites
+  - [x] 8.6 Verify npm upgrade: rebuild site, diff against baseline, run test suites
     - Run `bundle exec jekyll build` and diff `_site/` against `_site_baseline/`
     - Run `bundle exec rspec` — all tests must pass
     - Run `npm test` — all tests must pass
