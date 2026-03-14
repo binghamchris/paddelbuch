@@ -66,7 +66,7 @@
     - _Requirements: 2.1, 3.1_
 
 - [ ] 5. Create `assets/js/home-map.js` for home page map initialization
-  - [~] 5.1 Create `assets/js/home-map.js`
+  - [x] 5.1 Create `assets/js/home-map.js`
     - DOMContentLoaded listener
     - Call `PaddelbuchMap.init('map')` and store result as `window.paddelbuchMap`
     - Minimal script — home page map has no geometry to render or bounds to fit
