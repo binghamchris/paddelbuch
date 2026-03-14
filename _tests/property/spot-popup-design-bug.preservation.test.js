@@ -41,24 +41,24 @@ const CRAFT_TYPE_SLUGS = ['seekajak', 'kanadier', 'stand-up-paddle-board'];
 const LOCALES = ['de', 'en'];
 
 // --- fast-check arbitraries ---
-const arbSpotName = fc.stringOf(
-  fc.constantFrom(...'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 '.split('')),
-  { minLength: 1, maxLength: 40 }
-);
-const arbSlug = fc.stringOf(
-  fc.constantFrom(...'abcdefghijklmnopqrstuvwxyz0123456789-'.split('')),
-  { minLength: 3, maxLength: 30 }
-);
+const arbSpotName = fc.string({
+  unit: fc.constantFrom(...'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 '.split('')),
+  minLength: 1, maxLength: 40
+});
+const arbSlug = fc.string({
+  unit: fc.constantFrom(...'abcdefghijklmnopqrstuvwxyz0123456789-'.split('')),
+  minLength: 3, maxLength: 30
+});
 const arbLat = fc.double({ min: 45.5, max: 48.0, noNaN: true, noDefaultInfinity: true });
 const arbLon = fc.double({ min: 5.5, max: 10.5, noNaN: true, noDefaultInfinity: true });
 const arbLocation = fc.oneof(fc.constant(null), fc.record({ lat: arbLat, lon: arbLon }));
 const arbDescription = fc.oneof(
   fc.constant(undefined), fc.constant(null), fc.constant(''),
-  fc.stringOf(fc.constantFrom(...'abcdefghijklmnopqrstuvwxyz '.split('')), { minLength: 1, maxLength: 100 }).map(s => '<p>' + s + '</p>')
+  fc.string({ unit: fc.constantFrom(...'abcdefghijklmnopqrstuvwxyz '.split('')), minLength: 1, maxLength: 100 }).map(s => '<p>' + s + '</p>')
 );
 const arbAddress = fc.oneof(
   fc.constant(undefined), fc.constant(null), fc.constant(''),
-  fc.stringOf(fc.constantFrom(...'abcdefghijklmnopqrstuvwxyz0123456789 ,'.split('')), { minLength: 5, maxLength: 60 })
+  fc.string({ unit: fc.constantFrom(...'abcdefghijklmnopqrstuvwxyz0123456789 ,'.split('')), minLength: 5, maxLength: 60 })
 );
 const arbCraftTypes = fc.oneof(
   fc.constant(undefined), fc.constant(null), fc.constant([]),
@@ -101,7 +101,7 @@ describe('Preservation Property Tests — Spot Popup Design (Property 2)', () =>
       fc.assert(fc.property(
         fc.record({
           name: arbSpotName, slug: arbSlug,
-          description: fc.stringOf(fc.constantFrom(...'abcdefghijklmnopqrstuvwxyz '.split('')), { minLength: 1, maxLength: 100 }).map(s => '<p>' + s + '</p>'),
+          description: fc.string({ unit: fc.constantFrom(...'abcdefghijklmnopqrstuvwxyz '.split('')), minLength: 1, maxLength: 100 }).map(s => '<p>' + s + '</p>'),
           spotType_slug: fc.constantFrom(...SPOT_TYPE_SLUGS), rejected: fc.constant(false),
           location: fc.record({ lat: arbLat, lon: arbLon }),
           approximateAddress: arbAddress, paddleCraftTypes: arbCraftTypes
@@ -165,7 +165,7 @@ describe('Preservation Property Tests — Spot Popup Design (Property 2)', () =>
       fc.assert(fc.property(
         fc.record({
           name: arbSpotName, slug: arbSlug,
-          description: fc.stringOf(fc.constantFrom(...'abcdefghijklmnopqrstuvwxyz '.split('')), { minLength: 1, maxLength: 100 }).map(s => '<p>' + s + '</p>'),
+          description: fc.string({ unit: fc.constantFrom(...'abcdefghijklmnopqrstuvwxyz '.split('')), minLength: 1, maxLength: 100 }).map(s => '<p>' + s + '</p>'),
           spotType_slug: fc.constantFrom(...SPOT_TYPE_SLUGS), rejected: fc.constant(true),
           location: arbLocation, approximateAddress: arbAddress, paddleCraftTypes: arbCraftTypes
         }),
