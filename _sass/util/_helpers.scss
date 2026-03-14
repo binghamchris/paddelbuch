@@ -1,7 +1,7 @@
 .visually-hidden {
   overflow: hidden;
   position: absolute;
-  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
   width: 1px;
   height: 1px;
   padding: 0;

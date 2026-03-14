@@ -13,6 +13,7 @@ end
 # Development dependencies
 group :development do
   gem "webrick", "~> 1.8"
+  gem "bundler-audit", "~> 0.9"
 end
 
 # Test dependencies

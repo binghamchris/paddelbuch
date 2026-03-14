@@ -18,6 +18,13 @@ require 'time'
 # before and after the fix.
 
 RSpec.describe 'Notice Page Preservation' do
+  GERMAN_MONTHS_ABBR = {
+    'Jan' => 'Jan', 'Feb' => 'Feb', 'Mar' => 'Mär',
+    'Apr' => 'Apr', 'May' => 'Mai', 'Jun' => 'Jun',
+    'Jul' => 'Jul', 'Aug' => 'Aug', 'Sep' => 'Sep',
+    'Oct' => 'Okt', 'Nov' => 'Nov', 'Dec' => 'Dez'
+  }.freeze
+
   # Helper: build a minimal Jekyll site with the given locale
   def build_jekyll_site(tmpdir, lang: 'de')
     i18n_dir = File.join(tmpdir, '_i18n')
@@ -84,7 +91,7 @@ RSpec.describe 'Notice Page Preservation' do
   # **Validates: Requirements 3.9**
   # ─────────────────────────────────────────────────────────────────────
   describe 'localized_date default format preservation' do
-    it 'produces DD.MM.YYYY for de locale and DD/MM/YYYY for en locale for all dates' do
+    it 'produces DD MMM YYYY for de locale and DD MMM YYYY for en locale for all dates' do
       Dir.mktmpdir do |tmpdir|
         site_de = build_jekyll_site(tmpdir, lang: 'de')
         site_en = build_jekyll_site(tmpdir, lang: 'en')
@@ -98,20 +105,21 @@ RSpec.describe 'Notice Page Preservation' do
             format('%04d-%02d-%02d', year, month, day)
           }
         }.check(50) { |iso_date|
-          # German locale: DD.MM.YYYY
+          # German locale: DD MMM YYYY (with German abbreviated month names)
           ctx_de = make_liquid_context(site_de, { 'date_val' => iso_date })
           rendered_de = render_liquid('{{ date_val | localized_date }}', ctx_de).strip
 
           parsed = Date.parse(iso_date)
-          expected_de = parsed.strftime('%d.%m.%Y')
+          expected_de = parsed.strftime('%d %b %Y')
+          GERMAN_MONTHS_ABBR.each { |en, de| expected_de = expected_de.gsub(en, de) }
           expect(rendered_de).to eq(expected_de),
             "DE locale: '#{iso_date}' rendered as '#{rendered_de}', expected '#{expected_de}'"
 
-          # English locale: DD/MM/YYYY
+          # English locale: DD MMM YYYY
           ctx_en = make_liquid_context(site_en, { 'date_val' => iso_date })
           rendered_en = render_liquid('{{ date_val | localized_date }}', ctx_en).strip
 
-          expected_en = parsed.strftime('%d/%m/%Y')
+          expected_en = parsed.strftime('%d %b %Y')
           expect(rendered_en).to eq(expected_en),
             "EN locale: '#{iso_date}' rendered as '#{rendered_en}', expected '#{expected_en}'"
         }
@@ -124,7 +132,7 @@ RSpec.describe 'Notice Page Preservation' do
   # **Validates: Requirements 3.9**
   # ─────────────────────────────────────────────────────────────────────
   describe "localized_date 'long' format preservation" do
-    it "produces 'DD. Month YYYY' for de locale for all dates" do
+    it "produces 'DD MMM YYYY' for de locale for all dates" do
       Dir.mktmpdir do |tmpdir|
         site_de = build_jekyll_site(tmpdir, lang: 'de')
 
@@ -140,18 +148,11 @@ RSpec.describe 'Notice Page Preservation' do
           ctx = make_liquid_context(site_de, { 'date_val' => iso_date })
           rendered = render_liquid("{{ date_val | localized_date: 'long' }}", ctx).strip
 
-          # The localized_date filter uses Ruby strftime('%d. %B %Y') and then
-          # localizes month names to German (e.g., "Juli" not "July")
+          # The localized_date filter now uses '%d %b %Y' for all non-ISO formats
+          # and localizes abbreviated month names to German (e.g., "Mar" → "Mär")
           parsed = Date.parse(iso_date)
-          expected = parsed.strftime('%d. %B %Y')
-          # Apply German month name localization (same as the filter does)
-          german_months = {
-            'January' => 'Januar', 'February' => 'Februar', 'March' => 'März',
-            'April' => 'April', 'May' => 'Mai', 'June' => 'Juni',
-            'July' => 'Juli', 'August' => 'August', 'September' => 'September',
-            'October' => 'Oktober', 'November' => 'November', 'December' => 'Dezember'
-          }
-          german_months.each { |en, de| expected = expected.gsub(en, de) }
+          expected = parsed.strftime('%d %b %Y')
+          GERMAN_MONTHS_ABBR.each { |en, de| expected = expected.gsub(en, de) }
 
           expect(rendered).to eq(expected),
             "DE 'long': '#{iso_date}' rendered as '#{rendered}', expected '#{expected}'"
@@ -165,7 +166,7 @@ RSpec.describe 'Notice Page Preservation' do
   # **Validates: Requirements 3.9**
   # ─────────────────────────────────────────────────────────────────────
   describe 'localized_datetime default format preservation' do
-    it "produces 'DD.MM.YYYY HH:MM' for de locale for all datetimes" do
+    it "produces 'DD MMM YYYY HH:MM' for de locale for all datetimes" do
       Dir.mktmpdir do |tmpdir|
         site_de = build_jekyll_site(tmpdir, lang: 'de')
 
@@ -184,7 +185,8 @@ RSpec.describe 'Notice Page Preservation' do
           rendered = render_liquid('{{ dt_val | localized_datetime }}', ctx).strip
 
           parsed = Time.parse(iso_datetime)
-          expected = parsed.strftime('%d.%m.%Y %H:%M')
+          expected = parsed.strftime('%d %b %Y %H:%M')
+          GERMAN_MONTHS_ABBR.each { |en, de| expected = expected.gsub(en, de) }
 
           expect(rendered).to eq(expected),
             "DE datetime default: '#{iso_datetime}' rendered as '#{rendered}', expected '#{expected}'"
@@ -198,7 +200,7 @@ RSpec.describe 'Notice Page Preservation' do
   # **Validates: Requirements 3.9**
   # ─────────────────────────────────────────────────────────────────────
   describe "localized_datetime 'long' format preservation" do
-    it "produces 'DD. Month YYYY, HH:MM Uhr' for de locale for all datetimes" do
+    it "produces 'DD MMM YYYY um HH:MM' for de locale for all datetimes" do
       Dir.mktmpdir do |tmpdir|
         site_de = build_jekyll_site(tmpdir, lang: 'de')
 
@@ -216,18 +218,11 @@ RSpec.describe 'Notice Page Preservation' do
           ctx = make_liquid_context(site_de, { 'dt_val' => iso_datetime })
           rendered = render_liquid("{{ dt_val | localized_datetime: 'long' }}", ctx).strip
 
-          # The localized_datetime filter uses Ruby strftime('%-d. %B %Y um %H:%M')
-          # and then localizes month names to German (e.g., "Juli" not "July")
+          # The localized_datetime filter now uses '%d %b %Y um %H:%M'
+          # and localizes abbreviated month names to German (e.g., "Mar" → "Mär")
           parsed = Time.parse(iso_datetime)
-          expected = parsed.strftime('%-d. %B %Y um %H:%M')
-          # Apply German month name localization (same as the filter does)
-          german_months = {
-            'January' => 'Januar', 'February' => 'Februar', 'March' => 'März',
-            'April' => 'April', 'May' => 'Mai', 'June' => 'Juni',
-            'July' => 'Juli', 'August' => 'August', 'September' => 'September',
-            'October' => 'Oktober', 'November' => 'November', 'December' => 'Dezember'
-          }
-          german_months.each { |en, de| expected = expected.gsub(en, de) }
+          expected = parsed.strftime('%d %b %Y um %H:%M')
+          GERMAN_MONTHS_ABBR.each { |en, de| expected = expected.gsub(en, de) }
 
           expect(rendered).to eq(expected),
             "DE datetime 'long': '#{iso_datetime}' rendered as '#{rendered}', expected '#{expected}'"

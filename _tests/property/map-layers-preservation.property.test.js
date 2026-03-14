@@ -22,11 +22,16 @@ const fc = require('fast-check');
 const fs = require('fs');
 const path = require('path');
 
-// Read raw source files once for all tests
+// Read raw source files once for all tests.
+// After CSP extraction, inline scripts moved to external JS files.
+// We combine the HTML include + its extracted JS so pattern checks still work.
 const mapInitPath = path.join(__dirname, '..', '..', '_includes', 'map-init.html');
 const layerControlPath = path.join(__dirname, '..', '..', '_includes', 'layer-control.html');
-const mapInitSource = fs.readFileSync(mapInitPath, 'utf-8');
-const layerControlSource = fs.readFileSync(layerControlPath, 'utf-8');
+const mapDataInitJsPath = path.join(__dirname, '..', '..', 'assets', 'js', 'map-data-init.js');
+const layerControlJsPath = path.join(__dirname, '..', '..', 'assets', 'js', 'layer-control.js');
+
+const mapInitSource = fs.readFileSync(mapInitPath, 'utf-8') + '\n' + fs.readFileSync(mapDataInitJsPath, 'utf-8');
+const layerControlSource = fs.readFileSync(layerControlPath, 'utf-8') + '\n' + fs.readFileSync(layerControlJsPath, 'utf-8');
 
 // Switzerland center coordinates
 const SWITZERLAND_CENTER = { lat: '46.801111', lon: '8.226667' };

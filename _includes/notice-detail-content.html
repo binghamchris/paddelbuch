@@ -15,6 +15,7 @@
 -->
 
 {% assign notice = include.notice %}
+{% assign waterways = include.waterways %}
 {% assign current_locale = site.lang | default: 'de' %}
 
 {% if site.lang != site.default_lang %}
@@ -46,6 +47,20 @@
     <tr>
       <th>{% t event_notices.approx_end_date %}</th>
       <td>{{ notice.endDate | localized_date }}</td>
+    </tr>
+    {% endif %}
+
+    <!-- Waterway Link(s) -->
+    {% if waterways and waterways.size > 0 %}
+    <tr>
+      <th>{% t labels.waterway %}</th>
+      <td>
+        {% for waterway in waterways %}
+          <a href="{{ locale_prefix | append: '/gewaesser/' | append: waterway.slug | append: '/' }}">
+            {{ waterway.name | escape }}
+          </a>{% unless forloop.last %}<br>{% endunless %}
+        {% endfor %}
+      </td>
     </tr>
     {% endif %}
 

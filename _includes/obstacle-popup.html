@@ -24,7 +24,7 @@
 {% assign obstacle = include.obstacle %}
 {% assign current_locale = include.locale | default: site.lang | default: 'de' %}
 
-<span class="popup-title"><h1>{{ obstacle.name }}</h1></span>
+<span class="popup-title"><h1>{{ obstacle.name | escape }}</h1></span>
 
 <!-- Portage Possibility Status (Requirement 5.3) -->
 <table>

@@ -33,7 +33,7 @@
     {% if obstacle_type_name %}
     <tr>
       <th>{% t labels.type %}:</th>
-      <td>{{ obstacle_type_name }}</td>
+      <td>{{ obstacle_type_name | escape }}</td>
     </tr>
     {% endif %}
 
@@ -51,7 +51,7 @@
       <th>{% t labels.waterway %}:</th>
       <td>
         <a hreflang="{{ current_locale }}" href="{{ locale_prefix | append: '/gewaesser/' | append: waterway.slug | append: '/' }}">
-          {{ waterway.name }}
+          {{ waterway.name | escape }}
         </a>
       </td>
     </tr>
@@ -85,7 +85,7 @@
     {% if obstacle.portageDistance %}
     <tr>
       <th>{% t obstacles.portage_distance %}:</th>
-      <td>{{ obstacle.portageDistance }}m</td>
+      <td>{{ obstacle.portageDistance | escape }}m</td>
     </tr>
     {% endif %}
 
@@ -95,7 +95,7 @@
       <th>{% t obstacles.exit_spot %}:</th>
       <td>
         <a hreflang="{{ current_locale }}" href="{{ locale_prefix | append: '/einstiegsorte/' | append: obstacle.exitSpot_slug | append: '/' }}">
-          {{ obstacle.exitSpot_name }}
+          {{ obstacle.exitSpot_name | escape }}
         </a>
       </td>
     </tr>
@@ -107,7 +107,7 @@
       <th>{% t obstacles.reentry_spot %}:</th>
       <td>
         <a hreflang="{{ current_locale }}" href="{{ locale_prefix | append: '/einstiegsorte/' | append: obstacle.reentrySpot_slug | append: '/' }}">
-          {{ obstacle.reentrySpot_name }}
+          {{ obstacle.reentrySpot_name | escape }}
         </a>
       </td>
     </tr>

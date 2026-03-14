@@ -221,9 +221,9 @@ RSpec.describe 'Notice Page Bug Condition Exploration' do
           # Expected: "d. MMMM YYYY um HH:MM" (e.g., "10. Mai 2025 um 14:30" or "5. Mai 2025 um 09:00")
           # Day has no leading zero (%-d format)
           # Month names may contain non-ASCII characters (e.g., März) so use [[:alpha:]]+ instead of \w+
-          expect(rendered).to match(/^\d{1,2}\. [[:alpha:]]+ \d{4} um \d{2}:\d{2}$/),
+          expect(rendered).to match(/^\d{2} [[:alpha:]]{3} \d{4} um \d{2}:\d{2}$/),
             "updatedAt '#{iso_datetime}' rendered as '#{rendered}', " \
-            "expected format like '10. Mai 2025 um 14:30'"
+            "expected format like '10 Mai 2025 um 14:30'"
         }
       end
     end

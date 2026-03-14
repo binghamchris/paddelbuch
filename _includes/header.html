@@ -33,7 +33,7 @@
               {% for lake in lakes %}
               <li>
                 <a class="dropdown-item" href="{{ locale_prefix | append: '/gewaesser/' | append: lake.slug | append: '/' }}">
-                  <span class="nav-link">{{ lake.name }}</span>
+                  <span class="nav-link">{{ lake.name | escape }}</span>
                 </a>
               </li>
               {% endfor %}
@@ -56,7 +56,7 @@
               {% for river in rivers %}
               <li>
                 <a class="dropdown-item" href="{{ locale_prefix | append: '/gewaesser/' | append: river.slug | append: '/' }}">
-                  <span class="nav-link">{{ river.name }}</span>
+                  <span class="nav-link">{{ river.name | escape }}</span>
                 </a>
               </li>
               {% endfor %}
@@ -83,7 +83,7 @@
               {% for static_page in open_data_pages %}
               <li>
                 <a class="dropdown-item" href="{{ locale_prefix | append: '/' | append: static_page.menu_slug | append: '/' | append: static_page.slug | append: '/' }}">
-                  <span class="nav-link">{{ static_page.title }}</span>
+                  <span class="nav-link">{{ static_page.title | escape }}</span>
                 </a>
               </li>
               {% endfor %}
@@ -109,7 +109,7 @@
               {% for static_page in about_pages %}
               <li>
                 <a class="dropdown-item" href="{{ locale_prefix | append: '/' | append: static_page.menu_slug | append: '/' | append: static_page.slug | append: '/' }}">
-                  <span class="nav-link">{{ static_page.title }}</span>
+                  <span class="nav-link">{{ static_page.title | escape }}</span>
                 </a>
               </li>
               {% endfor %}
@@ -125,11 +125,11 @@
               {% for lang in site.languages %}
               <li>
                 {% if lang == site.lang %}
-                <a class="dropdown-item active" href="#">
+                <a class="dropdown-item active" href="#" hreflang="{{ lang }}">
                   <span class="nav-link">{{ lang | upcase }}</span>
                 </a>
                 {% else %}
-                <a class="dropdown-item" href="{% if lang == site.default_lang %}{{ page.url | relative_url }}{% else %}/{{ lang }}{{ page.url | relative_url }}{% endif %}">
+                <a class="dropdown-item" href="{% if lang == site.default_lang %}{{ page.url | relative_url }}{% else %}/{{ lang }}{{ page.url | relative_url }}{% endif %}" hreflang="{{ lang }}">
                   <span class="nav-link">{{ lang | upcase }}</span>
                 </a>
                 {% endif %}

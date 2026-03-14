@@ -48,7 +48,7 @@ pageName: spot-details
   <div class="row">
     <!-- Map Column -->
     <div class="col-xl-8 col-lg-7 p-0">
-      <div id="spot-map" class="map"></div>
+      <div id="spot-map" class="map" role="img" aria-label="{% t map.spot_map_label %}"></div>
     </div>
     
     <!-- Details Panel -->
@@ -67,11 +67,11 @@ pageName: spot-details
       <!-- Spot Icon and Type -->
       <div class="spot-icon-div align-items-center">
         {% include spot-icon.html type=spot_type_slug rejected=is_rejected variant="dark" size=20 %}
-        <span class="ms-2">{{ spot_type_name }}</span>
+        <span class="ms-2">{{ spot_type_name | escape }}</span>
       </div>
       
       <!-- Spot Title -->
-      <div class="spot-title"><h1>{{ spot.name }}</h1></div>
+      <div class="spot-title"><h1>{{ spot.name | escape }}</h1></div>
       
       {% if is_rejected %}
         <!-- Rejected Spot: Show rejection reason (Requirement 3.7) -->
@@ -84,102 +84,37 @@ pageName: spot-details
   </div>
 </div>
 
-<!-- Map Initialization Script -->
+<!-- Map Configuration (CSP-safe JSON, not executed) -->
 <script src="{{ '/assets/js/marker-styles.js' | relative_url }}"></script>
 <script src="{{ '/assets/js/layer-styles.js' | relative_url }}"></script>
 <script src="{{ '/assets/js/clipboard.js' | relative_url }}"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  // Initialize map centered on spot location
-  {% assign lat = spot.location.lat | default: spot.location.latitude %}
-  {% assign lon = spot.location.lon | default: spot.location.lng | default: spot.location.longitude %}
-  
-  {% if lat and lon %}
-  var spotLat = {{ lat }};
-  var spotLon = {{ lon }};
-  
-  var map = L.map('spot-map', {
-    center: [spotLat, spotLon],
-    zoom: 15,
-    zoomControl: true
-  });
-  
-  // Add tile layer
-  L.tileLayer('{{ site.mapbox_url }}', {
-    attribution: '&copy; <a href="https://www.mapbox.com/about/maps/" target="_blank" rel="noopener">Mapbox</a> &copy; <a href="http://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> <strong><a href="https://www.mapbox.com/map-feedback/" target="_blank" rel="noopener">Improve this map</a></strong>',
-    maxZoom: {{ site.map.max_zoom | default: 18 }}
-  }).addTo(map);
-  
-  // Position zoom control at bottom-right
-  map.zoomControl.setPosition('bottomright');
-  
-  // Add locate control for user position finding
-  L.control.locate({
-    position: 'bottomright',
-    strings: {
-      title: '{{ site.lang | default: "de" }}' === 'de' ? 'Meinen Standort anzeigen' : 'Show my location'
-    },
-    locateOptions: {
-      enableHighAccuracy: true,
-      maxZoom: 14
-    },
-    flyTo: true,
-    showCompass: true,
-    showPopup: false,
-    drawCircle: true,
-    drawMarker: true,
-    markerStyle: {
-      weight: 2,
-      opacity: 0.8,
-      fillOpacity: 0.8
-    },
-    circleStyle: {
-      weight: 1,
-      clickable: false
-    },
-    icon: 'leaflet-control-locate-location-arrow',
-    iconLoading: 'leaflet-control-locate-spinner',
-    onLocationError: function(err) {
-      console.warn('Location error:', err.message);
-    }
-  }).addTo(map);
-
-  // Add spot marker for this page's spot
-  var spotType = '{{ spot_type_slug }}';
-  var isRejected = {{ is_rejected | default: false }};
-  var markerIcon = PaddelbuchMarkerStyles.getSpotIcon(spotType, isRejected);
-  
-  var marker = L.marker([spotLat, spotLon], { icon: markerIcon }).addTo(map);
-
-  // Build the proper popup using the spot popup module (same as tile-loaded spots)
-  var currentSpotData = {
-    name: '{{ spot.name | escape }}',
-    slug: '{{ spot.slug }}',
-    spotType_slug: spotType,
-    rejected: isRejected,
-    description: {{ spot.description | jsonify | default: 'null' }},
-    approximateAddress: {{ spot.approximateAddress | jsonify | default: 'null' }},
-    paddleCraftTypes: {{ spot.paddleCraftTypes | jsonify | default: '[]' }},
-    location: { lat: spotLat, lon: spotLon }
-  };
-  var currentLocale = '{{ current_locale }}';
-  var popupHtml;
-  if (window.PaddelbuchSpotPopup) {
-    if (isRejected) {
-      popupHtml = window.PaddelbuchSpotPopup.generateRejectedSpotPopupContent(currentSpotData, currentLocale);
-    } else {
-      popupHtml = window.PaddelbuchSpotPopup.generateSpotPopupContent(currentSpotData, currentLocale);
-    }
-  } else {
-    popupHtml = '<strong>' + currentSpotData.name + '</strong>';
+{% assign lat = spot.location.lat | default: spot.location.latitude %}
+{% assign lon = spot.location.lon | default: spot.location.lng | default: spot.location.longitude %}
+<script type="application/json" id="map-config">
+{
+  "center": { "lat": {% if lat %}{{ lat }}{% else %}{{ site.map.center.lat }}{% endif %}, "lon": {% if lon %}{{ lon }}{% else %}{{ site.map.center.lon }}{% endif %} },
+  "zoom": {% if lat and lon %}15{% else %}{{ site.map.default_zoom }}{% endif %},
+  "maxZoom": {{ site.map.max_zoom | default: 18 }},
+  "mapboxUrl": "{{ site.mapbox_url }}",
+  "locale": "{{ current_locale }}",
+  "spotLat": {% if lat %}{{ lat }}{% else %}null{% endif %},
+  "spotLon": {% if lon %}{{ lon }}{% else %}null{% endif %},
+  "spotTypeSlug": {{ spot_type_slug | jsonify }},
+  "isRejected": {{ is_rejected | default: false }},
+  "spotData": {
+    "name": {{ spot.name | jsonify }},
+    "slug": {{ spot.slug | jsonify }},
+    "spotType_slug": {{ spot_type_slug | jsonify }},
+    "rejected": {{ is_rejected | default: false }},
+    "description": {{ spot.description | jsonify | default: 'null' }},
+    "approximateAddress": {{ spot.approximateAddress | jsonify | default: 'null' }},
+    "paddleCraftTypes": {{ spot.paddleCraftTypes | jsonify | default: '[]' }},
+    "location": { "lat": {% if lat %}{{ lat }}{% else %}null{% endif %}, "lon": {% if lon %}{{ lon }}{% else %}null{% endif %} }
   }
-  marker.bindPopup(popupHtml, { maxWidth: 350 });
-  
-  // Store map globally so the data layer pipeline can find it
-  window.paddelbuchMap = map;
-  {% endif %}
-});
+}
 </script>
+<script src="{{ '/assets/js/paddelbuch-map.js' | relative_url }}"></script>
+<script src="{{ '/assets/js/spot-map.js' | relative_url }}"></script>
 
 <!-- Load all data layers (spots, obstacles, protected areas, event notices) -->
 {% include detail-map-layers.html locale=current_locale %}

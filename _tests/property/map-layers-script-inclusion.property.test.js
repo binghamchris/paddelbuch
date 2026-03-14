@@ -18,9 +18,15 @@ const fc = require('fast-check');
 const fs = require('fs');
 const path = require('path');
 
-// Read the raw source of map-init.html once for all tests
+// Read the raw source of map-init.html and the extracted map-data-init.js for all tests.
+// After CSP extraction, initialization logic moved from inline script in map-init.html
+// to the external assets/js/map-data-init.js file.
 const mapInitPath = path.join(__dirname, '..', '..', '_includes', 'map-init.html');
-const mapInitSource = fs.readFileSync(mapInitPath, 'utf-8');
+const mapDataInitJsPath = path.join(__dirname, '..', '..', 'assets', 'js', 'map-data-init.js');
+const mapInitHtmlSource = fs.readFileSync(mapInitPath, 'utf-8');
+const mapDataInitJsSource = fs.readFileSync(mapDataInitJsPath, 'utf-8');
+// Combined source: the include HTML + the extracted JS (tests check for patterns in either)
+const mapInitSource = mapInitHtmlSource + '\n' + mapDataInitJsSource;
 
 // The 5 required JS modules that must be included as script tags
 const REQUIRED_MODULES = [
