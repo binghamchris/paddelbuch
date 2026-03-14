@@ -121,7 +121,7 @@ Incrementally upgrade all runtime and development dependencies (Ruby, Node.js, g
     - Remove `baseline-counts.txt`
     - _Requirements: N/A (housekeeping)_
 
-- [~] 11. Final checkpoint — All upgrades complete
+- [x] 11. Final checkpoint — All upgrades complete
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Notes
