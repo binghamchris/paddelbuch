@@ -106,7 +106,7 @@ Incrementally upgrade all runtime and development dependencies (Ruby, Node.js, g
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 10. Final verification and test count preservation
-  - [~] 10.1 Run full build pipeline sequence locally
+  - [x] 10.1 Run full build pipeline sequence locally
     - Execute the full amplify.yml sequence locally: `npm ci`, `npm run download-fonts`, `npm run copy-assets`, `bundle install`, `bundle exec jekyll build`, `npm test`
     - Confirm `_site/` matches `_site_baseline/` with no differences
     - _Requirements: 1.5, 8.3, 8.4_
