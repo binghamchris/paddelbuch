@@ -14,7 +14,7 @@ Incrementally upgrade all runtime and development dependencies (Ruby, Node.js, g
     - Store test counts in a `baseline-counts.txt` file at the project root for later comparison
     - _Requirements: 1.5, 7.5, 7.6_
 
-- [ ] 2. Upgrade Ruby version
+- [x] 2. Upgrade Ruby version
   - [x] 2.1 Update `.ruby-version` to the latest stable Ruby release
     - Change the version string in `.ruby-version` (e.g. `ruby-3.4.x` → latest stable)
     - _Requirements: 2.1_
@@ -26,7 +26,7 @@ Incrementally upgrade all runtime and development dependencies (Ruby, Node.js, g
     - Generate random valid Ruby version strings, parse `.ruby-version` and `amplify.yml`, and assert that the `rvm install` and `rvm use` version strings match the `.ruby-version` value
     - Test file: `spec/plugins/pipeline_version_consistency_spec.rb` using RSpec + Rantly
     - **Validates: Requirements 2.3, 8.1**
-  - [~] 2.4 Verify Ruby upgrade: rebuild site, diff against baseline, run test suites
+  - [x] 2.4 Verify Ruby upgrade: rebuild site, diff against baseline, run test suites
     - Run `bundle install` with the new Ruby
     - Run `bundle exec jekyll build` and diff `_site/` against `_site_baseline/`
     - Run `bundle exec rspec` — all tests must pass
