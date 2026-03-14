@@ -2,7 +2,7 @@
   "name": "@binghamchris/paddelbuch",
   "title": "Swiss Paddle Sports Map",
   "description": "A Swiss paddle sports map built with Jekyll",
-  "version": "0.2",
+  "version": "2.0.0",
   "author": {
     "name": "Chris Bingham"
   },

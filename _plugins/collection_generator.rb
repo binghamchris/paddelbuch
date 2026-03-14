@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Jekyll plugin to generate collection documents from Contentful YAML data
 #
 # The ContentfulFetcher writes data to _data/*.yml but Jekyll collections

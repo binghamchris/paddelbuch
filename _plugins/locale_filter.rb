@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Locale filtering plugin for Jekyll
 # Provides filters and utilities for filtering content by locale
 
@@ -26,28 +28,6 @@ module Jekyll
       
       # Fall back to base key
       data[key]
-    end
-    
-    # Get translation from i18n
-    # Usage: {{ 'nav.spots' | t }}
-    def t(key)
-      site = @context.registers[:site]
-      lang = site.config['lang'] || site.config['default_lang'] || 'de'
-      
-      # Load translations
-      translations = site.data['translations'] || {}
-      lang_translations = translations[lang] || {}
-      
-      # Navigate nested keys
-      keys = key.to_s.split('.')
-      result = lang_translations
-      
-      keys.each do |k|
-        result = result[k] if result.is_a?(Hash)
-        break unless result
-      end
-      
-      result || key
     end
     
     # Format date according to locale

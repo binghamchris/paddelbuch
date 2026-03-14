@@ -42,7 +42,7 @@
             {% assign craft_type = site.data.types.paddle_craft_types | where: "slug", craft_slug | first %}
             <li>
               {% if craft_type %}
-                {% if current_locale == 'en' %}{{ craft_type.name_en }}{% else %}{{ craft_type.name_de }}{% endif %}
+                {% if current_locale == 'en' %}{{ craft_type.name_en | escape }}{% else %}{{ craft_type.name_de | escape }}{% endif %}
               {% else %}
                 {{ craft_slug }}
               {% endif %}
@@ -81,7 +81,7 @@
     <tr>
       <th>{% t labels.approx_address %}</th>
       <td>
-        <span id="approx-address">{{ spot.approximateAddress }}</span>
+        <span id="approx-address">{{ spot.approximateAddress | escape }}</span>
       </td>
       <td class="clipboard-cell">
         <button type="button" 
@@ -101,7 +101,7 @@
       <th>{% t labels.waterway %}</th>
       <td colspan="2">
         <a href="{{ locale_prefix | append: '/gewaesser/' | append: waterway.slug | append: '/' }}">
-          {{ waterway.name }}
+          {{ waterway.name | escape }}
         </a>
       </td>
     </tr>

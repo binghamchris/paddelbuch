@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Jekyll plugin to generate XML sitemap files during the build process.
 #
 # Produces a sitemap-index.xml referencing one or more sitemap-N.xml

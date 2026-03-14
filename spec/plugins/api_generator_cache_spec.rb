@@ -366,9 +366,9 @@ RSpec.describe Jekyll::ApiGenerator, 'caching unit tests' do
     end
   end
 
-  # Requirements 3.2, 3.4: @@cached_last_updates is set correctly from cache
-  describe '@@cached_last_updates from cache' do
-    it 'sets @@cached_last_updates from cached lastUpdateIndex.json' do
+  # Requirements 3.2, 3.4: cached_last_updates is set correctly from cache
+  describe 'cached_last_updates from cache' do
+    it 'sets cached_last_updates from cached lastUpdateIndex.json' do
       index_data = [
         { 'table' => 'spotTypes', 'lastUpdatedAt' => '2025-06-01T12:00:00Z' },
         { 'table' => 'obstacleTypes', 'lastUpdatedAt' => '2025-06-02T09:30:00Z' }
@@ -381,7 +381,7 @@ RSpec.describe Jekyll::ApiGenerator, 'caching unit tests' do
       site_config['contentful_data_changed'] = false
       generator.generate(site)
 
-      cached = described_class.class_variable_get(:@@cached_last_updates)
+      cached = described_class.cached_last_updates
       expect(cached).to eq({
         'spotTypes' => '2025-06-01T12:00:00Z',
         'obstacleTypes' => '2025-06-02T09:30:00Z'
