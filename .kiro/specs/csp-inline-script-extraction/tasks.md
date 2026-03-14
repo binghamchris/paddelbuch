@@ -18,7 +18,7 @@
   - Mark task complete when test is written, run, and failure is documented
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 2.7_
 
-- [-] 2. Write preservation property tests (BEFORE implementing fix)
+- [x] 2. Write preservation property tests (BEFORE implementing fix)
   - **Property 2: Preservation** - Existing External Script Behavior Unchanged
   - **IMPORTANT**: Follow observation-first methodology
   - Observe on UNFIXED code (with CSP disabled or in dev mode):
@@ -38,7 +38,7 @@
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7_
 
 - [ ] 3. Extract `color-vars.html` inline script to external JS
-  - [~] 3.1 Create `assets/js/color-vars.js`
+  - [x] 3.1 Create `assets/js/color-vars.js`
     - IIFE that reads `#paddelbuch-colors` JSON element via `document.getElementById`
     - Parses `textContent` with `JSON.parse`
     - Assigns result to `window.PaddelbuchColors`
@@ -47,7 +47,7 @@
     - _Expected_Behavior: `window.PaddelbuchColors` is set from JSON data element instead of inline script_
     - _Preservation: `layer-styles.js` continues to read the same color keys from `window.PaddelbuchColors`_
     - _Requirements: 1.2, 2.2, 3.7_
-  - [~] 3.2 Update `_includes/color-vars.html`
+  - [x] 3.2 Update `_includes/color-vars.html`
     - Replace `<script>window.PaddelbuchColors = {{ site.data.paddelbuch_colors | jsonify }};</script>`
     - With `<script type="application/json" id="paddelbuch-colors">{{ site.data.paddelbuch_colors | jsonify }}</script>`
     - Followed by `<script src="{{ '/assets/js/color-vars.js' | relative_url }}"></script>`
