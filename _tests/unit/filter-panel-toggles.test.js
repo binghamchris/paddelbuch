@@ -15,14 +15,13 @@ const fs = require('fs');
 const path = require('path');
 
 /**
- * Extract the JavaScript code from filter-panel.html's <script> tag.
+ * Read the JavaScript code for the filter panel.
+ * After CSP extraction, the code lives in assets/js/filter-panel.js
+ * rather than inline in filter-panel.html.
  */
 function getFilterPanelScript() {
-  const htmlPath = path.join(__dirname, '..', '..', '_includes', 'filter-panel.html');
-  const html = fs.readFileSync(htmlPath, 'utf-8');
-  const scriptMatch = html.match(/<script>([\s\S]*?)<\/script>/);
-  if (!scriptMatch) throw new Error('No <script> tag found in filter-panel.html');
-  return scriptMatch[1];
+  const jsPath = path.join(__dirname, '..', '..', 'assets', 'js', 'filter-panel.js');
+  return fs.readFileSync(jsPath, 'utf-8');
 }
 
 /**

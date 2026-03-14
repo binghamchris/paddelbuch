@@ -117,7 +117,11 @@ class ScriptSrcExtractor(HTMLParser):
 
 
 def _collect_detail_pages():
-    """Collect (layout_type, page_path) pairs for all detail pages in _site."""
+    """Collect (layout_type, page_path) pairs for all detail pages in _site.
+
+    Only includes pages that actually use a detail layout (contain #map-config),
+    excluding list/index pages like gewaesser/seen/ or gewaesser/fluesse/.
+    """
     pages = []
     for layout_type, dirname in DETAIL_PAGE_DIRS.items():
         dir_path = os.path.join(SITE_DIR, dirname)
@@ -125,6 +129,14 @@ def _collect_detail_pages():
             continue
         pattern = os.path.join(dir_path, '**', '*.html')
         for path in glob.glob(pattern, recursive=True):
+            # Only include pages that contain #map-config (actual detail pages)
+            try:
+                with open(path, 'r', encoding='utf-8', errors='replace') as f:
+                    content = f.read()
+                if 'id="map-config"' not in content:
+                    continue
+            except OSError:
+                continue
             rel = os.path.relpath(path, SITE_DIR)
             pages.append((layout_type, rel))
     return pages

@@ -15,8 +15,11 @@
 const fs = require('fs');
 const path = require('path');
 
-const layerControlPath = path.join(__dirname, '..', '..', '_includes', 'layer-control.html');
-const layerControlSource = fs.readFileSync(layerControlPath, 'utf-8');
+// After CSP extraction, the inline script from layer-control.html moved to
+// assets/js/layer-control.js. Combine both sources for pattern checks.
+const layerControlHtmlPath = path.join(__dirname, '..', '..', '_includes', 'layer-control.html');
+const layerControlJsPath = path.join(__dirname, '..', '..', 'assets', 'js', 'layer-control.js');
+const layerControlSource = fs.readFileSync(layerControlHtmlPath, 'utf-8') + '\n' + fs.readFileSync(layerControlJsPath, 'utf-8');
 
 const eventNoticePopupPath = path.join(__dirname, '..', '..', 'assets', 'js', 'event-notice-popup.js');
 const eventNoticePopupSource = fs.readFileSync(eventNoticePopupPath, 'utf-8');
