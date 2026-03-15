@@ -20,29 +20,8 @@ pageName: spot-details
 {% assign spot_type_slug = spot.spotType_slug | default: spot.spot_type_slug %}
 {% assign is_rejected = spot.rejected %}
 
-<!-- Get spot type name -->
-{% assign spot_type = site.data.types.spot_types | where: "slug", spot_type_slug | first %}
-{% if spot_type %}
-  {% if current_locale == 'en' %}
-    {% assign spot_type_name = spot_type.name_en %}
-  {% else %}
-    {% assign spot_type_name = spot_type.name_de %}
-  {% endif %}
-{% else %}
-  {% assign spot_type_name = spot_type_slug %}
-{% endif %}
-
-<!-- Override spot type name for rejected spots -->
-{% if is_rejected %}
-  {% capture spot_type_name %}{% t spot_types.no_entry %}{% endcapture %}
-  {% assign spot_type_name = spot_type_name | strip %}
-{% endif %}
-
-<!-- Get waterway information -->
-{% assign waterway_slug = spot.waterway_slug %}
-{% if waterway_slug %}
-  {% assign waterway = site.data.waterways | where: "slug", waterway_slug | where: "locale", current_locale | first %}
-{% endif %}
+{% assign spot_type_name = page.spot_type_name %}
+{% assign locale_prefix = site.locale_prefix %}
 
 <div class="container-fluid">
   <div class="row">
@@ -66,7 +45,7 @@ pageName: spot-details
 
       <!-- Spot Icon and Type -->
       <div class="spot-icon-div align-items-center">
-        {% include spot-icon.html type=spot_type_slug rejected=is_rejected variant="dark" size=20 %}
+        {% include spot-icon.html type=spot_type_slug rejected=is_rejected variant="dark" size=20 icon_name=page.spot_icon_name icon_alt=page.spot_icon_alt %}
         <span class="ms-2">{{ spot_type_name | escape }}</span>
       </div>
       
@@ -78,7 +57,7 @@ pageName: spot-details
         {% include rejected-spot-content.html spot=spot %}
       {% else %}
         <!-- Normal Spot: Show standard information (Requirement 3.6) -->
-        {% include spot-detail-content.html spot=spot waterway=waterway %}
+        {% include spot-detail-content.html spot=spot waterway_name=page.waterway_name waterway_slug=page.waterway_slug %}
       {% endif %}
     </div>
   </div>
