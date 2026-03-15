@@ -1,3 +1,4 @@
 languages: ["en"]
 destination: _site_en
 baseurl: "/en"
+skip_contentful_fetch: true
