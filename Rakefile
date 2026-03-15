@@ -1,11 +1,102 @@
 require 'jekyll'
+require 'fileutils'
+
+TEMP_DIRS = %w[_site_de _site_en _site_prefetch].freeze
+
+# ---------------------------------------------------------------------------
+# Helper methods for the parallel build pipeline
+# ---------------------------------------------------------------------------
+
+def prefetch_and_validate!
+  puts "==> Pre-fetching Contentful data..."
+  success = system("bundle exec jekyll build --config _config.yml,_config_prefetch.yml")
+  unless success
+    abort "[prefetch] Pre-fetch build failed (exit #{$?.exitstatus}). Aborting."
+  end
+  FileUtils.rm_rf('_site_prefetch')
+  puts "==> Pre-fetch complete."
+end
+
+def run_parallel_builds!
+  puts "==> Starting parallel locale builds..."
+
+  builds = {
+    'de' => 'bundle exec jekyll build --config _config.yml,_config_de.yml',
+    'en' => 'bundle exec jekyll build --config _config.yml,_config_en.yml'
+  }
+
+  pids = {}
+  readers = []
+
+  builds.each do |locale, cmd|
+    out_r, out_w = IO.pipe
+    err_r, err_w = IO.pipe
+
+    pid = Process.spawn(cmd, out: out_w, err: err_w)
+    out_w.close
+    err_w.close
+
+    pids[locale] = pid
+
+    readers << Thread.new(out_r, locale) do |io, loc|
+      io.each_line { |line| $stdout.puts "[#{loc}] #{line}" }
+    end
+    readers << Thread.new(err_r, locale) do |io, loc|
+      io.each_line { |line| $stderr.puts "[#{loc}] #{line}" }
+    end
+  end
+
+  # Collect exit statuses
+  statuses = {}
+  pids.each do |locale, pid|
+    _, status = Process.waitpid2(pid)
+    statuses[locale] = status
+  end
+
+  readers.each(&:join)
+
+  # Check for failures
+  failures = statuses.select { |_, s| !s.success? }
+  unless failures.empty?
+    failures.each do |locale, status|
+      $stderr.puts "[#{locale}] Build failed with exit status #{status.exitstatus}."
+    end
+    abort "Parallel build failed. Temp dirs (_site_de/, _site_en/) preserved for debugging."
+  end
+
+  puts "==> Both locale builds succeeded."
+end
+
+def merge_outputs!
+  puts "==> Merging build outputs into _site/..."
+  FileUtils.rm_rf('_site')
+  FileUtils.mkdir_p('_site')
+  FileUtils.cp_r('_site_de/.', '_site')
+  FileUtils.cp_r('_site_en/en', '_site/en')
+  puts "==> Merge complete."
+end
+
+def cleanup_temp_dirs!
+  TEMP_DIRS.each { |dir| FileUtils.rm_rf(dir) }
+  puts "==> Temporary directories cleaned up."
+end
+
+# ---------------------------------------------------------------------------
+# Rake tasks
+# ---------------------------------------------------------------------------
 
 namespace :build do
-  desc "Build the Jekyll site"
+  desc "Build the Jekyll site (parallel locale builds)"
   task :site do
-    puts "Building Jekyll site..."
-    Jekyll::Commands::Build.process({})
-    puts "Build complete!"
+    start_time = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+
+    prefetch_and_validate!
+    run_parallel_builds!
+    merge_outputs!
+    cleanup_temp_dirs!
+
+    elapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - start_time
+    puts "Build complete in #{elapsed.round(1)}s"
   end
 end
 
