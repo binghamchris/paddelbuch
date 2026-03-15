@@ -157,27 +157,24 @@ RSpec.describe 'Parallel build pipeline — temp directory cleanup on success' d
 
   after { FileUtils.remove_entry(tmpdir) if File.exist?(tmpdir) }
 
-  it 'removes _site_de/, _site_en/, and _site_prefetch/ after successful merge' do
+  it 'removes _site_de/ and _site_en/ after successful merge' do
     site_de = File.join(tmpdir, '_site_de')
     site_en = File.join(tmpdir, '_site_en')
-    site_prefetch = File.join(tmpdir, '_site_prefetch')
 
     # Create temp dirs as if builds succeeded
-    [site_de, site_en, site_prefetch].each do |dir|
+    [site_de, site_en].each do |dir|
       FileUtils.mkdir_p(dir)
       File.write(File.join(dir, 'test.html'), 'content')
     end
 
     expect(File.exist?(site_de)).to be true
     expect(File.exist?(site_en)).to be true
-    expect(File.exist?(site_prefetch)).to be true
 
     # Simulate cleanup (same logic as cleanup_temp_dirs!)
-    [site_de, site_en, site_prefetch].each { |dir| FileUtils.rm_rf(dir) }
+    [site_de, site_en].each { |dir| FileUtils.rm_rf(dir) }
 
     expect(File.exist?(site_de)).to be false
     expect(File.exist?(site_en)).to be false
-    expect(File.exist?(site_prefetch)).to be false
   end
 end
 

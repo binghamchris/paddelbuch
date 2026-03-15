@@ -1,3 +1,4 @@
-# Pre-fetch config: triggers ContentfulFetcher, output is discarded
+# Pre-fetch config: triggers ContentfulFetcher via generators only.
+# No render or write phase runs — the destination is never created.
 languages: ["de"]
 destination: _site_prefetch
