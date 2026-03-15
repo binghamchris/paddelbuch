@@ -6,11 +6,7 @@
   - include.locale: Current locale (default: site.lang or 'de')
 -->
 
-{% if site.lang != site.default_lang %}
-  {% assign locale_prefix = '/' | append: site.lang %}
-{% else %}
-  {% assign locale_prefix = '' %}
-{% endif %}
+{% assign locale_prefix = site.locale_prefix %}
 
 {% assign spot = include.spot %}
 {% assign current_locale = include.locale | default: site.lang | default: 'de' %}
