@@ -24,7 +24,7 @@ The ECR repository is provisioned via CloudFormation using the template at `infr
 ```bash
 aws cloudformation deploy \
   --template-file infrastructure/custom-build-image.yaml \
-  --stack-name custom-build-image \
+  --stack-name paddelbuch-custom-build-image \
   --profile paddelbuch-dev \
   --region eu-central-1
 ```
@@ -36,7 +36,7 @@ The same command works for updates. Add `--no-fail-on-empty-changeset` to avoid 
 ```bash
 aws cloudformation deploy \
   --template-file infrastructure/custom-build-image.yaml \
-  --stack-name custom-build-image \
+  --stack-name paddelbuch-custom-build-image \
   --no-fail-on-empty-changeset \
   --profile paddelbuch-dev \
   --region eu-central-1
@@ -46,7 +46,7 @@ aws cloudformation deploy \
 
 ```bash
 aws cloudformation describe-stacks \
-  --stack-name custom-build-image \
+  --stack-name paddelbuch-custom-build-image \
   --profile paddelbuch-dev \
   --region eu-central-1 \
   --query "Stacks[0].Outputs"
@@ -64,7 +64,7 @@ A helper script handles ECR authentication, building, tagging, and pushing the i
 
 The script will:
 
-1. Retrieve the ECR repository URI from the `custom-build-image` CloudFormation stack
+1. Retrieve the ECR repository URI from the `paddelbuch-custom-build-image` CloudFormation stack
 2. Authenticate Docker with ECR using the `paddelbuch-dev` profile
 3. Build the image from `infrastructure/Dockerfile` using the project root as the build context
 4. Tag the image with both `latest` and a timestamp (`YYYYMMDDHHmmss`)
@@ -80,7 +80,7 @@ The Amplify app template (`deploy/frontend-deploy.yaml`) accepts a `CustomBuildI
 
 ```bash
 REPO_URI=$(aws cloudformation describe-stacks \
-  --stack-name custom-build-image \
+  --stack-name paddelbuch-custom-build-image \
   --profile paddelbuch-dev \
   --region eu-central-1 \
   --query "Stacks[0].Outputs[?OutputKey=='RepositoryUri'].OutputValue" \

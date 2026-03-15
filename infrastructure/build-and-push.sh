@@ -3,7 +3,7 @@ set -euo pipefail
 
 PROFILE=paddelbuch-dev
 REGION=eu-central-1
-STACK_NAME=custom-build-image
+STACK_NAME=paddelbuch-custom-build-image
 TIMESTAMP=$(date +%Y%m%d%H%M%S)
 
 # Get ECR repository URI from CloudFormation output

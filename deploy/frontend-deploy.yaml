@@ -68,11 +68,6 @@ Resources:
     Properties: 
       AccessToken:
         Ref: GithubToken
-      CustomImage:
-        !If
-          - HasCustomImage
-          - !Ref CustomBuildImageUri
-          - !Ref AWS::NoValue
       IAMServiceRole:
         !If
           - HasCustomImage
@@ -168,6 +163,9 @@ Resources:
             Ref: EnvVarContentfulEnv
         - Name: JEKYLL_ENV
           Value: production
+        - Name: _CUSTOM_IMAGE
+          Value:
+            Ref: CustomBuildImageUri
       Name:
         Ref: AppName
       Repository:

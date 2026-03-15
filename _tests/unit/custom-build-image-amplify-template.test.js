@@ -39,14 +39,18 @@ describe('Amplify template – custom build image support', () => {
     expect(template.Conditions).toHaveProperty('HasCustomImage');
   });
 
-  // Requirement 4.3: PaddelBuchApp has a conditional CustomImage property
-  test('PaddelBuchApp resource has a CustomImage property using !If', () => {
+  // Requirement 4.3: PaddelBuchApp has _CUSTOM_IMAGE environment variable referencing CustomBuildImageUri
+  test('PaddelBuchApp resource has _CUSTOM_IMAGE environment variable', () => {
     const app = template.Resources.PaddelBuchApp;
     expect(app).toBeDefined();
     expect(app.Type).toBe('AWS::Amplify::App');
-    expect(app.Properties).toHaveProperty('CustomImage');
-    // The value is an !If construct parsed as { 'Fn::If': [...] }
-    expect(app.Properties.CustomImage).toHaveProperty('Fn::If');
+    const envVars = app.Properties.EnvironmentVariables;
+    expect(envVars).toBeDefined();
+    const customImageVar = envVars.find((v) => v.Name === '_CUSTOM_IMAGE');
+    expect(customImageVar).toBeDefined();
+    // The value should reference the CustomBuildImageUri parameter
+    expect(customImageVar.Value).toHaveProperty('Ref');
+    expect(customImageVar.Value['Ref']).toBe('CustomBuildImageUri');
   });
 
   // Requirement 4.2: AmplifyEcrPolicy resource exists with ECR pull actions

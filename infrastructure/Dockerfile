@@ -34,14 +34,12 @@ RUN curl -fsSL https://cache.ruby-lang.org/pub/ruby/3.4/ruby-3.4.9.tar.gz -o /tm
   && make -j$(nproc) \
   && make install \
   && cd / \
-  && rm -rf /tmp/ruby* \
-  && ruby --version
+  && rm -rf /tmp/ruby*
 
 # Layer 3 — Node.js 22 from official binary archive
-RUN curl -fsSL https://nodejs.org/dist/v22.16.0/node-v22.16.0-linux-x64.tar.xz -o /tmp/node.tar.xz \
-  && tar xJf /tmp/node.tar.xz -C /usr/local --strip-components=1 \
-  && rm /tmp/node.tar.xz \
-  && node --version && npm --version
+RUN curl -fsSL https://nodejs.org/dist/v22.16.0/node-v22.16.0-linux-x64.tar.gz -o /tmp/node.tar.gz \
+  && tar xzf /tmp/node.tar.gz -C /usr/local --strip-components=1 \
+  && rm /tmp/node.tar.gz
 
 # Layer 4 — Gem dependencies
 COPY Gemfile Gemfile.lock ./
