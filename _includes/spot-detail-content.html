@@ -7,20 +7,15 @@
   
   Parameters:
   - include.spot: The spot object containing all spot data
-  - include.waterway: The waterway object (optional)
+  - include.waterway_name: Pre-computed waterway name (optional)
+  - include.waterway_slug: Pre-computed waterway slug (optional)
   
   Requirements: 3.6
 -->
 
-{% if site.lang != site.default_lang %}
-  {% assign locale_prefix = '/' | append: site.lang %}
-{% else %}
-  {% assign locale_prefix = '' %}
-{% endif %}
+{% assign locale_prefix = site.locale_prefix %}
 
 {% assign spot = include.spot %}
-{% assign waterway = include.waterway %}
-{% assign current_locale = site.lang | default: 'de' %}
 
 <!-- Description (between title and table, matching Gatsby layout) -->
 {% if spot.description %}
@@ -33,19 +28,14 @@
 <table class="spot-details-table">
   <tbody>
     <!-- Paddle Craft Types (first row, matching Gatsby order) -->
-    {% if spot.paddleCraftTypes and spot.paddleCraftTypes.size > 0 %}
+    {% if spot.paddle_craft_type_names and spot.paddle_craft_type_names.size > 0 %}
     <tr>
       <th>{% t labels.potentially_usable_by %}</th>
       <td colspan="2">
         <ul class="mb-0 ps-3">
-          {% for craft_slug in spot.paddleCraftTypes %}
-            {% assign craft_type = site.data.types.paddle_craft_types | where: "slug", craft_slug | first %}
+          {% for craft_name in spot.paddle_craft_type_names %}
             <li>
-              {% if craft_type %}
-                {% if current_locale == 'en' %}{{ craft_type.name_en | escape }}{% else %}{{ craft_type.name_de | escape }}{% endif %}
-              {% else %}
-                {{ craft_slug }}
-              {% endif %}
+              {{ craft_name | escape }}
             </li>
           {% endfor %}
         </ul>
@@ -96,12 +86,12 @@
     {% endif %}
 
     <!-- Waterway Link -->
-    {% if waterway %}
+    {% if include.waterway_name %}
     <tr>
       <th>{% t labels.waterway %}</th>
       <td colspan="2">
-        <a href="{{ locale_prefix | append: '/gewaesser/' | append: waterway.slug | append: '/' }}">
-          {{ waterway.name | escape }}
+        <a href="{{ locale_prefix | append: '/gewaesser/' | append: include.waterway_slug | append: '/' }}">
+          {{ include.waterway_name | escape }}
         </a>
       </td>
     </tr>
