@@ -48,17 +48,36 @@ Parameters:
     Type: String
     Description: The GitHub personal access token to be used during the setup of the Amplify app
     NoEcho: true
+  CustomBuildImageUri:
+    Type: String
+    Description: The ECR image URI for the custom Amplify build image (leave empty to use default Amplify image)
+    Default: ""
 Conditions:
   IsProduction:
     !Equals
       - !Ref AppStage
       - PRODUCTION
+  HasCustomImage:
+    !Not
+      - !Equals
+          - !Ref CustomBuildImageUri
+          - ""
 Resources:
   PaddelBuchApp:
     Type: AWS::Amplify::App
     Properties: 
       AccessToken:
         Ref: GithubToken
+      CustomImage:
+        !If
+          - HasCustomImage
+          - !Ref CustomBuildImageUri
+          - !Ref AWS::NoValue
+      IAMServiceRole:
+        !If
+          - HasCustomImage
+          - !GetAtt AmplifyServiceRole.Arn
+          - !Ref AWS::NoValue
       CustomHeaders: |-
         customHeaders:
           # Security and default cache headers for all files (recursive)
@@ -202,3 +221,41 @@ Resources:
         - BranchName:
             !GetAtt PaddelBuchBranch.BranchName
           Prefix: www
+  AmplifyServiceRole:
+    Type: AWS::IAM::Role
+    Condition: HasCustomImage
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: amplify.amazonaws.com
+            Action: sts:AssumeRole
+      Tags:
+        - Key: app
+          Value:
+            Ref: AppName
+        - Key: stage
+          Value:
+            Ref: AppStage
+  AmplifyEcrPolicy:
+    Type: AWS::IAM::Policy
+    Condition: HasCustomImage
+    Properties:
+      PolicyName: AmplifyEcrPullPolicy
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - ecr:GetDownloadUrlForLayer
+              - ecr:BatchGetImage
+            Resource:
+              !Sub "arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/*"
+          - Effect: Allow
+            Action:
+              - ecr:GetAuthorizationToken
+            Resource: "*"
+      Roles:
+        - !Ref AmplifyServiceRole
