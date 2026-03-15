@@ -25,46 +25,72 @@ beforeAll(() => {
   template = yaml.load(raw, { schema: CF_SCHEMA });
 });
 
-describe('ECR CloudFormation template', () => {
-  // Requirement 1.1: Template defines an ECR repository resource
-  test('contains an AWS::ECR::Repository resource', () => {
-    const ecrResources = Object.values(template.Resources).filter(
-      (r) => r.Type === 'AWS::ECR::Repository'
+describe('ECR Public CloudFormation template', () => {
+  // Requirement 1.1: Template defines an ECR Public repository resource
+  test('contains an AWS::ECR::PublicRepository resource', () => {
+    const ecrPublicResources = Object.values(template.Resources).filter(
+      (r) => r.Type === 'AWS::ECR::PublicRepository'
     );
-    expect(ecrResources.length).toBeGreaterThanOrEqual(1);
+    expect(ecrPublicResources.length).toBeGreaterThanOrEqual(1);
   });
 
-  // Requirement 1.2: Image tag immutability disabled (MUTABLE)
-  test('ECR repository has ImageTagMutability set to MUTABLE', () => {
+  // Requirement 1.4: Repository catalog data with description
+  test('ECR Public repository has RepositoryCatalogData with AboutText', () => {
     const ecrResource = Object.values(template.Resources).find(
-      (r) => r.Type === 'AWS::ECR::Repository'
+      (r) => r.Type === 'AWS::ECR::PublicRepository'
     );
-    expect(ecrResource.Properties.ImageTagMutability).toBe('MUTABLE');
+    expect(ecrResource.Properties.RepositoryCatalogData).toBeDefined();
+    expect(ecrResource.Properties.RepositoryCatalogData.AboutText).toBeDefined();
+    expect(typeof ecrResource.Properties.RepositoryCatalogData.AboutText).toBe('string');
   });
 
-  // Requirement 1.3: Lifecycle policy retains max 5 untagged images
-  test('lifecycle policy retains max 5 untagged images', () => {
+  // Requirement 1.2: Repository name is configured via parameter
+  test('RepositoryName references a parameter', () => {
     const ecrResource = Object.values(template.Resources).find(
-      (r) => r.Type === 'AWS::ECR::Repository'
+      (r) => r.Type === 'AWS::ECR::PublicRepository'
     );
-    const policyText = ecrResource.Properties.LifecyclePolicy.LifecyclePolicyText;
-    const policy = JSON.parse(policyText);
-
-    const untaggedRule = policy.rules.find(
-      (rule) => rule.selection.tagStatus === 'untagged'
-    );
-    expect(untaggedRule).toBeDefined();
-    expect(untaggedRule.selection.countType).toBe('imageCountMoreThan');
-    expect(untaggedRule.selection.countNumber).toBe(5);
-    expect(untaggedRule.action.type).toBe('expire');
+    const repoName = ecrResource.Properties.RepositoryName;
+    // Should be a !Ref to a parameter (parsed as { "Fn::Ref": "RepositoryName" })
+    expect(repoName).toBeDefined();
+    expect(template.Parameters).toHaveProperty('RepositoryName');
   });
 
-  // Requirement 1.4: Outputs include RepositoryUri and RepositoryArn
+  // Requirement 1.3: Outputs include RepositoryUri with public.ecr.aws format
   test('outputs include RepositoryUri', () => {
     expect(template.Outputs).toHaveProperty('RepositoryUri');
   });
 
-  test('outputs include RepositoryArn', () => {
-    expect(template.Outputs).toHaveProperty('RepositoryArn');
+  test('RepositoryUri output references public.ecr.aws', () => {
+    const raw = fs.readFileSync(TEMPLATE_PATH, 'utf8');
+    expect(raw).toMatch(/public\.ecr\.aws/);
+  });
+
+  // Negative assertions: no private ECR properties
+  test('does not use private ECR resource type AWS::ECR::Repository', () => {
+    const privateEcrResources = Object.values(template.Resources).filter(
+      (r) => r.Type === 'AWS::ECR::Repository'
+    );
+    expect(privateEcrResources.length).toBe(0);
+  });
+
+  test('does not have LifecyclePolicy property', () => {
+    const ecrResource = Object.values(template.Resources).find(
+      (r) => r.Type === 'AWS::ECR::PublicRepository'
+    );
+    expect(ecrResource.Properties).not.toHaveProperty('LifecyclePolicy');
+  });
+
+  test('does not have RepositoryPolicyText property', () => {
+    const ecrResource = Object.values(template.Resources).find(
+      (r) => r.Type === 'AWS::ECR::PublicRepository'
+    );
+    expect(ecrResource.Properties).not.toHaveProperty('RepositoryPolicyText');
+  });
+
+  test('does not have ImageTagMutability property', () => {
+    const ecrResource = Object.values(template.Resources).find(
+      (r) => r.Type === 'AWS::ECR::PublicRepository'
+    );
+    expect(ecrResource.Properties).not.toHaveProperty('ImageTagMutability');
   });
 });
