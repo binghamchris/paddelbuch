@@ -71,8 +71,21 @@ def merge_outputs!
   puts "==> Merging build outputs into _site/..."
   FileUtils.rm_rf('_site')
   FileUtils.mkdir_p('_site')
+
+  # Copy all de output (root pages, assets, api) as the base
   FileUtils.cp_r('_site_de/.', '_site', preserve: true)
-  FileUtils.cp_r('_site_en/en', '_site/en', preserve: true)
+
+  # Copy en output into _site/en/, excluding locale-independent paths.
+  # The plugin treats "en" as default_lang (languages.first), so en pages
+  # land at _site_en/ root — not _site_en/en/. We copy everything except
+  # assets/ and api/ (which come from the de build).
+  excluded = %w[assets api]
+  FileUtils.mkdir_p('_site/en')
+  Dir.children('_site_en').each do |entry|
+    next if excluded.include?(entry)
+    FileUtils.cp_r(File.join('_site_en', entry), File.join('_site', 'en', entry), preserve: true)
+  end
+
   puts "==> Merge complete."
 end
 

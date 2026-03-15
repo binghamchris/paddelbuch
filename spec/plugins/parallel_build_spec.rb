@@ -70,21 +70,28 @@ RSpec.describe 'Parallel build pipeline — merge logic' do
     File.write(File.join(site_de, 'assets', 'css', 'main.css'), 'body { color: black; }')
     File.write(File.join(site_de, 'api', 'spots.json'), '{"spots":[]}')
 
-    # Simulate _site_en/ with en/ subtree (including duplicate assets/api)
-    FileUtils.mkdir_p(File.join(site_en, 'en', 'einstiegsorte'))
-    FileUtils.mkdir_p(File.join(site_en, 'en', 'assets', 'css'))
-    FileUtils.mkdir_p(File.join(site_en, 'en', 'api'))
-    File.write(File.join(site_en, 'en', 'index.html'), '<h1>EN Home</h1>')
-    File.write(File.join(site_en, 'en', 'einstiegsorte', 'aare.html'), '<h1>Aare EN</h1>')
-    File.write(File.join(site_en, 'en', 'assets', 'css', 'main.css'), 'body { color: white; }')
-    File.write(File.join(site_en, 'en', 'api', 'spots.json'), '{"spots_en":[]}')
+    # Simulate _site_en/ — plugin writes en pages at root (not en/ subtree).
+    # Also includes assets/ and api/ which must be excluded during merge.
+    FileUtils.mkdir_p(File.join(site_en, 'einstiegsorte'))
+    FileUtils.mkdir_p(File.join(site_en, 'assets', 'css'))
+    FileUtils.mkdir_p(File.join(site_en, 'api'))
+    File.write(File.join(site_en, 'index.html'), '<h1>EN Home</h1>')
+    File.write(File.join(site_en, 'einstiegsorte', 'aare.html'), '<h1>Aare EN</h1>')
+    File.write(File.join(site_en, 'assets', 'css', 'main.css'), 'body { color: white; }')
+    File.write(File.join(site_en, 'api', 'spots.json'), '{"spots_en":[]}')
   end
 
   def perform_merge
     FileUtils.rm_rf(site_out)
     FileUtils.mkdir_p(site_out)
     FileUtils.cp_r("#{site_de}/.", site_out)
-    FileUtils.cp_r(File.join(site_en, 'en'), File.join(site_out, 'en'))
+    # Mirror Rakefile: copy everything from _site_en/ into _site/en/, excluding assets/ and api/
+    excluded = %w[assets api]
+    FileUtils.mkdir_p(File.join(site_out, 'en'))
+    Dir.children(site_en).each do |entry|
+      next if excluded.include?(entry)
+      FileUtils.cp_r(File.join(site_en, entry), File.join(site_out, 'en', entry), preserve: true)
+    end
   end
 
   it 'copies all de files into _site/' do
@@ -108,9 +115,11 @@ RSpec.describe 'Parallel build pipeline — merge logic' do
     expect(File.read(File.join(site_out, 'assets', 'css', 'main.css'))).to eq('body { color: black; }')
     expect(File.read(File.join(site_out, 'api', 'spots.json'))).to eq('{"spots":[]}')
 
-    # en/assets and en/api come from the en build's en/ subtree (as copied)
-    # but the root-level assets/ and api/ are NOT overwritten by en build
-    expect(File.read(File.join(site_out, 'assets', 'css', 'main.css'))).not_to eq('body { color: white; }')
+    # en/assets and en/api must NOT exist — they are excluded during merge
+    expect(File.exist?(File.join(site_out, 'en', 'assets'))).to be(false),
+      "assets/ from _site_en/ should be excluded from _site/en/"
+    expect(File.exist?(File.join(site_out, 'en', 'api'))).to be(false),
+      "api/ from _site_en/ should be excluded from _site/en/"
   end
 end
 
@@ -287,7 +296,12 @@ RSpec.describe 'Property: Merge produces correct file set from both builds' do
     FileUtils.rm_rf(site_out)
     FileUtils.mkdir_p(site_out)
     FileUtils.cp_r("#{site_de}/.", site_out)
-    FileUtils.cp_r(File.join(site_en, 'en'), File.join(site_out, 'en'))
+    excluded = %w[assets api]
+    FileUtils.mkdir_p(File.join(site_out, 'en'))
+    Dir.children(site_en).each do |entry|
+      next if excluded.include?(entry)
+      FileUtils.cp_r(File.join(site_en, entry), File.join(site_out, 'en', entry), preserve: true)
+    end
   end
 
   def collect_relative_files(dir)
@@ -296,7 +310,7 @@ RSpec.describe 'Property: Merge produces correct file set from both builds' do
     end.sort
   end
 
-  it 'produces the correct union of de files and en/en files in _site/' do
+  it 'produces the correct union of de files and en files in _site/' do
     property_of {
       de_count = range(1, 5)
       en_count = range(1, 5)
@@ -310,10 +324,11 @@ RSpec.describe 'Property: Merge produces correct file set from both builds' do
         site_out = File.join(tmpdir, '_site')
 
         FileUtils.mkdir_p(site_de)
-        FileUtils.mkdir_p(File.join(site_en, 'en'))
+        FileUtils.mkdir_p(site_en)
 
         de_names.each { |name| File.write(File.join(site_de, name), "de:#{name}") }
-        en_names.each { |name| File.write(File.join(site_en, 'en', name), "en:#{name}") }
+        # EN files at _site_en/ root (not _site_en/en/)
+        en_names.each { |name| File.write(File.join(site_en, name), "en:#{name}") }
 
         perform_merge(site_de, site_en, site_out)
 
@@ -334,34 +349,36 @@ RSpec.describe 'Property: Merge produces correct file set from both builds' do
     }
   end
 
-  it 'does not include files from _site_en/ outside the en/ subdirectory' do
+  it 'excludes assets/ and api/ from _site_en/ during merge' do
     property_of {
-      stray_count = range(1, 4)
-      stray_names = Array.new(stray_count) { "stray_#{range(0, 9999)}.html" }.uniq
-      stray_names
-    }.check(100) { |stray_names|
-      Dir.mktmpdir('pbt_merge_stray') do |tmpdir|
+      asset_count = range(1, 3)
+      api_count = range(1, 3)
+      asset_names = Array.new(asset_count) { "style_#{range(0, 9999)}.css" }.uniq
+      api_names = Array.new(api_count) { "data_#{range(0, 9999)}.json" }.uniq
+      [asset_names, api_names]
+    }.check(100) { |asset_names, api_names|
+      Dir.mktmpdir('pbt_merge_excluded') do |tmpdir|
         site_de = File.join(tmpdir, '_site_de')
         site_en = File.join(tmpdir, '_site_en')
         site_out = File.join(tmpdir, '_site')
 
         FileUtils.mkdir_p(site_de)
-        FileUtils.mkdir_p(File.join(site_en, 'en'))
+        FileUtils.mkdir_p(File.join(site_en, 'assets'))
+        FileUtils.mkdir_p(File.join(site_en, 'api'))
 
-        # Create a de index so merge has something to copy
         File.write(File.join(site_de, 'index.html'), 'de home')
-        File.write(File.join(site_en, 'en', 'index.html'), 'en home')
+        File.write(File.join(site_en, 'index.html'), 'en home')
 
-        # Place stray files at the root of _site_en/ (outside en/)
-        stray_names.each { |name| File.write(File.join(site_en, name), "stray:#{name}") }
+        asset_names.each { |name| File.write(File.join(site_en, 'assets', name), "asset:#{name}") }
+        api_names.each { |name| File.write(File.join(site_en, 'api', name), "api:#{name}") }
 
         perform_merge(site_de, site_en, site_out)
 
-        # Stray files must NOT appear in _site/
-        stray_names.each do |name|
-          expect(File.exist?(File.join(site_out, name))).to be(false),
-            "Stray file '#{name}' from _site_en/ root should not appear in _site/"
-        end
+        # assets/ and api/ from _site_en/ must NOT appear under _site/en/
+        expect(File.exist?(File.join(site_out, 'en', 'assets'))).to be(false),
+          "assets/ from _site_en/ should be excluded from _site/en/"
+        expect(File.exist?(File.join(site_out, 'en', 'api'))).to be(false),
+          "api/ from _site_en/ should be excluded from _site/en/"
       end
     }
   end
@@ -376,7 +393,12 @@ RSpec.describe 'Property: File permissions preserved during merge' do
     FileUtils.rm_rf(site_out)
     FileUtils.mkdir_p(site_out)
     FileUtils.cp_r("#{site_de}/.", site_out, preserve: true)
-    FileUtils.cp_r(File.join(site_en, 'en'), File.join(site_out, 'en'), preserve: true)
+    excluded = %w[assets api]
+    FileUtils.mkdir_p(File.join(site_out, 'en'))
+    Dir.children(site_en).each do |entry|
+      next if excluded.include?(entry)
+      FileUtils.cp_r(File.join(site_en, entry), File.join(site_out, 'en', entry), preserve: true)
+    end
   end
 
   it 'preserves file permissions for all copied files' do
@@ -393,10 +415,10 @@ RSpec.describe 'Property: File permissions preserved during merge' do
         site_out = File.join(tmpdir, '_site')
 
         FileUtils.mkdir_p(site_de)
-        FileUtils.mkdir_p(File.join(site_en, 'en'))
+        FileUtils.mkdir_p(site_en)
 
         de_path = File.join(site_de, de_name)
-        en_path = File.join(site_en, 'en', en_name)
+        en_path = File.join(site_en, en_name)
 
         File.write(de_path, "de content")
         File.chmod(de_mode, de_path)
@@ -458,8 +480,8 @@ RSpec.describe 'Property: Failure isolation preserves existing state' do
         when :en_build
           FileUtils.mkdir_p(site_de)
           temp_de_files.each { |name| File.write(File.join(site_de, name), "de:#{name}") }
-          FileUtils.mkdir_p(File.join(site_en, 'en'))
-          temp_en_files.each { |name| File.write(File.join(site_en, 'en', name), "en:#{name}") }
+          FileUtils.mkdir_p(site_en)
+          temp_en_files.each { |name| File.write(File.join(site_en, name), "en:#{name}") }
         end
 
         # Failure means merge is NOT called — _site/ must be unchanged
