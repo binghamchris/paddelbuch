@@ -2,44 +2,17 @@
   Event Notice List Include
   
   Displays a list of active waterway event notices for a specific waterway.
-  Filters to show only notices affecting the waterway with future end dates.
+  Uses pre-computed page.active_notices from CollectionGenerator.
   
-  Parameters:
-  - include.waterway_slug: The slug of the waterway to filter notices for
-  
-  Requirements: 7.5
+  Requirements: 2.2, 5.1, 5.2, 7.5
   Property 17: Waterway Event Notice List Filtering
   
   For any waterway detail page, the event notice list shall contain only notices 
   that affect that waterway AND have an end date in the future.
 -->
 
-{% assign waterway_slug = include.waterway_slug %}
-{% assign current_locale = site.lang | default: 'de' %}
-{% assign today = 'now' | date: '%Y-%m-%d' %}
-
-{% if site.lang != site.default_lang %}
-  {% assign locale_prefix = '/' | append: site.lang %}
-{% else %}
-  {% assign locale_prefix = '' %}
-{% endif %}
-
-<!-- Get notices data filtered by locale -->
-{% assign all_notices = site.data.notices | where: "locale", current_locale %}
-
-<!-- Filter notices: must affect this waterway AND have future end date -->
-{% assign active_notices = "" | split: "" %}
-{% for notice in all_notices %}
-  {% assign notice_end_date = notice.endDate | date: '%Y-%m-%d' %}
-  {% if notice_end_date >= today %}
-    {% for ww_slug in notice.waterways %}
-      {% if ww_slug == waterway_slug %}
-        {% assign active_notices = active_notices | push: notice %}
-        {% break %}
-      {% endif %}
-    {% endfor %}
-  {% endif %}
-{% endfor %}
+{% assign active_notices = page.active_notices %}
+{% assign locale_prefix = site.locale_prefix %}
 
 <div class="event-notices-section">
   <h2>{% t event_notices.waterway_notices %}</h2>

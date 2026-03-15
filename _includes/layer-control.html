@@ -28,17 +28,7 @@
 <!-- Include event notice popup module for generating event notice popup content (Requirements 7.1, 7.2, 7.3) -->
 <script src="{{ '/assets/js/event-notice-popup.js' | relative_url }}"></script>
 
-{% assign pa_type_key = "name_" | append: current_locale %}
-{% assign pa_types = site.data.types.protected_area_types | where: "locale", current_locale %}
 <script type="application/json" id="layer-control-config">
-{
-  "currentLocale": "{{ current_locale }}",
-  "localePrefix": "{% if current_locale != 'de' %}/{{ current_locale }}{% endif %}",
-  "protectedAreaTypeNames": {
-    {% for pat in pa_types %}
-    "{{ pat.slug }}": "{{ pat[pa_type_key] | default: pat.name_de }}"{% unless forloop.last %},{% endunless %}
-    {% endfor %}
-  }
-}
+{{ site.data.layer_control_config_json }}
 </script>
 <script src="{{ '/assets/js/layer-control.js' | relative_url }}"></script>
