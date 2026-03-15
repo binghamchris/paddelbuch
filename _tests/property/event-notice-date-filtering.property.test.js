@@ -382,15 +382,10 @@ describe('Event Notice Date Filtering - Property 13', () => {
           (notices, referenceDate) => {
             const filtered = filterActiveNotices(notices, referenceDate);
             
-            // Each filtered notice should be identical to its original
+            // Each filtered notice should be reference-identical to its original
+            // (filter returns the same objects, not copies)
             return filtered.every(filteredNotice => {
-              const original = notices.find(n => n.slug === filteredNotice.slug);
-              if (!original) return false;
-              
-              return filteredNotice.name === original.name &&
-                     filteredNotice.endDate === original.endDate &&
-                     filteredNotice.startDate === original.startDate &&
-                     filteredNotice.locale === original.locale;
+              return notices.includes(filteredNotice);
             });
           }
         ),
