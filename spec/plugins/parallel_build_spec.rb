@@ -21,6 +21,14 @@ RSpec.describe 'Parallel build pipeline — config file content' do
     it 'sets destination to _site_de' do
       expect(config['destination']).to eq('_site_de')
     end
+
+    it 'sets locale_prefix to ""' do
+      expect(config['locale_prefix']).to eq('')
+    end
+
+    it 'sets all_languages to ["de", "en"]' do
+      expect(config['all_languages']).to eq(['de', 'en'])
+    end
   end
 
   describe '_config_en.yml' do
@@ -34,8 +42,12 @@ RSpec.describe 'Parallel build pipeline — config file content' do
       expect(config['destination']).to eq('_site_en')
     end
 
-    it 'sets baseurl to "/en"' do
-      expect(config['baseurl']).to eq('/en')
+    it 'sets locale_prefix to "/en"' do
+      expect(config['locale_prefix']).to eq('/en')
+    end
+
+    it 'sets all_languages to ["de", "en"]' do
+      expect(config['all_languages']).to eq(['de', 'en'])
     end
   end
 

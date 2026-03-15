@@ -109,14 +109,15 @@
               {% t nav.language %}
             </a>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-dropdown-lang">
-              {% for lang in site.languages %}
+              {% assign switcher_languages = site.all_languages | default: site.languages %}
+              {% for lang in switcher_languages %}
               <li>
                 {% if lang == site.lang %}
                 <a class="dropdown-item active" href="#" hreflang="{{ lang }}">
                   <span class="nav-link">{{ lang | upcase }}</span>
                 </a>
                 {% else %}
-                <a class="dropdown-item" href="{% if lang == site.default_lang %}{{ page.url | relative_url }}{% else %}/{{ lang }}{{ page.url | relative_url }}{% endif %}" hreflang="{{ lang }}">
+                <a class="dropdown-item" href="{% if lang == 'de' %}{{ page.url }}{% else %}/{{ lang }}{{ page.url }}{% endif %}" hreflang="{{ lang }}">
                   <span class="nav-link">{{ lang | upcase }}</span>
                 </a>
                 {% endif %}
