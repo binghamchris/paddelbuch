@@ -4,12 +4,12 @@
 
 The paddelbuch project is a Jekyll-based Swiss paddle sports map site deployed on AWS Amplify in eu-central-1. Currently, every Amplify build installs Ruby 3.4.9 via RVM and Node.js 22 via NVM from scratch, along with all gem and npm dependencies. This adds significant time to each build.
 
-This feature introduces a custom Docker build image hosted in Amazon ECR that pre-packages Ruby 3.4.9, Node.js 22, and all project dependencies (gems and npm packages). AWS Amplify will use this custom image instead of its default image, eliminating runtime installation of language runtimes and reducing build times. All infrastructure is defined as CloudFormation YAML templates stored in the `infrastructure/` directory.
+This feature introduces a custom Docker build image hosted in Amazon ECR Public (public.ecr.aws) that pre-packages Ruby 3.4.9, Node.js 22, and all project dependencies (gems and npm packages). AWS Amplify will use this custom image instead of its default image, eliminating runtime installation of language runtimes and reducing build times. ECR Public is required because Amplify's CodeBuild runs in an AWS-managed account that cannot pull from private ECR repositories in the customer's account. All infrastructure is defined as CloudFormation YAML templates stored in the `infrastructure/` directory.
 
 ## Glossary
 
 - **Build_Image**: A Docker container image containing pre-installed language runtimes and project dependencies, used by AWS Amplify as the build environment
-- **ECR_Repository**: An Amazon Elastic Container Registry repository that stores and serves the Build_Image
+- **ECR_Public_Repository**: An Amazon Elastic Container Registry Public repository (public.ecr.aws) that stores and serves the Build_Image; ECR Public API is only available in us-east-1
 - **Amplify_App**: The AWS Amplify application that builds and deploys the paddelbuch site
 - **Dockerfile**: The file that defines how the Build_Image is assembled, specifying the base image, runtime installations, and dependency pre-installation
 - **CloudFormation_Template**: An AWS CloudFormation YAML template stored in `infrastructure/` that declaratively provisions AWS resources
@@ -17,16 +17,16 @@ This feature introduces a custom Docker build image hosted in Amazon ECR that pr
 
 ## Requirements
 
-### Requirement 1: ECR Repository Provisioning
+### Requirement 1: ECR Public Repository Provisioning
 
-**User Story:** As a developer, I want an ECR repository provisioned via CloudFormation, so that I have a managed registry to store the custom build image.
+**User Story:** As a developer, I want an ECR Public repository provisioned via CloudFormation, so that I have a publicly accessible registry to store the custom build image that Amplify can pull without cross-account authentication.
 
 #### Acceptance Criteria
 
-1. THE CloudFormation_Template SHALL define an ECR repository resource in the eu-central-1 region
-2. THE CloudFormation_Template SHALL configure the ECR repository with image tag immutability disabled to allow overwriting the `latest` tag
-3. THE CloudFormation_Template SHALL configure a lifecycle policy on the ECR repository that retains a maximum of 5 untagged images
-4. THE CloudFormation_Template SHALL output the ECR repository URI for use by other resources and deployment scripts
+1. THE CloudFormation_Template SHALL define an ECR Public repository resource deployed in us-east-1 (ECR Public API region)
+2. THE CloudFormation_Template SHALL configure the ECR Public repository with a repository name that identifies the project
+3. THE CloudFormation_Template SHALL output the ECR Public repository URI (public.ecr.aws format) for use by other resources and deployment scripts
+4. THE CloudFormation_Template SHALL include a repository catalog data section with a brief description
 
 ### Requirement 2: Custom Build Image Definition
 
@@ -44,25 +44,25 @@ This feature introduces a custom Docker build image hosted in Amazon ECR that pr
 
 ### Requirement 3: Image Build and Push Automation
 
-**User Story:** As a developer, I want a script that builds the Docker image and pushes it to ECR, so that I can update the build image with a single command.
+**User Story:** As a developer, I want a script that builds the Docker image and pushes it to ECR Public, so that I can update the build image with a single command.
 
 #### Acceptance Criteria
 
-1. THE build script SHALL authenticate with ECR in eu-central-1 using the paddelbuch-dev AWS profile
+1. THE build script SHALL authenticate with ECR Public in us-east-1 using `aws ecr-public get-login-password` and the paddelbuch-dev AWS profile
 2. THE build script SHALL build the Docker image from the Dockerfile
 3. THE build script SHALL tag the built image with both a timestamp-based tag and the `latest` tag
-4. THE build script SHALL push both tags to the ECR repository
-5. IF the ECR authentication fails, THEN THE build script SHALL exit with a non-zero status and print a descriptive error message
+4. THE build script SHALL push both tags to the ECR Public repository (public.ecr.aws URI)
+5. IF the ECR Public authentication fails, THEN THE build script SHALL exit with a non-zero status and print a descriptive error message
 6. IF the Docker build fails, THEN THE build script SHALL exit with a non-zero status and print a descriptive error message
 
 ### Requirement 4: Amplify App Configuration for Custom Image
 
-**User Story:** As a developer, I want the Amplify app configured to use the custom ECR image, so that builds run in the pre-provisioned environment.
+**User Story:** As a developer, I want the Amplify app configured to use the custom ECR Public image, so that builds run in the pre-provisioned environment without requiring cross-account IAM permissions.
 
 #### Acceptance Criteria
 
-1. THE CloudFormation_Template SHALL configure the Amplify_App to use the custom Build_Image from the ECR_Repository as its build environment
-2. THE CloudFormation_Template SHALL grant the Amplify service role permission to pull images from the ECR_Repository
+1. THE CloudFormation_Template SHALL configure the Amplify_App to use the custom Build_Image from the ECR_Public_Repository as its build environment via the `_CUSTOM_IMAGE` environment variable pointing to the public.ecr.aws URI
+2. THE CloudFormation_Template SHALL NOT require an IAM service role or ECR pull policy for the Amplify_App to access the Build_Image, because ECR Public repositories are publicly accessible
 3. WHEN the custom Build_Image is configured, THE Amplify_App SHALL use Ruby 3.4.9 and Node.js 22 from the image PATH without RVM or NVM installation steps
 
 ### Requirement 5: Simplified Build Specification
@@ -85,8 +85,8 @@ This feature introduces a custom Docker build image hosted in Amazon ECR that pr
 
 #### Acceptance Criteria
 
-1. THE documentation SHALL describe the steps to deploy the CloudFormation stack using the AWS CLI with the paddelbuch-dev profile in eu-central-1
-2. THE documentation SHALL describe the steps to build and push the Docker image to ECR
+1. THE documentation SHALL describe the steps to deploy the ECR Public CloudFormation stack using the AWS CLI with the paddelbuch-dev profile in us-east-1
+2. THE documentation SHALL describe the steps to build and push the Docker image to ECR Public
 3. THE documentation SHALL describe how to verify that the Amplify app is using the custom image
 4. THE documentation SHALL describe how to update the image when project dependencies change
 

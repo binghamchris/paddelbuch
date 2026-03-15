@@ -2,17 +2,20 @@
 
 ## Overview
 
-This design introduces a custom Docker build image for the paddelbuch AWS Amplify application. The image pre-packages Ruby 3.4.9, Node.js 22, and all project dependencies (gems + npm packages) on an Amazon Linux 2023 base. It is stored in an ECR repository provisioned via CloudFormation and referenced by the Amplify app resource. A shell script automates building and pushing the image to ECR. The amplify.yml is simplified to remove RVM/NVM installation steps, relying on the pre-installed runtimes in the image.
+This design introduces a custom Docker build image for the paddelbuch AWS Amplify application. The image pre-packages Ruby 3.4.9, Node.js 22, and all project dependencies (gems + npm packages) on an Amazon Linux 2023 base. It is stored in an ECR Public repository (public.ecr.aws) provisioned via CloudFormation and referenced by the Amplify app resource. A shell script automates building and pushing the image to ECR Public. The amplify.yml is simplified to remove RVM/NVM installation steps, relying on the pre-installed runtimes in the image.
+
+ECR Public is required because Amplify's CodeBuild runs in an AWS-managed account (not the customer's account) and cannot pull from private ECR repositories. ECR Public repositories are publicly accessible, so no cross-account IAM permissions are needed.
 
 The goal is to reduce build times by eliminating per-build installation of language runtimes while producing byte-identical site output.
 
 ### Key Design Decisions
 
-1. **Single CloudFormation template** — The ECR repository, Amplify app changes, and IAM permissions live in one template (`infrastructure/custom-build-image.yaml`) separate from the existing `deploy/frontend-deploy.yaml`. This keeps the build-image infrastructure self-contained and avoids modifying the existing deployment stack.
+1. **Single CloudFormation template** — The ECR Public repository lives in one template (`infrastructure/custom-build-image.yaml`) deployed to us-east-1 (the only region supporting ECR Public API), separate from the existing `deploy/frontend-deploy.yaml`. This keeps the build-image infrastructure self-contained.
 2. **Amazon Linux 2023 base** — Matches the default Amplify build environment OS family, minimizing differences that could affect build output.
 3. **Ruby compiled from source** — AL2023 does not ship Ruby 3.4.9 packages. Compiling from source with the exact version ensures parity with the current RVM-based build.
 4. **Node.js from official binary archive** — The Node.js project publishes pre-built Linux x64 binaries. Using these avoids compiling from source and is more reliable than third-party repos.
 5. **`bundle install` and `npm ci` retained in amplify.yml** — Even though dependencies are pre-installed in the image, running these at build time ensures the lock files are always honoured. With warm caches from the image, these commands complete in seconds.
+6. **ECR Public instead of private ECR** — Amplify's CodeBuild runs in AWS account 644397351177 (Amplify's internal account) and cannot pull from private ECR repos in the customer's account. ECR Public (public.ecr.aws) is publicly accessible, eliminating the need for cross-account IAM roles and ECR pull policies. The ECR Public API is only available in us-east-1.
 
 ## Architecture
 
@@ -20,16 +23,16 @@ The goal is to reduce build times by eliminating per-build installation of langu
 graph TD
     subgraph "Developer Workstation"
         A[build-and-push.sh] -->|docker build| B[Dockerfile]
-        A -->|docker push| C[ECR Repository]
+        A -->|docker push| C[ECR Public Repository\npublic.ecr.aws]
+    end
+
+    subgraph "AWS - us-east-1"
+        E[CloudFormation Stack] -->|provisions| C
     end
 
     subgraph "AWS - eu-central-1"
-        C -->|pull image| D[Amplify Build Environment]
-        E[CloudFormation Stack] -->|provisions| C
-        E -->|configures| F[Amplify App]
-        F -->|uses custom image| D
-        G[IAM Role] -->|ecr:GetDownloadUrlForLayer\necr:BatchGetImage| C
-        F -->|assumes| G
+        F[Amplify App] -->|_CUSTOM_IMAGE env var| D[Amplify Build Environment]
+        C -->|pull public image| D
     end
 
     subgraph "Amplify Build Pipeline"
@@ -42,9 +45,9 @@ graph TD
 ### Build Flow
 
 1. Developer runs `infrastructure/build-and-push.sh`
-2. Script authenticates with ECR, builds the Docker image, tags it (`latest` + timestamp), and pushes both tags
-3. CloudFormation stack provisions the ECR repo and configures the Amplify app to use the custom image
-4. On each Amplify build, the custom image is pulled — Ruby 3.4.9 and Node.js 22 are already on PATH
+2. Script authenticates with ECR Public (us-east-1), builds the Docker image, tags it (`latest` + timestamp), and pushes both tags to public.ecr.aws
+3. CloudFormation stack (us-east-1) provisions the ECR Public repo; the Amplify app (eu-central-1) references the public image URI via `_CUSTOM_IMAGE` environment variable
+4. On each Amplify build, the custom image is pulled from public.ecr.aws — no IAM permissions needed — Ruby 3.4.9 and Node.js 22 are already on PATH
 5. `amplify.yml` runs `npm ci`, `bundle install`, asset scripts, then the Jekyll build and tests
 
 ## Components and Interfaces
@@ -52,36 +55,33 @@ graph TD
 ### 1. CloudFormation Template (`infrastructure/custom-build-image.yaml`)
 
 Provisions:
-- **ECR Repository** — stores the custom build image; tag immutability disabled; lifecycle policy retains max 5 untagged images
-- **IAM Policy** — grants the Amplify service role `ecr:GetDownloadUrlForLayer`, `ecr:BatchGetImage`, and `ecr:GetAuthorizationToken` permissions
-- **Outputs** — ECR repository URI for use by the build script
+- **ECR Public Repository** — stores the custom build image on public.ecr.aws; includes catalog data with a brief description
+- **Outputs** — ECR Public repository URI for use by the build script and Amplify configuration
 
-The existing `deploy/frontend-deploy.yaml` Amplify app resource will be updated to add the `CustomImage` property pointing to the ECR repository URI. This is done by adding a new parameter `CustomBuildImageUri` (defaulting to empty string) and conditionally setting `CustomImage` when the parameter is provided.
+This template must be deployed to us-east-1 (the only region supporting the ECR Public API). The existing `deploy/frontend-deploy.yaml` Amplify app resource references the public image URI via the `_CUSTOM_IMAGE` environment variable. No IAM service role or ECR pull policy is needed because ECR Public repositories are publicly accessible.
 
 **Parameters:**
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| RepositoryName | String | ECR repository name (default: `paddelbuch-build-image`) |
+| RepositoryName | String | ECR Public repository name (default: `paddelbuch-build-image`) |
 
 **Resources:**
 | Resource | Type | Purpose |
 |----------|------|---------|
-| BuildImageRepository | AWS::ECR::Repository | Stores Docker images |
-| BuildImagePolicy | AWS::ECR::Repository LifecyclePolicy | Retains max 5 untagged images |
+| BuildImageRepository | AWS::ECR::PublicRepository | Stores Docker images on public.ecr.aws |
 
 **Outputs:**
 | Output | Description |
 |--------|-------------|
-| RepositoryUri | Full ECR repository URI |
-| RepositoryArn | ARN for IAM policy references |
+| RepositoryUri | Full ECR Public repository URI (public.ecr.aws/...) |
 
 ### 2. Updated Amplify Template (`deploy/frontend-deploy.yaml`)
 
 Changes to the existing template:
 - New parameter `CustomBuildImageUri` (String, default empty)
 - New condition `HasCustomImage` — true when `CustomBuildImageUri` is non-empty
-- `PaddelBuchApp` resource gets `CustomImage` property set conditionally
-- New `AmplifyEcrPolicy` resource (AWS::IAM::ManagedPolicy or inline policy on the Amplify service role) granting ECR pull permissions scoped to the build image repository
+- `PaddelBuchApp` resource sets `_CUSTOM_IMAGE` environment variable to the ECR Public URI when provided
+- No IAM service role or ECR pull policy is needed — ECR Public images are publicly accessible, so Amplify's internal CodeBuild can pull them directly
 
 ### 3. Dockerfile (`infrastructure/Dockerfile`)
 
@@ -122,18 +122,19 @@ WORKDIR /app
 set -euo pipefail
 
 PROFILE=paddelbuch-dev
-REGION=eu-central-1
+REGION=us-east-1  # ECR Public API is only available in us-east-1
 REPO_NAME=paddelbuch-build-image
 TIMESTAMP=$(date +%Y%m%d%H%M%S)
 
-# 1. Get ECR repository URI from CloudFormation output
-# 2. Authenticate Docker with ECR
+# 1. Get ECR Public repository URI from CloudFormation output (us-east-1)
+# 2. Authenticate Docker with ECR Public: aws ecr-public get-login-password --region us-east-1
+#    docker login --username AWS --password-stdin public.ecr.aws
 # 3. Build image: docker build -t $REPO_URI:latest -f infrastructure/Dockerfile .
 # 4. Tag with timestamp: docker tag $REPO_URI:latest $REPO_URI:$TIMESTAMP
-# 5. Push both tags
+# 5. Push both tags to public.ecr.aws
 ```
 
-The script is run from the project root so that `COPY Gemfile ...` in the Dockerfile can access project files. The Dockerfile path is specified via `-f infrastructure/Dockerfile`.
+The script is run from the project root so that `COPY Gemfile ...` in the Dockerfile can access project files. The Dockerfile path is specified via `-f infrastructure/Dockerfile`. Note that ECR Public authentication uses `aws ecr-public get-login-password` (not `aws ecr get-login-password`) and always targets us-east-1.
 
 ### 5. Simplified `amplify.yml`
 
@@ -179,12 +180,11 @@ A single `README.md` covering:
 
 This feature does not introduce application-level data models. The relevant "data" is infrastructure configuration:
 
-### ECR Repository Configuration
+### ECR Public Repository Configuration
 ```yaml
 RepositoryName: paddelbuch-build-image
-ImageTagMutability: MUTABLE
-LifecyclePolicy:
-  MaxUntaggedImages: 5
+RepositoryCatalogData:
+  AboutText: Custom Amplify build image for paddelbuch with Ruby 3.4.9 and Node.js 22
 ```
 
 ### Docker Image Tags
@@ -195,7 +195,7 @@ LifecyclePolicy:
 
 ### Amplify Custom Image Reference
 ```yaml
-CustomImage: !Sub "${AccountId}.dkr.ecr.${Region}.amazonaws.com/${RepositoryName}:latest"
+_CUSTOM_IMAGE: public.ecr.aws/<alias>/paddelbuch-build-image:latest
 ```
 
 
@@ -215,9 +215,9 @@ Most acceptance criteria in this feature are structural checks on configuration 
 
 The remaining acceptance criteria are verified through example-based tests and integration checks:
 
-- **CloudFormation structure** (1.1–1.4, 4.1–4.2): Verified by parsing the YAML and asserting specific resource types, properties, and outputs exist.
+- **CloudFormation structure** (1.1–1.4, 4.1–4.2): Verified by parsing the YAML and asserting specific resource types, properties, and outputs exist. ECR Public template uses `AWS::ECR::PublicRepository`; Amplify template has no IAM role/policy for ECR.
 - **Dockerfile structure** (2.1–2.6): Verified by parsing the Dockerfile and asserting FROM base, Ruby/Node install commands, COPY instructions, and ENV settings.
-- **Build script structure** (3.1–3.4): Verified by parsing the shell script and asserting ECR auth, docker build, tag, and push commands.
+- **Build script structure** (3.1–3.4): Verified by parsing the shell script and asserting ECR Public auth (`ecr-public get-login-password`), docker build, tag, and push commands.
 - **amplify.yml retained commands** (5.3–5.7): Verified by parsing the YAML and asserting specific commands are present in preBuild/build phases.
 - **Version parity** (7.2–7.5): Verified by comparing versions referenced in the Dockerfile against `.ruby-version` and `Gemfile.lock`/`package-lock.json`.
 - **Documentation** (6.1–6.4): Verified by human review.
@@ -231,7 +231,7 @@ The build script uses `set -euo pipefail` to ensure any command failure immediat
 
 | Scenario | Handling |
 |----------|----------|
-| ECR authentication failure | `aws ecr get-login-password` fails → script exits with error message from AWS CLI |
+| ECR Public authentication failure | `aws ecr-public get-login-password` fails → script exits with error message from AWS CLI |
 | Docker build failure | `docker build` fails → script exits; partial image is not pushed |
 | Docker push failure | `docker push` fails → script exits; the `latest` tag may or may not be updated depending on which push failed |
 | Missing AWS profile | AWS CLI returns credential error → script exits |
@@ -249,7 +249,7 @@ The build script uses `set -euo pipefail` to ensure any command failure immediat
 
 | Scenario | Handling |
 |----------|----------|
-| Custom image pull failure | Amplify reports image pull error in build logs; verify ECR permissions and image URI |
+| Custom image pull failure | Amplify reports image pull error in build logs; verify the public.ecr.aws image URI is correct and the image exists |
 | `bundle install` version mismatch | Bundler reports conflict; rebuild and push the image with updated lock file |
 | `npm ci` version mismatch | npm reports conflict; rebuild and push the image with updated lock file |
 
@@ -260,12 +260,11 @@ The build script uses `set -euo pipefail` to ensure any command failure immediat
 Example-based tests verify the structural correctness of generated configuration files. These are best implemented as simple assertion tests:
 
 1. **CloudFormation template validation**
-   - Template contains `AWS::ECR::Repository` resource
-   - ECR repository has `ImageTagMutability: MUTABLE`
-   - Lifecycle policy retains max 5 untagged images
-   - Outputs section includes repository URI
-   - Amplify app resource has conditional `CustomImage` property
-   - IAM policy grants ECR pull permissions
+   - Template contains `AWS::ECR::PublicRepository` resource
+   - ECR Public repository has catalog data
+   - Outputs section includes repository URI (public.ecr.aws format)
+   - Amplify app template has `CustomBuildImageUri` parameter and `_CUSTOM_IMAGE` environment variable
+   - No IAM service role or ECR pull policy resources exist (not needed for ECR Public)
 
 2. **Dockerfile validation**
    - FROM line references `amazonlinux:2023`
@@ -277,7 +276,8 @@ Example-based tests verify the structural correctness of generated configuration
 
 3. **Build script validation**
    - Uses `paddelbuch-dev` AWS profile
-   - Targets `eu-central-1` region
+   - Targets `us-east-1` region for ECR Public API
+   - Uses `aws ecr-public get-login-password` for authentication
    - Contains `docker build`, `docker tag`, and `docker push` commands
    - Tags with both `latest` and timestamp format
    - Uses `set -euo pipefail`
@@ -308,7 +308,7 @@ Property-based tests use `fast-check` (JavaScript) for universal property verifi
 
 These tests require AWS infrastructure and are performed manually:
 
-1. Deploy CloudFormation stack and verify ECR repository exists
-2. Build and push Docker image; verify it appears in ECR
+1. Deploy CloudFormation stack to us-east-1 and verify ECR Public repository exists
+2. Build and push Docker image; verify it appears in ECR Public (public.ecr.aws)
 3. Trigger Amplify build with custom image; verify build succeeds
 4. Compare `_site/` output between default and custom image builds for byte-identical parity
