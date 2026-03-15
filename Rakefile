@@ -1,7 +1,7 @@
 require 'jekyll'
 require 'fileutils'
 
-TEMP_DIRS = %w[_site_de _site_en _site_prefetch].freeze
+TEMP_DIRS = %w[_site_de _site_en].freeze
 
 # ---------------------------------------------------------------------------
 # Helper methods for the parallel build pipeline
@@ -9,12 +9,19 @@ TEMP_DIRS = %w[_site_de _site_en _site_prefetch].freeze
 
 def prefetch_and_validate!
   puts "==> Pre-fetching Contentful data..."
-  success = system("bundle exec jekyll build --config _config.yml,_config_prefetch.yml")
-  unless success
-    abort "[prefetch] Pre-fetch build failed (exit #{$?.exitstatus}). Aborting."
-  end
-  FileUtils.rm_rf('_site_prefetch')
+
+  # Boot Jekyll just enough to run generators (ContentfulFetcher has
+  # priority :highest). This skips the expensive render + write phases
+  # that a full `jekyll build` would perform (~24s saved locally, ~60s on CI).
+  config = Jekyll.configuration('config' => %w[_config.yml _config_prefetch.yml])
+  site = Jekyll::Site.new(config)
+  site.reset
+  site.read
+  site.generate
+
   puts "==> Pre-fetch complete."
+rescue => e
+  abort "[prefetch] Pre-fetch failed: #{e.message}. Aborting."
 end
 
 def run_parallel_builds!
