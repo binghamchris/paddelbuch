@@ -13,6 +13,20 @@ Resources:
     Properties:
       RepositoryName: !Ref RepositoryName
       ImageTagMutability: MUTABLE
+      RepositoryPolicyText:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: AllowAmplifyPull
+            Effect: Allow
+            Principal:
+              Service: amplify.amazonaws.com
+            Action:
+              - ecr:GetDownloadUrlForLayer
+              - ecr:BatchGetImage
+              - ecr:BatchCheckLayerAvailability
+            Condition:
+              StringEquals:
+                aws:SourceAccount: !Ref AWS::AccountId
       LifecyclePolicy:
         LifecyclePolicyText: |
           {
