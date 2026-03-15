@@ -57,22 +57,12 @@ Conditions:
     !Equals
       - !Ref AppStage
       - PRODUCTION
-  HasCustomImage:
-    !Not
-      - !Equals
-          - !Ref CustomBuildImageUri
-          - ""
 Resources:
   PaddelBuchApp:
     Type: AWS::Amplify::App
     Properties: 
       AccessToken:
         Ref: GithubToken
-      IAMServiceRole:
-        !If
-          - HasCustomImage
-          - !GetAtt AmplifyServiceRole.Arn
-          - !Ref AWS::NoValue
       CustomHeaders: |-
         customHeaders:
           # Security and default cache headers for all files (recursive)
@@ -219,41 +209,4 @@ Resources:
         - BranchName:
             !GetAtt PaddelBuchBranch.BranchName
           Prefix: www
-  AmplifyServiceRole:
-    Type: AWS::IAM::Role
-    Condition: HasCustomImage
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: amplify.amazonaws.com
-            Action: sts:AssumeRole
-      Tags:
-        - Key: app
-          Value:
-            Ref: AppName
-        - Key: stage
-          Value:
-            Ref: AppStage
-  AmplifyEcrPolicy:
-    Type: AWS::IAM::Policy
-    Condition: HasCustomImage
-    Properties:
-      PolicyName: AmplifyEcrPullPolicy
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Action:
-              - ecr:GetDownloadUrlForLayer
-              - ecr:BatchGetImage
-            Resource:
-              !Sub "arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/*"
-          - Effect: Allow
-            Action:
-              - ecr:GetAuthorizationToken
-            Resource: "*"
-      Roles:
-        - !Ref AmplifyServiceRole
+
