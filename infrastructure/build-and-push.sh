@@ -6,16 +6,17 @@ REGION=us-east-1
 STACK_NAME=paddelbuch-custom-build-image
 TIMESTAMP=$(date +%Y%m%d%H%M%S)
 
-# Get ECR Public repository URI from CloudFormation output (us-east-1)
-REPO_URI=$(aws cloudformation describe-stacks \
-  --stack-name "$STACK_NAME" \
+# Get ECR Public repository URI directly from ECR Public API (includes registry alias)
+REPO_NAME=paddelbuch-build-image
+REPO_URI=$(aws ecr-public describe-repositories \
+  --repository-names "$REPO_NAME" \
   --profile "$PROFILE" \
   --region "$REGION" \
-  --query "Stacks[0].Outputs[?OutputKey=='RepositoryUri'].OutputValue" \
+  --query "repositories[0].repositoryUri" \
   --output text)
 
 if [[ -z "$REPO_URI" || "$REPO_URI" == "None" ]]; then
-  echo "Error: Could not retrieve ECR Public repository URI from stack '$STACK_NAME'." >&2
+  echo "Error: Could not retrieve ECR Public repository URI for '$REPO_NAME'." >&2
   exit 1
 fi
 
