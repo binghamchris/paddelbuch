@@ -12,7 +12,7 @@ frontend:
         - bundle install
     build:
       commands:
-        - bundle exec jekyll build --verbose
+        - bundle exec rake build:site
         - npm test
   artifacts:
     baseDirectory: _site

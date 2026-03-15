@@ -15,10 +15,7 @@ permalink: /offene-daten/api/
   Requirements: 9.1, 9.2, 9.3
 -->
 
-{% assign locale_prefix = "" %}
-{% if site.lang == "en" %}
-  {% assign locale_prefix = "/en" %}
-{% endif %}
+{% assign locale_prefix = site.locale_prefix %}
 
 <div class="container">
   <h1>{% t api.title %}</h1>

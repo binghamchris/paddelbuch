@@ -21,7 +21,11 @@ module Jekyll
       default_lang = site.config['default_lang'] || 'de'
 
       # Requirement 2: Locale prefix
-      site.config['locale_prefix'] = (locale != default_lang) ? "/#{locale}" : ''
+      # Respect an explicit locale_prefix from per-locale config overrides
+      # (needed for parallel builds where the plugin sets default_lang = languages.first).
+      unless site.config.key?('locale_prefix')
+        site.config['locale_prefix'] = (locale != default_lang) ? "/#{locale}" : ''
+      end
 
       # Requirement 3: Header navigation data
       precompute_header_nav(site, locale)
@@ -62,7 +66,7 @@ module Jekyll
 
     def precompute_map_config_json(site, locale)
       default_lang = site.config['default_lang'] || 'de'
-      locale_prefix = (locale != default_lang) ? "/#{locale}" : ''
+      locale_prefix = site.config['locale_prefix']
       name_key = "name_#{locale}"
 
       # Paddle craft types for dimension config

@@ -1,0 +1,5 @@
+languages: ["en"]
+destination: _site_en
+locale_prefix: "/en"
+all_languages: ["de", "en"]
+skip_contentful_fetch: true
