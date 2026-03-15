@@ -67,7 +67,7 @@ Create a custom Docker build image for the paddelbuch Amplify app that pre-packa
 - [x] 4. Checkpoint - Verify infrastructure files
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 5. Update Amplify template for custom image support
+- [x] 5. Update Amplify template for custom image support
   - [x] 5.1 Add `CustomBuildImageUri` parameter and `HasCustomImage` condition to `deploy/frontend-deploy.yaml`
     - New parameter `CustomBuildImageUri` (String, default empty)
     - New condition `HasCustomImage` that is true when parameter is non-empty
@@ -80,7 +80,7 @@ Create a custom Docker build image for the paddelbuch Amplify app that pre-packa
     - Remove `AmplifyServiceRole` and `AmplifyEcrPolicy` resources if present
     - _Requirements: 4.2_
 
-  - [~] 5.3 Write unit tests for updated Amplify template
+  - [x] 5.3 Write unit tests for updated Amplify template
     - Parse `deploy/frontend-deploy.yaml` and assert: `CustomBuildImageUri` parameter exists, `HasCustomImage` condition exists, `_CUSTOM_IMAGE` environment variable is set, no `AmplifyServiceRole` or `AmplifyEcrPolicy` resources exist
     - Test file: `_tests/unit/custom-build-image-amplify-template.test.js`
     - _Requirements: 4.1, 4.2, 4.3_
