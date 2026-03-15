@@ -68,14 +68,14 @@ Create a custom Docker build image for the paddelbuch Amplify app that pre-packa
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 5. Update Amplify template for custom image support
-  - [~] 5.1 Add `CustomBuildImageUri` parameter and `HasCustomImage` condition to `deploy/frontend-deploy.yaml`
+  - [x] 5.1 Add `CustomBuildImageUri` parameter and `HasCustomImage` condition to `deploy/frontend-deploy.yaml`
     - New parameter `CustomBuildImageUri` (String, default empty)
     - New condition `HasCustomImage` that is true when parameter is non-empty
     - Set `_CUSTOM_IMAGE` environment variable on `PaddelBuchApp` to the ECR Public URI
     - No IAM service role or ECR pull policy needed (ECR Public is publicly accessible)
     - _Requirements: 4.1, 4.2, 4.3_
 
-  - [~] 5.2 ~~Add ECR pull permissions to the Amplify template~~ (REMOVED — not needed for ECR Public)
+  - [x] 5.2 ~~Add ECR pull permissions to the Amplify template~~ (REMOVED — not needed for ECR Public)
     - ECR Public repositories are publicly accessible; Amplify's internal CodeBuild can pull without IAM permissions
     - Remove `AmplifyServiceRole` and `AmplifyEcrPolicy` resources if present
     - _Requirements: 4.2_

@@ -34,9 +34,11 @@ describe('Amplify template – custom build image support', () => {
     expect(param.Default).toBe('');
   });
 
-  // Requirement 4.1: HasCustomImage condition exists
-  test('HasCustomImage condition exists', () => {
-    expect(template.Conditions).toHaveProperty('HasCustomImage');
+  // Requirement 4.2: No HasCustomImage condition (not needed for ECR Public)
+  test('HasCustomImage condition does not exist (not needed for ECR Public)', () => {
+    if (template.Conditions) {
+      expect(template.Conditions).not.toHaveProperty('HasCustomImage');
+    }
   });
 
   // Requirement 4.3: PaddelBuchApp has _CUSTOM_IMAGE environment variable referencing CustomBuildImageUri
@@ -53,31 +55,18 @@ describe('Amplify template – custom build image support', () => {
     expect(customImageVar.Value['Ref']).toBe('CustomBuildImageUri');
   });
 
-  // Requirement 4.2: AmplifyEcrPolicy resource exists with ECR pull actions
-  test('AmplifyEcrPolicy resource exists with correct ECR actions', () => {
-    const policy = template.Resources.AmplifyEcrPolicy;
-    expect(policy).toBeDefined();
-    expect(policy.Type).toBe('AWS::IAM::Policy');
-
-    const statements = policy.Properties.PolicyDocument.Statement;
-    const allActions = statements.flatMap((s) =>
-      Array.isArray(s.Action) ? s.Action : [s.Action]
-    );
-
-    expect(allActions).toContain('ecr:GetDownloadUrlForLayer');
-    expect(allActions).toContain('ecr:BatchGetImage');
-    expect(allActions).toContain('ecr:GetAuthorizationToken');
+  // Requirement 4.2: No AmplifyServiceRole or AmplifyEcrPolicy (ECR Public is publicly accessible)
+  test('AmplifyServiceRole resource does not exist (not needed for ECR Public)', () => {
+    expect(template.Resources).not.toHaveProperty('AmplifyServiceRole');
   });
 
-  // Requirement 4.2: AmplifyServiceRole resource exists for Amplify
-  test('AmplifyServiceRole IAM role exists for amplify.amazonaws.com', () => {
-    const role = template.Resources.AmplifyServiceRole;
-    expect(role).toBeDefined();
-    expect(role.Type).toBe('AWS::IAM::Role');
+  test('AmplifyEcrPolicy resource does not exist (not needed for ECR Public)', () => {
+    expect(template.Resources).not.toHaveProperty('AmplifyEcrPolicy');
+  });
 
-    const principals = role.Properties.AssumeRolePolicyDocument.Statement.map(
-      (s) => s.Principal.Service
-    );
-    expect(principals).toContain('amplify.amazonaws.com');
+  // Requirement 4.2: PaddelBuchApp has no IAMServiceRole property
+  test('PaddelBuchApp does not have IAMServiceRole property', () => {
+    const app = template.Resources.PaddelBuchApp;
+    expect(app.Properties).not.toHaveProperty('IAMServiceRole');
   });
 });
