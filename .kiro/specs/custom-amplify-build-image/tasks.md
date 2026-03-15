@@ -109,8 +109,8 @@ Create a custom Docker build image for the paddelbuch Amplify app that pre-packa
 - [x] 7. Checkpoint - Verify all templates and build config
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 8. Create deployment documentation
-  - [~] 8.1 Create `docs/custom-amplify-build-image/README.md`
+- [x] 8. Create deployment documentation
+  - [x] 8.1 Create `docs/custom-amplify-build-image/README.md`
     - Document prerequisites (AWS CLI, Docker, paddelbuch-dev profile)
     - Document CloudFormation stack deployment steps using AWS CLI with paddelbuch-dev profile in us-east-1 (ECR Public API region)
     - Document building and pushing the Docker image to ECR Public
