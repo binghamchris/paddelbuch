@@ -6,14 +6,14 @@ Create a custom Docker build image for the paddelbuch Amplify app that pre-packa
 
 ## Tasks
 
-- [ ] 1. Create ECR Public CloudFormation template and infrastructure directory
+- [x] 1. Create ECR Public CloudFormation template and infrastructure directory
   - [x] 1.1 Create `infrastructure/custom-build-image.yaml` with ECR Public repository resource
     - Define `AWS::ECR::PublicRepository` with catalog data description
     - Template must be deployed to us-east-1 (ECR Public API region)
     - Add `RepositoryUri` output (public.ecr.aws format)
     - _Requirements: 1.1, 1.2, 1.3, 1.4_
 
-  - [~] 1.2 Write unit tests for ECR Public CloudFormation template
+  - [x] 1.2 Write unit tests for ECR Public CloudFormation template
     - Parse `infrastructure/custom-build-image.yaml` and assert ECR Public resource type (`AWS::ECR::PublicRepository`), catalog data, and outputs
     - Test file: `_tests/unit/custom-build-image-ecr.test.js`
     - _Requirements: 1.1, 1.2, 1.3, 1.4_
