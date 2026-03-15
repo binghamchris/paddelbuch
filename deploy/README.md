@@ -65,29 +65,32 @@ aws cloudformation deploy \
 The site is built using Jekyll with the following process (defined in `amplify.yml`):
 
 1. **preBuild Phase**:
-   - Install Ruby 3.3.0 via rbenv
-   - Install bundler and project gems
-   - Install Node.js dependencies for testing
+   - Install npm dependencies (`npm ci`)
+   - Download and self-host Google Fonts (`npm run download-fonts`)
+   - Copy vendor assets from node_modules (`npm run copy-assets`)
+   - Install Ruby gem dependencies (`bundle install`)
 
 2. **build Phase**:
-   - Execute `bundle exec jekyll build`
-   - Run tests (optional)
+   - Execute `bundle exec rake build:site` (parallel locale build pipeline)
+   - Run JavaScript tests (`npm test`)
 
 3. **artifacts**:
    - Output directory: `_site`
    - All files are deployed to CloudFront
 
+A custom Docker build image (see [docs/custom-amplify-build-image/README.md](../docs/custom-amplify-build-image/README.md)) pre-packages Ruby 3.4.9 and Node.js 22 to speed up builds.
+
 ## Cache Configuration
 
-Different content types have different cache TTLs:
+Different content types have different cache TTLs (configured in the CloudFormation template's `CustomHeaders`):
 
 | Content Type | Pattern | TTL | Rationale |
 |--------------|---------|-----|-----------|
-| HTML pages | `*.html` | 5 minutes | Content freshness |
+| HTML pages | `*.html` | 1 day | Content changes infrequently |
 | Spatial tiles | `/api/tiles/**/*.json` | 7 days | Only changes on rebuild |
-| API JSON | `/api/*.json` | 6 hours | Balance freshness/performance |
-| Static assets | `/assets/**/*` | 30 days | Versioned, immutable |
-| Default | `*` | 6 hours | General content |
+| API JSON | `/api/*.json` | 1 day | Balance freshness/performance |
+| Static assets | `/assets/**/*` | 30 days | Immutable |
+| Default | `**/*` | 6 hours | General content |
 
 ## Contentful Webhook Setup
 
