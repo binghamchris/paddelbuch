@@ -19,7 +19,7 @@ The main goal of this project is to provide a central, nation-wide store of info
 - **Maps**: Leaflet.js with OpenStreetMap tiles
 - **Hosting**: AWS Amplify (eu-central-1)
 - **Languages**: German (default), English
-- **Ruby**: 3.4.1 (managed with chruby)
+- **Ruby**: 3.4.9 (managed with chruby)
 - **Testing**: RSpec + Rantly (Ruby), Jest + fast-check (JavaScript)
 
 ## Project Structure
@@ -27,6 +27,9 @@ The main goal of this project is to provide a central, nation-wide store of info
 ```
 paddelbuch/
 ├── _config.yml           # Jekyll configuration
+├── _config_de.yml        # German locale build override
+├── _config_en.yml        # English locale build override
+├── _config_prefetch.yml  # Contentful pre-fetch build override
 ├── _data/                # Data files (populated from Contentful)
 │   ├── spots.yml         # Spot data
 │   ├── waterways.yml     # Waterway data
@@ -100,7 +103,7 @@ paddelbuch/
 
 ### Prerequisites
 
-- Ruby 3.4.1 (managed with chruby)
+- Ruby 3.4.9 (managed with chruby)
 - Bundler
 - Node.js (for running tests)
 - librsvg (`brew install librsvg`) — for regenerating the Apple Touch Icon PNG
@@ -136,7 +139,7 @@ System environment variables always take priority over `.env` file values.
 
 ```bash
 # Install Ruby dependencies
-source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.1 && bundle install
+source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.9 && bundle install
 
 # Install Node.js dependencies (for testing)
 npm install
@@ -146,7 +149,7 @@ npm install
 
 ```bash
 # Start Jekyll development server (loads .env.development)
-source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.1 && bundle exec jekyll serve
+source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.9 && bundle exec jekyll serve
 ```
 
 The site will be available at `http://localhost:4000`
@@ -155,8 +158,14 @@ The site will be available at `http://localhost:4000`
 
 ```bash
 # Test a production build locally (loads .env.production)
-source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.1 && JEKYLL_ENV=production bundle exec jekyll build
+source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.9 && JEKYLL_ENV=production bundle exec rake build:site
 ```
+
+The `build:site` Rake task runs a parallel build pipeline that reduces build time by ~40% compared to the previous sequential approach:
+
+1. **Pre-fetch** — A single Jekyll invocation triggers `ContentfulFetcher` to populate `_data/` with fresh Contentful content.
+2. **Parallel builds** — Two Jekyll processes run concurrently, one per locale (`de` and `en`), each writing to its own temporary output directory.
+3. **Merge** — The German build output (root pages, `assets/`, `api/`) and the English build output (`en/` subtree only) are combined into `_site/`.
 
 The built site will be in the `_site/` directory.
 
@@ -173,7 +182,7 @@ npm run test:property
 npm run test:watch
 
 # Run Ruby tests (RSpec + Rantly)
-source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.1 && bundle exec rspec
+source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.9 && bundle exec rspec
 ```
 
 ### Vulnerability Scanning
@@ -182,10 +191,10 @@ Scan Ruby and Node.js dependencies for known vulnerabilities:
 
 ```bash
 # Scan Ruby gems only
-source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.1 && bundle exec rake audit
+source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.9 && bundle exec rake audit
 
 # Scan both Ruby gems and npm packages
-source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.1 && bundle exec rake audit:all
+source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.9 && bundle exec rake audit:all
 ```
 
 ## Favicon and Apple Touch Icon
@@ -226,7 +235,7 @@ By default, the build uses the Contentful Sync API for incremental updates. To f
 1. Set the `CONTENTFUL_FORCE_SYNC` environment variable:
 
 ```bash
-source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.1 && CONTENTFUL_FORCE_SYNC=true bundle exec jekyll build
+source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.9 && CONTENTFUL_FORCE_SYNC=true bundle exec jekyll build
 ```
 
 2. Or add `force_contentful_sync: true` to `_config.yml`:
