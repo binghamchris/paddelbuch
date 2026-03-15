@@ -49,7 +49,7 @@ Create a custom Docker build image for the paddelbuch Amplify app that pre-packa
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6_
 
 - [ ] 3. Create the build-and-push script
-  - [~] 3.1 Create `infrastructure/build-and-push.sh`
+  - [x] 3.1 Create `infrastructure/build-and-push.sh`
     - Use `set -euo pipefail`
     - Authenticate with ECR Public using `aws ecr-public get-login-password` with `paddelbuch-dev` profile in `us-east-1`
     - Docker login to `public.ecr.aws`
