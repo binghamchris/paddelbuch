@@ -21,9 +21,19 @@ describe('build-and-push.sh script', () => {
     expect(scriptContent).toMatch(/PROFILE=paddelbuch-dev/);
   });
 
-  // Requirement 3.1: Targets eu-central-1 region
-  test('targets eu-central-1 region', () => {
-    expect(scriptContent).toMatch(/REGION=eu-central-1/);
+  // Requirement 3.1: Targets us-east-1 region (ECR Public API region)
+  test('targets us-east-1 region', () => {
+    expect(scriptContent).toMatch(/REGION=us-east-1/);
+  });
+
+  // Requirement 3.1: Uses ecr-public get-login-password for ECR Public authentication
+  test('uses ecr-public get-login-password for authentication', () => {
+    expect(scriptContent).toMatch(/ecr-public get-login-password/);
+  });
+
+  // Requirement 3.1: Docker login targets public.ecr.aws
+  test('docker login targets public.ecr.aws', () => {
+    expect(scriptContent).toMatch(/public\.ecr\.aws/);
   });
 
   // Requirement 3.2: Contains docker build command

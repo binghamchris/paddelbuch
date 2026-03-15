@@ -48,7 +48,7 @@ Create a custom Docker build image for the paddelbuch Amplify app that pre-packa
     - Test file: `_tests/unit/custom-build-image-dockerfile.test.js`
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6_
 
-- [ ] 3. Create the build-and-push script
+- [x] 3. Create the build-and-push script
   - [x] 3.1 Create `infrastructure/build-and-push.sh`
     - Use `set -euo pipefail`
     - Authenticate with ECR Public using `aws ecr-public get-login-password` with `paddelbuch-dev` profile in `us-east-1`
@@ -59,7 +59,7 @@ Create a custom Docker build image for the paddelbuch Amplify app that pre-packa
     - Make script executable
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6_
 
-  - [~] 3.2 Write unit tests for build-and-push script
+  - [x] 3.2 Write unit tests for build-and-push script
     - Parse `infrastructure/build-and-push.sh` and assert: `set -euo pipefail`, paddelbuch-dev profile, us-east-1 region, `ecr-public get-login-password`, `public.ecr.aws` login, docker build/tag/push commands, latest + timestamp tags
     - Test file: `_tests/unit/custom-build-image-build-script.test.js`
     - _Requirements: 3.1, 3.2, 3.3, 3.4_
