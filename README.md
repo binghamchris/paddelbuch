@@ -4,6 +4,17 @@ PaddelBuch.ch is a website which displays the data published in the public datab
 
 More information about the technological evolution of the project can be found in the [Paddel Buch blog series](https://cloudypandas.ch/series/paddel-buch/) on Cloudy Pandas.
 
+## Documentation
+
+- [Contributing Guide](CONTRIBUTING.md) — How to contribute to the project
+- [Architecture Overview](docs/architecture.md) — Build pipeline, data flow, and system design
+- [Plugin Reference](docs/plugins.md) — All 18 custom Jekyll plugins documented
+- [Frontend Guide](docs/frontend.md) — JavaScript modules, SCSS structure, and vendor assets
+- [Content Model](docs/content-model.md) — Contentful content types and how to add new ones
+- [Testing Guide](docs/testing.md) — Test suites, property-based testing, and how to write new tests
+- [Deployment](deploy/README.md) — AWS Amplify deployment and CloudFormation
+- [Custom Build Image](docs/custom-amplify-build-image/README.md) — Docker build image for Amplify
+
 ## Project Origin
 
 Paddel Buch started following a sea kayaking roundtable meeting organised by Swiss Canoe in June 2021.
