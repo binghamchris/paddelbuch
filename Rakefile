@@ -71,8 +71,8 @@ def merge_outputs!
   puts "==> Merging build outputs into _site/..."
   FileUtils.rm_rf('_site')
   FileUtils.mkdir_p('_site')
-  FileUtils.cp_r('_site_de/.', '_site')
-  FileUtils.cp_r('_site_en/en', '_site/en')
+  FileUtils.cp_r('_site_de/.', '_site', preserve: true)
+  FileUtils.cp_r('_site_en/en', '_site/en', preserve: true)
   puts "==> Merge complete."
 end
 
