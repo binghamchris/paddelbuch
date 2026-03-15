@@ -3,16 +3,13 @@ frontend:
   phases:
     preBuild:
       commands:
-        - nvm install 22
         - npm ci
         - npm run download-fonts
         - npm run copy-assets
-        - rvm install 3.4.9
-        - rvm use 3.4.9
         - bundle install
     build:
       commands:
-        - bundle exec jekyll build --verbose
+        - bundle exec rake build:site
         - npm test
   artifacts:
     baseDirectory: _site

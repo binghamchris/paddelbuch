@@ -48,6 +48,10 @@ Parameters:
     Type: String
     Description: The GitHub personal access token to be used during the setup of the Amplify app
     NoEcho: true
+  CustomBuildImageUri:
+    Type: String
+    Description: The ECR image URI for the custom Amplify build image (leave empty to use default Amplify image)
+    Default: ""
 Conditions:
   IsProduction:
     !Equals
@@ -149,6 +153,9 @@ Resources:
             Ref: EnvVarContentfulEnv
         - Name: JEKYLL_ENV
           Value: production
+        - Name: _CUSTOM_IMAGE
+          Value:
+            Ref: CustomBuildImageUri
       Name:
         Ref: AppName
       Repository:
@@ -202,3 +209,4 @@ Resources:
         - BranchName:
             !GetAtt PaddelBuchBranch.BranchName
           Prefix: www
+

@@ -18,11 +18,7 @@
 {% assign waterways = include.waterways %}
 {% assign current_locale = site.lang | default: 'de' %}
 
-{% if site.lang != site.default_lang %}
-  {% assign locale_prefix = '/' | append: site.lang %}
-{% else %}
-  {% assign locale_prefix = '' %}
-{% endif %}
+{% assign locale_prefix = site.locale_prefix %}
 
 <!-- Full Description (Requirement 7.4) -->
 {% if notice.description %}

@@ -269,7 +269,7 @@ describe('Protected Area Popup Content - Property 12', () => {
           localeArb,
           fc.string({ minLength: 1, maxLength: 50 }).filter(s => s.trim().length > 0),
           (protectedArea, locale, translatedName) => {
-            const typeNames = {};
+            const typeNames = Object.create(null);
             typeNames[protectedArea.protectedAreaType_slug] = translatedName;
             const popupContent = generateProtectedAreaPopupContent(protectedArea, locale, typeNames);
             

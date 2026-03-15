@@ -19,27 +19,8 @@ pageName: obstacle-details
 {% assign current_locale = site.lang | default: 'de' %}
 {% assign obstacle = page %}
 
-<!-- Get obstacle type name -->
-{% assign obstacle_type_slug = obstacle.obstacleType_slug %}
-{% if obstacle_type_slug %}
-  {% assign obstacle_type = site.data.types.obstacle_types | where: "slug", obstacle_type_slug | first %}
-  {% if obstacle_type %}
-    {% if current_locale == 'en' %}
-      {% assign obstacle_type_name = obstacle_type.name_en %}
-    {% else %}
-      {% assign obstacle_type_name = obstacle_type.name_de %}
-    {% endif %}
-  {% else %}
-    {% assign obstacle_type_name = obstacle_type_slug %}
-  {% endif %}
-{% endif %}
-
-<!-- Get waterway information -->
-{% assign waterway_slug = obstacle.waterway_slug %}
-{% if waterway_slug %}
-  {% assign waterways_data = site.data.waterways | where: "locale", current_locale %}
-  {% assign waterway = waterways_data | where: "slug", waterway_slug | first %}
-{% endif %}
+{% assign obstacle_type_name = page.obstacle_type_name %}
+{% assign locale_prefix = site.locale_prefix %}
 
 <div class="container-fluid">
   <div class="row">
@@ -61,7 +42,7 @@ pageName: obstacle-details
       {% endif %}
       
       <!-- Obstacle Details Table (Requirement 5.4) -->
-      {% include obstacle-detail-content.html obstacle=obstacle waterway=waterway obstacle_type_name=obstacle_type_name %}
+      {% include obstacle-detail-content.html obstacle=obstacle waterway_name=page.waterway_name waterway_slug=page.waterway_slug obstacle_type_name=obstacle_type_name %}
     </div>
   </div>
 </div>
