@@ -5,76 +5,78 @@
   Supports light (for popups) and dark (for detail panes) variants.
   
   Parameters:
-  - include.type: The spot type slug (e.g., 'einstieg-ausstieg', 'nur-einstieg', etc.)
-  - include.rejected: Boolean indicating if the spot is rejected (uses no-entry icon)
+  - include.icon_name: Pre-computed icon name (e.g., 'entryexit', 'entry', 'noentry')
+  - include.icon_alt: Pre-computed alt text for the icon
+  - include.type: (fallback) The spot type slug — used only when icon_name is not provided
+  - include.rejected: (fallback) Boolean — used only when icon_name is not provided
   - include.variant: 'light' (default) or 'dark' - determines icon color scheme
   - include.size: Icon size in pixels (default: 20)
   - include.class: Additional CSS classes to apply
   
-  Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6
+  Requirements: 1.5, 1.6
 -->
 
-{% assign spot_type = include.type %}
-{% assign is_rejected = include.rejected %}
 {% assign variant = include.variant | default: 'light' %}
 {% assign icon_size = include.size | default: 20 %}
 {% assign extra_class = include.class | default: '' %}
-{% assign current_locale = site.lang | default: 'de' %}
 
-{% comment %}
-  Determine which icon to use based on spot type and rejection status.
-  Rejected spots always use the no-entry icon (Requirement 2.6).
-{% endcomment %}
-
-{% if is_rejected == true or is_rejected == 'true' %}
-  {% assign icon_name = 'noentry' %}
-  {% if current_locale == 'en' %}
-    {% assign icon_alt = 'No entry spot icon' %}
-  {% else %}
-    {% assign icon_alt = 'Kein Zutritt Symbol' %}
-  {% endif %}
-{% elsif spot_type == 'einstieg-ausstieg' %}
-  {% assign icon_name = 'entryexit' %}
-  {% if current_locale == 'en' %}
-    {% assign icon_alt = 'Entry and exit spot icon' %}
-  {% else %}
-    {% assign icon_alt = 'Ein-/Ausstiegsorte Symbol' %}
-  {% endif %}
-{% elsif spot_type == 'nur-einstieg' %}
-  {% assign icon_name = 'entry' %}
-  {% if current_locale == 'en' %}
-    {% assign icon_alt = 'Entry spot icon' %}
-  {% else %}
-    {% assign icon_alt = 'Einstiegsorte Symbol' %}
-  {% endif %}
-{% elsif spot_type == 'nur-ausstieg' %}
-  {% assign icon_name = 'exit' %}
-  {% if current_locale == 'en' %}
-    {% assign icon_alt = 'Exit spot icon' %}
-  {% else %}
-    {% assign icon_alt = 'Ausstiegsorte Symbol' %}
-  {% endif %}
-{% elsif spot_type == 'rasthalte' %}
-  {% assign icon_name = 'rest' %}
-  {% if current_locale == 'en' %}
-    {% assign icon_alt = 'Rest spot icon' %}
-  {% else %}
-    {% assign icon_alt = 'Rasthalte Symbol' %}
-  {% endif %}
-{% elsif spot_type == 'notauswasserungsstelle' %}
-  {% assign icon_name = 'emergency' %}
-  {% if current_locale == 'en' %}
-    {% assign icon_alt = 'Emergency exit spot icon' %}
-  {% else %}
-    {% assign icon_alt = 'Notauswasserungsstelle Symbol' %}
-  {% endif %}
+{% if include.icon_name %}
+  {% assign icon_name = include.icon_name %}
+  {% assign icon_alt = include.icon_alt %}
 {% else %}
-  {% comment %} Default to entry-exit icon for unknown types {% endcomment %}
-  {% assign icon_name = 'entryexit' %}
-  {% if current_locale == 'en' %}
-    {% assign icon_alt = 'Spot icon' %}
+  {% assign spot_type = include.type %}
+  {% assign is_rejected = include.rejected %}
+  {% assign current_locale = site.lang | default: 'de' %}
+
+  {% if is_rejected == true or is_rejected == 'true' %}
+    {% assign icon_name = 'noentry' %}
+    {% if current_locale == 'en' %}
+      {% assign icon_alt = 'No entry spot icon' %}
+    {% else %}
+      {% assign icon_alt = 'Kein Zutritt Symbol' %}
+    {% endif %}
+  {% elsif spot_type == 'einstieg-ausstieg' %}
+    {% assign icon_name = 'entryexit' %}
+    {% if current_locale == 'en' %}
+      {% assign icon_alt = 'Entry and exit spot icon' %}
+    {% else %}
+      {% assign icon_alt = 'Ein-/Ausstiegsorte Symbol' %}
+    {% endif %}
+  {% elsif spot_type == 'nur-einstieg' %}
+    {% assign icon_name = 'entry' %}
+    {% if current_locale == 'en' %}
+      {% assign icon_alt = 'Entry spot icon' %}
+    {% else %}
+      {% assign icon_alt = 'Einstiegsorte Symbol' %}
+    {% endif %}
+  {% elsif spot_type == 'nur-ausstieg' %}
+    {% assign icon_name = 'exit' %}
+    {% if current_locale == 'en' %}
+      {% assign icon_alt = 'Exit spot icon' %}
+    {% else %}
+      {% assign icon_alt = 'Ausstiegsorte Symbol' %}
+    {% endif %}
+  {% elsif spot_type == 'rasthalte' %}
+    {% assign icon_name = 'rest' %}
+    {% if current_locale == 'en' %}
+      {% assign icon_alt = 'Rest spot icon' %}
+    {% else %}
+      {% assign icon_alt = 'Rasthalte Symbol' %}
+    {% endif %}
+  {% elsif spot_type == 'notauswasserungsstelle' %}
+    {% assign icon_name = 'emergency' %}
+    {% if current_locale == 'en' %}
+      {% assign icon_alt = 'Emergency exit spot icon' %}
+    {% else %}
+      {% assign icon_alt = 'Notauswasserungsstelle Symbol' %}
+    {% endif %}
   {% else %}
-    {% assign icon_alt = 'Einstiegsorte Symbol' %}
+    {% assign icon_name = 'entryexit' %}
+    {% if current_locale == 'en' %}
+      {% assign icon_alt = 'Spot icon' %}
+    {% else %}
+      {% assign icon_alt = 'Einstiegsorte Symbol' %}
+    {% endif %}
   {% endif %}
 {% endif %}
 

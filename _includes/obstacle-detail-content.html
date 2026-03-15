@@ -7,7 +7,8 @@
   
   Parameters:
   - include.obstacle: The obstacle object containing all obstacle data
-  - include.waterway: The waterway object (optional)
+  - include.waterway_name: The pre-computed waterway name (optional)
+  - include.waterway_slug: The waterway slug (optional)
   - include.obstacle_type_name: The resolved obstacle type name (optional)
   
   Requirements: 5.4, 5.5
@@ -16,15 +17,12 @@
 -->
 
 {% assign obstacle = include.obstacle %}
-{% assign waterway = include.waterway %}
+{% assign waterway_name = include.waterway_name %}
+{% assign waterway_slug = include.waterway_slug %}
 {% assign obstacle_type_name = include.obstacle_type_name %}
 {% assign current_locale = site.lang | default: 'de' %}
 
-{% if site.lang != site.default_lang %}
-  {% assign locale_prefix = '/' | append: site.lang %}
-{% else %}
-  {% assign locale_prefix = '' %}
-{% endif %}
+{% assign locale_prefix = site.locale_prefix %}
 
 <!-- Obstacle Details Table (Requirement 5.4) -->
 <table>
@@ -46,12 +44,12 @@
     {% endif %}
 
     <!-- Waterway Link -->
-    {% if waterway %}
+    {% if waterway_name %}
     <tr>
       <th>{% t labels.waterway %}:</th>
       <td>
-        <a hreflang="{{ current_locale }}" href="{{ locale_prefix | append: '/gewaesser/' | append: waterway.slug | append: '/' }}">
-          {{ waterway.name | escape }}
+        <a hreflang="{{ current_locale }}" href="{{ locale_prefix | append: '/gewaesser/' | append: waterway_slug | append: '/' }}">
+          {{ waterway_name | escape }}
         </a>
       </td>
     </tr>

@@ -1,8 +1,4 @@
-{% if site.lang != site.default_lang %}
-  {% assign locale_prefix = '/' | append: site.lang %}
-{% else %}
-  {% assign locale_prefix = '' %}
-{% endif %}
+{% assign locale_prefix = site.locale_prefix %}
 
 <header>
   <nav class="navbar navbar-expand-lg navbar-dark" id="site-navbar">
@@ -28,8 +24,7 @@
               {% t nav.lakes %}
             </a>
             <ul class="dropdown-menu" aria-labelledby="nav-dropdown-lakes">
-              {% assign current_locale = site.lang | default: 'de' %}
-              {% assign lakes = site.data.waterways | top_lakes_by_area: current_locale, 10 %}
+              {% assign lakes = site.data.nav_top_lakes %}
               {% for lake in lakes %}
               <li>
                 <a class="dropdown-item" href="{{ locale_prefix | append: '/gewaesser/' | append: lake.slug | append: '/' }}">
@@ -52,7 +47,7 @@
               {% t nav.rivers %}
             </a>
             <ul class="dropdown-menu" aria-labelledby="nav-dropdown-rivers">
-              {% assign rivers = site.data.waterways | top_rivers_by_length: current_locale, 10 %}
+              {% assign rivers = site.data.nav_top_rivers %}
               {% for river in rivers %}
               <li>
                 <a class="dropdown-item" href="{{ locale_prefix | append: '/gewaesser/' | append: river.slug | append: '/' }}">
@@ -75,11 +70,7 @@
               {% t nav.open_data %}
             </a>
             <ul class="dropdown-menu" aria-labelledby="nav-dropdown-opendata">
-              {% if site.data.static_pages %}
-                {% assign open_data_pages = site.data.static_pages | where: "locale", current_locale | where: "menu_slug", "offene-daten" | sort: "menuOrder" %}
-              {% else %}
-                {% assign open_data_pages = "" | split: "" %}
-              {% endif %}
+              {% assign open_data_pages = site.data.nav_open_data_pages %}
               {% for static_page in open_data_pages %}
               <li>
                 <a class="dropdown-item" href="{{ locale_prefix | append: '/' | append: static_page.menu_slug | append: '/' | append: static_page.slug | append: '/' }}">
@@ -101,11 +92,7 @@
               {% t nav.about %}
             </a>
             <ul class="dropdown-menu" aria-labelledby="nav-dropdown-about">
-              {% if site.data.static_pages %}
-                {% assign about_pages = site.data.static_pages | where: "locale", current_locale | where: "menu_slug", "ueber" | sort: "menuOrder" %}
-              {% else %}
-                {% assign about_pages = "" | split: "" %}
-              {% endif %}
+              {% assign about_pages = site.data.nav_about_pages %}
               {% for static_page in about_pages %}
               <li>
                 <a class="dropdown-item" href="{{ locale_prefix | append: '/' | append: static_page.menu_slug | append: '/' | append: static_page.slug | append: '/' }}">
