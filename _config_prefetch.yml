@@ -1,0 +1,3 @@
+# Pre-fetch config: triggers ContentfulFetcher, output is discarded
+languages: ["de"]
+destination: _site_prefetch
