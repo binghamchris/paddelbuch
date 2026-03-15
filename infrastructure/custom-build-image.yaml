@@ -1,0 +1,42 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: ECR repository for the paddelbuch custom Amplify build image
+
+Parameters:
+  RepositoryName:
+    Type: String
+    Default: paddelbuch-build-image
+    Description: Name of the ECR repository for the custom build image
+
+Resources:
+  BuildImageRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: !Ref RepositoryName
+      ImageTagMutability: MUTABLE
+      LifecyclePolicy:
+        LifecyclePolicyText: |
+          {
+            "rules": [
+              {
+                "rulePriority": 1,
+                "description": "Retain max 5 untagged images",
+                "selection": {
+                  "tagStatus": "untagged",
+                  "countType": "imageCountMoreThan",
+                  "countNumber": 5
+                },
+                "action": {
+                  "type": "expire"
+                }
+              }
+            ]
+          }
+
+Outputs:
+  RepositoryUri:
+    Description: URI of the ECR repository
+    Value: !GetAtt BuildImageRepository.RepositoryUri
+
+  RepositoryArn:
+    Description: ARN of the ECR repository
+    Value: !GetAtt BuildImageRepository.Arn
