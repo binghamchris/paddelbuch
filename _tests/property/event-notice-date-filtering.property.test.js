@@ -234,7 +234,7 @@ describe('Event Notice Date Filtering - Property 13', () => {
             
             // None of these should be in the filtered result
             return pastNotices.every(n => 
-              !filtered.some(f => f.slug === n.slug)
+              !filtered.includes(n)
             );
           }
         ),
@@ -257,7 +257,7 @@ describe('Event Notice Date Filtering - Property 13', () => {
             
             // All of these should be in the filtered result
             return futureNotices.every(n => 
-              filtered.some(f => f.slug === n.slug)
+              filtered.includes(n)
             );
           }
         ),
@@ -365,7 +365,7 @@ describe('Event Notice Date Filtering - Property 13', () => {
             
             if (filtered1.length !== filtered2.length) return false;
             
-            return filtered1.every((n, i) => n.slug === filtered2[i].slug);
+            return filtered1.every((n, i) => n === filtered2[i]);
           }
         ),
         { numRuns: 100 }
