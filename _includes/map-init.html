@@ -57,61 +57,6 @@
 
 <!-- Map data configuration as CSP-safe JSON data element -->
 <script type="application/json" id="map-data-config">
-{
-  "locale": "{{ current_locale }}",
-  "dimensionConfigs": [
-    {
-      "key": "spotType",
-      {% if current_locale == 'en' %}
-      "label": "Spot Type",
-      {% else %}
-      "label": "Ortstyp",
-      {% endif %}
-      "options": [
-        {% if current_locale == 'en' %}
-        { "slug": "einstieg-ausstieg", "label": "Entry & Exit Spots" },
-        { "slug": "nur-einstieg", "label": "Entry Only Spots" },
-        { "slug": "nur-ausstieg", "label": "Exit Only Spots" },
-        { "slug": "rasthalte", "label": "Rest Spots" },
-        { "slug": "notauswasserungsstelle", "label": "Emergency Exit Spots" }
-        {% else %}
-        { "slug": "einstieg-ausstieg", "label": "Ein-/Ausstiegsorte" },
-        { "slug": "nur-einstieg", "label": "Einstiegsorte" },
-        { "slug": "nur-ausstieg", "label": "Ausstiegsorte" },
-        { "slug": "rasthalte", "label": "Rasthalte" },
-        { "slug": "notauswasserungsstelle", "label": "Notauswasserungsstelle" }
-        {% endif %}
-      ]
-    },
-    {
-      "key": "paddleCraftType",
-      {% if current_locale == 'en' %}
-      "label": "Paddle Craft Type",
-      {% else %}
-      "label": "Paddelboottyp",
-      {% endif %}
-      "options": [
-        {% assign craft_types = site.data.types.paddle_craft_types | where: "locale", current_locale %}
-        {% assign craft_name_key = "name_" | append: current_locale %}
-        {% for ct in craft_types %}
-        { "slug": "{{ ct.slug }}", "label": "{{ ct[craft_name_key] | default: ct.name_de }}" }{% unless forloop.last %},{% endunless %}
-        {% endfor %}
-      ]
-    }
-  ],
-  "layerLabels": {
-    {% if current_locale == 'en' %}
-    "noEntry": "No Entry Spots",
-    "eventNotices": "Event Notices",
-    "obstacles": "Obstacles",
-    "protectedAreas": "Protected Areas"
-    {% else %}
-    "noEntry": "Keine Zutritt Orte",
-    "eventNotices": "Gewässerereignisse",
-    "obstacles": "Hindernisse",
-    "protectedAreas": "Schutzgebiete"
-    {% endif %}
-  }
-}
+{{ site.data.map_data_config_json }}
 </script>
 <script src="{{ '/assets/js/map-data-init.js' | relative_url }}"></script>
