@@ -37,6 +37,12 @@ module Jekyll
       @site = site
       @data_dir = File.join(site.source, '_data')
 
+      if site.config['skip_contentful_fetch']
+        Jekyll.logger.info 'Contentful:', 'Skipping — data already fetched by prefetch step'
+        site.config['contentful_data_changed'] = false
+        return
+      end
+
       unless contentful_configured?
         Jekyll.logger.warn 'Contentful:', 'Missing CONTENTFUL_SPACE_ID or CONTENTFUL_ACCESS_TOKEN — skipping content fetch'
         return

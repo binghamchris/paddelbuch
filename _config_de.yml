@@ -1,2 +1,3 @@
 languages: ["de"]
 destination: _site_de
+skip_contentful_fetch: true
