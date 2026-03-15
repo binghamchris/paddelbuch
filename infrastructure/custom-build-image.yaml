@@ -1,0 +1,21 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: ECR Public repository for the paddelbuch custom Amplify build image
+
+Parameters:
+  RepositoryName:
+    Type: String
+    Default: paddelbuch-build-image
+    Description: Name of the ECR Public repository for the custom build image
+
+Resources:
+  BuildImageRepository:
+    Type: AWS::ECR::PublicRepository
+    Properties:
+      RepositoryName: !Ref RepositoryName
+      RepositoryCatalogData:
+        AboutText: Custom Amplify build image for paddelbuch with Ruby 3.4.9 and Node.js 22
+
+Outputs:
+  RepositoryUri:
+    Description: URI of the ECR Public repository
+    Value: !Sub public.ecr.aws/${BuildImageRepository}
