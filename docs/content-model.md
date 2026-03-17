@@ -30,10 +30,11 @@ Paddle entry/exit points with GPS coordinates.
 | `paddle_craft_type` | References → paddleCraftType[] | Suitable craft types |
 | `event_notices` | References → waterwayEventNotice[] | Active event notices |
 | `obstacles` | References → obstacle[] | Nearby obstacles |
+| `spot_tips` | References → spotTipType[] | Advisory tip types for this spot |
 | `data_source_type` | Reference → dataSourceType | Data provenance |
 | `data_license_type` | Reference → dataLicenseType | Licensing terms |
 
-**Relationships:** A spot belongs to one waterway, has one spot type, and can reference multiple craft types, event notices, and obstacles.
+**Relationships:** A spot belongs to one waterway, has one spot type, and can reference multiple craft types, event notices, obstacles, and spot tip types.
 
 ### waterway
 
@@ -146,6 +147,18 @@ Kayak, canoe, SUP — each with a localised name and description.
 
 - `see` — Lake
 - `fluss` — River
+
+### spotTipType
+
+Advisory tip types that can be associated with spots. Each spot can reference zero or more tip types.
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `slug` | Short text | Yes | Unique identifier, used in CSS classes and file paths |
+| `name` | Short text (localised) | Yes | Display name of the tip type |
+| `description` | Rich text (localised) | No | Optional detailed description shown in tip banners |
+
+Stored as `_data/types/spot_tip_types.yml`. Each row includes `name_de`, `name_en`, `description_de` (rendered HTML), `description_en` (rendered HTML), and `_raw_description` (serialised JSON for API output).
 
 ### obstacleType, protectedAreaType, dataSourceType, dataLicenseType
 

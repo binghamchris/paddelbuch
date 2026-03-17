@@ -43,7 +43,7 @@ Plugins run in priority order. Hooks run at specific lifecycle points.
 
 **Outputs:**
 - `_data/spots.yml`, `_data/waterways.yml`, `_data/obstacles.yml`, `_data/protected_areas.yml`, `_data/notices.yml`, `_data/static_pages.yml`
-- `_data/types/*.yml` (dimension tables)
+- `_data/types/*.yml` (dimension tables: `spot_types.yml`, `spot_tip_types.yml`, `obstacle_types.yml`, `paddle_craft_types.yml`, `paddling_environment_types.yml`, `protected_area_types.yml`, `data_source_types.yml`, `data_license_types.yml`)
 - `_data/.contentful_sync_cache.yml` (sync state)
 - `site.config['contentful_data_changed']` (boolean flag for downstream plugins)
 

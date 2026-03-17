@@ -49,6 +49,7 @@ paddelbuch/
 │   ├── protected_areas.yml
 │   ├── static_pages.yml  # CMS-driven static pages
 │   └── types/            # Dimension/lookup tables
+│       └── spot_tip_types.yml  # Spot tip type dimension
 ├── _i18n/                # Internationalization files (de.yml, en.yml)
 ├── _includes/            # Reusable HTML partials
 │   ├── header.html       # Site navigation
@@ -237,7 +238,7 @@ Content is managed in Contentful and synced to Jekyll data files during the buil
 4. **ContentfulMappers** (`contentful_mappers.rb`) — Transforms Contentful entries into Jekyll-compatible YAML data, including rich text rendering with support for tables, marks (bold, italic, underline, code), and embedded entries
 5. **CollectionGenerator** (`collection_generator.rb`) — Generates Jekyll collection pages from the synced data
 
-Content types mapped from Contentful include spots, waterways, obstacles, protected areas, event notices, static pages, and various dimension/lookup types.
+Content types mapped from Contentful include spots, waterways, obstacles, protected areas, event notices, static pages, and various dimension/lookup types (spotType, spotTipType, obstacleType, paddleCraftType, paddlingEnvironmentType, protectedAreaType, dataSourceType, dataLicenseType).
 
 ### Forcing a Full Sync
 
@@ -346,6 +347,7 @@ Paddel Buch provides a JSON API for accessing paddle sports data. Documentation 
 
 **Dimension Tables:**
 - `/api/spottypes-{locale}.json`
+- `/api/spottiptypes-{locale}.json`
 - `/api/obstacletypes-{locale}.json`
 - `/api/paddlecrafttypes-{locale}.json`
 - And more...
