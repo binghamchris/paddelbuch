@@ -139,6 +139,7 @@ api:
   paddle_craft_types: "Paddle Craft Types"
   protected_area_types: "Protected Area Types"
   spot_types: "Spot Types"
+  spot_tip_types: "Spot Tip Types"
   paddling_environment_types: "Paddling Environment Types"
 
 # Map accessibility labels

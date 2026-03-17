@@ -139,6 +139,7 @@ api:
   paddle_craft_types: "Paddelboot Typen"
   protected_area_types: "Schutzgebietstypen"
   spot_types: "Einstiegsortstypen"
+  spot_tip_types: "Einstiegsort-Tipp-Typen"
   paddling_environment_types: "Paddelumgebungstypen"
 
 # Error pages
