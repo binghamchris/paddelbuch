@@ -97,14 +97,14 @@ spec/
 ├── layouts/
 │   └── default_layout_spec.rb              ← Default layout tests
 └── plugins/
-    ├── api_generator_spec.rb               ← ApiGenerator core tests
+    ├── api_generator_spec.rb               ← ApiGenerator core tests (includes spot tip type dimension and spot transform)
     ├── api_generator_api_structure_spec.rb  ← API output structure tests
     ├── api_generator_cache_spec.rb          ← API caching tests
     ├── api_generator_preservation_spec.rb   ← API backward compatibility tests
     ├── build_output_invariance_spec.rb      ← Build determinism tests
     ├── cache_metadata_hash_spec.rb          ← Content hash tests
     ├── collection_generator_cache_spec.rb   ← Collection caching tests
-    ├── collection_precompute_spec.rb        ← Pre-computation tests
+    ├── collection_precompute_spec.rb        ← Pre-computation tests (includes spot tip type resolution)
     ├── color_generator_spec.rb             ← ColorGenerator tests
     ├── contentful_fetcher_cache_spec.rb     ← Fetcher caching tests
     ├── favicon_generator_spec.rb            ← FaviconGenerator tests
@@ -114,7 +114,8 @@ spec/
     ├── locale_filter_spec.rb                ← LocaleFilter tests
     ├── parallel_build_spec.rb               ← Parallel build pipeline tests
     ├── pipeline_version_consistency_spec.rb  ← Version consistency tests
-    ├── precompute_generator_spec.rb         ← PrecomputeGenerator tests
+    ├── precompute_generator_spec.rb         ← PrecomputeGenerator tests (includes spotTipType dimension config)
+    ├── spot_tip_type_mapper_spec.rb         ← Spot tip type mapper property tests
     ├── tile_generator_cache_spec.rb         ← Tile caching tests
     ├── tile_generator_spatial_spec.rb       ← Spatial tiling correctness tests
     └── waterway_filters_spec.rb             ← WaterwayFilters tests
@@ -155,6 +156,10 @@ _tests/
 │   ├── protected-area-popup.property.test.js         ← Protected area popups
 │   ├── rejected-spot.property.test.js                ← Rejected spot handling
 │   ├── spot-*.property.test.js                       ← Spot rendering (4 files)
+│   ├── spot-tip-banner-rendering.property.test.js    ← Spot tip banner rendering completeness
+│   ├── spot-tip-composite-marker.property.test.js    ← Composite marker modifier images
+│   ├── spot-tip-filter-match.property.test.js        ← Spot tip filter match function correctness
+│   ├── spot-tip-modifier-offsets.property.test.js    ← Modifier icon unique offsets
 │   ├── tile-coverage.property.test.js                ← Tile grid covers Switzerland
 │   ├── url-pattern-generation.property.test.js       ← URL pattern correctness
 │   ├── vendor-css-paths.property.test.js             ← Vendor CSS path correctness

@@ -122,6 +122,7 @@ Content is stored in Contentful and mapped to Jekyll data structures by `Content
 | Content Type | Data File | Description |
 |---|---|---|
 | `spotType` | `types/spot_types.yml` | Entry/exit, entry-only, exit-only, rest, emergency |
+| `spotTipType` | `types/spot_tip_types.yml` | Advisory tip types for spots |
 | `obstacleType` | `types/obstacle_types.yml` | Obstacle classifications |
 | `paddleCraftType` | `types/paddle_craft_types.yml` | Kayak, canoe, SUP |
 | `paddlingEnvironmentType` | `types/paddling_environment_types.yml` | Lake (see), river (fluss) |

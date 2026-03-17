@@ -35,7 +35,7 @@ All modules live in `assets/js/`. They are plain scripts that attach functions t
 | Module | Purpose |
 |--------|---------|
 | `paddelbuch-map.js` | Creates the Leaflet map instance, sets Swiss bounds, adds tile layer and locate control |
-| `map-data-init.js` | Orchestrates layer creation, tile-based data loading, filter setup, and layer control |
+| `map-data-init.js` | Orchestrates layer creation, tile-based data loading, filter setup (including `spotTipType` match function), and layer control |
 | `data-loader.js` | Fetches spatial tile JSON files based on the current map viewport |
 | `spatial-utils.js` | GeoJSON geometry utilities (centroid calculation, bounds checking) |
 
@@ -43,9 +43,9 @@ All modules live in `assets/js/`. They are plain scripts that attach functions t
 
 | Module | Purpose |
 |--------|---------|
-| `filter-engine.js` | Core filter logic: multi-dimension AND filtering across spot type and paddle craft type |
+| `filter-engine.js` | Core filter logic: multi-dimension AND filtering across spot type, paddle craft type, and spot tip type |
 | `filter-panel.js` | Renders the filter toggle UI panel and handles user interactions |
-| `layer-control.js` | Custom Leaflet control for toggling map layers, includes date-based event notice filtering |
+| `layer-control.js` | Custom Leaflet control for toggling map layers, includes date-based event notice filtering and composite marker icons for spots with tip types |
 | `zoom-layer-manager.js` | Shows/hides detail layers (obstacles, protected areas) based on zoom level (threshold: zoom 12) |
 
 ### Popups and Markers
@@ -56,7 +56,7 @@ All modules live in `assets/js/`. They are plain scripts that attach functions t
 | `obstacle-popup.js` | Generates HTML for obstacle marker popups |
 | `event-notice-popup.js` | Generates HTML for event notice popups |
 | `marker-registry.js` | Deduplicates markers by slug, manages marker add/remove lifecycle |
-| `marker-styles.js` | Defines Leaflet icon styles per spot type (entry/exit, entry-only, etc.) |
+| `marker-styles.js` | Defines Leaflet icon styles per spot type (entry/exit, entry-only, etc.) and tip modifier icon configuration (`TIP_MODIFIER_CONFIG`) |
 | `layer-styles.js` | Defines colours and styles for GeoJSON layers (obstacles, protected areas, notices) |
 
 ### Utilities
@@ -93,7 +93,19 @@ On the homepage, the map initialisation follows this sequence:
    - Registers the `zoom-layer-manager` to show detail layers at zoom ≥ 12
 3. On map move/zoom, `data-loader.js` calculates which tiles overlap the viewport, fetches any unfetched tiles, and passes the data to marker creation functions
 4. `marker-registry.js` deduplicates markers (same slug = same marker) and adds them to the appropriate layer group
-5. `filter-engine.js` applies active filters by showing/hiding markers based on their spot type and paddle craft type attributes
+5. `filter-engine.js` applies active filters by showing/hiding markers based on their spot type, paddle craft type, and spot tip type attributes
+
+## Includes
+
+### spot-tip-banners.html
+
+The `_includes/spot-tip-banners.html` partial renders advisory tip banners on spot detail pages. For each spot tip type associated with a spot, it renders a Bootstrap alert with:
+- A CSS class `alert-spot-tip-{slug}` for per-type styling
+- An SVG icon from `assets/images/tips/tip-banner-{slug}.svg`
+- The localised tip type name
+- The rich text description (when present)
+
+Included conditionally in `_layouts/spot.html` when `page.spot_tip_types` is non-empty.
 
 ## Colour System
 
@@ -127,7 +139,7 @@ _sass/
 │   └── _components.scss             ← Barrel file
 └── pages/
     ├── _home.scss                   ← Homepage
-    ├── _spot-details.scss           ← Spot detail pages
+    ├── _spot-details.scss           ← Spot detail pages (includes spot tip banner styles)
     ├── _waterway-details.scss       ← Waterway detail pages
     ├── _obstacle-details.scss       ← Obstacle detail pages
     ├── _notice-details.scss         ← Notice detail pages
