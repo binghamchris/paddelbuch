@@ -132,7 +132,8 @@
         var metadata = {
           spotType_slug: spotTypeSlug,
           paddleCraftTypes: spot.paddleCraftTypes || [],
-          paddlingEnvironmentType_slug: spot.paddlingEnvironmentType_slug || ''
+          paddlingEnvironmentType_slug: spot.paddlingEnvironmentType_slug || '',
+          spotTipType_slugs: spot.spotTipType_slugs || []
         };
         PaddelbuchMarkerRegistry.register(spot.slug, marker, metadata);
 
