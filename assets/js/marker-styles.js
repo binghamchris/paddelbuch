@@ -143,7 +143,8 @@
    * Requirements: 4.3, 4.4, 4.7
    */
   var TIP_MODIFIER_CONFIG = {
-    'swiss-canoe-eco-tipp': { iconUrl: basePath + 'tip-modifier-swiss-canoe-eco-tipp.svg', offset: [-8, -8], size: 20 }
+    'swiss-canoe-eco-tipp': { iconUrl: basePath + 'tip-modifier-swiss-canoe-eco-tipp.svg', offset: [-10, -12], size: 20 },
+    'swiss-canoe-spitzenklasse-tipp': { iconUrl: basePath + 'tip-modifier-swiss-canoe-spitzenklasse-tipp.svg', offset: [22, -12], size: 20 }
   };
 
   // Export to global scope
