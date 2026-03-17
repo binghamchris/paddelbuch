@@ -70,12 +70,46 @@
     }
 
     /**
+     * Creates a composite Leaflet DivIcon that overlays modifier icon SVGs
+     * on top of the base marker SVG, positioned per TIP_MODIFIER_CONFIG.
+     * Slugs without config entries are silently skipped (Requirement 4.6).
+     *
+     * Requirements: 4.1, 4.2, 4.5, 4.6
+     *
+     * @param {string} baseIconUrl - URL to the base marker SVG
+     * @param {Array<string>} tipSlugs - Array of tip type slugs
+     * @returns {L.DivIcon} Composite Leaflet DivIcon
+     */
+    function createCompositeIcon(baseIconUrl, tipSlugs) {
+      var config = window.PaddelbuchMarkerStyles
+        ? window.PaddelbuchMarkerStyles.TIP_MODIFIER_CONFIG
+        : {};
+      var html = '<img src="' + baseIconUrl + '" width="32" height="53" />';
+
+      for (var i = 0; i < tipSlugs.length; i++) {
+        var modConfig = config[tipSlugs[i]];
+        if (!modConfig) continue; // Req 4.6: skip missing modifier SVGs
+        html += '<img src="' + modConfig.iconUrl + '"' +
+                ' style="position:absolute;left:' + modConfig.offset[0] + 'px;top:' + modConfig.offset[1] + 'px;"' +
+                ' width="' + (modConfig.size || 16) + '" height="' + (modConfig.size || 16) + '" />';
+      }
+
+      return L.divIcon({
+        html: html,
+        className: 'composite-marker-icon',
+        iconSize: [32, 53],
+        iconAnchor: [16, 53],
+        popupAnchor: [0, -53]
+      });
+    }
+
+    /**
      * Creates a marker for a spot.
      * - Rejected spots: added to the noEntry LayerGroup (not registered in Marker Registry)
      * - Non-rejected spots: registered in PaddelbuchMarkerRegistry with metadata,
      *   then evaluated by PaddelbuchFilterEngine for initial visibility
      *
-     * Requirements: 4.1, 6.1, 9.1, 9.2, 9.3
+     * Requirements: 4.1, 4.2, 4.5, 4.6, 6.1, 9.1, 9.2, 9.3
      *
      * @param {Object} spot - The spot data object
      */
@@ -91,11 +125,20 @@
 
       var isRejected = spot.rejected === true || spot.rejected === 'true';
       var spotTypeSlug = spot.spotType_slug || spot.spotTypeSlug || spot.spot_type_slug;
+      var tipSlugs = spot.spotTipType_slugs || [];
 
       // Get the appropriate icon using the marker styles module
-      var icon = window.PaddelbuchMarkerStyles
-        ? window.PaddelbuchMarkerStyles.getSpotIcon(spotTypeSlug, isRejected)
-        : L.Icon.Default.prototype;
+      // Use composite icon when spot has tip types (Req 4.1, 4.2);
+      // use standard L.icon otherwise (Req 4.2)
+      var icon;
+      if (!isRejected && tipSlugs.length > 0 && window.PaddelbuchMarkerStyles) {
+        var baseIconUrl = window.PaddelbuchMarkerStyles.getSpotIcon(spotTypeSlug, false).options.iconUrl;
+        icon = createCompositeIcon(baseIconUrl, tipSlugs);
+      } else {
+        icon = window.PaddelbuchMarkerStyles
+          ? window.PaddelbuchMarkerStyles.getSpotIcon(spotTypeSlug, isRejected)
+          : L.Icon.Default.prototype;
+      }
 
       var marker = L.marker([lat, lon], { icon: icon });
 
@@ -386,6 +429,7 @@
     // Store layer groups globally for other scripts to access
     window.paddelbuchLayerGroups = layerGroups;
     window.paddelbuchFilterByLocale = filterByLocale;
+    window.paddelbuchCreateCompositeIcon = createCompositeIcon;
     window.paddelbuchAddSpotMarker = addSpotMarker;
     window.paddelbuchAddEventNoticeMarker = addEventNoticeMarker;
     window.paddelbuchAddObstacleLayer = addObstacleLayer;

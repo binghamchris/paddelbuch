@@ -130,12 +130,30 @@
     return markerStyles.waterwayEventNoticeIcon;
   }
 
+  /**
+   * Modifier icon configuration — single authoritative source for all components.
+   * Maps each tip type slug to its SVG path, position offset, and size.
+   * Position offsets are relative to the standard marker icon anchor point [16, 53].
+   * Offsets are designed so multiple modifiers don't overlap.
+   *
+   * Each entry: { iconUrl: string, offset: [dx, dy], size: number }
+   *
+   * This object is empty initially; entries are added when Contentful tip types are created.
+   *
+   * Requirements: 4.3, 4.4, 4.7
+   */
+  var TIP_MODIFIER_CONFIG = {
+    // Example entry (added when a tip type is created in Contentful):
+    // 'example-tip': { iconUrl: basePath + 'tip-modifier-example-tip.svg', offset: [-8, -8], size: 16 }
+  };
+
   // Export to global scope
   global.PaddelbuchMarkerStyles = {
     markerStyles: markerStyles,
     getSpotIcon: getSpotIcon,
     getEventNoticeIcon: getEventNoticeIcon,
-    createIcon: createIcon
+    createIcon: createIcon,
+    TIP_MODIFIER_CONFIG: TIP_MODIFIER_CONFIG
   };
 
 })(typeof window !== 'undefined' ? window : this);
