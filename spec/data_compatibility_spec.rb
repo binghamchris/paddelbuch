@@ -365,7 +365,7 @@ RSpec.describe 'Data file output compatibility' do
 
     it 'dimension table filenames match ApiGenerator DIMENSION_TABLES data_keys' do
       api_dim_keys = Jekyll::ApiGenerator::DIMENSION_TABLES.values.map { |c| c[:data_key] }
-      fetcher_dim_filenames = %w[spotType obstacleType paddleCraftType paddlingEnvironmentType protectedAreaType dataSourceType dataLicenseType].map { |ct| content_types[ct][:filename] }
+      fetcher_dim_filenames = %w[spotType obstacleType paddleCraftType paddlingEnvironmentType protectedAreaType dataSourceType dataLicenseType spotTipType].map { |ct| content_types[ct][:filename] }
       expect(fetcher_dim_filenames).to match_array(api_dim_keys)
     end
   end
