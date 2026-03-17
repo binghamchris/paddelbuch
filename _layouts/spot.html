@@ -57,9 +57,6 @@ pageName: spot-details
         {% include rejected-spot-content.html spot=spot %}
       {% else %}
         <!-- Normal Spot: Show standard information (Requirement 3.6) -->
-        {% if page.spot_tip_types and page.spot_tip_types.size > 0 %}
-          {% include spot-tip-banners.html spot_tip_types=page.spot_tip_types %}
-        {% endif %}
         {% include spot-detail-content.html spot=spot waterway_name=page.waterway_name waterway_slug=page.waterway_slug %}
       {% endif %}
     </div>
