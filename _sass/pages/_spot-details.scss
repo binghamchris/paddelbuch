@@ -120,6 +120,12 @@
     }
   }
 
+  .alert-spot-tip-swiss-canoe-eco-tipp {
+    background-color: rgba($green-1, 0.15);
+    border-color: $green-1;
+    color: darken($green-1, 10%);
+  }
+
   // Description text (between title and table, matching Gatsby layout)
   .spot-description-text {
     margin-bottom: 1em;
