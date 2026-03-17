@@ -74,6 +74,15 @@ module Jekyll
         .select { |t| t['locale'] == locale }
       craft_options = craft_types.map { |ct| { slug: ct['slug'], label: ct[name_key] || ct['name_de'] } }
 
+      # Spot tip type dimension options (dynamic from data)
+      tip_types = (site.data.dig('types', 'spot_tip_types') || [])
+        .select { |t| t['locale'] == locale }
+      tip_type_options = tip_types.map { |tt| { slug: tt['slug'], label: tt[name_key] || tt['name_de'] } }
+
+      # Add "no tips" option
+      no_tips_label = locale == 'en' ? 'Spots without tips' : 'Einstiegsorte ohne Tipps'
+      tip_type_options << { slug: '__no_tips__', label: no_tips_label }
+
       # Spot type dimension options (hardcoded slugs, translated labels)
       spot_type_options = if locale == 'en'
         [
@@ -111,12 +120,22 @@ module Jekyll
             key: 'paddleCraftType',
             label: locale == 'en' ? 'Paddle Craft Type' : 'Paddelboottyp',
             options: craft_options
+          },
+          {
+            key: 'spotTipType',
+            label: locale == 'en' ? 'Spot Tips' : 'Tipps',
+            options: tip_type_options
           }
         ],
         layerLabels: layer_labels
       }
 
       site.data['map_data_config_json'] = JSON.generate(map_data_config)
+
+      # Pre-compute spot tip types for template use (avoids per-page Liquid lookups)
+      site.data['spot_tip_types_for_locale'] = tip_types.map do |tt|
+        { 'slug' => tt['slug'], 'name' => tt[name_key] || tt['name_de'] }
+      end
 
       # Layer control config
       pa_types = (site.data.dig('types', 'protected_area_types') || [])

@@ -265,10 +265,14 @@ RSpec.describe 'PrecomputeGenerator properties' do
               'obstacles' => 'Hindernisse', 'protectedAreas' => 'Schutzgebiete' }
           end
 
+          # Expected spotTipType dimension (no tip types data provided, only __no_tips__)
+          no_tips_label = data[:locale] == 'en' ? 'Spots without tips' : 'Einstiegsorte ohne Tipps'
+          expected_tip_options = [{ 'slug' => '__no_tips__', 'label' => no_tips_label }]
+
           # Verify top-level structure
           expect(parsed['locale']).to eq(data[:locale])
           expect(parsed['dimensionConfigs']).to be_an(Array)
-          expect(parsed['dimensionConfigs'].size).to eq(2)
+          expect(parsed['dimensionConfigs'].size).to eq(3)
 
           # Verify spotType dimension
           spot_dim = parsed['dimensionConfigs'][0]
@@ -282,6 +286,12 @@ RSpec.describe 'PrecomputeGenerator properties' do
           expect(craft_dim['label']).to eq(data[:locale] == 'en' ? 'Paddle Craft Type' : 'Paddelboottyp')
           expect(craft_dim['options']).to eq(expected_craft_options),
             "locale=#{data[:locale]}: craft options mismatch"
+
+          # Verify spotTipType dimension
+          tip_dim = parsed['dimensionConfigs'][2]
+          expect(tip_dim['key']).to eq('spotTipType')
+          expect(tip_dim['label']).to eq(data[:locale] == 'en' ? 'Spot Tips' : 'Tipps')
+          expect(tip_dim['options']).to eq(expected_tip_options)
 
           # Verify layer labels
           expect(parsed['layerLabels']).to eq(expected_layer_labels)
@@ -336,6 +346,79 @@ RSpec.describe 'PrecomputeGenerator properties' do
             "expected prefix #{expected_prefix.inspect}, got #{parsed['localePrefix'].inspect}"
           expect(parsed['protectedAreaTypeNames']).to eq(expected_pa_names),
             "locale=#{data[:locale]}: PA type names mismatch"
+        end
+      }
+    end
+  end
+
+  # ============================================================================
+  # Feature: spot-tips, Property 3: spotTipType Dimension Config Completeness
+  # **Validates: Requirements 2.2, 2.3, 5.2**
+  # ============================================================================
+  describe 'Property 3: spotTipType Dimension Config Completeness' do
+    it 'map_data_config_json contains a spotTipType dimension with one entry per tip type plus __no_tips__' do
+      property_of {
+        Rantly {
+          locale = choose('de', 'en')
+          num_types = range(0, 10)
+          tip_types = Array.new(num_types) do
+            slug = gen_slug
+            {
+              'locale' => choose(locale, choose('de', 'en')),
+              'slug' => slug,
+              'name_de' => gen_name,
+              'name_en' => gen_name
+            }
+          end
+          { locale: locale, tip_types: tip_types }
+        }
+      }.check(100) { |data|
+        Dir.mktmpdir do |tmpdir|
+          site = build_site(tmpdir, lang: data[:locale], default_lang: 'de')
+          site.data['waterways'] = []
+          site.data['static_pages'] = []
+          site.data['types'] = {
+            'paddle_craft_types' => [],
+            'protected_area_types' => [],
+            'spot_tip_types' => data[:tip_types]
+          }
+
+          generator = Jekyll::PrecomputeGenerator.new
+          generator.generate(site)
+
+          parsed = JSON.parse(site.data['map_data_config_json'])
+          name_key = "name_#{data[:locale]}"
+
+          # Find the spotTipType dimension
+          tip_dim = parsed['dimensionConfigs'].find { |d| d['key'] == 'spotTipType' }
+          expect(tip_dim).not_to be_nil, 'spotTipType dimension config missing'
+
+          # Oracle: build expected options
+          locale_tip_types = data[:tip_types].select { |t| t['locale'] == data[:locale] }
+          expected_options = locale_tip_types.map do |tt|
+            { 'slug' => tt['slug'], 'label' => tt[name_key] || tt['name_de'] }
+          end
+
+          no_tips_label = data[:locale] == 'en' ? 'Spots without tips' : 'Einstiegsorte ohne Tipps'
+          expected_options << { 'slug' => '__no_tips__', 'label' => no_tips_label }
+
+          # Verify options count: one per locale tip type + one __no_tips__
+          expect(tip_dim['options'].size).to eq(locale_tip_types.size + 1),
+            "locale=#{data[:locale]}: expected #{locale_tip_types.size + 1} options, " \
+            "got #{tip_dim['options'].size}"
+
+          # Verify options match exactly
+          expect(tip_dim['options']).to eq(expected_options),
+            "locale=#{data[:locale]}: tip type options mismatch"
+
+          # Verify __no_tips__ is the last option
+          last_option = tip_dim['options'].last
+          expect(last_option['slug']).to eq('__no_tips__')
+          expect(last_option['label']).to eq(no_tips_label)
+
+          # Verify label
+          expected_label = data[:locale] == 'en' ? 'Spot Tips' : 'Tipps'
+          expect(tip_dim['label']).to eq(expected_label)
         end
       }
     end
