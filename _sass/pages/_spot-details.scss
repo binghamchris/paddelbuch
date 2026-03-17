@@ -117,6 +117,10 @@
     .spot-tip-description {
       margin-top: 0.25rem;
       font-size: 0.9em;
+
+      p:last-child {
+        margin-bottom: 0;
+      }
     }
   }
 
