@@ -42,7 +42,8 @@ module Jekyll
       'paddlingenvironmenttypes' => { data_key: 'types/paddling_environment_types', content_type: 'paddlingEnvironmentType' },
       'protectedareatypes' => { data_key: 'types/protected_area_types', content_type: 'protectedAreaType' },
       'datasourcetypes' => { data_key: 'types/data_source_types', content_type: 'dataSourceType' },
-      'datalicensetypes' => { data_key: 'types/data_license_types', content_type: 'dataLicenseType' }
+      'datalicensetypes' => { data_key: 'types/data_license_types', content_type: 'dataLicenseType' },
+      'spottiptypes' => { data_key: 'types/spot_tip_types', content_type: 'spotTipType' }
     }.freeze
 
     # Mapping from internal content type keys to camelCase names with 's' suffix
@@ -59,7 +60,8 @@ module Jekyll
       'paddlecrafttypes' => 'paddleCraftTypes',
       'protectedareatypes' => 'protectedAreaTypes',
       'spottypes' => 'spotTypes',
-      'paddlingenvironmenttypes' => 'paddlingEnvironmentTypes'
+      'paddlingenvironmenttypes' => 'paddlingEnvironmentTypes',
+      'spottiptypes' => 'spotTipTypes'
     }.freeze
 
     def generate(site)
@@ -405,6 +407,7 @@ module Jekyll
       result['paddleCraftType'] = wrap_slug_refs(item['paddleCraftTypes']) || []
       result['waterway_event_notice'] = waterway_event_notice
       result['obstacle'] = obstacle
+      result['spotTipType'] = wrap_slug_refs(item['spotTipType_slugs']) || []
       result['dataSourceType'] = wrap_slug_ref(item['dataSourceType_slug'])
       result['dataLicenseType'] = wrap_slug_ref(item['dataLicenseType_slug'])
       result
@@ -514,7 +517,7 @@ module Jekyll
       result['name'] = item['name']
 
       case table_name
-      when 'paddlecrafttypes', 'datasourcetypes'
+      when 'paddlecrafttypes', 'datasourcetypes', 'spottiptypes'
         result['description'] = wrap_raw_description(item['_raw_description'])
       when 'datalicensetypes'
         result['summaryUrl'] = item['summaryUrl']
