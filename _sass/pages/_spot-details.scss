@@ -105,6 +105,21 @@
     }
   }
 
+  // Spot tip banners (Requirement 3)
+  .alert-spot-tip {
+    border-radius: 0;
+    margin-bottom: 0.75rem;
+
+    .spot-tip-icon {
+      margin-top: 0.15em;
+    }
+
+    .spot-tip-description {
+      margin-top: 0.25rem;
+      font-size: 0.9em;
+    }
+  }
+
   // Description text (between title and table, matching Gatsby layout)
   .spot-description-text {
     margin-bottom: 1em;
