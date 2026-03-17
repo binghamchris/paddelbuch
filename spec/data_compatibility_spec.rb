@@ -299,14 +299,14 @@ RSpec.describe 'Data file output compatibility' do
   describe 'CONTENT_TYPES mapping completeness' do
     let(:content_types) { Jekyll::ContentfulFetcher::CONTENT_TYPES }
 
-    it 'maps exactly 13 content types' do
-      expect(content_types.size).to eq(13)
+    it 'maps exactly 14 content types' do
+      expect(content_types.size).to eq(14)
     end
 
     %w[
       spot waterway obstacle protectedArea waterwayEventNotice
       spotType obstacleType paddleCraftType paddlingEnvironmentType
-      protectedAreaType dataSourceType dataLicenseType staticPage
+      protectedAreaType dataSourceType dataLicenseType spotTipType staticPage
     ].each do |ct|
       it "includes '#{ct}' content type" do
         expect(content_types).to have_key(ct)
