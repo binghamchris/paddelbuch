@@ -30,6 +30,7 @@ module Jekyll
       'protectedAreaType'       => { filename: 'types/protected_area_types',       mapper: :map_type },
       'dataSourceType'          => { filename: 'types/data_source_types',          mapper: :map_type },
       'dataLicenseType'         => { filename: 'types/data_license_types',         mapper: :map_type },
+      'spotTipType'             => { filename: 'types/spot_tip_types',             mapper: :map_type },
       'staticPage'              => { filename: 'static_pages',                     mapper: :map_static_page }
     }.freeze
 

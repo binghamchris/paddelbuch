@@ -267,7 +267,8 @@ module ContentfulMappers
       'eventNotices' => extract_reference_slugs(resolve_field(fields, :event_notices, locale)),
       'obstacles' => extract_reference_slugs(resolve_field(fields, :obstacles, locale)),
       'dataSourceType_slug' => extract_reference_slug(resolve_field(fields, :data_source_type, locale)),
-      'dataLicenseType_slug' => extract_reference_slug(resolve_field(fields, :data_license_type, locale))
+      'dataLicenseType_slug' => extract_reference_slug(resolve_field(fields, :data_license_type, locale)),
+      'spotTipType_slugs' => extract_reference_slugs(resolve_field(fields, :spot_tips, locale))
     }
   end
 
@@ -367,6 +368,11 @@ module ContentfulMappers
     when 'dataLicenseType'
       result['summaryUrl'] = resolve_field(fields, :summary_url, locale)
       result['fullTextUrl'] = resolve_field(fields, :full_text_url, locale)
+    when 'spotTipType'
+      desc_field = resolve_field(fields, :description, locale)
+      result['description_de'] = extract_rich_text_html(resolve_field(fields, :description, 'de'))
+      result['description_en'] = extract_rich_text_html(resolve_field(fields, :description, 'en'))
+      result['_raw_description'] = serialize_raw_rich_text(desc_field)
     end
 
     result
