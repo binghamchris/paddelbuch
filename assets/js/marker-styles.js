@@ -143,8 +143,7 @@
    * Requirements: 4.3, 4.4, 4.7
    */
   var TIP_MODIFIER_CONFIG = {
-    // Example entry (added when a tip type is created in Contentful):
-    // 'example-tip': { iconUrl: basePath + 'tip-modifier-example-tip.svg', offset: [-8, -8], size: 16 }
+    'swiss-canoe-eco-tipp': { iconUrl: basePath + 'tip-modifier-swiss-canoe-eco-tipp.svg', offset: [-8, -8], size: 16 }
   };
 
   // Export to global scope
