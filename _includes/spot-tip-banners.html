@@ -1,0 +1,30 @@
+<!--
+  Spot Tip Banners Include
+
+  Displays one tip banner per spot tip type on the detail page.
+  Each banner shows an SVG icon, the localised name, and an optional description.
+  Uses Bootstrap alert structure consistent with rejected-spot-content.html.
+
+  Parameters:
+  - include.spot_tip_types: Array of tip type hashes with slug, name, and optional description
+
+  Requirements: 3.1, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8
+-->
+
+{% assign spot_tip_types = include.spot_tip_types %}
+{% assign current_locale = site.lang | default: 'de' %}
+
+{% for tip in spot_tip_types %}
+<div class="alert alert-spot-tip alert-spot-tip-{{ tip.slug }} d-flex align-items-start" role="alert">
+  <img src="{{ '/assets/images/tips/tip-banner-' | append: tip.slug | append: '.svg' | relative_url }}"
+       width="24" height="24"
+       class="flex-shrink-0 me-2 spot-tip-icon"
+       alt="{{ tip.name | escape }}" />
+  <div>
+    <strong>{{ tip.name | escape }}</strong>
+    {% if tip.description %}
+    <div class="spot-tip-description">{{ tip.description }}</div>
+    {% endif %}
+  </div>
+</div>
+{% endfor %}
