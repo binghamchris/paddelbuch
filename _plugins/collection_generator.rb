@@ -53,6 +53,7 @@ module Jekyll
       @type_lookup = build_type_lookup(site.data, current_locale)
       @waterway_lookup = build_waterway_lookup(site.data['waterways'], current_locale)
       @craft_type_lookup = build_craft_type_lookup(site.data, current_locale)
+      @spot_tip_type_lookup = build_spot_tip_type_lookup(site.data, current_locale)
 
       COLLECTIONS.each do |collection_name, config|
         collection = site.collections[collection_name]
@@ -193,6 +194,10 @@ module Jekyll
       doc.data['spot_icon_name'] = icon[:name]
       doc.data['spot_icon_alt'] = icon[:alt]
 
+      # Spot tip types (resolved array of type hashes)
+      tip_slugs = entry['spotTipType_slugs'] || []
+      doc.data['spot_tip_types'] = tip_slugs.filter_map { |slug| @spot_tip_type_lookup[slug] }
+
       # Waterway name
       if entry['waterway_slug'] && @waterway_lookup&.[](entry['waterway_slug'])
         doc.data['waterway_name'] = @waterway_lookup[entry['waterway_slug']]['name']
@@ -297,6 +302,24 @@ module Jekyll
       types.each do |t|
         next unless t['locale'] == locale && t['slug']
         lookup[t['slug']] = t[name_key] || t['name_de'] || t['slug']
+      end
+      lookup
+    end
+
+    # Build { slug => { slug, name, description } } hash for spot tip types filtered by locale
+    def build_spot_tip_type_lookup(data, locale)
+      types = data.dig('types', 'spot_tip_types')
+      return {} unless types.is_a?(Array)
+      name_key = locale == 'en' ? 'name_en' : 'name_de'
+      desc_key = "description_#{locale}"
+      lookup = {}
+      types.each do |t|
+        next unless t['locale'] == locale && t['slug']
+        lookup[t['slug']] = {
+          'slug' => t['slug'],
+          'name' => t[name_key] || t['name_de'] || t['slug'],
+          'description' => t[desc_key]
+        }
       end
       lookup
     end
