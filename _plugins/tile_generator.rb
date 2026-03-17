@@ -40,7 +40,7 @@ module Jekyll
         data_key: 'spots',
         location_type: :point,
         exclude_rejected: false,
-        fields: [:slug, :name, :location, :spotType_slug, :description, :approximateAddress, :paddleCraftTypes, :rejected]
+        fields: [:slug, :name, :location, :spotType_slug, :description, :approximateAddress, :paddleCraftTypes, :rejected, :spotTipType_slugs]
       },
       'notices' => {
         data_key: 'notices',

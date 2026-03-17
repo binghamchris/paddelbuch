@@ -151,7 +151,7 @@ module Jekyll
       CONTENT_TYPES.each do |content_type, config|
         begin
           entries = fetch_entries(content_type)
-          data = entries.flat_map { |entry| ContentfulMappers.flatten_entry(entry, config[:mapper]) }
+          data = entries.flat_map { |entry| ContentfulMappers.flatten_entry(entry, config[:mapper], content_type) }
           Jekyll.logger.info 'Contentful:', "Fetched #{entries.size} #{content_type} entries"
           write_yaml(config[:filename], data)
         rescue Contentful::Error => e
