@@ -163,4 +163,88 @@ RSpec.describe Jekyll::DashboardMetricsGenerator, 'property tests' do
       }
     end
   end
+
+  # ── Property 4: Coverage segment classification correctness ─────────────────
+  # **Validates: Requirements 10.1, 10.2, 4.2, 4.3, 4.4**
+  #
+  # For any waterway geometry (LineString or Polygon) and any array of spot
+  # locations, every segment classified as "covered" by classify_segments shall
+  # have its midpoint within 2000 metres (Haversine) of at least one spot, and
+  # every segment classified as "uncovered" shall have its midpoint farther
+  # than 2000 metres from all spots.
+  describe '#classify_segments — Property 4: Coverage segment classification correctness' do
+    # Helper: generate a random coordinate [lon, lat] within Swiss bounds
+    def random_coord
+      lat = Rantly { range(45_800, 47_800) } / 1000.0
+      lon = Rantly { range(5_900, 10_500) } / 1000.0
+      [lon, lat]
+    end
+
+    it 'classifies every segment correctly based on midpoint distance to spots' do
+      property_of {
+        # Choose geometry type
+        geo_type = choose('LineString', 'Polygon')
+
+        # Generate 3-10 coordinate pairs within Swiss bounds
+        num_coords = range(3, 10)
+        coords = Array.new(num_coords) {
+          lat = range(45_800, 47_800) / 1000.0
+          lon = range(5_900, 10_500) / 1000.0
+          [lon, lat]
+        }
+
+        # Build geometry
+        geometry = if geo_type == 'LineString'
+                     { 'type' => 'LineString', 'coordinates' => coords }
+                   else
+                     # Close the ring for Polygon (append first coord)
+                     ring = coords + [coords.first]
+                     { 'type' => 'Polygon', 'coordinates' => [ring] }
+                   end
+
+        # Generate 0-5 random spot locations
+        num_spots = range(0, 5)
+        spots = Array.new(num_spots) {
+          slat = range(45_800, 47_800) / 1000.0
+          slon = range(5_900, 10_500) / 1000.0
+          { 'location' => { 'lat' => slat, 'lon' => slon } }
+        }
+
+        [geometry, spots]
+      }.check(100) { |geometry, spots|
+        result = generator.send(:classify_segments, geometry, spots)
+
+        # Verify every "covered" segment midpoint is within 2000m of at least one spot
+        result['covered'].each do |feature|
+          c1 = feature['geometry']['coordinates'][0]
+          c2 = feature['geometry']['coordinates'][1]
+          mid_lon = (c1[0] + c2[0]) / 2.0
+          mid_lat = (c1[1] + c2[1]) / 2.0
+
+          min_dist = spots.map { |s|
+            loc = s['location']
+            generator.send(:haversine_distance, mid_lat, mid_lon, loc['lat'], loc['lon'])
+          }.min
+
+          expect(min_dist).to be <= 2000,
+            "Covered segment midpoint (#{mid_lat}, #{mid_lon}) is #{min_dist}m from nearest spot, expected <= 2000m"
+        end
+
+        # Verify every "uncovered" segment midpoint is farther than 2000m from all spots
+        result['uncovered'].each do |feature|
+          c1 = feature['geometry']['coordinates'][0]
+          c2 = feature['geometry']['coordinates'][1]
+          mid_lon = (c1[0] + c2[0]) / 2.0
+          mid_lat = (c1[1] + c2[1]) / 2.0
+
+          spots.each do |s|
+            loc = s['location']
+            dist = generator.send(:haversine_distance, mid_lat, mid_lon, loc['lat'], loc['lon'])
+            expect(dist).to be > 2000,
+              "Uncovered segment midpoint (#{mid_lat}, #{mid_lon}) is only #{dist}m from spot (#{loc['lat']}, #{loc['lon']}), expected > 2000m"
+          end
+        end
+      }
+    end
+  end
 end
