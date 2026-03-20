@@ -145,9 +145,9 @@ RSpec.describe Jekyll::DashboardMetricsGenerator, 'property tests' do
   #
   # For any waterway geometry (LineString or Polygon) and any array of spot
   # locations, every segment classified as "covered" by classify_segments shall
-  # have its midpoint within 2000 metres (Haversine) of at least one spot, and
+  # have its midpoint within 5000 metres (Haversine) of at least one spot, and
   # every segment classified as "uncovered" shall have its midpoint farther
-  # than 2000 metres from all spots.
+  # than 5000 metres from all spots.
   describe '#classify_segments — Property 4: Coverage segment classification correctness' do
     # Helper: generate a random coordinate [lon, lat] within Swiss bounds
     def random_coord
@@ -190,10 +190,14 @@ RSpec.describe Jekyll::DashboardMetricsGenerator, 'property tests' do
       }.check(100) { |geometry, spots|
         result = generator.send(:classify_segments, geometry, spots)
 
-        # Verify every "covered" segment midpoint is within 2000m of at least one spot
-        result['covered'].each do |feature|
-          c1 = feature['geometry']['coordinates'][0]
-          c2 = feature['geometry']['coordinates'][1]
+        # Extract coordinate pairs from MultiLineString geometries (or empty array if nil)
+        covered_coords = result['covered'] ? result['covered']['coordinates'] : []
+        uncovered_coords = result['uncovered'] ? result['uncovered']['coordinates'] : []
+
+        # Verify every "covered" segment midpoint is within 5000m of at least one spot
+        covered_coords.each do |seg|
+          c1 = seg[0]
+          c2 = seg[1]
           mid_lon = (c1[0] + c2[0]) / 2.0
           mid_lat = (c1[1] + c2[1]) / 2.0
 
@@ -202,22 +206,22 @@ RSpec.describe Jekyll::DashboardMetricsGenerator, 'property tests' do
             generator.send(:haversine_distance, mid_lat, mid_lon, loc['lat'], loc['lon'])
           }.min
 
-          expect(min_dist).to be <= 2000,
-            "Covered segment midpoint (#{mid_lat}, #{mid_lon}) is #{min_dist}m from nearest spot, expected <= 2000m"
+          expect(min_dist).to be <= 5000,
+            "Covered segment midpoint (#{mid_lat}, #{mid_lon}) is #{min_dist}m from nearest spot, expected <= 5000m"
         end
 
-        # Verify every "uncovered" segment midpoint is farther than 2000m from all spots
-        result['uncovered'].each do |feature|
-          c1 = feature['geometry']['coordinates'][0]
-          c2 = feature['geometry']['coordinates'][1]
+        # Verify every "uncovered" segment midpoint is farther than 5000m from all spots
+        uncovered_coords.each do |seg|
+          c1 = seg[0]
+          c2 = seg[1]
           mid_lon = (c1[0] + c2[0]) / 2.0
           mid_lat = (c1[1] + c2[1]) / 2.0
 
           spots.each do |s|
             loc = s['location']
             dist = generator.send(:haversine_distance, mid_lat, mid_lon, loc['lat'], loc['lon'])
-            expect(dist).to be > 2000,
-              "Uncovered segment midpoint (#{mid_lat}, #{mid_lon}) is only #{dist}m from spot (#{loc['lat']}, #{loc['lon']}), expected > 2000m"
+            expect(dist).to be > 5000,
+              "Uncovered segment midpoint (#{mid_lat}, #{mid_lon}) is only #{dist}m from spot (#{loc['lat']}, #{loc['lon']}), expected > 5000m"
           end
         end
       }
@@ -312,9 +316,7 @@ RSpec.describe Jekyll::DashboardMetricsGenerator, 'property tests' do
         num_segments = coords.size - 1
 
         # Build a set of covered segment coordinate pairs for fast lookup
-        covered_set = result['covered'].map { |f|
-          f['geometry']['coordinates']
-        }
+        covered_set = result['covered'] ? result['covered']['coordinates'] : []
 
         labels = (0...num_segments).map { |i|
           seg_coords = [coords[i], coords[i + 1]]

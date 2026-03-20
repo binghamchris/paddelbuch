@@ -99,9 +99,10 @@ RSpec.describe Jekyll::DashboardMetricsGenerator do
 
     it 'classifies entire geometry as uncovered when spots array is empty (Requirement 10.4)' do
       result = generator.send(:classify_segments, geometry, [])
-      expect(result['covered']).to be_empty
-      expect(result['uncovered']).not_to be_empty
-      expect(result['uncovered'].size).to eq(1) # single segment from 2-point LineString
+      expect(result['covered']).to be_nil
+      expect(result['uncovered']).not_to be_nil
+      expect(result['uncovered']['type']).to eq('MultiLineString')
+      expect(result['uncovered']['coordinates'].size).to eq(1) # single segment from 2-point LineString
     end
 
     it 'classifies nearby segments as covered when a spot is within range' do
@@ -109,16 +110,20 @@ RSpec.describe Jekyll::DashboardMetricsGenerator do
       # Place a spot right at the midpoint
       spots = [{ 'location' => { 'lat' => 47.35, 'lon' => 8.55 } }]
       result = generator.send(:classify_segments, geometry, spots)
-      expect(result['covered'].size).to eq(1)
-      expect(result['uncovered']).to be_empty
+      expect(result['covered']).not_to be_nil
+      expect(result['covered']['type']).to eq('MultiLineString')
+      expect(result['covered']['coordinates'].size).to eq(1)
+      expect(result['uncovered']).to be_nil
     end
 
     it 'classifies segments as uncovered when spot is far away' do
       # Place a spot very far from the geometry
       spots = [{ 'location' => { 'lat' => 40.0, 'lon' => 2.0 } }]
       result = generator.send(:classify_segments, geometry, spots)
-      expect(result['covered']).to be_empty
-      expect(result['uncovered'].size).to eq(1)
+      expect(result['covered']).to be_nil
+      expect(result['uncovered']).not_to be_nil
+      expect(result['uncovered']['type']).to eq('MultiLineString')
+      expect(result['uncovered']['coordinates'].size).to eq(1)
     end
   end
 

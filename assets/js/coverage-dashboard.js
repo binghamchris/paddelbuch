@@ -136,8 +136,8 @@
         var metric = metrics[i];
         var popupHtml = buildPopupHtml(metric, strings);
 
-        // Covered segments (green)
-        if (metric.coveredSegments && metric.coveredSegments.length > 0) {
+        // Covered segments (green) — single MultiLineString geometry
+        if (metric.coveredSegments) {
           var coveredLayer = L.geoJSON(metric.coveredSegments, {
             style: {
               color: COVERED_COLOR,
@@ -150,8 +150,8 @@
           layers.push(coveredLayer);
         }
 
-        // Uncovered segments (red)
-        if (metric.uncoveredSegments && metric.uncoveredSegments.length > 0) {
+        // Uncovered segments (red) — single MultiLineString geometry
+        if (metric.uncoveredSegments) {
           var uncoveredLayer = L.geoJSON(metric.uncoveredSegments, {
             style: {
               color: UNCOVERED_COLOR,
