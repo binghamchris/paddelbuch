@@ -97,15 +97,15 @@ describe('PaddelbuchDashboardSwitcher', () => {
       expect(btn.getAttribute('data-dashboard-id')).toBe('freshness');
     });
 
-    test('creates nav-tabs ul structure', () => {
+    test('creates button wrapper structure', () => {
       setupDOM();
       var d1 = createFakeDashboard('freshness', 'Freshness');
       setupGlobals([d1]);
 
       loadModule();
 
-      var ul = document.querySelector('#dashboard-switcher ul.nav.nav-tabs');
-      expect(ul).not.toBeNull();
+      var wrapper = document.querySelector('#dashboard-switcher .dashboard-switcher-buttons');
+      expect(wrapper).not.toBeNull();
     });
 
     test('creates no tabs when registry is empty', () => {
