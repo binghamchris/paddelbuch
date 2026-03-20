@@ -166,7 +166,7 @@ dashboards:
   description: "These visualisations show key information about the current overall quality of the contents of the Paddel Buch database."
   freshness:
     name: "Waterway Freshness"
-    description: "How recently spots for each waterway were updated."
+    description: "How recently spots for each waterway were updated. Calculated using the median spot based on the <code>updatedAt</code> field."
     legend_title: "Median Age of Entries"
     fresh: "Fresh (≤ 2 years)"
     aging: "Aging (2–5 years)"

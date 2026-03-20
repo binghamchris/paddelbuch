@@ -166,7 +166,7 @@ dashboards:
   description: "Diese Visualisierungen zeigen wichtige Informationen über die aktuelle Gesamtqualität der Inhalte der Paddel Buch Datenbank."
   freshness:
     name: "Gewässeraktualität"
-    description: "Wie aktuell die Einstiegsorte für jedes Gewässer sind."
+    description: "Wie aktuell die Einstiegsorte für jedes Gewässer sind. Berechnet anhand des Median-Einstiegsorts basierend auf dem <code>updatedAt</code>-Feld."
     legend_title: "Median-Alter der Einträge"
     fresh: "Aktuell (≤ 2 Jahre)"
     aging: "Alternd (2–5 Jahre)"
