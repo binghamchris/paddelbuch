@@ -29,9 +29,11 @@
   function getStrings() {
     var defaults = {
       name: 'Gewässerabdeckung',
+      description: '',
       legend_title: 'Abdeckung der Gewässer',
-      covered: 'Abgedeckt (innerhalb 2 km)',
+      covered: 'Abgedeckt (innerhalb 5 km)',
       not_covered: 'Nicht abgedeckt',
+      coverage_radius: '5 km Abdeckungsradius pro Einstiegsort',
       popup_spots: 'Einstiegsorte'
     };
 
@@ -110,6 +112,12 @@
     html += '<span>' + escapeHtml(strings.not_covered) + '</span>';
     html += '</div>';
 
+    // Coverage radius note
+    html += '<div class="dashboard-legend-item">';
+    html += '<span class="dashboard-legend-swatch dashboard-legend-swatch--radius"></span>';
+    html += '<span>' + escapeHtml(strings.coverage_radius) + '</span>';
+    html += '</div>';
+
     html += '</div>';
     el.innerHTML = html;
   }
@@ -128,10 +136,15 @@
     activate: function(context) {
       var map = context.map;
       legendEl = context.legendEl || document.getElementById('dashboard-legend');
+      var descriptionEl = document.getElementById('dashboard-description');
       var metrics = (global.PaddelbuchDashboardData && global.PaddelbuchDashboardData.coverageMetrics) || [];
 
       // Refresh i18n strings on each activation (page may have changed locale)
       strings = getStrings();
+
+      if (descriptionEl) {
+        descriptionEl.textContent = strings.description;
+      }
 
       for (var i = 0; i < metrics.length; i++) {
         var metric = metrics[i];
@@ -179,6 +192,11 @@
 
       if (legendEl) {
         legendEl.innerHTML = '';
+      }
+
+      var descriptionEl = document.getElementById('dashboard-description');
+      if (descriptionEl) {
+        descriptionEl.textContent = '';
       }
     }
   };

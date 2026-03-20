@@ -166,6 +166,7 @@ dashboards:
   description: "Diese Visualisierungen zeigen wichtige Informationen über die aktuelle Gesamtqualität der Inhalte der Paddel Buch Datenbank."
   freshness:
     name: "Gewässeraktualität"
+    description: "Wie aktuell die Einstiegsorte für jedes Gewässer sind."
     legend_title: "Median-Alter der Einträge"
     fresh: "Aktuell (≤ 2 Jahre)"
     aging: "Alternd (2–5 Jahre)"
@@ -177,7 +178,9 @@ dashboards:
     popup_no_data: "Keine Daten vorhanden"
   coverage:
     name: "Gewässerabdeckung"
+    description: "Wie viel der Länge jedes Flusses oder des Ufers jedes Sees Einstiegsorte hat."
     legend_title: "Abdeckung der Gewässer"
-    covered: "Abgedeckt (innerhalb 2 km)"
+    covered: "Abgedeckt (innerhalb 5 km)"
     not_covered: "Nicht abgedeckt"
+    coverage_radius: "5 km Abdeckungsradius pro Einstiegsort"
     popup_spots: "Einstiegsorte"

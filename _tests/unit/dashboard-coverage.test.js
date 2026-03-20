@@ -56,9 +56,11 @@ function setupDOM() {
     '<script type="application/json" id="coverage-i18n">' +
     JSON.stringify({
       name: 'Waterway Coverage',
+      description: 'How much of the length of each river or shore of each lake has spots.',
       legend_title: 'Waterway Coverage',
-      covered: 'Covered (within 2 km)',
+      covered: 'Covered (within 5 km)',
       not_covered: 'Not Covered',
+      coverage_radius: '5 km coverage radius per spot',
       popup_spots: 'Spots'
     }) +
     '</script>';
@@ -241,7 +243,7 @@ describe('PaddelbuchCoverageDashboard', () => {
   });
 
   describe('legend rendering', () => {
-    test('renders legend with two items (covered and not covered)', () => {
+    test('renders legend with three items (covered, not covered, and radius)', () => {
       setupDOM();
       setupGlobals();
       var mod = loadModule();
@@ -250,7 +252,7 @@ describe('PaddelbuchCoverageDashboard', () => {
       mod.activate({ map: mockMap, legendEl: legendEl });
 
       var items = legendEl.querySelectorAll('.dashboard-legend-item');
-      expect(items.length).toBe(2);
+      expect(items.length).toBe(3);
     });
 
     test('renders legend title', () => {
@@ -295,8 +297,9 @@ describe('PaddelbuchCoverageDashboard', () => {
       mod.activate({ map: mockMap, legendEl: legendEl });
 
       var html = legendEl.innerHTML;
-      expect(html).toContain('Covered (within 2 km)');
+      expect(html).toContain('Covered (within 5 km)');
       expect(html).toContain('Not Covered');
+      expect(html).toContain('5 km coverage radius per spot');
     });
   });
 

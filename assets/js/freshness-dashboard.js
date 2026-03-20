@@ -25,6 +25,7 @@
   function getStrings() {
     var defaults = {
       name: 'Gewässeraktualität',
+      description: '',
       legend_title: 'Median-Alter der Einträge',
       fresh: 'Aktuell (≤ 2 Jahre)',
       aging: 'Alternd (2–5 Jahre)',
@@ -161,10 +162,15 @@
     activate: function(context) {
       var map = context.map;
       legendEl = context.legendEl || document.getElementById('dashboard-legend');
+      var descriptionEl = document.getElementById('dashboard-description');
       var metrics = (global.PaddelbuchDashboardData && global.PaddelbuchDashboardData.freshnessMetrics) || [];
 
       // Refresh i18n strings on each activation (page may have changed locale)
       strings = getStrings();
+
+      if (descriptionEl) {
+        descriptionEl.textContent = strings.description;
+      }
 
       for (var i = 0; i < metrics.length; i++) {
         var metric = metrics[i];
@@ -200,6 +206,11 @@
 
       if (legendEl) {
         legendEl.innerHTML = '';
+      }
+
+      var descriptionEl = document.getElementById('dashboard-description');
+      if (descriptionEl) {
+        descriptionEl.textContent = '';
       }
     }
   };
