@@ -241,8 +241,9 @@ module Jekyll
     # Returns { 'covered' => [...], 'uncovered' => [...] } where each
     # value is an array of GeoJSON LineString Feature hashes (2-point segments).
     # Requirements: 4.1, 4.2, 4.3, 4.4, 10.1, 10.2
-    def classify_segments(geometry, spots, radius = 2000)
-      result = { 'covered' => [], 'uncovered' => [] }
+    def classify_segments(geometry, spots, radius = 5000)
+      covered_lines = []
+      uncovered_lines = []
 
       geo_type = geometry['type']
       coord_arrays = case geo_type
@@ -258,7 +259,7 @@ module Jekyll
                        (geometry['coordinates'] || []).map { |poly| poly&.first }
                      else
                        Jekyll.logger.warn 'DashboardMetrics:', "Unknown geometry type '#{geo_type}', skipping segment classification"
-                       return result
+                       return { 'covered' => nil, 'uncovered' => nil }
                      end
 
       spot_locations = spots.map { |s| s['location'] }.compact
@@ -278,24 +279,24 @@ module Jekyll
             haversine_distance(mid_lat, mid_lon, loc['lat'], loc['lon']) <= radius
           end
 
-          segment_feature = {
-            'type' => 'Feature',
-            'geometry' => {
-              'type' => 'LineString',
-              'coordinates' => [c1, c2]
-            },
-            'properties' => {}
-          }
-
           if covered
-            result['covered'] << segment_feature
+            covered_lines << [c1, c2]
           else
-            result['uncovered'] << segment_feature
+            uncovered_lines << [c1, c2]
           end
         end
       end
 
-      result
+      {
+        'covered' => covered_lines.empty? ? nil : {
+          'type' => 'MultiLineString',
+          'coordinates' => covered_lines
+        },
+        'uncovered' => uncovered_lines.empty? ? nil : {
+          'type' => 'MultiLineString',
+          'coordinates' => uncovered_lines
+        }
+      }
     end
 
     # Computes coverage metrics for each unique waterway.
