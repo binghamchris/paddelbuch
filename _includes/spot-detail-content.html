@@ -56,7 +56,9 @@
       <td class="clipboard-cell">
         <button type="button" 
                 class="btn btn-sm clipboard-btn copy-btn" 
-                onclick="PaddelbuchClipboard.copyGPS('{{ lat }}', '{{ lon }}')"
+                data-copy-gps
+                data-lat="{{ lat }}"
+                data-lon="{{ lon }}"
                 title="{% t actions.copy_gps %}"
                 aria-label="{% t actions.copy_gps %}">
           {% t actions.copy %}
@@ -76,7 +78,8 @@
       <td class="clipboard-cell">
         <button type="button" 
                 class="btn btn-sm clipboard-btn copy-btn" 
-                onclick="PaddelbuchClipboard.copyAddress('{{ spot.approximateAddress | escape }}')"
+                data-copy-address
+                data-address="{{ spot.approximateAddress | escape }}"
                 title="{% t actions.copy_address %}"
                 aria-label="{% t actions.copy_address %}">
           {% t actions.copy %}
