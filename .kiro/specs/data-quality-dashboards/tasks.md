@@ -148,7 +148,7 @@ Build two map-based data quality dashboards (Data Freshness and Waterway Coverag
     - Create `_tests/unit/dashboard-switcher.test.js` — test tab creation, activation/deactivation flow
     - _Requirements: 2.1, 2.2, 2.3, 3.9, 4.6, 6.5_
 
-  - [~] 4.7 Write property test for switcher state management (Property 7)
+  - [x] 4.7 Write property test for switcher state management (Property 7)
     - **Property 7: Switcher state management**
     - Create `_tests/property/dashboard-switcher-state.property.test.js`
     - Generate random sequences of dashboard selections from a registry
