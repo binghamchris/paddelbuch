@@ -182,13 +182,14 @@
           continue;
         }
 
+        var isNoData = metric.spotCount === 0;
         var layer = L.geoJSON(metric.geometry, {
           style: {
             color: metric.color,
             weight: 3,
-            opacity: 1,
+            opacity: isNoData ? 0.55 : 1,
             fillColor: metric.color,
-            fillOpacity: 0.25
+            fillOpacity: isNoData ? 0.55 * 0.25 : 0.25
           }
         });
 
