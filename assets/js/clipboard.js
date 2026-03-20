@@ -146,6 +146,27 @@
       });
   }
 
+  // Bind event listeners for CSP-compliant clipboard buttons
+  function bindClipboardListeners() {
+    document.querySelectorAll('[data-copy-gps]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        copyGPS(btn.dataset.lat, btn.dataset.lon, btn);
+      });
+    });
+
+    document.querySelectorAll('[data-copy-address]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        copyAddress(btn.dataset.address, btn);
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bindClipboardListeners);
+  } else {
+    bindClipboardListeners();
+  }
+
   // Export to global scope
   global.PaddelbuchClipboard = {
     copyToClipboard: copyToClipboard,
