@@ -182,5 +182,4 @@ dashboards:
     legend_title: "Waterway Coverage"
     covered: "Covered (within 5 km)"
     not_covered: "Not Covered"
-    coverage_radius: "5 km coverage radius per spot"
     popup_spots: "Spots"

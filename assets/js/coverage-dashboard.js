@@ -33,7 +33,6 @@
       legend_title: 'Abdeckung der Gewässer',
       covered: 'Abgedeckt (innerhalb 5 km)',
       not_covered: 'Nicht abgedeckt',
-      coverage_radius: '5 km Abdeckungsradius pro Einstiegsort',
       popup_spots: 'Einstiegsorte'
     };
 
@@ -109,11 +108,6 @@
     html += '<div class="dashboard-legend-item">';
     html += '<span class="dashboard-legend-swatch dashboard-legend-swatch--uncovered"></span>';
     html += '<span>' + escapeHtml(strings.not_covered) + '</span>';
-    html += '</div>';
-
-    // Coverage radius note
-    html += '<div class="dashboard-legend-item">';
-    html += '<span>' + escapeHtml(strings.coverage_radius) + '</span>';
     html += '</div>';
 
     html += '</div>';
