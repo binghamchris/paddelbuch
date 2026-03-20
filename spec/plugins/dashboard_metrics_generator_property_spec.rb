@@ -247,4 +247,55 @@ RSpec.describe Jekyll::DashboardMetricsGenerator, 'property tests' do
       }
     end
   end
+
+  # ── Property 5: Haversine distance accuracy ────────────────────────────────
+  # **Validates: Requirements 10.3**
+  #
+  # For any two geographic coordinate pairs (lat/lon within valid ranges), the
+  # Haversine distance computed by haversine_distance shall be within 0.5% of
+  # the expected geodesic distance for the same coordinates (validated against
+  # the standard Haversine formula with Earth radius 6371 km).
+  describe '#haversine_distance — Property 5: Haversine distance accuracy' do
+    # Independent reference Haversine implementation (Earth radius 6371 km)
+    def reference_haversine(lat1, lon1, lat2, lon2)
+      r = 6_371_000.0 # Earth radius in metres
+
+      dlat = (lat2 - lat1) * Math::PI / 180.0
+      dlon = (lon2 - lon1) * Math::PI / 180.0
+
+      lat1_rad = lat1 * Math::PI / 180.0
+      lat2_rad = lat2 * Math::PI / 180.0
+
+      a = Math.sin(dlat / 2.0)**2 +
+          Math.cos(lat1_rad) * Math.cos(lat2_rad) * Math.sin(dlon / 2.0)**2
+      c = 2.0 * Math.atan2(Math.sqrt(a), Math.sqrt(1.0 - a))
+
+      r * c
+    end
+
+    it 'computes distances within 0.5% of the reference Haversine formula' do
+      property_of {
+        # Generate random lat in [-90, 90] and lon in [-180, 180]
+        # Use integer ranges divided by 1000.0 for float precision
+        lat1 = range(-90_000, 90_000) / 1000.0
+        lon1 = range(-180_000, 180_000) / 1000.0
+        lat2 = range(-90_000, 90_000) / 1000.0
+        lon2 = range(-180_000, 180_000) / 1000.0
+
+        [lat1, lon1, lat2, lon2]
+      }.check(100) { |lat1, lon1, lat2, lon2|
+        result = generator.send(:haversine_distance, lat1, lon1, lat2, lon2)
+        expected = reference_haversine(lat1, lon1, lat2, lon2)
+
+        # Both points identical → distance should be 0
+        if lat1 == lat2 && lon1 == lon2
+          expect(result).to eq(0.0),
+            "Identical points (#{lat1}, #{lon1}): expected 0.0 but got #{result}"
+        else
+          expect(result).to be_within(expected * 0.005).of(expected),
+            "Points (#{lat1}, #{lon1}) → (#{lat2}, #{lon2}): expected ~#{expected.round(2)}m but got #{result.round(2)}m"
+        end
+      }
+    end
+  end
 end
