@@ -1,7 +1,7 @@
 /**
  * Paddelbuch Dashboard Switcher Module
  *
- * Reads PaddelbuchDashboardRegistry, creates Bootstrap-styled tab buttons
+ * Reads PaddelbuchDashboardRegistry, creates styled buttons
  * inside #dashboard-switcher, and manages activation/deactivation of
  * dashboard modules. On load, activates the first registered dashboard.
  *
@@ -134,7 +134,7 @@
   }
 
   /**
-   * Builds the Bootstrap nav-tabs UI from the registry and inserts it
+   * Builds the button-group UI from the registry and inserts it
    * into #dashboard-switcher.
    */
   function buildTabs() {
@@ -142,23 +142,20 @@
       return;
     }
 
-    var ul = document.createElement('ul');
-    ul.className = 'nav nav-tabs';
+    var wrapper = document.createElement('div');
+    wrapper.className = 'dashboard-switcher-buttons';
 
     for (var i = 0; i < registry.length; i++) {
       var dashboard = registry[i];
 
-      var li = document.createElement('li');
-      li.className = 'nav-item';
-
       var btn = document.createElement('button');
-      btn.className = 'nav-link';
+      btn.className = 'dashboard-switcher-btn';
       btn.setAttribute('data-dashboard-id', dashboard.id);
       btn.textContent = typeof dashboard.getName === 'function'
         ? dashboard.getName()
         : dashboard.id;
 
-      // Mark the first tab as active
+      // Mark the first button as active
       if (i === 0) {
         btn.classList.add('active');
       }
@@ -170,11 +167,10 @@
         });
       })(dashboard.id);
 
-      li.appendChild(btn);
-      ul.appendChild(li);
+      wrapper.appendChild(btn);
     }
 
-    switcherEl.appendChild(ul);
+    switcherEl.appendChild(wrapper);
   }
 
   /**
