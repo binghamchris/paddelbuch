@@ -31,7 +31,7 @@ const DASHBOARD_TRANSLATION_KEYS = [
   'dashboards.freshness.no_data',
   'dashboards.freshness.popup_spots',
   'dashboards.freshness.popup_median_age',
-  'dashboards.freshness.popup_days',
+  'dashboards.freshness.popup_years',
   'dashboards.freshness.popup_no_data',
   'dashboards.coverage.name',
   'dashboards.coverage.legend_title',
