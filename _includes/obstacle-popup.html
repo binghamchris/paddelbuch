@@ -15,7 +15,7 @@
   Requirements: 5.3
 -->
 
-{% assign locale_prefix = site.locale_prefix %}
+{% include locale-prefix.html %}
 
 {% assign obstacle = include.obstacle %}
 {% assign current_locale = include.locale | default: site.lang | default: 'de' %}
