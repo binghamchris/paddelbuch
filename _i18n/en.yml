@@ -19,6 +19,7 @@ nav:
   language: "Language"
   more_lakes: "More lakes"
   more_rivers: "More rivers"
+  data_quality_dashboards: "Data Quality"
 
 # Spot types
 spot_types:
@@ -158,3 +159,27 @@ errors:
 date:
   format: "%d/%m/%Y"
   format_long: "%d %B %Y"
+
+# Dashboard page
+dashboards:
+  title: "Data Quality"
+  description: "These visualisations show key information about the current overall quality of the contents of the Paddel Buch database."
+  freshness:
+    name: "Waterway Freshness"
+    description: "How recently spots for each waterway were updated."
+    legend_title: "Median Age of Entries"
+    fresh: "Fresh (≤ 2 years)"
+    aging: "Aging (2–5 years)"
+    stale: "Stale (> 5 years)"
+    no_data: "No Spots"
+    popup_spots: "Spots"
+    popup_median_age: "Median Age"
+    popup_years: "years"
+    popup_no_data: "No data available"
+  coverage:
+    name: "Waterway Coverage"
+    description: "How much of the length of each river or shore of each lake has spots."
+    legend_title: "Waterway Coverage"
+    covered: "Covered (within 5 km)"
+    not_covered: "Not Covered"
+    popup_spots: "Spots"

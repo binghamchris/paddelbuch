@@ -1,4 +1,4 @@
-{% assign locale_prefix = site.locale_prefix %}
+{% include locale-prefix.html %}
 
 <header>
   <nav class="navbar navbar-expand-lg navbar-dark" id="site-navbar">
@@ -81,6 +81,11 @@
               <li>
                 <a class="dropdown-item" href="{{ locale_prefix | append: '/offene-daten/api' }}">
                   <span class="nav-link">{% t nav.public_database_api %}</span>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="{{ locale_prefix | append: '/offene-daten/datenqualitaet/' }}">
+                  <span class="nav-link">{% t nav.data_quality_dashboards %}</span>
                 </a>
               </li>
             </ul>

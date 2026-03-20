@@ -1,0 +1,77 @@
+---
+layout: default
+title: Data Quality
+pageName: data-quality
+permalink: /offene-daten/datenqualitaet/
+scripts:
+  - /assets/js/dashboard-data.js
+  - /assets/js/dashboard-map.js
+  - /assets/js/freshness-dashboard.js
+  - /assets/js/coverage-dashboard.js
+  - /assets/js/dashboard-switcher.js
+---
+<!--
+  Data Quality Dashboards Page
+
+  Hosts two map-based dashboards (Data Freshness and Waterway Coverage)
+  on a shared Leaflet map with a switcher control. Pre-computed metrics
+  are embedded as JSON data blocks and rendered by the JS modules.
+
+  Path: /offene-daten/datenqualitaet/
+
+  Requirements: 1.1, 1.6, 5.1, 5.2
+-->
+
+<div class="container">
+  <h1>{% t dashboards.title %}</h1>
+
+  <p>{% t dashboards.description %}</p>
+
+  <div id="dashboard-switcher"></div>
+
+  <h2 id="dashboard-title"></h2>
+
+  <div id="dashboard-description"></div>
+
+  <div id="dashboard-legend"></div>
+
+  <div id="dashboard-map" class="map"></div>
+
+  <div id="dashboard-content" style="display:none;"></div>
+
+  <!-- Last Updated (build time) -->
+  <div class="static-page-meta">
+    <small class="text-muted">
+      {% t labels.last_updated %}: {{ site.time | localized_date }}
+    </small>
+  </div>
+</div>
+
+<script type="application/json" id="freshness-data">{{ site.data.dashboard_freshness_metrics | jsonify }}</script>
+<script type="application/json" id="coverage-data">{{ site.data.dashboard_coverage_metrics | jsonify }}</script>
+
+<script type="application/json" id="freshness-i18n">
+{
+  "name": "{% t dashboards.freshness.name %}",
+  "description": "{% t dashboards.freshness.description %}",
+  "legend_title": "{% t dashboards.freshness.legend_title %}",
+  "fresh": "{% t dashboards.freshness.fresh %}",
+  "aging": "{% t dashboards.freshness.aging %}",
+  "stale": "{% t dashboards.freshness.stale %}",
+  "no_data": "{% t dashboards.freshness.no_data %}",
+  "popup_spots": "{% t dashboards.freshness.popup_spots %}",
+  "popup_median_age": "{% t dashboards.freshness.popup_median_age %}",
+  "popup_years": "{% t dashboards.freshness.popup_years %}",
+  "popup_no_data": "{% t dashboards.freshness.popup_no_data %}"
+}
+</script>
+<script type="application/json" id="coverage-i18n">
+{
+  "name": "{% t dashboards.coverage.name %}",
+  "description": "{% t dashboards.coverage.description %}",
+  "legend_title": "{% t dashboards.coverage.legend_title %}",
+  "covered": "{% t dashboards.coverage.covered %}",
+  "not_covered": "{% t dashboards.coverage.not_covered %}",
+  "popup_spots": "{% t dashboards.coverage.popup_spots %}"
+}
+</script>
