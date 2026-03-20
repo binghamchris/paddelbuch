@@ -32,6 +32,13 @@ scripts:
   <div id="dashboard-map" class="map"></div>
 
   <div id="dashboard-content" style="display:none;"></div>
+
+  <!-- Last Updated (build time) -->
+  <div class="static-page-meta">
+    <small class="text-muted">
+      {% t labels.last_updated %}: {{ site.time | localized_date }}
+    </small>
+  </div>
 </div>
 
 <script type="application/json" id="freshness-data">{{ site.data.dashboard_freshness_metrics | jsonify }}</script>
