@@ -132,7 +132,7 @@ Build two map-based data quality dashboards (Data Freshness and Waterway Coverag
     - Register on `PaddelbuchDashboardRegistry`
     - _Requirements: 4.1, 4.6, 4.7, 6.5, 7.1_
 
-  - [~] 4.5 Create `assets/js/dashboard-switcher.js`
+  - [x] 4.5 Create `assets/js/dashboard-switcher.js`
     - Implement `PaddelbuchDashboardSwitcher` that reads `PaddelbuchDashboardRegistry`
     - Create Bootstrap-styled tab buttons inside `#dashboard-switcher`, one per registered dashboard
     - On load: activate first registered dashboard (freshness)
