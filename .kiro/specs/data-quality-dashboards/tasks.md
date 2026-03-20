@@ -189,7 +189,7 @@ Build two map-based data quality dashboards (Data Freshness and Waterway Coverag
     - Place it alongside the existing API page link
     - _Requirements: 1.2_
 
-  - [~] 6.3 Add i18n translation keys to `_i18n/de.yml` and `_i18n/en.yml`
+  - [x] 6.3 Add i18n translation keys to `_i18n/de.yml` and `_i18n/en.yml`
     - Add `nav.data_quality_dashboards` key
     - Add all `dashboards.*` keys: title, freshness (name, legend_title, fresh, aging, stale, no_data, popup_spots, popup_median_age, popup_days, popup_no_data), coverage (name, legend_title, covered, not_covered, popup_spots)
     - German values in `de.yml`, English values in `en.yml`
