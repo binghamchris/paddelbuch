@@ -32,7 +32,7 @@
       no_data: 'Keine Daten',
       popup_spots: 'Einstiegsorte',
       popup_median_age: 'Median-Alter',
-      popup_days: 'Tage',
+      popup_years: 'Jahre',
       popup_no_data: 'Keine Daten vorhanden'
     };
 
@@ -66,8 +66,8 @@
     if (medianAgeDays == null) {
       return strings.popup_no_data;
     }
-    var days = Math.round(medianAgeDays);
-    return days + ' ' + strings.popup_days;
+    var years = (medianAgeDays / 365.25).toFixed(1);
+    return years + ' ' + strings.popup_years;
   }
 
   /**
@@ -94,11 +94,6 @@
     html += '<div>';
     html += '<p>' + strings.popup_median_age + ': ' + formatMedianAge(metric.medianAgeDays, strings) + '</p>';
     html += '</div>';
-
-    // Link to waterway detail page
-    html += '<button class="popup-btn">';
-    html += '<a href="/einstiegsorte/?gewaesser=' + encodeURIComponent(metric.slug) + '">' + escapeHtml(metric.name) + '</a>';
-    html += '</button>';
 
     return html;
   }

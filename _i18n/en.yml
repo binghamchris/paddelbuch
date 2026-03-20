@@ -172,7 +172,7 @@ dashboards:
     no_data: "No Data"
     popup_spots: "Spots"
     popup_median_age: "Median Age"
-    popup_days: "days"
+    popup_years: "years"
     popup_no_data: "No data available"
   coverage:
     name: "Coverage"

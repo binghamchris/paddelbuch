@@ -83,11 +83,6 @@
     // Title: waterway name
     html += '<span class="popup-title"><h1>' + escapeHtml(metric.name) + '</h1></span>';
 
-    // Link to waterway detail page
-    html += '<button class="popup-btn">';
-    html += '<a href="/einstiegsorte/?gewaesser=' + encodeURIComponent(metric.slug) + '">' + escapeHtml(metric.name) + '</a>';
-    html += '</button>';
-
     return html;
   }
 

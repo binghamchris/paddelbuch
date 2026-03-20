@@ -37,18 +37,32 @@ module Jekyll
 
       # Compute once on first locale pass, cache for reuse
       if @@cached_freshness.nil?
+        Jekyll.logger.info 'DashboardMetrics:', 'Starting dashboard metrics computation...'
+
         all_spots = site.data['spots'] || []
         all_waterways = site.data['waterways'] || []
 
         # Deduplicate waterways by slug (they appear once per locale in the data)
         unique_waterways = deduplicate_by_slug(all_waterways)
+        Jekyll.logger.info 'DashboardMetrics:', "Deduplicated #{all_waterways.size} waterway entries to #{unique_waterways.size} unique waterways"
 
         # Deduplicate spots by waterway_slug (updatedAt/location are identical across locales)
         spots_by_waterway = all_spots.group_by { |s| s['waterway_slug'] }
         unique_spots_by_waterway = deduplicate_spots_by_waterway(spots_by_waterway)
+        total_unique_spots = unique_spots_by_waterway.values.sum(&:size)
+        Jekyll.logger.info 'DashboardMetrics:', "Deduplicated #{all_spots.size} spot entries to #{total_unique_spots} unique spots across #{unique_spots_by_waterway.size} waterways"
 
+        Jekyll.logger.info 'DashboardMetrics:', "Computing freshness metrics for #{unique_waterways.size} waterways..."
         @@cached_freshness = compute_freshness_metrics(unique_waterways, unique_spots_by_waterway, colors)
+        Jekyll.logger.info 'DashboardMetrics:', "Freshness metrics complete: #{@@cached_freshness.size} waterways processed"
+
+        Jekyll.logger.info 'DashboardMetrics:', "Computing coverage metrics for #{unique_waterways.size} waterways..."
         @@cached_coverage = compute_coverage_metrics(unique_waterways, unique_spots_by_waterway)
+        Jekyll.logger.info 'DashboardMetrics:', "Coverage metrics complete: #{@@cached_coverage.size} waterways processed"
+
+        Jekyll.logger.info 'DashboardMetrics:', 'Dashboard metrics computation finished (cached for subsequent locale passes)'
+      else
+        Jekyll.logger.info 'DashboardMetrics:', "Using cached metrics for locale '#{locale}'"
       end
 
       # Localize: swap in locale-specific waterway names
@@ -56,6 +70,7 @@ module Jekyll
 
       site.data['dashboard_freshness_metrics'] = localize_metrics(@@cached_freshness, waterway_names)
       site.data['dashboard_coverage_metrics'] = localize_metrics(@@cached_coverage, waterway_names)
+      Jekyll.logger.info 'DashboardMetrics:', "Localized #{@@cached_freshness.size} freshness + #{@@cached_coverage.size} coverage metrics for locale '#{locale}'"
     end
 
     private
@@ -254,46 +269,53 @@ module Jekyll
       result = { 'covered' => [], 'uncovered' => [] }
 
       geo_type = geometry['type']
-      coords = case geo_type
-               when 'LineString'
-                 geometry['coordinates']
-               when 'Polygon'
-                 # Use outer ring (first element of coordinates array)
-                 geometry['coordinates']&.first
-               else
-                 Jekyll.logger.warn 'DashboardMetrics:', "Unknown geometry type '#{geo_type}', skipping segment classification"
-                 return result
-               end
-
-      return result if coords.nil? || coords.size < 2
+      coord_arrays = case geo_type
+                     when 'LineString'
+                       [geometry['coordinates']]
+                     when 'Polygon'
+                       # Use outer ring (first element of coordinates array)
+                       [geometry['coordinates']&.first]
+                     when 'MultiLineString'
+                       geometry['coordinates'] || []
+                     when 'MultiPolygon'
+                       # Each polygon's outer ring (first element)
+                       (geometry['coordinates'] || []).map { |poly| poly&.first }
+                     else
+                       Jekyll.logger.warn 'DashboardMetrics:', "Unknown geometry type '#{geo_type}', skipping segment classification"
+                       return result
+                     end
 
       spot_locations = spots.map { |s| s['location'] }.compact
 
-      (0...(coords.size - 1)).each do |i|
-        c1 = coords[i]
-        c2 = coords[i + 1]
+      coord_arrays.each do |coords|
+        next if coords.nil? || coords.size < 2
 
-        # GeoJSON: [lon, lat]
-        mid_lon = (c1[0] + c2[0]) / 2.0
-        mid_lat = (c1[1] + c2[1]) / 2.0
+        (0...(coords.size - 1)).each do |i|
+          c1 = coords[i]
+          c2 = coords[i + 1]
 
-        covered = spot_locations.any? do |loc|
-          haversine_distance(mid_lat, mid_lon, loc['lat'], loc['lon']) <= radius
-        end
+          # GeoJSON: [lon, lat]
+          mid_lon = (c1[0] + c2[0]) / 2.0
+          mid_lat = (c1[1] + c2[1]) / 2.0
 
-        segment_feature = {
-          'type' => 'Feature',
-          'geometry' => {
-            'type' => 'LineString',
-            'coordinates' => [c1, c2]
-          },
-          'properties' => {}
-        }
+          covered = spot_locations.any? do |loc|
+            haversine_distance(mid_lat, mid_lon, loc['lat'], loc['lon']) <= radius
+          end
 
-        if covered
-          result['covered'] << segment_feature
-        else
-          result['uncovered'] << segment_feature
+          segment_feature = {
+            'type' => 'Feature',
+            'geometry' => {
+              'type' => 'LineString',
+              'coordinates' => [c1, c2]
+            },
+            'properties' => {}
+          }
+
+          if covered
+            result['covered'] << segment_feature
+          else
+            result['uncovered'] << segment_feature
+          end
         end
       end
 
