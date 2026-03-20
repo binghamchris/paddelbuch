@@ -9,6 +9,10 @@
     background: $blue-grey-50;
   }
 
+  .leaflet-gl-layer {
+    opacity: 0.55;
+  }
+
 }
 
 .map-loading {

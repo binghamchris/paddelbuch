@@ -16,28 +16,15 @@ RSpec.describe 'Pipeline Version Consistency — Property 2' do
     match ? match[1] : nil
   end
 
-  def parse_amplify_rvm_versions(yaml_content)
-    amplify = YAML.safe_load(yaml_content)
-    commands = amplify.dig('frontend', 'phases', 'preBuild', 'commands') || []
-
-    rvm_install_version = nil
-    rvm_use_version = nil
-
-    commands.each do |cmd|
-      if (m = cmd.to_s.match(/\Arvm install (\S+)\z/))
-        rvm_install_version = m[1]
-      end
-      if (m = cmd.to_s.match(/\Arvm use (\S+)\z/))
-        rvm_use_version = m[1]
-      end
-    end
-
-    { install: rvm_install_version, use: rvm_use_version }
+  def parse_dockerfile_ruby_version(content)
+    # Dockerfile downloads ruby-X.Y.Z.tar.gz — extract the version
+    match = content.match(/ruby-(\d+\.\d+\.\d+)\.tar\.gz/)
+    match ? match[1] : nil
   end
 
   # --- Property test: random version strings ---
   describe 'parsing and matching logic with random versions' do
-    it 'correctly round-trips any valid Ruby version through .ruby-version and amplify.yml formats' do
+    it 'correctly round-trips any valid Ruby version through .ruby-version and Dockerfile formats' do
       property_of {
         Rantly {
           major = range(2, 4)
@@ -53,31 +40,16 @@ RSpec.describe 'Pipeline Version Consistency — Property 2' do
         expect(parsed_version).to eq(version),
           "Failed to parse version from .ruby-version content '#{ruby_version_content}'"
 
-        # Simulate amplify.yml content with matching rvm commands
-        amplify_content = {
-          'version' => 1,
-          'frontend' => {
-            'phases' => {
-              'preBuild' => {
-                'commands' => [
-                  "nvm install 18",
-                  "npm ci",
-                  "rvm install #{version}",
-                  "rvm use #{version}",
-                  "bundle install"
-                ]
-              }
-            }
-          }
-        }.to_yaml
+        # Simulate Dockerfile content with matching Ruby source download
+        dockerfile_content = <<~DOCKERFILE
+          FROM amazonlinux:2023
+          RUN curl -fsSL https://cache.ruby-lang.org/pub/ruby/#{version.split('.')[0..1].join('.')}/ruby-#{version}.tar.gz -o /tmp/ruby.tar.gz
+        DOCKERFILE
 
-        rvm_versions = parse_amplify_rvm_versions(amplify_content)
+        dockerfile_version = parse_dockerfile_ruby_version(dockerfile_content)
 
-        # Both rvm commands must reference the same version as .ruby-version
-        expect(rvm_versions[:install]).to eq(parsed_version),
-          "rvm install version '#{rvm_versions[:install]}' does not match .ruby-version '#{parsed_version}'"
-        expect(rvm_versions[:use]).to eq(parsed_version),
-          "rvm use version '#{rvm_versions[:use]}' does not match .ruby-version '#{parsed_version}'"
+        expect(dockerfile_version).to eq(parsed_version),
+          "Dockerfile Ruby version '#{dockerfile_version}' does not match .ruby-version '#{parsed_version}'"
       }
     end
   end
@@ -86,26 +58,24 @@ RSpec.describe 'Pipeline Version Consistency — Property 2' do
   describe 'actual project files consistency' do
     let(:project_root) { File.expand_path('../../', __dir__) }
     let(:ruby_version_path) { File.join(project_root, '.ruby-version') }
-    let(:amplify_yml_path) { File.join(project_root, 'amplify.yml') }
+    let(:dockerfile_path) { File.join(project_root, 'infrastructure', 'Dockerfile') }
 
-    it 'has .ruby-version, rvm install, and rvm use all referencing the same version' do
+    it 'has .ruby-version and Dockerfile Ruby source download referencing the same version' do
       ruby_version_content = File.read(ruby_version_path)
       parsed_version = parse_ruby_version_file(ruby_version_content)
       expect(parsed_version).not_to be_nil, "Could not parse version from .ruby-version: '#{ruby_version_content.strip}'"
 
-      amplify_content = File.read(amplify_yml_path)
-      rvm_versions = parse_amplify_rvm_versions(amplify_content)
+      dockerfile_content = File.read(dockerfile_path)
+      dockerfile_version = parse_dockerfile_ruby_version(dockerfile_content)
 
-      expect(rvm_versions[:install]).to eq(parsed_version),
-        "amplify.yml 'rvm install #{rvm_versions[:install]}' does not match .ruby-version '#{parsed_version}'"
-      expect(rvm_versions[:use]).to eq(parsed_version),
-        "amplify.yml 'rvm use #{rvm_versions[:use]}' does not match .ruby-version '#{parsed_version}'"
+      expect(dockerfile_version).to eq(parsed_version),
+        "Dockerfile Ruby version '#{dockerfile_version}' does not match .ruby-version '#{parsed_version}'"
     end
   end
 
   # --- Property test: detect mismatches ---
   describe 'mismatch detection' do
-    it 'detects when rvm install version differs from .ruby-version' do
+    it 'detects when Dockerfile Ruby version differs from .ruby-version' do
       property_of {
         Rantly {
           major = range(2, 4)
@@ -122,27 +92,17 @@ RSpec.describe 'Pipeline Version Consistency — Property 2' do
       }.check(100) { |data|
         parsed_version = parse_ruby_version_file("ruby-#{data[:correct]}")
 
-        # Simulate amplify.yml with mismatched rvm install
-        amplify_content = {
-          'version' => 1,
-          'frontend' => {
-            'phases' => {
-              'preBuild' => {
-                'commands' => [
-                  "rvm install #{data[:wrong]}",
-                  "rvm use #{data[:correct]}",
-                  "bundle install"
-                ]
-              }
-            }
-          }
-        }.to_yaml
+        # Simulate Dockerfile with mismatched Ruby version
+        dockerfile_content = <<~DOCKERFILE
+          FROM amazonlinux:2023
+          RUN curl -fsSL https://cache.ruby-lang.org/pub/ruby/3.4/ruby-#{data[:wrong]}.tar.gz -o /tmp/ruby.tar.gz
+        DOCKERFILE
 
-        rvm_versions = parse_amplify_rvm_versions(amplify_content)
+        dockerfile_version = parse_dockerfile_ruby_version(dockerfile_content)
 
-        # The install version should NOT match the parsed version
-        expect(rvm_versions[:install]).not_to eq(parsed_version),
-          "Expected mismatch but versions matched: #{rvm_versions[:install]}"
+        # The Dockerfile version should NOT match the parsed version
+        expect(dockerfile_version).not_to eq(parsed_version),
+          "Expected mismatch but versions matched: #{dockerfile_version}"
       }
     end
   end

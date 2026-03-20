@@ -32,6 +32,8 @@ yarn-error.log
 # Jekyll
 _site
 .sass-cache
+.jekyll-cache-de
+.jekyll-cache-en
 .jekyll-metadata
 
 # Test coverage
