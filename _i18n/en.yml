@@ -163,6 +163,7 @@ date:
 # Dashboard page
 dashboards:
   title: "Data Quality"
+  description: "These visualisations show key information about the current overall quality of the contents of the Paddel Buch database."
   freshness:
     name: "Waterway Freshness"
     legend_title: "Median Age of Entries"

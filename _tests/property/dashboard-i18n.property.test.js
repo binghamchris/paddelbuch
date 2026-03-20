@@ -22,6 +22,7 @@ const yaml = require('js-yaml');
 const DASHBOARD_TRANSLATION_KEYS = [
   'nav.data_quality_dashboards',
   'dashboards.title',
+  'dashboards.description',
   'dashboards.freshness.name',
   'dashboards.freshness.legend_title',
   'dashboards.freshness.fresh',
