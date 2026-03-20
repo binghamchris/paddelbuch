@@ -163,6 +163,7 @@ date:
 # Dashboard page
 dashboards:
   title: "Datenqualität"
+  description: "Diese Visualisierungen zeigen wichtige Informationen über die aktuelle Gesamtqualität der Inhalte der Paddel Buch Datenbank."
   freshness:
     name: "Gewässeraktualität"
     legend_title: "Median-Alter der Einträge"
