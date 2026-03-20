@@ -60,7 +60,6 @@ function setupDOM() {
       legend_title: 'Waterway Coverage',
       covered: 'Covered (within 5 km)',
       not_covered: 'Not Covered',
-      coverage_radius: '5 km coverage radius per spot',
       popup_spots: 'Spots'
     }) +
     '</script>';
@@ -243,7 +242,7 @@ describe('PaddelbuchCoverageDashboard', () => {
   });
 
   describe('legend rendering', () => {
-    test('renders legend with three items (covered, not covered, and radius)', () => {
+    test('renders legend with two items (covered and not covered)', () => {
       setupDOM();
       setupGlobals();
       var mod = loadModule();
@@ -252,7 +251,7 @@ describe('PaddelbuchCoverageDashboard', () => {
       mod.activate({ map: mockMap, legendEl: legendEl });
 
       var items = legendEl.querySelectorAll('.dashboard-legend-item');
-      expect(items.length).toBe(3);
+      expect(items.length).toBe(2);
     });
 
     test('legend contains covered colour class', () => {
@@ -288,7 +287,6 @@ describe('PaddelbuchCoverageDashboard', () => {
       var html = legendEl.innerHTML;
       expect(html).toContain('Covered (within 5 km)');
       expect(html).toContain('Not Covered');
-      expect(html).toContain('5 km coverage radius per spot');
     });
   });
 

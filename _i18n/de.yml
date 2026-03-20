@@ -182,5 +182,4 @@ dashboards:
     legend_title: "Abdeckung der Gewässer"
     covered: "Abgedeckt (innerhalb 5 km)"
     not_covered: "Nicht abgedeckt"
-    coverage_radius: "5 km Abdeckungsradius pro Einstiegsort"
     popup_spots: "Einstiegsorte"
