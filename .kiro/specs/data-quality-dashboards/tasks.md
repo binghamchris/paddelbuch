@@ -103,7 +103,7 @@ Build two map-based data quality dashboards (Data Freshness and Waterway Coverag
     - Add `<script src="{{ '/assets/js/vendor/leaflet-maplibre-gl.js' | relative_url }}"></script>` after `maplibre-gl.js`
     - _Requirements: 2.1, 8.3_
 
-- [ ] 4. Implement browser-side JS modules
+- [x] 4. Implement browser-side JS modules
   - [x] 4.1 Create `assets/js/dashboard-data.js`
     - Implement `PaddelbuchDashboardData` global that parses `#freshness-data` and `#coverage-data` JSON blocks
     - Expose `{ freshnessMetrics, coverageMetrics }` — no computation, data is pre-computed
@@ -172,7 +172,7 @@ Build two map-based data quality dashboards (Data Freshness and Waterway Coverag
     - Minimum 100 iterations
     - **Validates: Requirements 7.4, 7.5**
 
-- [ ] 5. Checkpoint - Ensure all JS tests pass
+- [x] 5. Checkpoint - Ensure all JS tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 6. Create the dashboard page and integrate navigation and i18n
