@@ -63,9 +63,9 @@ function setupDOM() {
     JSON.stringify({
       name: 'Data Freshness',
       legend_title: 'Median Age of Entries',
-      fresh: 'Fresh (0 days)',
-      aging: 'Aging (3 years)',
-      stale: 'Stale (5+ years)',
+      fresh: 'Fresh (≤ 2 years)',
+      aging: 'Aging (2–5 years)',
+      stale: 'Stale (> 5 years)',
       no_data: 'No Data',
       popup_spots: 'Spots',
       popup_median_age: 'Median Age',
@@ -188,17 +188,6 @@ describe('PaddelbuchFreshnessDashboard', () => {
       expect(popupHtml).toContain('popup-title');
     });
 
-    test('popup HTML contains popup-btn class', () => {
-      setupDOM();
-      setupGlobals();
-      var mod = loadModule();
-
-      mod.activate({ map: mockMap, legendEl: document.getElementById('dashboard-legend') });
-
-      var popupHtml = mockLayers[0].bindPopup.mock.calls[0][0];
-      expect(popupHtml).toContain('popup-btn');
-    });
-
     test('popup HTML includes waterway name', () => {
       setupDOM();
       setupGlobals();
@@ -244,7 +233,7 @@ describe('PaddelbuchFreshnessDashboard', () => {
   });
 
   describe('legend rendering', () => {
-    test('renders legend with gradient bar', () => {
+    test('renders legend with discrete colour swatches', () => {
       setupDOM();
       setupGlobals();
       var mod = loadModule();
@@ -252,8 +241,9 @@ describe('PaddelbuchFreshnessDashboard', () => {
 
       mod.activate({ map: mockMap, legendEl: legendEl });
 
-      expect(legendEl.innerHTML).toContain('dashboard-legend-gradient');
-      expect(legendEl.innerHTML).toContain('dashboard-legend-bar');
+      expect(legendEl.innerHTML).toContain('#07753f');
+      expect(legendEl.innerHTML).toContain('#ffb200');
+      expect(legendEl.innerHTML).toContain('#c40200');
     });
 
     test('renders legend with "no data" indicator', () => {
@@ -288,9 +278,9 @@ describe('PaddelbuchFreshnessDashboard', () => {
       mod.activate({ map: mockMap, legendEl: legendEl });
 
       var html = legendEl.innerHTML;
-      expect(html).toContain('Fresh (0 days)');
-      expect(html).toContain('Aging (3 years)');
-      expect(html).toContain('Stale (5+ years)');
+      expect(html).toContain('Fresh (≤ 2 years)');
+      expect(html).toContain('Aging (2–5 years)');
+      expect(html).toContain('Stale (&gt; 5 years)');
     });
   });
 
