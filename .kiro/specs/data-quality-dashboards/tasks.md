@@ -156,7 +156,7 @@ Build two map-based data quality dashboards (Data Freshness and Waterway Coverag
     - Minimum 100 iterations via `{ numRuns: 100 }`
     - **Validates: Requirements 1.9, 7.6**
 
-  - [~] 4.8 Write property test for switcher auto-discovery (Property 8)
+  - [x] 4.8 Write property test for switcher auto-discovery (Property 8)
     - **Property 8: Switcher auto-discovery**
     - Create `_tests/property/dashboard-switcher-discovery.property.test.js`
     - Generate random numbers of dashboard modules registered in the registry
