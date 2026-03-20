@@ -166,9 +166,9 @@ dashboards:
   freshness:
     name: "Data Freshness"
     legend_title: "Median Age of Entries"
-    fresh: "Fresh (0 days)"
-    aging: "Aging (3 years)"
-    stale: "Stale (5+ years)"
+    fresh: "Fresh (≤ 2 years)"
+    aging: "Aging (2–5 years)"
+    stale: "Stale (> 5 years)"
     no_data: "No Data"
     popup_spots: "Spots"
     popup_median_age: "Median Age"

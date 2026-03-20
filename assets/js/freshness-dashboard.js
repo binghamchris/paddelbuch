@@ -26,9 +26,9 @@
     var defaults = {
       name: 'Datenaktualität',
       legend_title: 'Median-Alter der Einträge',
-      fresh: 'Aktuell (0 Tage)',
-      aging: 'Alternd (3 Jahre)',
-      stale: 'Veraltet (5+ Jahre)',
+      fresh: 'Aktuell (≤ 2 Jahre)',
+      aging: 'Alternd (2–5 Jahre)',
+      stale: 'Veraltet (> 5 Jahre)',
       no_data: 'Keine Daten',
       popup_spots: 'Einstiegsorte',
       popup_median_age: 'Median-Alter',
@@ -121,18 +121,24 @@
     html += '<h4>' + escapeHtml(strings.legend_title) + '</h4>';
     html += '<div class="dashboard-legend-items">';
 
-    // Gradient bar: Fresh → Aging → Stale
-    html += '<div class="dashboard-legend-gradient">';
-    html += '<div class="dashboard-legend-bar" style="background:linear-gradient(to right, #4ab31f, #f5a623, #d0021b);height:12px;border-radius:3px;"></div>';
-    html += '<div class="dashboard-legend-labels" style="display:flex;justify-content:space-between;font-size:0.8em;margin-top:2px;">';
+    // Traffic light: Green / Yellow / Red
+    html += '<div class="dashboard-legend-item" style="display:flex;align-items:center;margin-bottom:4px;">';
+    html += '<span style="display:inline-block;width:20px;height:12px;background:#07753f;border-radius:3px;margin-right:8px;"></span>';
     html += '<span>' + escapeHtml(strings.fresh) + '</span>';
-    html += '<span>' + escapeHtml(strings.aging) + '</span>';
-    html += '<span>' + escapeHtml(strings.stale) + '</span>';
     html += '</div>';
+
+    html += '<div class="dashboard-legend-item" style="display:flex;align-items:center;margin-bottom:4px;">';
+    html += '<span style="display:inline-block;width:20px;height:12px;background:#ffb200;border-radius:3px;margin-right:8px;"></span>';
+    html += '<span>' + escapeHtml(strings.aging) + '</span>';
+    html += '</div>';
+
+    html += '<div class="dashboard-legend-item" style="display:flex;align-items:center;margin-bottom:4px;">';
+    html += '<span style="display:inline-block;width:20px;height:12px;background:#c40200;border-radius:3px;margin-right:8px;"></span>';
+    html += '<span>' + escapeHtml(strings.stale) + '</span>';
     html += '</div>';
 
     // No data indicator
-    html += '<div class="dashboard-legend-item" style="margin-top:8px;display:flex;align-items:center;">';
+    html += '<div class="dashboard-legend-item" style="display:flex;align-items:center;">';
     html += '<span style="display:inline-block;width:20px;height:12px;background:#9013fe;border-radius:3px;margin-right:8px;"></span>';
     html += '<span>' + escapeHtml(strings.no_data) + '</span>';
     html += '</div>';

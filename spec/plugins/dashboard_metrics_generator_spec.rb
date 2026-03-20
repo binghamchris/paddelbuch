@@ -61,17 +61,27 @@ RSpec.describe Jekyll::DashboardMetricsGenerator do
       expect(result).to eq('#07753f')
     end
 
-    it 'returns warning-yellow at 1095 days (Requirement 3.5)' do
-      result = generator.send(:freshness_color, 1095, colors)
+    it 'returns green-1 at 730 days (within 2-year threshold) (Requirement 3.4)' do
+      result = generator.send(:freshness_color, 730, colors)
+      expect(result).to eq('#07753f')
+    end
+
+    it 'returns warning-yellow at 731 days (above 2-year threshold) (Requirement 3.5)' do
+      result = generator.send(:freshness_color, 731, colors)
       expect(result).to eq('#ffb200')
     end
 
-    it 'returns danger-red at 1826 days (Requirement 3.6)' do
+    it 'returns warning-yellow at 1826 days (within 5-year threshold) (Requirement 3.5)' do
       result = generator.send(:freshness_color, 1826, colors)
+      expect(result).to eq('#ffb200')
+    end
+
+    it 'returns danger-red at 1827 days (above 5-year threshold) (Requirement 3.6)' do
+      result = generator.send(:freshness_color, 1827, colors)
       expect(result).to eq('#c40200')
     end
 
-    it 'returns danger-red for values above 1826 days (Requirement 3.7)' do
+    it 'returns danger-red for values well above 5 years (Requirement 3.7)' do
       result = generator.send(:freshness_color, 3000, colors)
       expect(result).to eq('#c40200')
     end

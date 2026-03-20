@@ -190,48 +190,24 @@ module Jekyll
       end
     end
 
-    # Returns a hex colour string interpolated along the freshness gradient.
-    # Anchors: 0 days = green1, 1095 days = warningYellow, 1826 days = dangerRed.
-    # Returns purple1 for nil days (no data).
-    # Clamps negative day values to 0.
+    # Returns a hex colour string based on a traffic-light threshold scheme.
+    # Green  = median age <= 2 years (730.5 days)
+    # Yellow = median age > 2 years and <= 5 years (1826.25 days)
+    # Red    = median age > 5 years
+    # Purple = no data (nil days)
     # Requirements: 3.4, 3.5, 3.6, 3.7, 3.8
     def freshness_color(days, colors)
       return colors['purple1'] || '#69599b' if days.nil?
 
       days = [days, 0].max
 
-      green   = parse_hex(colors['green1'] || '#07753f')
-      yellow  = parse_hex(colors['warningYellow'] || '#ffb200')
-      red     = parse_hex(colors['dangerRed'] || '#c40200')
-
-      if days <= 1095
-        t = days / 1095.0
-        interpolate_rgb(green, yellow, t)
-      elsif days < 1826
-        t = (days - 1095).to_f / (1826 - 1095)
-        interpolate_rgb(yellow, red, t)
+      if days <= 730.5
+        colors['green1'] || '#07753f'
+      elsif days <= 1826.25
+        colors['warningYellow'] || '#ffb200'
       else
-        to_hex(red)
+        colors['dangerRed'] || '#c40200'
       end
-    end
-
-    # Parses a hex colour string (e.g. '#07753f') into an [r, g, b] array.
-    def parse_hex(hex)
-      hex = hex.delete('#')
-      [hex[0..1], hex[2..3], hex[4..5]].map { |c| c.to_i(16) }
-    end
-
-    # Linearly interpolates between two [r, g, b] arrays and returns a hex string.
-    def interpolate_rgb(from, to, t)
-      r = (from[0] + (to[0] - from[0]) * t).round
-      g = (from[1] + (to[1] - from[1]) * t).round
-      b = (from[2] + (to[2] - from[2]) * t).round
-      to_hex([r.clamp(0, 255), g.clamp(0, 255), b.clamp(0, 255)])
-    end
-
-    # Converts an [r, g, b] array to a '#rrggbb' hex string.
-    def to_hex(rgb)
-      '#%02x%02x%02x' % rgb
     end
 
     # Computes the Haversine distance in metres between two geographic
