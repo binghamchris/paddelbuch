@@ -182,7 +182,7 @@ Build two map-based data quality dashboards (Data Freshness and Waterway Coverag
     - Add two `<script type="application/json">` blocks: `#freshness-data` with `{{ site.data.dashboard_freshness_metrics | jsonify }}` and `#coverage-data` with `{{ site.data.dashboard_coverage_metrics | jsonify }}`
     - _Requirements: 1.1, 1.6, 5.1, 5.2_
 
-  - [~] 6.2 Add navigation link in `_includes/header.html`
+  - [x] 6.2 Add navigation link in `_includes/header.html`
     - Add a new `<li>` in the Open Data dropdown menu linking to the dashboard page
     - Use `{{ locale_prefix | append: '/offene-daten/datenqualitaet/' }}` for the href
     - Use `{% t nav.data_quality_dashboards %}` for the link text
