@@ -176,7 +176,7 @@ Build two map-based data quality dashboards (Data Freshness and Waterway Coverag
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 6. Create the dashboard page and integrate navigation and i18n
-  - [~] 6.1 Create `offene-daten/datenqualitaet.html`
+  - [x] 6.1 Create `offene-daten/datenqualitaet.html`
     - Add front matter: layout default, pageName data-quality, permalink `/offene-daten/datenqualitaet/`, scripts array with all 5 JS modules
     - Add `#dashboard-switcher`, `#dashboard-map`, `#dashboard-content`, `#dashboard-legend` containers
     - Add two `<script type="application/json">` blocks: `#freshness-data` with `{{ site.data.dashboard_freshness_metrics | jsonify }}` and `#coverage-data` with `{{ site.data.dashboard_coverage_metrics | jsonify }}`
