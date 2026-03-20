@@ -125,7 +125,7 @@ Build two map-based data quality dashboards (Data Freshness and Waterway Coverag
     - Use existing popup CSS classes (`popup-icon-div`, `popup-title`, `popup-btn`)
     - _Requirements: 3.1, 3.9, 3.10, 6.5, 7.1_
 
-  - [~] 4.4 Create `assets/js/coverage-dashboard.js`
+  - [x] 4.4 Create `assets/js/coverage-dashboard.js`
     - Implement coverage dashboard module conforming to the dashboard interface
     - On activate: read `PaddelbuchDashboardData.coverageMetrics`, create `L.geoJSON` layers for covered (green-1) and uncovered (danger-red) segments, bind popups, render legend
     - On deactivate: remove all layers, clear legend
