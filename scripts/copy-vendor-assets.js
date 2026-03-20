@@ -32,6 +32,18 @@ const FILE_COPIES = [
     src: 'node_modules/leaflet.locatecontrol/dist/L.Control.Locate.min.css',
     dest: 'assets/css/vendor/L.Control.Locate.min.css',
   },
+  {
+    src: 'node_modules/maplibre-gl/dist/maplibre-gl.js',
+    dest: 'assets/js/vendor/maplibre-gl.js',
+  },
+  {
+    src: 'node_modules/maplibre-gl/dist/maplibre-gl.css',
+    dest: 'assets/css/vendor/maplibre-gl.css',
+  },
+  {
+    src: 'node_modules/@maplibre/maplibre-gl-leaflet/leaflet-maplibre-gl.js',
+    dest: 'assets/js/vendor/leaflet-maplibre-gl.js',
+  },
 ];
 
 function createDirectories() {
