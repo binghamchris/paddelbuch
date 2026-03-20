@@ -168,7 +168,7 @@
       strings = getStrings();
 
       if (descriptionEl) {
-        descriptionEl.textContent = strings.description;
+        descriptionEl.innerHTML = strings.description;
       }
 
       var titleEl = document.getElementById('dashboard-title');
