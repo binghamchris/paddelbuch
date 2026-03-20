@@ -55,7 +55,7 @@ function setupDOM() {
     '<div id="dashboard-legend"></div>' +
     '<script type="application/json" id="coverage-i18n">' +
     JSON.stringify({
-      name: 'Coverage',
+      name: 'Waterway Coverage',
       legend_title: 'Waterway Coverage',
       covered: 'Covered (within 2 km)',
       not_covered: 'Not Covered',
@@ -93,7 +93,7 @@ describe('PaddelbuchCoverageDashboard', () => {
     setupDOM();
     setupGlobals();
     var mod = loadModule();
-    expect(mod.getName()).toBe('Coverage');
+    expect(mod.getName()).toBe('Waterway Coverage');
   });
 
   test('usesMap is true', () => {
@@ -336,7 +336,7 @@ describe('PaddelbuchCoverageDashboard', () => {
       setupGlobals();
       var mod = loadModule();
 
-      expect(mod.getName()).toBe('Abdeckung');
+      expect(mod.getName()).toBe('Gewässerabdeckung');
     });
   });
 });

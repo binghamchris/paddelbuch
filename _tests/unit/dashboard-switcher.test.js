@@ -75,15 +75,15 @@ describe('PaddelbuchDashboardSwitcher', () => {
 
     test('tab buttons use dashboard getName() as text', () => {
       setupDOM();
-      var d1 = createFakeDashboard('freshness', 'Data Freshness');
-      var d2 = createFakeDashboard('coverage', 'Coverage');
+      var d1 = createFakeDashboard('freshness', 'Waterway Freshness');
+      var d2 = createFakeDashboard('coverage', 'Waterway Coverage');
       setupGlobals([d1, d2]);
 
       loadModule();
 
       var buttons = document.querySelectorAll('[data-dashboard-id]');
-      expect(buttons[0].textContent).toBe('Data Freshness');
-      expect(buttons[1].textContent).toBe('Coverage');
+      expect(buttons[0].textContent).toBe('Waterway Freshness');
+      expect(buttons[1].textContent).toBe('Waterway Coverage');
     });
 
     test('tab buttons have data-dashboard-id attribute', () => {
