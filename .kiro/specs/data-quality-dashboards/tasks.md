@@ -164,7 +164,7 @@ Build two map-based data quality dashboards (Data Freshness and Waterway Coverag
     - Minimum 100 iterations
     - **Validates: Requirements 7.2**
 
-  - [~] 4.9 Write property test for map/content container visibility (Property 9)
+  - [x] 4.9 Write property test for map/content container visibility (Property 9)
     - **Property 9: Map/content container visibility**
     - Create `_tests/property/dashboard-switcher-visibility.property.test.js`
     - Generate dashboards with random `usesMap` values
