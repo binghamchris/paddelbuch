@@ -195,7 +195,7 @@ Build two map-based data quality dashboards (Data Freshness and Waterway Coverag
     - German values in `de.yml`, English values in `en.yml`
     - _Requirements: 1.3, 1.5_
 
-  - [~] 6.4 Write property test for translation key completeness (Property 10)
+  - [x] 6.4 Write property test for translation key completeness (Property 10)
     - **Property 10: Translation key completeness**
     - Create `_tests/property/dashboard-i18n.property.test.js`
     - For every translation key referenced in the dashboard page and JS modules, assert it exists in both `de.yml` and `en.yml` with a non-empty string value
