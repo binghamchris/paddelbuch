@@ -27,6 +27,15 @@
   // Coverage colours
   &--covered { background-color: $covered-green; }
   &--uncovered { background-color: $uncovered-red; }
+
+  // Coverage radius indicator
+  &--radius {
+    background-color: transparent;
+    border: 2px dashed $covered-green;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+  }
 }
 
 .dashboard-popup-icon {

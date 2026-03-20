@@ -29,6 +29,8 @@ scripts:
 
   <div id="dashboard-switcher"></div>
 
+  <div id="dashboard-description"></div>
+
   <div id="dashboard-legend"></div>
 
   <div id="dashboard-map" class="map"></div>
@@ -49,6 +51,7 @@ scripts:
 <script type="application/json" id="freshness-i18n">
 {
   "name": "{% t dashboards.freshness.name %}",
+  "description": "{% t dashboards.freshness.description %}",
   "legend_title": "{% t dashboards.freshness.legend_title %}",
   "fresh": "{% t dashboards.freshness.fresh %}",
   "aging": "{% t dashboards.freshness.aging %}",
@@ -63,9 +66,11 @@ scripts:
 <script type="application/json" id="coverage-i18n">
 {
   "name": "{% t dashboards.coverage.name %}",
+  "description": "{% t dashboards.coverage.description %}",
   "legend_title": "{% t dashboards.coverage.legend_title %}",
   "covered": "{% t dashboards.coverage.covered %}",
   "not_covered": "{% t dashboards.coverage.not_covered %}",
+  "coverage_radius": "{% t dashboards.coverage.coverage_radius %}",
   "popup_spots": "{% t dashboards.coverage.popup_spots %}"
 }
 </script>
