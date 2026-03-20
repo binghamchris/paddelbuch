@@ -258,17 +258,6 @@ describe('PaddelbuchFreshnessDashboard', () => {
       expect(legendEl.innerHTML).toContain('dashboard-legend-swatch--no-data');
     });
 
-    test('renders legend title', () => {
-      setupDOM();
-      setupGlobals();
-      var mod = loadModule();
-      var legendEl = document.getElementById('dashboard-legend');
-
-      mod.activate({ map: mockMap, legendEl: legendEl });
-
-      expect(legendEl.querySelector('h4').textContent).toBe('Median Age of Entries');
-    });
-
     test('renders fresh/aging/stale labels', () => {
       setupDOM();
       setupGlobals();

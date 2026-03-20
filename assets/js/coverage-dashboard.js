@@ -97,7 +97,6 @@
    */
   function renderLegend(el, strings) {
     var html = '';
-    html += '<h4>' + escapeHtml(strings.legend_title) + '</h4>';
     html += '<div class="dashboard-legend-items">';
 
     // Covered indicator
@@ -114,7 +113,6 @@
 
     // Coverage radius note
     html += '<div class="dashboard-legend-item">';
-    html += '<span class="dashboard-legend-swatch dashboard-legend-swatch--radius"></span>';
     html += '<span>' + escapeHtml(strings.coverage_radius) + '</span>';
     html += '</div>';
 
@@ -144,6 +142,11 @@
 
       if (descriptionEl) {
         descriptionEl.textContent = strings.description;
+      }
+
+      var titleEl = document.getElementById('dashboard-title');
+      if (titleEl) {
+        titleEl.textContent = strings.name;
       }
 
       for (var i = 0; i < metrics.length; i++) {
@@ -197,6 +200,11 @@
       var descriptionEl = document.getElementById('dashboard-description');
       if (descriptionEl) {
         descriptionEl.textContent = '';
+      }
+
+      var titleEl = document.getElementById('dashboard-title');
+      if (titleEl) {
+        titleEl.textContent = '';
       }
     }
   };
