@@ -255,17 +255,6 @@ describe('PaddelbuchCoverageDashboard', () => {
       expect(items.length).toBe(3);
     });
 
-    test('renders legend title', () => {
-      setupDOM();
-      setupGlobals();
-      var mod = loadModule();
-      var legendEl = document.getElementById('dashboard-legend');
-
-      mod.activate({ map: mockMap, legendEl: legendEl });
-
-      expect(legendEl.querySelector('h4').textContent).toBe('Waterway Coverage');
-    });
-
     test('legend contains covered colour class', () => {
       setupDOM();
       setupGlobals();

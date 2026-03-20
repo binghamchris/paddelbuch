@@ -119,7 +119,6 @@
    */
   function renderLegend(el, strings) {
     var html = '';
-    html += '<h4>' + escapeHtml(strings.legend_title) + '</h4>';
     html += '<div class="dashboard-legend-items">';
 
     // Traffic light: Green / Yellow / Red
@@ -172,6 +171,11 @@
         descriptionEl.textContent = strings.description;
       }
 
+      var titleEl = document.getElementById('dashboard-title');
+      if (titleEl) {
+        titleEl.textContent = strings.name;
+      }
+
       for (var i = 0; i < metrics.length; i++) {
         var metric = metrics[i];
         if (!metric.geometry) {
@@ -211,6 +215,11 @@
       var descriptionEl = document.getElementById('dashboard-description');
       if (descriptionEl) {
         descriptionEl.textContent = '';
+      }
+
+      var titleEl = document.getElementById('dashboard-title');
+      if (titleEl) {
+        titleEl.textContent = '';
       }
     }
   };
