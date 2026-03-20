@@ -298,4 +298,70 @@ RSpec.describe Jekyll::DashboardMetricsGenerator, 'property tests' do
       }
     end
   end
+
+  # ── Property 6: Single-spot coverage contiguity ─────────────────────────────
+  # **Validates: Requirements 10.5**
+  #
+  # For any waterway geometry and a single spot location, the segments
+  # classified as "covered" by classify_segments shall form a contiguous run
+  # (no uncovered segments between two covered segments). The pattern of
+  # segment labels should be U*C*U* — zero or more uncovered, then zero or
+  # more covered, then zero or more uncovered.
+  describe '#classify_segments — Property 6: Single-spot coverage contiguity' do
+    it 'produces a contiguous covered run for a single spot' do
+      property_of {
+        # Generate a LineString with 5-15 coordinate pairs within Swiss bounds
+        num_coords = range(5, 15)
+        coords = Array.new(num_coords) {
+          lat = range(45_800, 47_800) / 1000.0
+          lon = range(5_900, 10_500) / 1000.0
+          [lon, lat]
+        }
+
+        geometry = { 'type' => 'LineString', 'coordinates' => coords }
+
+        # Generate a single spot location within Swiss bounds
+        spot_lat = range(45_800, 47_800) / 1000.0
+        spot_lon = range(5_900, 10_500) / 1000.0
+        spots = [{ 'location' => { 'lat' => spot_lat, 'lon' => spot_lon } }]
+
+        [geometry, spots]
+      }.check(100) { |geometry, spots|
+        result = generator.send(:classify_segments, geometry, spots)
+
+        # Build an ordered list of segment classifications (C or U)
+        # Walk through the original coordinate pairs in order and check
+        # which bucket each segment ended up in.
+        coords = geometry['coordinates']
+        num_segments = coords.size - 1
+
+        # Build a set of covered segment coordinate pairs for fast lookup
+        covered_set = result['covered'].map { |f|
+          f['geometry']['coordinates']
+        }
+
+        labels = (0...num_segments).map { |i|
+          seg_coords = [coords[i], coords[i + 1]]
+          covered_set.include?(seg_coords) ? :C : :U
+        }
+
+        # Verify contiguity: the pattern should be U*C*U*
+        # Find the first and last covered index; verify no uncovered
+        # segments exist between them.
+        first_covered = labels.index(:C)
+        last_covered = labels.rindex(:C)
+
+        if first_covered && last_covered
+          between = labels[first_covered..last_covered]
+          uncovered_between = between.count(:U)
+
+          expect(uncovered_between).to eq(0),
+            "Non-contiguous coverage: labels=#{labels.inspect}, " \
+            "first_covered=#{first_covered}, last_covered=#{last_covered}, " \
+            "found #{uncovered_between} uncovered segment(s) between covered segments"
+        end
+        # If no covered segments at all, contiguity trivially holds
+      }
+    end
+  end
 end
