@@ -24,12 +24,12 @@
    */
   function getStrings() {
     var defaults = {
-      name: 'Datenaktualität',
+      name: 'Gewässeraktualität',
       legend_title: 'Median-Alter der Einträge',
       fresh: 'Aktuell (≤ 2 Jahre)',
       aging: 'Alternd (2–5 Jahre)',
       stale: 'Veraltet (> 5 Jahre)',
-      no_data: 'Keine Daten',
+      no_data: 'Keine Einstiegsorte',
       popup_spots: 'Einstiegsorte',
       popup_median_age: 'Median-Alter',
       popup_years: 'Jahre',

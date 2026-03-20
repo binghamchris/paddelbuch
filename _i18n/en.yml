@@ -164,18 +164,18 @@ date:
 dashboards:
   title: "Data Quality"
   freshness:
-    name: "Data Freshness"
+    name: "Waterway Freshness"
     legend_title: "Median Age of Entries"
     fresh: "Fresh (≤ 2 years)"
     aging: "Aging (2–5 years)"
     stale: "Stale (> 5 years)"
-    no_data: "No Data"
+    no_data: "No Spots"
     popup_spots: "Spots"
     popup_median_age: "Median Age"
     popup_years: "years"
     popup_no_data: "No data available"
   coverage:
-    name: "Coverage"
+    name: "Waterway Coverage"
     legend_title: "Waterway Coverage"
     covered: "Covered (within 2 km)"
     not_covered: "Not Covered"

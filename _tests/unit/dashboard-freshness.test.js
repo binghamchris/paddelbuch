@@ -61,12 +61,12 @@ function setupDOM() {
     '<div id="dashboard-legend"></div>' +
     '<script type="application/json" id="freshness-i18n">' +
     JSON.stringify({
-      name: 'Data Freshness',
+      name: 'Waterway Freshness',
       legend_title: 'Median Age of Entries',
       fresh: 'Fresh (≤ 2 years)',
       aging: 'Aging (2–5 years)',
       stale: 'Stale (> 5 years)',
-      no_data: 'No Data',
+      no_data: 'No Spots',
       popup_spots: 'Spots',
       popup_median_age: 'Median Age',
       popup_days: 'days',
@@ -104,7 +104,7 @@ describe('PaddelbuchFreshnessDashboard', () => {
     setupDOM();
     setupGlobals();
     var mod = loadModule();
-    expect(mod.getName()).toBe('Data Freshness');
+    expect(mod.getName()).toBe('Waterway Freshness');
   });
 
   test('usesMap is true', () => {
@@ -254,7 +254,7 @@ describe('PaddelbuchFreshnessDashboard', () => {
 
       mod.activate({ map: mockMap, legendEl: legendEl });
 
-      expect(legendEl.innerHTML).toContain('No Data');
+      expect(legendEl.innerHTML).toContain('No Spots');
       expect(legendEl.innerHTML).toContain('dashboard-legend-swatch--no-data');
     });
 
@@ -321,7 +321,7 @@ describe('PaddelbuchFreshnessDashboard', () => {
       setupGlobals();
       var mod = loadModule();
 
-      expect(mod.getName()).toBe('Datenaktualität');
+      expect(mod.getName()).toBe('Gewässeraktualität');
     });
   });
 });

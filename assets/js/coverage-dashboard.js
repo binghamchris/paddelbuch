@@ -28,7 +28,7 @@
    */
   function getStrings() {
     var defaults = {
-      name: 'Abdeckung',
+      name: 'Gewässerabdeckung',
       legend_title: 'Abdeckung der Gewässer',
       covered: 'Abgedeckt (innerhalb 2 km)',
       not_covered: 'Nicht abgedeckt',
