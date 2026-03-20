@@ -183,7 +183,7 @@ describe('PaddelbuchCoverageDashboard', () => {
       expect(popupHtml).toContain('popup-title');
     });
 
-    test('popup HTML contains popup-btn class', () => {
+    test('popup HTML does not contain popup-btn class (coverage has no detail link)', () => {
       setupDOM();
       setupGlobals();
       var mod = loadModule();
@@ -191,7 +191,7 @@ describe('PaddelbuchCoverageDashboard', () => {
       mod.activate({ map: mockMap, legendEl: document.getElementById('dashboard-legend') });
 
       var popupHtml = mockLayers[0].bindPopup.mock.calls[0][0];
-      expect(popupHtml).toContain('popup-btn');
+      expect(popupHtml).not.toContain('popup-btn');
     });
 
     test('popup HTML includes waterway name', () => {
@@ -225,7 +225,7 @@ describe('PaddelbuchCoverageDashboard', () => {
         slug: 'rhein',
         name: 'Rhein',
         spotCount: 0,
-        coveredSegments: [],
+        coveredSegments: null,
         uncoveredSegments: [
           { type: 'Feature', geometry: { type: 'LineString', coordinates: [[8.0, 47.5], [8.1, 47.6]] } }
         ]
@@ -264,7 +264,7 @@ describe('PaddelbuchCoverageDashboard', () => {
       expect(legendEl.querySelector('h4').textContent).toBe('Waterway Coverage');
     });
 
-    test('legend contains covered colour (#4ab31f)', () => {
+    test('legend contains covered colour class', () => {
       setupDOM();
       setupGlobals();
       var mod = loadModule();
@@ -272,10 +272,10 @@ describe('PaddelbuchCoverageDashboard', () => {
 
       mod.activate({ map: mockMap, legendEl: legendEl });
 
-      expect(legendEl.innerHTML).toContain('#4ab31f');
+      expect(legendEl.innerHTML).toContain('dashboard-legend-swatch--covered');
     });
 
-    test('legend contains uncovered colour (#d0021b)', () => {
+    test('legend contains uncovered colour class', () => {
       setupDOM();
       setupGlobals();
       var mod = loadModule();
@@ -283,7 +283,7 @@ describe('PaddelbuchCoverageDashboard', () => {
 
       mod.activate({ map: mockMap, legendEl: legendEl });
 
-      expect(legendEl.innerHTML).toContain('#d0021b');
+      expect(legendEl.innerHTML).toContain('dashboard-legend-swatch--uncovered');
     });
 
     test('legend contains covered and not covered labels', () => {

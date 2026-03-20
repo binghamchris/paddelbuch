@@ -83,7 +83,7 @@
 
     // Header with colour indicator
     html += '<div class="popup-icon-div">';
-    html += '<span class="popup-icon" style="display:inline-block;width:12px;height:12px;border-radius:50%;background:' + metric.color + ';margin-right:6px;"></span>';
+    html += '<span class="dashboard-popup-icon" style="background:' + metric.color + ';"></span>';
     html += strings.popup_spots + ': ' + metric.spotCount;
     html += '</div>';
 
@@ -122,24 +122,24 @@
     html += '<div class="dashboard-legend-items">';
 
     // Traffic light: Green / Yellow / Red
-    html += '<div class="dashboard-legend-item" style="display:flex;align-items:center;margin-bottom:4px;">';
-    html += '<span style="display:inline-block;width:20px;height:12px;background:#07753f;border-radius:3px;margin-right:8px;"></span>';
+    html += '<div class="dashboard-legend-item">';
+    html += '<span class="dashboard-legend-swatch dashboard-legend-swatch--fresh"></span>';
     html += '<span>' + escapeHtml(strings.fresh) + '</span>';
     html += '</div>';
 
-    html += '<div class="dashboard-legend-item" style="display:flex;align-items:center;margin-bottom:4px;">';
-    html += '<span style="display:inline-block;width:20px;height:12px;background:#ffb200;border-radius:3px;margin-right:8px;"></span>';
+    html += '<div class="dashboard-legend-item">';
+    html += '<span class="dashboard-legend-swatch dashboard-legend-swatch--aging"></span>';
     html += '<span>' + escapeHtml(strings.aging) + '</span>';
     html += '</div>';
 
-    html += '<div class="dashboard-legend-item" style="display:flex;align-items:center;margin-bottom:4px;">';
-    html += '<span style="display:inline-block;width:20px;height:12px;background:#c40200;border-radius:3px;margin-right:8px;"></span>';
+    html += '<div class="dashboard-legend-item">';
+    html += '<span class="dashboard-legend-swatch dashboard-legend-swatch--stale"></span>';
     html += '<span>' + escapeHtml(strings.stale) + '</span>';
     html += '</div>';
 
     // No data indicator
-    html += '<div class="dashboard-legend-item" style="display:flex;align-items:center;">';
-    html += '<span style="display:inline-block;width:20px;height:12px;background:#9013fe;border-radius:3px;margin-right:8px;"></span>';
+    html += '<div class="dashboard-legend-item">';
+    html += '<span class="dashboard-legend-swatch dashboard-legend-swatch--no-data"></span>';
     html += '<span>' + escapeHtml(strings.no_data) + '</span>';
     html += '</div>';
 

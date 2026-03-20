@@ -241,9 +241,9 @@ describe('PaddelbuchFreshnessDashboard', () => {
 
       mod.activate({ map: mockMap, legendEl: legendEl });
 
-      expect(legendEl.innerHTML).toContain('#07753f');
-      expect(legendEl.innerHTML).toContain('#ffb200');
-      expect(legendEl.innerHTML).toContain('#c40200');
+      expect(legendEl.innerHTML).toContain('dashboard-legend-swatch--fresh');
+      expect(legendEl.innerHTML).toContain('dashboard-legend-swatch--aging');
+      expect(legendEl.innerHTML).toContain('dashboard-legend-swatch--stale');
     });
 
     test('renders legend with "no data" indicator', () => {
@@ -255,7 +255,7 @@ describe('PaddelbuchFreshnessDashboard', () => {
       mod.activate({ map: mockMap, legendEl: legendEl });
 
       expect(legendEl.innerHTML).toContain('No Data');
-      expect(legendEl.innerHTML).toContain('#9013fe');
+      expect(legendEl.innerHTML).toContain('dashboard-legend-swatch--no-data');
     });
 
     test('renders legend title', () => {

@@ -15,8 +15,9 @@
 (function(global) {
   'use strict';
 
-  var COVERED_COLOR = '#4ab31f';
-  var UNCOVERED_COLOR = '#d0021b';
+  var colors = global.PaddelbuchColors || {};
+  var COVERED_COLOR = colors.coveredGreen || '#4ab31f';
+  var UNCOVERED_COLOR = colors.uncoveredRed || '#d0021b';
 
   var layers = [];
   var legendEl = null;
@@ -98,14 +99,14 @@
     html += '<div class="dashboard-legend-items">';
 
     // Covered indicator
-    html += '<div class="dashboard-legend-item" style="display:flex;align-items:center;margin-bottom:6px;">';
-    html += '<span style="display:inline-block;width:20px;height:12px;background:' + COVERED_COLOR + ';border-radius:3px;margin-right:8px;"></span>';
+    html += '<div class="dashboard-legend-item">';
+    html += '<span class="dashboard-legend-swatch dashboard-legend-swatch--covered"></span>';
     html += '<span>' + escapeHtml(strings.covered) + '</span>';
     html += '</div>';
 
     // Uncovered indicator
-    html += '<div class="dashboard-legend-item" style="display:flex;align-items:center;">';
-    html += '<span style="display:inline-block;width:20px;height:12px;background:' + UNCOVERED_COLOR + ';border-radius:3px;margin-right:8px;"></span>';
+    html += '<div class="dashboard-legend-item">';
+    html += '<span class="dashboard-legend-swatch dashboard-legend-swatch--uncovered"></span>';
     html += '<span>' + escapeHtml(strings.not_covered) + '</span>';
     html += '</div>';
 
