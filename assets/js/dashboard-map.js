@@ -32,11 +32,11 @@
     style: 'https://tiles.openfreemap.org/styles/positron'
   }).addTo(map);
 
-  L.control.zoom({ position: 'bottomright' }).addTo(map);
-
   L.control.attribution({ position: 'bottomright' })
     .addAttribution('&copy; <a href="http://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors')
     .addTo(map);
+
+  L.control.zoom({ position: 'bottomright' }).addTo(map);
 
   global.PaddelbuchDashboardMap = {
     map: map,
