@@ -21,6 +21,10 @@ const FILE_COPIES = [
     dest: 'assets/js/vendor/leaflet.js',
   },
   {
+    src: 'node_modules/leaflet/dist/leaflet.js.map',
+    dest: 'assets/js/vendor/leaflet.js.map',
+  },
+  {
     src: 'node_modules/leaflet/dist/leaflet.css',
     dest: 'assets/css/vendor/leaflet.css',
   },
