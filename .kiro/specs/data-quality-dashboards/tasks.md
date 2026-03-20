@@ -202,7 +202,7 @@ Build two map-based data quality dashboards (Data Freshness and Waterway Coverag
     - Minimum 100 iterations
     - **Validates: Requirements 1.5**
 
-- [ ] 7. Update CSP headers for OpenFreeMap vector tiles
+- [x] 7. Update CSP headers for OpenFreeMap vector tiles
   - [x] 7.1 Update `deploy/frontend-deploy.yaml` Content-Security-Policy header
     - Add `connect-src 'self' tiles.openfreemap.org;` for fetching Positron style JSON and vector tile PBF data
     - Add `worker-src 'self' blob:;` for MapLibre GL JS web workers
@@ -214,7 +214,7 @@ Build two map-based data quality dashboards (Data Freshness and Waterway Coverag
     - Parse the CSP header from `deploy/frontend-deploy.yaml` and assert `connect-src` includes `tiles.openfreemap.org` and `worker-src` includes `blob:`
     - _Requirements: 8.4_
 
-- [ ] 8. Final checkpoint - Ensure all tests pass
+- [x] 8. Final checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Notes
