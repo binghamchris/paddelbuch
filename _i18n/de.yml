@@ -172,7 +172,7 @@ dashboards:
     no_data: "Keine Daten"
     popup_spots: "Einstiegsorte"
     popup_median_age: "Median-Alter"
-    popup_days: "Tage"
+    popup_years: "Jahre"
     popup_no_data: "Keine Daten vorhanden"
   coverage:
     name: "Abdeckung"

@@ -27,11 +27,11 @@ scripts:
 
   <div id="dashboard-switcher"></div>
 
+  <div id="dashboard-legend"></div>
+
   <div id="dashboard-map" class="map"></div>
 
   <div id="dashboard-content" style="display:none;"></div>
-
-  <div id="dashboard-legend"></div>
 </div>
 
 <script type="application/json" id="freshness-data">{{ site.data.dashboard_freshness_metrics | jsonify }}</script>
@@ -47,7 +47,7 @@ scripts:
   "no_data": "{% t dashboards.freshness.no_data %}",
   "popup_spots": "{% t dashboards.freshness.popup_spots %}",
   "popup_median_age": "{% t dashboards.freshness.popup_median_age %}",
-  "popup_days": "{% t dashboards.freshness.popup_days %}",
+  "popup_years": "{% t dashboards.freshness.popup_years %}",
   "popup_no_data": "{% t dashboards.freshness.popup_no_data %}"
 }
 </script>
