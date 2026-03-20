@@ -176,7 +176,7 @@
           style: {
             color: metric.color,
             weight: 3,
-            opacity: 0.8,
+            opacity: 1,
             fillColor: metric.color,
             fillOpacity: 0.25
           }
