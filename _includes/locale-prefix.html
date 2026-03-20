@@ -1,0 +1,9 @@
+{% comment %}
+  Computes the locale_prefix variable for URL generation.
+
+  Production builds set site.locale_prefix explicitly via per-locale config
+  overlays (_config_de.yml / _config_en.yml). During local development
+  (jekyll serve), locale_prefix is not defined, so we derive it from
+  site.lang vs site.default_lang which the plugin sets for each locale pass.
+{% endcomment %}
+{% if site.locale_prefix.size > 0 %}{% assign locale_prefix = site.locale_prefix %}{% elsif site.lang != site.default_lang %}{% assign locale_prefix = "/" | append: site.lang %}{% else %}{% assign locale_prefix = "" %}{% endif %}

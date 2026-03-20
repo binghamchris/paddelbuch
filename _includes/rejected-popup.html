@@ -38,7 +38,7 @@
 
 <!-- More details button (matches regular spot popup: button.popup-btn-right > a) -->
 {% if spot.slug %}
-{% assign locale_prefix = site.locale_prefix %}
+{% include locale-prefix.html %}
 <button class="popup-btn popup-btn-right">
   <a href="{{ locale_prefix | append: '/einstiegsorte/' | append: spot.slug | append: '/' }}">{% t labels.more_details %}</a>
 </button>

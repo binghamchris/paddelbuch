@@ -6,7 +6,7 @@
   - include.locale: Current locale (default: site.lang or 'de')
 -->
 
-{% assign locale_prefix = site.locale_prefix %}
+{% include locale-prefix.html %}
 
 {% assign spot = include.spot %}
 {% assign current_locale = include.locale | default: site.lang | default: 'de' %}
