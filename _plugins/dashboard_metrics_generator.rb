@@ -219,9 +219,122 @@ module Jekyll
       '#%02x%02x%02x' % rgb
     end
 
-    # Stub — implemented in task 1.3
-    def compute_coverage_metrics(_unique_waterways, _unique_spots_by_waterway)
-      []
+    # Computes the Haversine distance in metres between two geographic
+    # coordinate pairs. Uses Earth radius of 6371 km.
+    # Parameters are in degrees: lat1, lon1, lat2, lon2.
+    # Requirements: 10.3
+    def haversine_distance(lat1, lon1, lat2, lon2)
+      r = 6_371_000.0 # Earth radius in metres
+
+      dlat = (lat2 - lat1) * Math::PI / 180.0
+      dlon = (lon2 - lon1) * Math::PI / 180.0
+
+      lat1_rad = lat1 * Math::PI / 180.0
+      lat2_rad = lat2 * Math::PI / 180.0
+
+      a = Math.sin(dlat / 2.0)**2 +
+          Math.cos(lat1_rad) * Math.cos(lat2_rad) * Math.sin(dlon / 2.0)**2
+      c = 2.0 * Math.atan2(Math.sqrt(a), Math.sqrt(1.0 - a))
+
+      r * c
+    end
+
+    # Classifies each segment of a geometry as covered or uncovered based
+    # on whether the segment midpoint is within `radius` metres of any spot.
+    #
+    # Handles LineString and Polygon (outer ring) geometries. Unknown
+    # geometry types are skipped with a warning.
+    #
+    # GeoJSON coordinates are [lon, lat] order.
+    #
+    # Returns { 'covered' => [...], 'uncovered' => [...] } where each
+    # value is an array of GeoJSON LineString Feature hashes (2-point segments).
+    # Requirements: 4.1, 4.2, 4.3, 4.4, 10.1, 10.2
+    def classify_segments(geometry, spots, radius = 2000)
+      result = { 'covered' => [], 'uncovered' => [] }
+
+      geo_type = geometry['type']
+      coords = case geo_type
+               when 'LineString'
+                 geometry['coordinates']
+               when 'Polygon'
+                 # Use outer ring (first element of coordinates array)
+                 geometry['coordinates']&.first
+               else
+                 Jekyll.logger.warn 'DashboardMetrics:', "Unknown geometry type '#{geo_type}', skipping segment classification"
+                 return result
+               end
+
+      return result if coords.nil? || coords.size < 2
+
+      spot_locations = spots.map { |s| s['location'] }.compact
+
+      (0...(coords.size - 1)).each do |i|
+        c1 = coords[i]
+        c2 = coords[i + 1]
+
+        # GeoJSON: [lon, lat]
+        mid_lon = (c1[0] + c2[0]) / 2.0
+        mid_lat = (c1[1] + c2[1]) / 2.0
+
+        covered = spot_locations.any? do |loc|
+          haversine_distance(mid_lat, mid_lon, loc['lat'], loc['lon']) <= radius
+        end
+
+        segment_feature = {
+          'type' => 'Feature',
+          'geometry' => {
+            'type' => 'LineString',
+            'coordinates' => [c1, c2]
+          },
+          'properties' => {}
+        }
+
+        if covered
+          result['covered'] << segment_feature
+        else
+          result['uncovered'] << segment_feature
+        end
+      end
+
+      result
+    end
+
+    # Computes coverage metrics for each unique waterway.
+    # Returns an array of metric hashes with slug, name (placeholder),
+    # spotCount, coveredSegments, and uncoveredSegments.
+    # Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 10.1, 10.2, 10.3, 10.4
+    def compute_coverage_metrics(unique_waterways, unique_spots_by_waterway)
+      metrics = []
+
+      unique_waterways.each do |waterway|
+        slug = waterway['slug']
+        geometry_json = waterway['geometry']
+
+        # Parse geometry JSON; skip waterway if malformed
+        geometry = nil
+        begin
+          geometry = JSON.parse(geometry_json) if geometry_json && !geometry_json.empty?
+        rescue JSON::ParserError => e
+          Jekyll.logger.warn 'DashboardMetrics:', "Malformed geometry JSON for waterway '#{slug}': #{e.message}"
+          next
+        end
+
+        next if geometry.nil?
+
+        spots = unique_spots_by_waterway[slug] || []
+        segments = classify_segments(geometry, spots)
+
+        metrics << {
+          'slug' => slug,
+          'name' => 'placeholder',
+          'spotCount' => spots.size,
+          'coveredSegments' => segments['covered'],
+          'uncoveredSegments' => segments['uncovered']
+        }
+      end
+
+      metrics
     end
   end
 end
