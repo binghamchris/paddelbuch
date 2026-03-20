@@ -209,7 +209,7 @@ Build two map-based data quality dashboards (Data Freshness and Waterway Coverag
     - No changes to `img-src` needed (vector tiles use `connect-src`)
     - _Requirements: 8.2, 8.4_
 
-  - [~] 7.2 Write JS unit test for CSP configuration
+  - [x] 7.2 Write JS unit test for CSP configuration
     - Create or extend `_tests/unit/dashboard-csp.test.js`
     - Parse the CSP header from `deploy/frontend-deploy.yaml` and assert `connect-src` includes `tiles.openfreemap.org` and `worker-src` includes `blob:`
     - _Requirements: 8.4_
