@@ -140,7 +140,7 @@ Build two map-based data quality dashboards (Data Freshness and Waterway Coverag
     - Show/hide map container vs content container based on `usesMap`
     - _Requirements: 1.5, 1.6, 1.7, 7.2, 7.4, 7.5, 7.6_
 
-  - [~] 4.6 Write JS unit tests for dashboard modules
+  - [x] 4.6 Write JS unit tests for dashboard modules
     - Create `_tests/unit/dashboard-data.test.js` — test JSON block parsing, empty data handling
     - Create `_tests/unit/dashboard-map.test.js` — test Positron tile config via `L.maplibreGL`, map centre/bounds
     - Create `_tests/unit/dashboard-freshness.test.js` — test legend DOM structure, popup HTML classes
