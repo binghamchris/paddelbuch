@@ -175,7 +175,7 @@ Build two map-based data quality dashboards (Data Freshness and Waterway Coverag
 - [x] 5. Checkpoint - Ensure all JS tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 6. Create the dashboard page and integrate navigation and i18n
+- [x] 6. Create the dashboard page and integrate navigation and i18n
   - [x] 6.1 Create `offene-daten/datenqualitaet.html`
     - Add front matter: layout default, pageName data-quality, permalink `/offene-daten/datenqualitaet/`, scripts array with all 5 JS modules
     - Add `#dashboard-switcher`, `#dashboard-map`, `#dashboard-content`, `#dashboard-legend` containers
@@ -203,7 +203,7 @@ Build two map-based data quality dashboards (Data Freshness and Waterway Coverag
     - **Validates: Requirements 1.5**
 
 - [ ] 7. Update CSP headers for OpenFreeMap vector tiles
-  - [~] 7.1 Update `deploy/frontend-deploy.yaml` Content-Security-Policy header
+  - [x] 7.1 Update `deploy/frontend-deploy.yaml` Content-Security-Policy header
     - Add `connect-src 'self' tiles.openfreemap.org;` for fetching Positron style JSON and vector tile PBF data
     - Add `worker-src 'self' blob:;` for MapLibre GL JS web workers
     - No changes to `img-src` needed (vector tiles use `connect-src`)
