@@ -271,7 +271,33 @@
         markerLayerGroup.addTo(map);
       }
 
-      // Legend rendering will be added in subsequent tasks
+      // --- Shared legend ---
+      var legendEl = document.getElementById('dashboard-legend');
+      if (legendEl) {
+        var legendHtml = '';
+        legendHtml += '<div class="dashboard-legend-items">';
+
+        var categories = [
+          { key: 'fresh', label: strings.fresh },
+          { key: 'aging', label: strings.aging },
+          { key: 'stale', label: strings.stale }
+        ];
+
+        for (var k = 0; k < categories.length; k++) {
+          var cat = categories[k];
+          var catColorKey = FRESHNESS_COLOR_MAP[cat.key];
+          var catColor = getColor(catColorKey);
+          var shapeSvg = SHAPES[cat.key](catColor);
+
+          legendHtml += '<div class="dashboard-legend-item">';
+          legendHtml += '<span class="dashboard-legend-shape">' + shapeSvg + '</span>';
+          legendHtml += '<span>' + escapeHtml(cat.label) + '</span>';
+          legendHtml += '</div>';
+        }
+
+        legendHtml += '</div>';
+        legendEl.innerHTML = legendHtml;
+      }
     },
 
     deactivate: function() {

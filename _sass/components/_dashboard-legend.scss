@@ -33,6 +33,16 @@
   &--uncovered { background-color: $uncovered-red; }
 }
 
+.dashboard-legend-shape {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 14px;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
 .dashboard-popup-icon {
   display: inline-block;
   width: 12px;

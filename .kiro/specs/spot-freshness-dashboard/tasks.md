@@ -67,13 +67,13 @@ Implement the Spot Freshness Dashboard as a new dashboard module on the data qua
     - Skip entries with null/missing `updatedAt` or `location` (already filtered at build time, but guard at runtime too)
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 8.1_
 
-  - [-] 3.7 Write property tests for marker count and shape/colour
+  - [x] 3.7 Write property tests for marker count and shape/colour
     - **Property 6: Marker count equals valid spots**
     - **Validates: Requirements 4.1, 4.5, 4.6**
     - **Property 7: Marker shape and colour match freshness category**
     - **Validates: Requirements 4.2, 4.3**
 
-  - [~] 3.8 Implement the shared legend in `activate()`
+  - [-] 3.8 Implement the shared legend in `activate()`
     - Render exactly three legend entries (Fresh, Aging, Stale) in `#dashboard-legend`
     - Each entry uses an SVG shape indicator (circle, triangle, square) filled with the corresponding `PaddelbuchColors` colour — no plain colour swatches
     - Clear `#dashboard-legend` in `deactivate()`
