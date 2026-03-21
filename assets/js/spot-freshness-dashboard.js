@@ -100,7 +100,7 @@
         var chartHeight = chartArea.bottom - chartArea.top;
         var fontSize = Math.floor(chartHeight * 0.5);
         var xScale = chart.scales.x;
-        var centerY = chartArea.top + chartHeight / 2;
+        var centerY = chartArea.top + chartHeight / 2 + fontSize * 0.05;
         var cumulative = 0;
 
         for (var d = 0; d < chart.data.datasets.length; d++) {
