@@ -198,9 +198,9 @@ describe('Legend BEM-modifier classes and entry counts (Property 5)', function (
         // index 0 = spots, index 1 = obstacles, index 2 = protected areas
         var legends = contentEl.querySelectorAll('.statistics-legend');
 
-        if (legends.length !== 4) {
+        if (legends.length !== 3) {
           throw new Error(
-            'Expected 4 legends but found ' + legends.length
+            'Expected 3 legends but found ' + legends.length
           );
         }
 
@@ -235,8 +235,8 @@ describe('Legend BEM-modifier classes and entry counts (Property 5)', function (
           }
         }
 
-        // --- Obstacles legend (index 2) ---
-        var obstaclesLegend = legends[2];
+        // --- Obstacles legend (index 1) ---
+        var obstaclesLegend = legends[1];
         var obstaclesItems = obstaclesLegend.querySelectorAll('.statistics-legend-item');
 
         if (obstaclesItems.length !== 2) {
@@ -266,8 +266,8 @@ describe('Legend BEM-modifier classes and entry counts (Property 5)', function (
           throw new Error('Obstacles legend: missing expected swatch classes, found: ' + obstacleSlugsFound.join(', '));
         }
 
-        // --- Protected areas legend (index 3) ---
-        var paLegend = legends[3];
+        // --- Protected areas legend (index 2) ---
+        var paLegend = legends[2];
         var paItems = paLegend.querySelectorAll('.statistics-legend-item');
         var expectedPACount = (metrics.protectedAreas.byType || []).length;
 
