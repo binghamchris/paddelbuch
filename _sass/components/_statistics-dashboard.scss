@@ -75,6 +75,11 @@
   justify-content: space-evenly;
   text-align: center;
   gap: 1rem;
+
+  > .statistics-figure {
+    flex: 1 1 0;
+    min-width: 0;
+  }
 }
 
 .statistics-figure {
