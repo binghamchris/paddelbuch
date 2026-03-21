@@ -55,7 +55,7 @@ Implement the Spot Freshness Dashboard as a new dashboard module on the data qua
     - **Property 4: Chart data reflects pre-computed metrics**
     - **Validates: Requirements 3.3**
 
-  - [~] 3.5 Write property test for chart destruction
+  - [-] 3.5 Write property test for chart destruction
     - **Property 5: Chart destroyed on deactivation**
     - **Validates: Requirements 3.4, 8.2**
 
