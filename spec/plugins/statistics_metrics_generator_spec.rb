@@ -224,6 +224,114 @@ RSpec.describe Jekyll::StatisticsMetricsGenerator do
     end
   end
 
+  # ── Property 9: Generator produces correct per-spot freshness data ──────────
+  # Feature: spot-freshness-dashboard, Property 9: Generator produces correct per-spot freshness data
+  # **Validates: Requirements 6.1**
+  describe '#compute_spot_freshness_map_data (Property 9)' do
+    it 'output contains only valid non-rejected spots with correct freshness categories' do
+      property_of {
+        now = Time.now
+        num_spots = range(0, 30)
+        spots = (1..num_spots).map do |i|
+          rejected = choose(true, false)
+          has_location = choose(true, false)
+          has_lat = choose(true, false)
+          has_lon = choose(true, false)
+          has_updated_at = choose(true, false)
+
+          location = if has_location
+                       lat = has_lat ? (range(-9000, 9000) / 100.0) : nil
+                       lon = has_lon ? (range(-18000, 18000) / 100.0) : nil
+                       { 'lat' => lat, 'lon' => lon }
+                     end
+
+          # Generate updatedAt as an ISO 8601 date string at a known offset from now
+          updated_at = if has_updated_at
+                         days_ago = range(0, 3000)
+                         (now - days_ago * 86_400).utc.strftime('%Y-%m-%dT%H:%M:%S.000Z')
+                       end
+
+          {
+            'slug' => "spot-#{i}",
+            'rejected' => rejected,
+            'location' => location,
+            'updatedAt' => updated_at
+          }
+        end
+        spots
+      }.check(100) { |spots|
+        before_call = Time.now
+        result = generator.send(:compute_spot_freshness_map_data, spots)
+        after_call = Time.now
+
+        # Determine which spots are valid (non-rejected, valid location with lat+lon, non-nil updatedAt)
+        valid_spots = spots.select do |s|
+          s['rejected'] != true &&
+            !s['location'].nil? &&
+            !s['location']['lat'].nil? &&
+            !s['location']['lon'].nil? &&
+            !s['updatedAt'].nil?
+        end
+
+        # Output count must equal valid spot count
+        expect(result.size).to eq(valid_spots.size),
+          "Expected #{valid_spots.size} entries but got #{result.size}"
+
+        # Each output entry must have the correct slug, lat, lon, and category
+        result.each do |entry|
+          expect(entry).to have_key('slug')
+          expect(entry).to have_key('lat')
+          expect(entry).to have_key('lon')
+          expect(entry).to have_key('category')
+          expect(%w[fresh aging stale]).to include(entry['category'])
+
+          # Find the source spot
+          source = spots.find { |s| s['slug'] == entry['slug'] }
+          expect(source).not_to be_nil, "Output entry slug '#{entry['slug']}' not found in input"
+
+          # Verify lat/lon match
+          expect(entry['lat']).to eq(source['location']['lat'])
+          expect(entry['lon']).to eq(source['location']['lon'])
+
+          # Verify category matches threshold rules
+          # Use a tolerance window: the method called Time.now between before_call and after_call
+          updated_at_time = Time.parse(source['updatedAt'])
+          min_days = [(before_call - updated_at_time) / 86_400.0, 0].max
+          max_days = [(after_call - updated_at_time) / 86_400.0, 0].max
+
+          # Determine the set of possible categories given the time window
+          possible_categories = []
+          [min_days, max_days].each do |days|
+            cat = if days <= 730.5 then 'fresh'
+                  elsif days <= 1826.25 then 'aging'
+                  else 'stale'
+                  end
+            possible_categories << cat
+          end
+          possible_categories.uniq!
+
+          expect(possible_categories).to include(entry['category']),
+            "Spot '#{entry['slug']}' with days in [#{min_days.round(2)}, #{max_days.round(2)}] " \
+            "should be #{possible_categories.join(' or ')} but was '#{entry['category']}'"
+        end
+
+        # Verify no rejected or invalid spots appear in output
+        result_slugs = result.map { |e| e['slug'] }
+        spots.each do |s|
+          is_invalid = s['rejected'] == true ||
+                       s['location'].nil? ||
+                       s['location']['lat'].nil? ||
+                       s['location']['lon'].nil? ||
+                       s['updatedAt'].nil?
+          if is_invalid
+            expect(result_slugs).not_to include(s['slug']),
+              "Rejected/invalid spot '#{s['slug']}' should not appear in output"
+          end
+        end
+      }
+    end
+  end
+
   # ── Property 7: Type name localisation ──────────────────────────────────────
   # Feature: statistics-dashboard, Property 7: Type name localisation
   # **Validates: Requirements 5.4, 6.4, 7.4, 9.3**
