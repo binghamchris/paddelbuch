@@ -203,3 +203,5 @@ dashboards:
     aging: "Alternd (2–5 Jahre)"
     stale: "Veraltet (> 5 Jahre)"
     chart_title: "Aktualität der Einstiegsorte"
+    popup_age: "Alter"
+    popup_years: "Jahre"

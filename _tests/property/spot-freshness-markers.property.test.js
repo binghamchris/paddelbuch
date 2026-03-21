@@ -171,7 +171,7 @@ describe('Spot Freshness Marker Properties', function () {
         };
       },
       marker: function (latlng, opts) {
-        return { latlng: latlng, options: opts };
+        return { latlng: latlng, options: opts, bindPopup: function () { return this; } };
       },
       divIcon: function (opts) {
         divIconCalls.push(opts);

@@ -109,7 +109,7 @@ describe('Spot Freshness Legend (Property 8)', function () {
         };
       },
       marker: function (latlng, opts) {
-        return { latlng: latlng, options: opts };
+        return { latlng: latlng, options: opts, bindPopup: function () { return this; } };
       },
       divIcon: function (opts) {
         return opts;

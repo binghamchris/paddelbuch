@@ -203,3 +203,5 @@ dashboards:
     aging: "Aging (2–5 years)"
     stale: "Stale (> 5 years)"
     chart_title: "Spot Freshness"
+    popup_age: "Age"
+    popup_years: "years"

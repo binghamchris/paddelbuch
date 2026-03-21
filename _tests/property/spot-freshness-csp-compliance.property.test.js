@@ -128,7 +128,7 @@ describe('Spot Freshness CSP Compliance (Property 12)', function () {
         };
       },
       marker: function (latlng, opts) {
-        return { latlng: latlng, options: opts };
+        return { latlng: latlng, options: opts, bindPopup: function () { return this; } };
       },
       divIcon: function (opts) {
         divIconCalls.push(opts);

@@ -98,7 +98,7 @@
         var ctx = chart.ctx;
         var chartArea = chart.chartArea;
         var chartHeight = chartArea.bottom - chartArea.top;
-        var fontSize = Math.floor(chartHeight * 0.8);
+        var fontSize = Math.floor(chartHeight * 0.5);
         var xScale = chart.scales.x;
         var centerY = chartArea.top + chartHeight / 2;
         var cumulative = 0;
@@ -184,7 +184,9 @@
       fresh: 'Aktuell (≤ 2 Jahre)',
       aging: 'Alternd (2–5 Jahre)',
       stale: 'Veraltet (> 5 Jahre)',
-      chart_title: 'Aktualität der Einstiegsorte'
+      chart_title: 'Aktualität der Einstiegsorte',
+      popup_age: 'Alter',
+      popup_years: 'Jahre'
     };
 
     var el = document.getElementById('spot-freshness-i18n');
@@ -204,6 +206,28 @@
     } catch (e) {
       return defaults;
     }
+  }
+
+  /**
+   * Builds popup HTML for a spot marker, following the same CSS pattern
+   * used by the freshness and coverage dashboard popups.
+   *
+   * @param {Object} spot - Spot data object with name, category, ageDays
+   * @param {Object} strings - Localised string map
+   * @returns {string} HTML string for the popup
+   */
+  function buildPopupHtml(spot, strings) {
+    var colorKey = FRESHNESS_COLOR_MAP[spot.category];
+    var color = getColor(colorKey);
+    var ageYears = spot.ageDays != null ? (spot.ageDays / 365.25).toFixed(1) : '–';
+
+    var html = '';
+    html += '<div class="popup-icon-div">';
+    html += '<span class="dashboard-popup-icon" style="background:' + color + ';"></span>';
+    html += strings.popup_age + ': ' + ageYears + ' ' + strings.popup_years;
+    html += '</div>';
+    html += '<span class="popup-title"><h1>' + escapeHtml(spot.name) + '</h1></span>';
+    return html;
   }
 
   var strings = getStrings();
@@ -284,6 +308,7 @@
           });
 
           var marker = L.marker([spot.lat, spot.lon], { icon: icon });
+          marker.bindPopup(buildPopupHtml(spot, strings));
           markerLayerGroup.addLayer(marker);
         }
 
@@ -381,6 +406,7 @@
   global.PaddelbuchSpotFreshnessDashboard.getColor = getColor;
   global.PaddelbuchSpotFreshnessDashboard.FRESHNESS_COLOR_MAP = FRESHNESS_COLOR_MAP;
   global.PaddelbuchSpotFreshnessDashboard.SHAPES = SHAPES;
+  global.PaddelbuchSpotFreshnessDashboard.buildPopupHtml = buildPopupHtml;
 
   // Register on the dashboard registry
   (global.PaddelbuchDashboardRegistry = global.PaddelbuchDashboardRegistry || []).push(module);

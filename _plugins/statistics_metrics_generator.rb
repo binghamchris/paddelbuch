@@ -32,7 +32,7 @@ module Jekyll
 
       localized = localize_metrics(@@cached_metrics, locale, site)
       site.data['dashboard_statistics_metrics'] = localized
-      site.data['dashboard_spot_freshness_map_data'] = @@cached_metrics['spotFreshnessMapData']
+      site.data['dashboard_spot_freshness_map_data'] = localize_spot_freshness_map_data(@@cached_metrics['spotFreshnessMapData'], locale, site)
       Jekyll.logger.info 'StatisticsMetrics:', "Localized statistics metrics for locale '#{locale}'"
     end
 
@@ -248,7 +248,24 @@ module Jekyll
                    else 'stale'
                    end
 
-        { 'slug' => spot['slug'], 'lat' => location['lat'], 'lon' => location['lon'], 'category' => category }
+        { 'slug' => spot['slug'], 'name' => 'placeholder', 'lat' => location['lat'], 'lon' => location['lon'], 'category' => category, 'ageDays' => days.round(1) }
+      end
+    end
+
+    # Deep-clones cached spot freshness map data and replaces placeholder
+    # names with locale-specific spot names.
+    def localize_spot_freshness_map_data(cached_map_data, locale, site)
+      spot_names = {}
+      (site.data['spots'] || []).each do |s|
+        next unless s['locale'] == locale && s['slug']
+
+        spot_names[s['slug']] = s['name']
+      end
+
+      cached_map_data.map do |entry|
+        cloned = entry.dup
+        cloned['name'] = spot_names[cloned['slug']] || cloned['slug']
+        cloned
       end
     end
 
