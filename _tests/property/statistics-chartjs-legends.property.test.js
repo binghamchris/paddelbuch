@@ -213,6 +213,7 @@ describe('Legend BEM-modifier classes and entry counts (Property 5)', function (
         }
 
         // Verify each spot swatch has the correct BEM-modifier class
+        var sortedSpotsByType = (metrics.spots.byType || []).slice().sort(function(a, b) { return b.count - a.count; });
         for (var s = 0; s < spotsItems.length; s++) {
           var spotSwatch = spotsItems[s].querySelector('.statistics-legend-swatch');
           if (!spotSwatch) {
@@ -220,7 +221,7 @@ describe('Legend BEM-modifier classes and entry counts (Property 5)', function (
               'Spots legend item ' + s + ' is missing a .statistics-legend-swatch element'
             );
           }
-          var expectedSpotSlug = metrics.spots.byType[s].slug;
+          var expectedSpotSlug = sortedSpotsByType[s].slug;
           var expectedSpotClass = 'statistics-legend-swatch--' + expectedSpotSlug;
           if (!spotSwatch.classList.contains(expectedSpotClass)) {
             throw new Error(
@@ -240,22 +241,25 @@ describe('Legend BEM-modifier classes and entry counts (Property 5)', function (
           );
         }
 
-        // Verify with-portage swatch
-        var withPortageSwatch = obstaclesItems[0].querySelector('.statistics-legend-swatch');
-        if (!withPortageSwatch || !withPortageSwatch.classList.contains('statistics-legend-swatch--with-portage')) {
-          throw new Error(
-            'Obstacles legend item 0: expected class "statistics-legend-swatch--with-portage" but found "' +
-            (withPortageSwatch ? withPortageSwatch.className : 'no swatch') + '"'
-          );
+        // Verify obstacle swatches contain both with-portage and without-portage (order depends on counts)
+        var obstacleSlugsFound = [];
+        for (var oi = 0; oi < 2; oi++) {
+          var obsSwatch = obstaclesItems[oi].querySelector('.statistics-legend-swatch');
+          if (!obsSwatch) {
+            throw new Error('Obstacles legend item ' + oi + ' is missing a .statistics-legend-swatch element');
+          }
+          if (obsSwatch.classList.contains('statistics-legend-swatch--with-portage')) {
+            obstacleSlugsFound.push('with-portage');
+          } else if (obsSwatch.classList.contains('statistics-legend-swatch--without-portage')) {
+            obstacleSlugsFound.push('without-portage');
+          } else {
+            throw new Error(
+              'Obstacles legend item ' + oi + ': unexpected swatch classes "' + obsSwatch.className + '"'
+            );
+          }
         }
-
-        // Verify without-portage swatch
-        var withoutPortageSwatch = obstaclesItems[1].querySelector('.statistics-legend-swatch');
-        if (!withoutPortageSwatch || !withoutPortageSwatch.classList.contains('statistics-legend-swatch--without-portage')) {
-          throw new Error(
-            'Obstacles legend item 1: expected class "statistics-legend-swatch--without-portage" but found "' +
-            (withoutPortageSwatch ? withoutPortageSwatch.className : 'no swatch') + '"'
-          );
+        if (obstacleSlugsFound.indexOf('with-portage') === -1 || obstacleSlugsFound.indexOf('without-portage') === -1) {
+          throw new Error('Obstacles legend: missing expected swatch classes, found: ' + obstacleSlugsFound.join(', '));
         }
 
         // --- Protected areas legend (index 2) ---
@@ -271,6 +275,7 @@ describe('Legend BEM-modifier classes and entry counts (Property 5)', function (
         }
 
         // Verify each PA swatch has the correct BEM-modifier class
+        var sortedPAByType = (metrics.protectedAreas.byType || []).slice().sort(function(a, b) { return b.count - a.count; });
         for (var p = 0; p < paItems.length; p++) {
           var paSwatch = paItems[p].querySelector('.statistics-legend-swatch');
           if (!paSwatch) {
@@ -278,7 +283,7 @@ describe('Legend BEM-modifier classes and entry counts (Property 5)', function (
               'PA legend item ' + p + ' is missing a .statistics-legend-swatch element'
             );
           }
-          var expectedPASlug = metrics.protectedAreas.byType[p].slug;
+          var expectedPASlug = sortedPAByType[p].slug;
           var expectedPAClass = 'statistics-legend-swatch--' + expectedPASlug;
           if (!paSwatch.classList.contains(expectedPAClass)) {
             throw new Error(

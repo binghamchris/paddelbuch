@@ -220,7 +220,7 @@ describe('Chart.js dataset colour and label correctness (Property 2)', function 
         // --- Spots chart (index 0) ---
         var spotsChart = window._chartInstances[0];
         var spotsDatasets = spotsChart.config.data.datasets;
-        var spotsByType = metrics.spots.byType || [];
+        var spotsByType = (metrics.spots.byType || []).slice().sort(function(a, b) { return b.count - a.count; });
 
         if (spotsDatasets.length !== spotsByType.length) {
           throw new Error(
@@ -257,55 +257,45 @@ describe('Chart.js dataset colour and label correctness (Property 2)', function 
         var obstaclesDatasets = obstaclesChart.config.data.datasets;
 
         // Obstacles always have exactly 2 datasets: with-portage and without-portage
+        // After sorting by count descending, order depends on data
         if (obstaclesDatasets.length !== 2) {
           throw new Error(
             'Obstacles chart: expected 2 datasets but found ' + obstaclesDatasets.length
           );
         }
 
+        var expectedWithLabel = 'Mit Portage-Route';
+        var expectedWithoutLabel = 'Ohne Portage-Route';
         var expectedWithPortageColor = MOCK_COLORS[OBSTACLE_COLOR_MAP['with-portage']];
         var expectedWithoutPortageColor = MOCK_COLORS[OBSTACLE_COLOR_MAP['without-portage']];
 
-        if (obstaclesDatasets[0].backgroundColor !== expectedWithPortageColor) {
-          throw new Error(
-            'Obstacles dataset[0] (with-portage): expected backgroundColor "' +
-            expectedWithPortageColor + '" but got "' +
-            obstaclesDatasets[0].backgroundColor + '"'
-          );
-        }
-
-        if (obstaclesDatasets[1].backgroundColor !== expectedWithoutPortageColor) {
-          throw new Error(
-            'Obstacles dataset[1] (without-portage): expected backgroundColor "' +
-            expectedWithoutPortageColor + '" but got "' +
-            obstaclesDatasets[1].backgroundColor + '"'
-          );
-        }
-
-        // Obstacle labels come from i18n strings (German defaults)
-        // The module uses strings.with_portage and strings.without_portage
-        // With no #statistics-i18n block, defaults are 'Mit Portage-Route' and 'Ohne Portage-Route'
-        var expectedWithLabel = 'Mit Portage-Route';
-        var expectedWithoutLabel = 'Ohne Portage-Route';
-
-        if (obstaclesDatasets[0].label !== expectedWithLabel) {
-          throw new Error(
-            'Obstacles dataset[0]: expected label "' + expectedWithLabel +
-            '" but got "' + obstaclesDatasets[0].label + '"'
-          );
-        }
-
-        if (obstaclesDatasets[1].label !== expectedWithoutLabel) {
-          throw new Error(
-            'Obstacles dataset[1]: expected label "' + expectedWithoutLabel +
-            '" but got "' + obstaclesDatasets[1].label + '"'
-          );
+        for (var oi = 0; oi < 2; oi++) {
+          var od = obstaclesDatasets[oi];
+          if (od.label === expectedWithLabel) {
+            if (od.backgroundColor !== expectedWithPortageColor) {
+              throw new Error(
+                'Obstacles with-portage: expected backgroundColor "' +
+                expectedWithPortageColor + '" but got "' + od.backgroundColor + '"'
+              );
+            }
+          } else if (od.label === expectedWithoutLabel) {
+            if (od.backgroundColor !== expectedWithoutPortageColor) {
+              throw new Error(
+                'Obstacles without-portage: expected backgroundColor "' +
+                expectedWithoutPortageColor + '" but got "' + od.backgroundColor + '"'
+              );
+            }
+          } else {
+            throw new Error(
+              'Obstacles dataset[' + oi + ']: unexpected label "' + od.label + '"'
+            );
+          }
         }
 
         // --- Protected areas chart (index 2) ---
         var paChart = window._chartInstances[2];
         var paDatasets = paChart.config.data.datasets;
-        var paByType = metrics.protectedAreas.byType || [];
+        var paByType = (metrics.protectedAreas.byType || []).slice().sort(function(a, b) { return b.count - a.count; });
 
         if (paDatasets.length !== paByType.length) {
           throw new Error(
