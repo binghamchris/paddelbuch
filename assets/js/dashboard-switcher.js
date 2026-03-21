@@ -8,6 +8,7 @@
  * Container visibility logic:
  *   - usesMap true:  show #dashboard-map, hide #dashboard-content
  *   - usesMap false: hide #dashboard-map, show #dashboard-content
+ *   - usesBoth true: show both #dashboard-map and #dashboard-content
  *   - #dashboard-legend is always visible (each dashboard manages its content)
  *
  * Requirements: 1.5, 1.6, 1.7, 7.2, 7.4, 7.5, 7.6
@@ -45,16 +46,19 @@
 
   /**
    * Shows or hides the map and content containers based on the dashboard's
-   * usesMap flag.
+   * usesMap and usesBoth flags.
    *
-   * @param {boolean} usesMap - Whether the dashboard uses the shared map
+   * @param {Object} dashboard - The dashboard module object
    */
-  function updateContainerVisibility(usesMap) {
+  function updateContainerVisibility(dashboard) {
+    var showMap = dashboard.usesMap || dashboard.usesBoth;
+    var showContent = !dashboard.usesMap || dashboard.usesBoth;
+
     if (mapEl) {
-      mapEl.style.display = usesMap ? '' : 'none';
+      mapEl.style.display = showMap ? '' : 'none';
     }
     if (contentEl) {
-      contentEl.style.display = usesMap ? 'none' : '';
+      contentEl.style.display = showContent ? '' : 'none';
     }
   }
 
@@ -88,7 +92,7 @@
     }
 
     deactivateCurrent();
-    updateContainerVisibility(dashboard.usesMap);
+    updateContainerVisibility(dashboard);
 
     var context = buildContext();
     dashboard.activate(context);
@@ -96,7 +100,7 @@
 
     // After activating a map-based dashboard, invalidate the map size so
     // Leaflet re-measures the container (it may have been hidden).
-    if (dashboard.usesMap && context.map && typeof context.map.invalidateSize === 'function') {
+    if ((dashboard.usesMap || dashboard.usesBoth) && context.map && typeof context.map.invalidateSize === 'function') {
       context.map.invalidateSize();
     }
   }

@@ -126,28 +126,28 @@ describe('PaddelbuchCoverageDashboard', () => {
       expect(global.L.geoJSON).toHaveBeenCalledTimes(2);
     });
 
-    test('uses green (#4ab31f) for covered segments', () => {
+    test('uses green (#07753f) for covered segments', () => {
       setupDOM();
       setupGlobals();
       var mod = loadModule();
 
       mod.activate({ map: mockMap, legendEl: document.getElementById('dashboard-legend') });
 
-      // First geoJSON call is for covered segments
-      var coveredOpts = global.L.geoJSON.mock.calls[0][1];
-      expect(coveredOpts.style.color).toBe('#4ab31f');
+      // Second geoJSON call is for covered segments (added on top for z-ordering)
+      var coveredOpts = global.L.geoJSON.mock.calls[1][1];
+      expect(coveredOpts.style.color).toBe('#07753f');
     });
 
-    test('uses red (#d0021b) for uncovered segments', () => {
+    test('uses red (#c40200) for uncovered segments', () => {
       setupDOM();
       setupGlobals();
       var mod = loadModule();
 
       mod.activate({ map: mockMap, legendEl: document.getElementById('dashboard-legend') });
 
-      // Second geoJSON call is for uncovered segments
-      var uncoveredOpts = global.L.geoJSON.mock.calls[1][1];
-      expect(uncoveredOpts.style.color).toBe('#d0021b');
+      // First geoJSON call is for uncovered segments (added below for z-ordering)
+      var uncoveredOpts = global.L.geoJSON.mock.calls[0][1];
+      expect(uncoveredOpts.style.color).toBe('#c40200');
     });
 
     test('binds popup to each layer', () => {
@@ -237,7 +237,7 @@ describe('PaddelbuchCoverageDashboard', () => {
 
       // Only 1 layer (uncovered only)
       expect(global.L.geoJSON).toHaveBeenCalledTimes(1);
-      expect(global.L.geoJSON.mock.calls[0][1].style.color).toBe('#d0021b');
+      expect(global.L.geoJSON.mock.calls[0][1].style.color).toBe('#c40200');
     });
   });
 

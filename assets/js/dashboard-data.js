@@ -3,13 +3,16 @@
  *
  * Parses pre-computed JSON data blocks from the dashboard page and exposes
  * them as structured arrays. All metric computation is done at Jekyll build
- * time by dashboard_metrics_generator.rb — this module only reads and exposes
+ * time by dashboard_metrics_generator.rb - this module only reads and exposes
  * the results.
  *
- * Expects three <script type="application/json"> elements in the page:
- *   #freshness-data  — array of freshness metric objects
- *   #coverage-data   — array of coverage metric objects
- *   #statistics-data — object of statistics metric data
+ * Expects six <script type="application/json"> elements in the page:
+ *   #freshness-data            - array of freshness metric objects
+ *   #freshness-summary-data    - object with waterway freshness category counts
+ *   #coverage-data             - array of coverage metric objects
+ *   #coverage-summary-data     - object with aggregate coverage lengths
+ *   #statistics-data           - object of statistics metric data
+ *   #spot-freshness-map-data   - array of per-spot freshness map objects
  *
  * Requirements: 5.1, 5.2, 5.3, 8.9, 8.10
  */
@@ -58,13 +61,19 @@
   }
 
   var freshnessMetrics = parseJsonBlock('freshness-data');
+  var freshnessSummary = parseJsonObjectBlock('freshness-summary-data');
   var coverageMetrics = parseJsonBlock('coverage-data');
+  var coverageSummary = parseJsonObjectBlock('coverage-summary-data');
   var statisticsMetrics = parseJsonObjectBlock('statistics-data');
+  var spotFreshnessMapData = parseJsonBlock('spot-freshness-map-data');
 
   global.PaddelbuchDashboardData = {
     freshnessMetrics: freshnessMetrics,
+    freshnessSummary: freshnessSummary,
     coverageMetrics: coverageMetrics,
-    statisticsMetrics: statisticsMetrics
+    coverageSummary: coverageSummary,
+    statisticsMetrics: statisticsMetrics,
+    spotFreshnessMapData: spotFreshnessMapData
   };
 
 })(typeof window !== 'undefined' ? window : this);

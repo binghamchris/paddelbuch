@@ -165,34 +165,33 @@
   display: inline-block;
   width: 0.85rem;
   height: 0.85rem;
-  border-radius: 2px;
   flex-shrink: 0;
 }
 
-// Legend swatch BEM modifiers — Spot types
-.statistics-legend-swatch--einstieg-ausstieg   { background-color: $spot-type-entry-exit; }
-.statistics-legend-swatch--nur-einstieg         { background-color: $spot-type-entry-only; }
-.statistics-legend-swatch--nur-ausstieg         { background-color: $spot-type-exit-only; }
-.statistics-legend-swatch--rasthalte            { background-color: $spot-type-rest; }
-.statistics-legend-swatch--notauswasserungsstelle { background-color: $spot-type-emergency; }
-.statistics-legend-swatch--no-entry             { background-color: $spot-type-no-entry; }
+// Legend swatch BEM modifiers - Spot types (positional: index 0 = largest category)
+.statistics-legend-swatch--spot-pos-0 { background-color: $chart-gradient-spot-1; }
+.statistics-legend-swatch--spot-pos-1 { background-color: $chart-gradient-spot-2; }
+.statistics-legend-swatch--spot-pos-2 { background-color: $chart-gradient-spot-3; }
+.statistics-legend-swatch--spot-pos-3 { background-color: $chart-gradient-spot-4; }
+.statistics-legend-swatch--spot-pos-4 { background-color: $chart-gradient-spot-5; }
+.statistics-legend-swatch--spot-pos-5 { background-color: $chart-gradient-spot-6; }
 
-// Legend swatch BEM modifiers — Obstacle types
+// Legend swatch BEM modifiers - Obstacle types
 .statistics-legend-swatch--with-portage    { background-color: $obstacle-with-portage; }
 .statistics-legend-swatch--without-portage { background-color: $obstacle-without-portage; }
 
-// Legend swatch BEM modifiers — Spot freshness buckets
+// Legend swatch BEM modifiers - Spot freshness buckets
 .statistics-legend-swatch--fresh   { background-color: $green-1; }
 .statistics-legend-swatch--aging   { background-color: $warning-yellow; }
 .statistics-legend-swatch--stale   { background-color: $danger-red; }
 
-// Legend swatch BEM modifiers — Protected area types
-.statistics-legend-swatch--naturschutzgebiet { background-color: $pa-type-naturschutzgebiet; }
-.statistics-legend-swatch--fahrverbotzone    { background-color: $pa-type-fahrverbotzone; }
-.statistics-legend-swatch--schilfgebiet      { background-color: $pa-type-schilfgebiet; }
-.statistics-legend-swatch--schwimmbereich    { background-color: $pa-type-schwimmbereich; }
-.statistics-legend-swatch--industriegebiet   { background-color: $pa-type-industriegebiet; }
-.statistics-legend-swatch--schiesszone       { background-color: $pa-type-schiesszone; }
-.statistics-legend-swatch--teleskizone       { background-color: $pa-type-teleskizone; }
-.statistics-legend-swatch--privatbesitz      { background-color: $pa-type-privatbesitz; }
-.statistics-legend-swatch--wasserskizone     { background-color: $pa-type-wasserskizone; }
+// Legend swatch BEM modifiers - Protected area types (positional: index 0 = largest category)
+.statistics-legend-swatch--pa-pos-0 { background-color: $chart-gradient-pa-1; }
+.statistics-legend-swatch--pa-pos-1 { background-color: $chart-gradient-pa-2; }
+.statistics-legend-swatch--pa-pos-2 { background-color: $chart-gradient-pa-3; }
+.statistics-legend-swatch--pa-pos-3 { background-color: $chart-gradient-pa-4; }
+.statistics-legend-swatch--pa-pos-4 { background-color: $chart-gradient-pa-5; }
+.statistics-legend-swatch--pa-pos-5 { background-color: $chart-gradient-pa-6; }
+.statistics-legend-swatch--pa-pos-6 { background-color: $chart-gradient-pa-7; }
+.statistics-legend-swatch--pa-pos-7 { background-color: $chart-gradient-pa-8; }
+.statistics-legend-swatch--pa-pos-8 { background-color: $chart-gradient-pa-9; }

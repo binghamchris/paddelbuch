@@ -136,8 +136,8 @@ describe('Legend BEM-modifier classes and entry counts (Property 5)', function (
       spotTypeRest: '#8e44ad',
       spotTypeEmergency: '#c0392b',
       spotTypeNoEntry: '#7f8c8d',
-      obstacleWithPortage: '#27ae60',
-      obstacleWithoutPortage: '#e74c3c',
+      obstacleWithPortage: '#07753f',
+      obstacleWithoutPortage: '#c40200',
       paTypeNaturschutzgebiet: '#1a5276',
       paTypeFahrverbotzone: '#d4ac0d',
       paTypeSchilfgebiet: '#117a65',
@@ -194,13 +194,13 @@ describe('Legend BEM-modifier classes and entry counts (Property 5)', function (
         var contentEl = document.getElementById('dashboard-content');
         dashboard.activate({ contentEl: contentEl });
 
-        // Query all .statistics-legend elements — they appear in order:
+        // Query all .statistics-legend elements - they appear in order:
         // index 0 = spots, index 1 = obstacles, index 2 = protected areas
         var legends = contentEl.querySelectorAll('.statistics-legend');
 
-        if (legends.length !== 4) {
+        if (legends.length !== 3) {
           throw new Error(
-            'Expected 4 legends but found ' + legends.length
+            'Expected 3 legends but found ' + legends.length
           );
         }
 
@@ -216,7 +216,7 @@ describe('Legend BEM-modifier classes and entry counts (Property 5)', function (
           );
         }
 
-        // Verify each spot swatch has the correct BEM-modifier class
+        // Verify each spot swatch has the correct positional BEM-modifier class
         var sortedSpotsByType = (metrics.spots.byType || []).slice().sort(function(a, b) { return b.count - a.count; });
         for (var s = 0; s < spotsItems.length; s++) {
           var spotSwatch = spotsItems[s].querySelector('.statistics-legend-swatch');
@@ -225,8 +225,7 @@ describe('Legend BEM-modifier classes and entry counts (Property 5)', function (
               'Spots legend item ' + s + ' is missing a .statistics-legend-swatch element'
             );
           }
-          var expectedSpotSlug = sortedSpotsByType[s].slug;
-          var expectedSpotClass = 'statistics-legend-swatch--' + expectedSpotSlug;
+          var expectedSpotClass = 'statistics-legend-swatch--spot-pos-' + s;
           if (!spotSwatch.classList.contains(expectedSpotClass)) {
             throw new Error(
               'Spots legend swatch ' + s + ': expected class "' + expectedSpotClass +
@@ -235,8 +234,8 @@ describe('Legend BEM-modifier classes and entry counts (Property 5)', function (
           }
         }
 
-        // --- Obstacles legend (index 2) ---
-        var obstaclesLegend = legends[2];
+        // --- Obstacles legend (index 1) ---
+        var obstaclesLegend = legends[1];
         var obstaclesItems = obstaclesLegend.querySelectorAll('.statistics-legend-item');
 
         if (obstaclesItems.length !== 2) {
@@ -266,8 +265,8 @@ describe('Legend BEM-modifier classes and entry counts (Property 5)', function (
           throw new Error('Obstacles legend: missing expected swatch classes, found: ' + obstacleSlugsFound.join(', '));
         }
 
-        // --- Protected areas legend (index 3) ---
-        var paLegend = legends[3];
+        // --- Protected areas legend (index 2) ---
+        var paLegend = legends[2];
         var paItems = paLegend.querySelectorAll('.statistics-legend-item');
         var expectedPACount = (metrics.protectedAreas.byType || []).length;
 
@@ -278,7 +277,7 @@ describe('Legend BEM-modifier classes and entry counts (Property 5)', function (
           );
         }
 
-        // Verify each PA swatch has the correct BEM-modifier class
+        // Verify each PA swatch has the correct positional BEM-modifier class
         var sortedPAByType = (metrics.protectedAreas.byType || []).slice().sort(function(a, b) { return b.count - a.count; });
         for (var p = 0; p < paItems.length; p++) {
           var paSwatch = paItems[p].querySelector('.statistics-legend-swatch');
@@ -287,8 +286,7 @@ describe('Legend BEM-modifier classes and entry counts (Property 5)', function (
               'PA legend item ' + p + ' is missing a .statistics-legend-swatch element'
             );
           }
-          var expectedPASlug = sortedPAByType[p].slug;
-          var expectedPAClass = 'statistics-legend-swatch--' + expectedPASlug;
+          var expectedPAClass = 'statistics-legend-swatch--pa-pos-' + p;
           if (!paSwatch.classList.contains(expectedPAClass)) {
             throw new Error(
               'PA legend swatch ' + p + ': expected class "' + expectedPAClass +
