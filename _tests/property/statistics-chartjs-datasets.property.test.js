@@ -215,9 +215,9 @@ describe('Chart.js dataset colour and label correctness (Property 2)', function 
         dashboard.activate({ contentEl: contentEl });
 
         // Should have exactly 3 chart instances (spots, obstacles, protected-areas)
-        if (window._chartInstances.length !== 4) {
+        if (window._chartInstances.length !== 3) {
           throw new Error(
-            'Expected 4 Chart instances but found ' + window._chartInstances.length
+            'Expected 3 Chart instances but found ' + window._chartInstances.length
           );
         }
 
@@ -256,8 +256,8 @@ describe('Chart.js dataset colour and label correctness (Property 2)', function 
           }
         }
 
-        // --- Obstacles chart (index 2) ---
-        var obstaclesChart = window._chartInstances[2];
+        // --- Obstacles chart (index 1) ---
+        var obstaclesChart = window._chartInstances[1];
         var obstaclesDatasets = obstaclesChart.config.data.datasets;
 
         // Obstacles always have exactly 2 datasets: with-portage and without-portage
@@ -296,8 +296,8 @@ describe('Chart.js dataset colour and label correctness (Property 2)', function 
           }
         }
 
-        // --- Protected areas chart (index 3) ---
-        var paChart = window._chartInstances[3];
+        // --- Protected areas chart (index 2) ---
+        var paChart = window._chartInstances[2];
         var paDatasets = paChart.config.data.datasets;
         var paByType = (metrics.protectedAreas.byType || []).slice().sort(function(a, b) { return b.count - a.count; });
 
