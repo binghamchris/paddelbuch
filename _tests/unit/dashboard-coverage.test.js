@@ -133,8 +133,8 @@ describe('PaddelbuchCoverageDashboard', () => {
 
       mod.activate({ map: mockMap, legendEl: document.getElementById('dashboard-legend') });
 
-      // First geoJSON call is for covered segments
-      var coveredOpts = global.L.geoJSON.mock.calls[0][1];
+      // Second geoJSON call is for covered segments (added on top for z-ordering)
+      var coveredOpts = global.L.geoJSON.mock.calls[1][1];
       expect(coveredOpts.style.color).toBe('#07753f');
     });
 
@@ -145,8 +145,8 @@ describe('PaddelbuchCoverageDashboard', () => {
 
       mod.activate({ map: mockMap, legendEl: document.getElementById('dashboard-legend') });
 
-      // Second geoJSON call is for uncovered segments
-      var uncoveredOpts = global.L.geoJSON.mock.calls[1][1];
+      // First geoJSON call is for uncovered segments (added below for z-ordering)
+      var uncoveredOpts = global.L.geoJSON.mock.calls[0][1];
       expect(uncoveredOpts.style.color).toBe('#c40200');
     });
 

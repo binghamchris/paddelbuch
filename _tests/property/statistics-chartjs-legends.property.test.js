@@ -216,7 +216,7 @@ describe('Legend BEM-modifier classes and entry counts (Property 5)', function (
           );
         }
 
-        // Verify each spot swatch has the correct BEM-modifier class
+        // Verify each spot swatch has the correct positional BEM-modifier class
         var sortedSpotsByType = (metrics.spots.byType || []).slice().sort(function(a, b) { return b.count - a.count; });
         for (var s = 0; s < spotsItems.length; s++) {
           var spotSwatch = spotsItems[s].querySelector('.statistics-legend-swatch');
@@ -225,8 +225,7 @@ describe('Legend BEM-modifier classes and entry counts (Property 5)', function (
               'Spots legend item ' + s + ' is missing a .statistics-legend-swatch element'
             );
           }
-          var expectedSpotSlug = sortedSpotsByType[s].slug;
-          var expectedSpotClass = 'statistics-legend-swatch--' + expectedSpotSlug;
+          var expectedSpotClass = 'statistics-legend-swatch--spot-pos-' + s;
           if (!spotSwatch.classList.contains(expectedSpotClass)) {
             throw new Error(
               'Spots legend swatch ' + s + ': expected class "' + expectedSpotClass +
@@ -278,7 +277,7 @@ describe('Legend BEM-modifier classes and entry counts (Property 5)', function (
           );
         }
 
-        // Verify each PA swatch has the correct BEM-modifier class
+        // Verify each PA swatch has the correct positional BEM-modifier class
         var sortedPAByType = (metrics.protectedAreas.byType || []).slice().sort(function(a, b) { return b.count - a.count; });
         for (var p = 0; p < paItems.length; p++) {
           var paSwatch = paItems[p].querySelector('.statistics-legend-swatch');
@@ -287,8 +286,7 @@ describe('Legend BEM-modifier classes and entry counts (Property 5)', function (
               'PA legend item ' + p + ' is missing a .statistics-legend-swatch element'
             );
           }
-          var expectedPASlug = sortedPAByType[p].slug;
-          var expectedPAClass = 'statistics-legend-swatch--' + expectedPASlug;
+          var expectedPAClass = 'statistics-legend-swatch--pa-pos-' + p;
           if (!paSwatch.classList.contains(expectedPAClass)) {
             throw new Error(
               'PA legend swatch ' + p + ': expected class "' + expectedPAClass +
