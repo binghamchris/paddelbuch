@@ -42,7 +42,7 @@ Implement the Spot Freshness Dashboard as a new dashboard module on the data qua
     - **Validates: Requirements 7.2, 1.2**
     - Use fast-check to generate arbitrary i18n JSON content (missing block, empty object, partial keys); assert `getStrings()` always returns a complete object with non-empty values
 
-  - [~] 3.3 Implement the spot freshness chart in `activate()`
+  - [x] 3.3 Implement the spot freshness chart in `activate()`
     - Read aggregate freshness counts from `PaddelbuchDashboardData.statisticsMetrics.spots.freshness`
     - Render a horizontal stacked bar chart using Chart.js with segments for Fresh (`PaddelbuchColors.green1`), Aging (`PaddelbuchColors.warningYellow`), Stale (`PaddelbuchColors.dangerRed`)
     - Render chart inside `#dashboard-content` using the canvas + pending-chart pattern from `statistics-dashboard.js`

@@ -9,11 +9,112 @@
  * All metric computation is done at Jekyll build time by
  * statistics_metrics_generator.rb — this module only renders pre-computed data.
  *
- * Requirements: 1.1, 1.2, 1.3, 2.3, 7.2
+ * Requirements: 1.1, 1.2, 1.3, 2.3, 3.1, 3.2, 3.3, 3.4, 7.2, 8.2
  */
 
 (function(global) {
   'use strict';
+
+  var Chart = global.Chart;
+  var colors = global.PaddelbuchColors || {};
+  var chartInstances = [];
+  var pendingCharts = [];
+
+  /**
+   * Colour-to-key mapping for freshness categories.
+   */
+  var FRESHNESS_COLOR_MAP = {
+    'fresh': 'green1',
+    'aging': 'warningYellow',
+    'stale': 'dangerRed'
+  };
+
+  /**
+   * Minimal HTML escaping for user-facing text.
+   */
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  /**
+   * Returns the colour hex value for a given colour key from PaddelbuchColors.
+   *
+   * @param {string} colorKey - The camelCase colour key
+   * @returns {string} Hex colour string or a grey fallback
+   */
+  function getColor(colorKey) {
+    return colors[colorKey] || '#999999';
+  }
+
+  /**
+   * Destroys all active Chart.js instances and clears the tracking array.
+   */
+  function destroyCharts() {
+    for (var i = 0; i < chartInstances.length; i++) {
+      try {
+        chartInstances[i].destroy();
+      } catch (e) {
+        // Continue destroying remaining instances
+      }
+    }
+    chartInstances = [];
+  }
+
+  /**
+   * Creates a horizontal stacked bar chart on a canvas element.
+   *
+   * @param {HTMLCanvasElement} canvas - The canvas element to render into
+   * @param {Array} segments - Array of { name, count, colorKey, slug } objects
+   * @returns {Object|null} The Chart instance, or null if Chart is unavailable
+   */
+  function createStackedBarChart(canvas, segments) {
+    if (!canvas || !Chart) return null;
+    var total = 0;
+    for (var i = 0; i < segments.length; i++) {
+      total += segments[i].count;
+    }
+    var chart = new Chart(canvas, {
+      type: 'bar',
+      data: {
+        labels: [''],
+        datasets: segments.map(function(seg) {
+          return {
+            label: seg.name,
+            data: [total > 0 ? (seg.count / total) * 100 : 0],
+            backgroundColor: getColor(seg.colorKey)
+          };
+        })
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            enabled: true,
+            callbacks: {
+              label: function(context) {
+                var seg = segments[context.datasetIndex];
+                return seg ? seg.name + ': ' + seg.count : '';
+              }
+            }
+          }
+        },
+        scales: {
+          x: { stacked: true, display: false, min: 0, max: 100 },
+          y: { stacked: true, display: false }
+        }
+      }
+    });
+    chartInstances.push(chart);
+    return chart;
+  }
 
   /**
    * Reads localised strings from a #spot-freshness-i18n JSON block on the page,
@@ -62,9 +163,14 @@
     usesBoth: true,
 
     activate: function(context) {
+      // Clean up any previous chart instances
+      destroyCharts();
+      pendingCharts = [];
+
       // Refresh i18n strings on each activation (page may have changed locale)
       strings = getStrings();
 
+      var contentEl = context.contentEl || document.getElementById('dashboard-content');
       var titleEl = document.getElementById('dashboard-title');
       if (titleEl) {
         titleEl.textContent = strings.name;
@@ -75,10 +181,53 @@
         descriptionEl.innerHTML = strings.description;
       }
 
-      // Chart, markers, and legend rendering will be added in subsequent tasks
+      // --- Spot freshness chart ---
+      var metrics = (global.PaddelbuchDashboardData && global.PaddelbuchDashboardData.statisticsMetrics) || {};
+      var spots = metrics.spots || {};
+      var freshness = spots.freshness || { fresh: 0, aging: 0, stale: 0 };
+
+      var freshnessSegments = [
+        { name: strings.fresh, count: freshness.fresh || 0, colorKey: FRESHNESS_COLOR_MAP['fresh'], slug: 'fresh' },
+        { name: strings.aging, count: freshness.aging || 0, colorKey: FRESHNESS_COLOR_MAP['aging'], slug: 'aging' },
+        { name: strings.stale, count: freshness.stale || 0, colorKey: FRESHNESS_COLOR_MAP['stale'], slug: 'stale' }
+      ];
+
+      var freshnessTotal = (freshness.fresh || 0) + (freshness.aging || 0) + (freshness.stale || 0);
+
+      pendingCharts.push({ section: 'spot-freshness', segments: freshnessSegments });
+
+      var html = '';
+      html += '<div class="statistics-section">';
+      html += '<h3 class="statistics-section-title">' + escapeHtml(strings.chart_title) + '</h3>';
+      html += '<div class="statistics-section-body">';
+      html += '<div class="statistics-figure statistics-figure--spot-freshness">';
+      html += '<div class="statistics-figure-value">' + escapeHtml(String(freshnessTotal)) + '</div>';
+      html += '</div>';
+      html += '<div class="statistics-chart-container">';
+      html += '<canvas data-chart-section="spot-freshness"></canvas>';
+      html += '</div>';
+      html += '</div>';
+      html += '</div>';
+
+      if (contentEl) {
+        contentEl.innerHTML = html;
+
+        // Create Chart.js instances on the now-rendered canvas elements
+        for (var i = 0; i < pendingCharts.length; i++) {
+          var pending = pendingCharts[i];
+          var canvas = contentEl.querySelector('canvas[data-chart-section="' + pending.section + '"]');
+          createStackedBarChart(canvas, pending.segments);
+        }
+      }
+
+      pendingCharts = [];
+
+      // Markers and legend rendering will be added in subsequent tasks
     },
 
     deactivate: function() {
+      destroyCharts();
+
       var titleEl = document.getElementById('dashboard-title');
       if (titleEl) {
         titleEl.textContent = '';
@@ -99,15 +248,19 @@
         legendEl.innerHTML = '';
       }
 
-      // Chart destruction and marker removal will be added in subsequent tasks
+      // Marker removal will be added in subsequent tasks
     }
   };
 
   // Expose globally for testing and direct access
   global.PaddelbuchSpotFreshnessDashboard = module;
 
-  // Expose getStrings for testing
+  // Expose internals for testing
   global.PaddelbuchSpotFreshnessDashboard.getStrings = getStrings;
+  global.PaddelbuchSpotFreshnessDashboard.createStackedBarChart = createStackedBarChart;
+  global.PaddelbuchSpotFreshnessDashboard.destroyCharts = destroyCharts;
+  global.PaddelbuchSpotFreshnessDashboard.getColor = getColor;
+  global.PaddelbuchSpotFreshnessDashboard.FRESHNESS_COLOR_MAP = FRESHNESS_COLOR_MAP;
 
   // Register on the dashboard registry
   (global.PaddelbuchDashboardRegistry = global.PaddelbuchDashboardRegistry || []).push(module);
