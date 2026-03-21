@@ -93,8 +93,8 @@ describe('i18n German fallback (Property 8)', function () {
     // Mock PaddelbuchColors
     window.PaddelbuchColors = {
       spotTypeEntryExit: '#2e86c1',
-      obstacleWithPortage: '#27ae60',
-      obstacleWithoutPortage: '#e74c3c',
+      obstacleWithPortage: '#07753f',
+      obstacleWithoutPortage: '#c40200',
       paTypeNaturschutzgebiet: '#1a5276',
       green1: '#07753f',
       warningYellow: '#ffb200',

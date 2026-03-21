@@ -33,9 +33,9 @@ $spot-type-rest: #8e44ad;
 $spot-type-emergency: #c0392b;
 $spot-type-no-entry: #7f8c8d;
 
-// Statistics Dashboard - Obstacle Colours
-$obstacle-with-portage: #27ae60;
-$obstacle-without-portage: #e74c3c;
+// Statistics Dashboard - Obstacle Colours (matches coverage dashboard: green-1 / danger-red)
+$obstacle-with-portage: #07753f; // = $green-1
+$obstacle-without-portage: #c40200; // = $danger-red
 
 // Statistics Dashboard - Protected Area Type Colours
 $pa-type-naturschutzgebiet: #1a5276;
