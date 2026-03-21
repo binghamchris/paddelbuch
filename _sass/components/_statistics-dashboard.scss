@@ -1,0 +1,129 @@
+// Statistics Dashboard Component
+// Layout, figures, chart containers, legends, and BEM-modifier colour classes.
+
+// ---------------------------------------------------------------------------
+// Section layout
+// ---------------------------------------------------------------------------
+
+.statistics-section {
+  margin-bottom: 1.5rem;
+}
+
+.statistics-section-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.statistics-section-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+// ---------------------------------------------------------------------------
+// Summary figures
+// ---------------------------------------------------------------------------
+
+.statistics-figures-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.statistics-figure {
+  text-align: center;
+  min-width: 5rem;
+}
+
+.statistics-figure-value {
+  display: block;
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.statistics-figure-label {
+  display: block;
+  font-size: 0.85rem;
+  color: $text-muted;
+}
+
+// Figure BEM modifiers (for individual targeting)
+.statistics-figure--spots {}
+.statistics-figure--obstacles {}
+.statistics-figure--protected-areas {}
+.statistics-figure--seekajak {}
+.statistics-figure--kanadier {}
+.statistics-figure--stand-up-paddle-board {}
+.statistics-figure--swiss-canoe {}
+.statistics-figure--openstreetmap {}
+.statistics-figure--swiss-canoe-fako-member {}
+.statistics-figure--individual-contributor {}
+.statistics-figure--swiss-canoe-meldestelle {}
+.statistics-figure--cc-by-sa-4 {}
+.statistics-figure--lizenz-odbl {}
+
+// ---------------------------------------------------------------------------
+// Chart containers
+// ---------------------------------------------------------------------------
+
+.statistics-chart-container {
+  position: relative;
+  width: 100%;
+  height: 3rem;
+}
+
+.statistics-bar {
+  position: relative;
+  height: 3rem;
+}
+
+// ---------------------------------------------------------------------------
+// Legend
+// ---------------------------------------------------------------------------
+
+.statistics-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin-top: 0.5rem;
+}
+
+.statistics-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+}
+
+.statistics-legend-swatch {
+  display: inline-block;
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+// Legend swatch BEM modifiers — Spot types
+.statistics-legend-swatch--einstieg-ausstieg   { background-color: $spot-type-entry-exit; }
+.statistics-legend-swatch--nur-einstieg         { background-color: $spot-type-entry-only; }
+.statistics-legend-swatch--nur-ausstieg         { background-color: $spot-type-exit-only; }
+.statistics-legend-swatch--rasthalte            { background-color: $spot-type-rest; }
+.statistics-legend-swatch--notauswasserungsstelle { background-color: $spot-type-emergency; }
+.statistics-legend-swatch--no-entry             { background-color: $spot-type-no-entry; }
+
+// Legend swatch BEM modifiers — Obstacle types
+.statistics-legend-swatch--with-portage    { background-color: $obstacle-with-portage; }
+.statistics-legend-swatch--without-portage { background-color: $obstacle-without-portage; }
+
+// Legend swatch BEM modifiers — Protected area types
+.statistics-legend-swatch--naturschutzgebiet { background-color: $pa-type-naturschutzgebiet; }
+.statistics-legend-swatch--fahrverbotzone    { background-color: $pa-type-fahrverbotzone; }
+.statistics-legend-swatch--schilfgebiet      { background-color: $pa-type-schilfgebiet; }
+.statistics-legend-swatch--schwimmbereich    { background-color: $pa-type-schwimmbereich; }
+.statistics-legend-swatch--industriegebiet   { background-color: $pa-type-industriegebiet; }
+.statistics-legend-swatch--schiesszone       { background-color: $pa-type-schiesszone; }
+.statistics-legend-swatch--teleskizone       { background-color: $pa-type-teleskizone; }
+.statistics-legend-swatch--privatbesitz      { background-color: $pa-type-privatbesitz; }
+.statistics-legend-swatch--wasserskizone     { background-color: $pa-type-wasserskizone; }
