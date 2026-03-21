@@ -176,6 +176,18 @@ dashboards:
     popup_median_age: "Median-Alter"
     popup_years: "Jahre"
     popup_no_data: "Keine Daten vorhanden"
+  statistics:
+    name: "Statistiken"
+    description: "Übersicht über den Inhalt der Paddel Buch Datenbank."
+    spots_title: "Einstiegsorte"
+    obstacles_title: "Hindernisse"
+    protected_areas_title: "Schutzgebiete"
+    paddle_craft_title: "Einstiegsorte nach Paddelboot-Typ"
+    data_source_title: "Einträge nach Datenquelle"
+    data_license_title: "Einträge nach Datenlizenz"
+    with_portage: "Mit Portage-Route"
+    without_portage: "Ohne Portage-Route"
+    no_entry: "Kein Zutritt"
   coverage:
     name: "Gewässerabdeckung"
     description: "Wie viel der Länge jedes Flusses oder des Ufers jedes Sees Einstiegsorte hat."
