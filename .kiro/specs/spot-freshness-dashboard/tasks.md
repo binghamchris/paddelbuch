@@ -55,11 +55,11 @@ Implement the Spot Freshness Dashboard as a new dashboard module on the data qua
     - **Property 4: Chart data reflects pre-computed metrics**
     - **Validates: Requirements 3.3**
 
-  - [-] 3.5 Write property test for chart destruction
+  - [x] 3.5 Write property test for chart destruction
     - **Property 5: Chart destroyed on deactivation**
     - **Validates: Requirements 3.4, 8.2**
 
-  - [~] 3.6 Implement map markers in `activate()`
+  - [-] 3.6 Implement map markers in `activate()`
     - Read spot data from `PaddelbuchDashboardData.spotFreshnessMapData`
     - For each entry with valid `lat`, `lon`, and `category`, create a Leaflet `divIcon` marker with inline SVG shape (circle for fresh, triangle for aging, square for stale) filled with the corresponding `PaddelbuchColors` colour
     - Add all markers to a `L.layerGroup` on the map
