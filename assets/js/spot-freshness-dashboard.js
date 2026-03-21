@@ -96,23 +96,29 @@
       id: 'spotFreshnessPercentageLabels',
       afterDraw: function(chart) {
         var ctx = chart.ctx;
-        var meta, bar, pct, text, textWidth;
+        var chartArea = chart.chartArea;
+        var chartHeight = chartArea.bottom - chartArea.top;
+        var fontSize = Math.floor(chartHeight * 0.9);
+        var meta, bar, pct, text, textWidth, segCenterX, centerY;
+
+        centerY = chartArea.top + chartHeight / 2;
+
         for (var d = 0; d < chart.data.datasets.length; d++) {
           meta = chart.getDatasetMeta(d);
           if (!meta || !meta.data || !meta.data[0]) continue;
           bar = meta.data[0];
           pct = total > 0 ? (segments[d].count / total) * 100 : 0;
-          if (pct < 1) continue; // skip tiny segments where label won't fit
+          if (pct < 1) continue;
           text = Math.round(pct) + '%';
           ctx.save();
           ctx.fillStyle = '#fff';
-          ctx.font = 'bold 12px sans-serif';
+          ctx.font = 'bold ' + fontSize + 'px Quicksand, Helvetica, Arial, sans-serif';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
           textWidth = ctx.measureText(text).width;
-          // Only draw if the segment is wide enough for the text
+          segCenterX = bar.x - bar.width / 2 + bar.width / 2;
           if ((bar.width || 0) > textWidth + 4) {
-            ctx.fillText(text, bar.x - bar.width / 2 + bar.width / 2, bar.y);
+            ctx.fillText(text, segCenterX, centerY);
           }
           ctx.restore();
         }
