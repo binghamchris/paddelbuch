@@ -6,10 +6,11 @@
  * time by dashboard_metrics_generator.rb — this module only reads and exposes
  * the results.
  *
- * Expects three <script type="application/json"> elements in the page:
- *   #freshness-data  — array of freshness metric objects
- *   #coverage-data   — array of coverage metric objects
- *   #statistics-data — object of statistics metric data
+ * Expects four <script type="application/json"> elements in the page:
+ *   #freshness-data            — array of freshness metric objects
+ *   #coverage-data             — array of coverage metric objects
+ *   #statistics-data           — object of statistics metric data
+ *   #spot-freshness-map-data   — array of per-spot freshness map objects
  *
  * Requirements: 5.1, 5.2, 5.3, 8.9, 8.10
  */
@@ -60,11 +61,13 @@
   var freshnessMetrics = parseJsonBlock('freshness-data');
   var coverageMetrics = parseJsonBlock('coverage-data');
   var statisticsMetrics = parseJsonObjectBlock('statistics-data');
+  var spotFreshnessMapData = parseJsonBlock('spot-freshness-map-data');
 
   global.PaddelbuchDashboardData = {
     freshnessMetrics: freshnessMetrics,
     coverageMetrics: coverageMetrics,
-    statisticsMetrics: statisticsMetrics
+    statisticsMetrics: statisticsMetrics,
+    spotFreshnessMapData: spotFreshnessMapData
   };
 
 })(typeof window !== 'undefined' ? window : this);
