@@ -9,16 +9,18 @@
  * All metric computation is done at Jekyll build time by
  * statistics_metrics_generator.rb — this module only renders pre-computed data.
  *
- * Requirements: 1.1, 1.2, 1.3, 2.3, 3.1, 3.2, 3.3, 3.4, 7.2, 8.2
+ * Requirements: 1.1, 1.2, 1.3, 2.3, 3.1, 3.2, 3.3, 3.4, 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 7.2, 8.1, 8.2
  */
 
 (function(global) {
   'use strict';
 
   var Chart = global.Chart;
+  var L = global.L;
   var colors = global.PaddelbuchColors || {};
   var chartInstances = [];
   var pendingCharts = [];
+  var markerLayerGroup = null;
 
   /**
    * Colour-to-key mapping for freshness categories.
@@ -27,6 +29,16 @@
     'fresh': 'green1',
     'aging': 'warningYellow',
     'stale': 'dangerRed'
+  };
+
+  /**
+   * SVG shape templates for map markers, keyed by freshness category.
+   * Each function accepts a fill colour and returns an SVG string.
+   */
+  var SHAPES = {
+    fresh:  function(color) { return '<svg width="14" height="14" viewBox="0 0 14 14"><circle cx="7" cy="7" r="6" fill="' + color + '" stroke="#fff" stroke-width="1"/></svg>'; },
+    aging:  function(color) { return '<svg width="14" height="14" viewBox="0 0 14 14"><polygon points="7,1 13,13 1,13" fill="' + color + '" stroke="#fff" stroke-width="1"/></svg>'; },
+    stale:  function(color) { return '<svg width="14" height="14" viewBox="0 0 14 14"><rect x="1" y="1" width="12" height="12" fill="' + color + '" stroke="#fff" stroke-width="1"/></svg>'; }
   };
 
   /**
@@ -222,7 +234,44 @@
 
       pendingCharts = [];
 
-      // Markers and legend rendering will be added in subsequent tasks
+      // --- Map markers ---
+      var map = context.map;
+      if (map && L && L.layerGroup && L.marker && L.divIcon) {
+        var spotData = (global.PaddelbuchDashboardData && global.PaddelbuchDashboardData.spotFreshnessMapData) || [];
+        markerLayerGroup = L.layerGroup();
+
+        for (var j = 0; j < spotData.length; j++) {
+          var spot = spotData[j];
+
+          // Guard: skip entries with missing lat, lon, or category
+          if (spot.lat == null || spot.lon == null || !spot.category) {
+            continue;
+          }
+
+          var shapeFn = SHAPES[spot.category];
+          if (!shapeFn) {
+            continue;
+          }
+
+          var colorKey = FRESHNESS_COLOR_MAP[spot.category];
+          var markerColor = getColor(colorKey);
+          var svgHtml = shapeFn(markerColor);
+
+          var icon = L.divIcon({
+            html: svgHtml,
+            className: 'spot-freshness-marker',
+            iconSize: [14, 14],
+            iconAnchor: [7, 7]
+          });
+
+          var marker = L.marker([spot.lat, spot.lon], { icon: icon });
+          markerLayerGroup.addLayer(marker);
+        }
+
+        markerLayerGroup.addTo(map);
+      }
+
+      // Legend rendering will be added in subsequent tasks
     },
 
     deactivate: function() {
@@ -248,7 +297,11 @@
         legendEl.innerHTML = '';
       }
 
-      // Marker removal will be added in subsequent tasks
+      // Remove marker layer group from the map
+      if (markerLayerGroup) {
+        markerLayerGroup.remove();
+        markerLayerGroup = null;
+      }
     }
   };
 
@@ -261,6 +314,7 @@
   global.PaddelbuchSpotFreshnessDashboard.destroyCharts = destroyCharts;
   global.PaddelbuchSpotFreshnessDashboard.getColor = getColor;
   global.PaddelbuchSpotFreshnessDashboard.FRESHNESS_COLOR_MAP = FRESHNESS_COLOR_MAP;
+  global.PaddelbuchSpotFreshnessDashboard.SHAPES = SHAPES;
 
   // Register on the dashboard registry
   (global.PaddelbuchDashboardRegistry = global.PaddelbuchDashboardRegistry || []).push(module);
