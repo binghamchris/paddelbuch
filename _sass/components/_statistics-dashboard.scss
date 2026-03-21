@@ -168,17 +168,17 @@
   flex-shrink: 0;
 }
 
-// Legend swatch BEM modifiers — Spot types
+// Legend swatch BEM modifiers - Spot types
 // Colours assigned dynamically by sort position in statistics-dashboard.js
 
-// Legend swatch BEM modifiers — Obstacle types
+// Legend swatch BEM modifiers - Obstacle types
 .statistics-legend-swatch--with-portage    { background-color: $obstacle-with-portage; }
 .statistics-legend-swatch--without-portage { background-color: $obstacle-without-portage; }
 
-// Legend swatch BEM modifiers — Spot freshness buckets
+// Legend swatch BEM modifiers - Spot freshness buckets
 .statistics-legend-swatch--fresh   { background-color: $green-1; }
 .statistics-legend-swatch--aging   { background-color: $warning-yellow; }
 .statistics-legend-swatch--stale   { background-color: $danger-red; }
 
-// Legend swatch BEM modifiers — Protected area types
+// Legend swatch BEM modifiers - Protected area types
 // Colours assigned dynamically by sort position in statistics-dashboard.js
