@@ -69,11 +69,36 @@ module Jekyll
       waterway_names = build_waterway_name_lookup(site.data['waterways'] || [], locale)
 
       site.data['dashboard_freshness_metrics'] = localize_metrics(@@cached_freshness, waterway_names)
+      site.data['dashboard_freshness_summary'] = compute_freshness_summary(@@cached_freshness)
       site.data['dashboard_coverage_metrics'] = localize_metrics(@@cached_coverage, waterway_names)
       Jekyll.logger.info 'DashboardMetrics:', "Localized #{@@cached_freshness.size} freshness + #{@@cached_coverage.size} coverage metrics for locale '#{locale}'"
     end
 
     private
+
+    # Counts waterways per freshness category from the cached freshness metrics.
+    # Returns a hash with fresh, aging, stale, and noData counts.
+    def compute_freshness_summary(cached_freshness)
+      fresh = 0
+      aging = 0
+      stale = 0
+      no_data = 0
+
+      cached_freshness.each do |metric|
+        days = metric['medianAgeDays']
+        if days.nil?
+          no_data += 1
+        elsif days <= 730.5
+          fresh += 1
+        elsif days <= 1826.25
+          aging += 1
+        else
+          stale += 1
+        end
+      end
+
+      { 'fresh' => fresh, 'aging' => aging, 'stale' => stale, 'noData' => no_data }
+    end
 
     # Returns one waterway hash per unique slug, picking the first occurrence.
     # Since geometry, length, and area are identical across locales, any
