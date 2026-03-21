@@ -7,6 +7,27 @@
 
 .statistics-section {
   margin-bottom: 1.5rem;
+
+  @media screen and (min-width: 768px) {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0 0.75rem;
+
+    // Title spans both columns
+    > .statistics-section-title {
+      grid-column: 1 / -1;
+    }
+
+    // Body children flow into the two-column grid
+    > .statistics-section-body {
+      display: contents;
+    }
+
+    // Legend aligns with the chart (second column)
+    > .statistics-legend {
+      grid-column: 2;
+    }
+  }
 }
 
 .statistics-section-title {
@@ -23,6 +44,11 @@
   > .statistics-figure {
     text-align: left;
     flex-shrink: 0;
+    align-self: center;
+  }
+
+  > .statistics-chart-container {
+    align-self: center;
   }
 
   @media screen and (min-width: 768px) {
@@ -48,8 +74,8 @@
 
 .statistics-figure-value {
   display: block;
-  font-size: 1.75rem;
-  font-weight: 700;
+  font-size: 3em;
+  font-weight: 500;
   line-height: 1.2;
 }
 
