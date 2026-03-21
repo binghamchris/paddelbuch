@@ -71,6 +71,7 @@ module Jekyll
       site.data['dashboard_freshness_metrics'] = localize_metrics(@@cached_freshness, waterway_names)
       site.data['dashboard_freshness_summary'] = compute_freshness_summary(@@cached_freshness)
       site.data['dashboard_coverage_metrics'] = localize_metrics(@@cached_coverage, waterway_names)
+      site.data['dashboard_coverage_summary'] = compute_coverage_summary(@@cached_coverage)
       Jekyll.logger.info 'DashboardMetrics:', "Localized #{@@cached_freshness.size} freshness + #{@@cached_coverage.size} coverage metrics for locale '#{locale}'"
     end
 
@@ -255,6 +256,12 @@ module Jekyll
       r * c
     end
 
+    # Computes the haversine length in metres of a 2-point segment.
+    # Coordinates are in GeoJSON [lon, lat] order.
+    def segment_length(c1, c2)
+      haversine_distance(c1[1], c1[0], c2[1], c2[0])
+    end
+
     # Classifies each segment of a geometry as covered or uncovered based
     # on whether the segment midpoint is within `radius` metres of any spot.
     #
@@ -263,12 +270,17 @@ module Jekyll
     #
     # GeoJSON coordinates are [lon, lat] order.
     #
-    # Returns { 'covered' => [...], 'uncovered' => [...] } where each
-    # value is an array of GeoJSON LineString Feature hashes (2-point segments).
+    # Returns a hash with:
+    #   'covered'          — MultiLineString geometry or nil
+    #   'uncovered'        — MultiLineString geometry or nil
+    #   'coveredLength'    — total length of covered segments in metres
+    #   'uncoveredLength'  — total length of uncovered segments in metres
     # Requirements: 4.1, 4.2, 4.3, 4.4, 10.1, 10.2
     def classify_segments(geometry, spots, radius = 5000)
       covered_lines = []
       uncovered_lines = []
+      covered_length = 0.0
+      uncovered_length = 0.0
 
       geo_type = geometry['type']
       coord_arrays = case geo_type
@@ -284,7 +296,7 @@ module Jekyll
                        (geometry['coordinates'] || []).map { |poly| poly&.first }
                      else
                        Jekyll.logger.warn 'DashboardMetrics:', "Unknown geometry type '#{geo_type}', skipping segment classification"
-                       return { 'covered' => nil, 'uncovered' => nil }
+                       return { 'covered' => nil, 'uncovered' => nil, 'coveredLength' => 0.0, 'uncoveredLength' => 0.0 }
                      end
 
       spot_locations = spots.map { |s| s['location'] }.compact
@@ -296,6 +308,8 @@ module Jekyll
           c1 = coords[i]
           c2 = coords[i + 1]
 
+          len = segment_length(c1, c2)
+
           # GeoJSON: [lon, lat]
           mid_lon = (c1[0] + c2[0]) / 2.0
           mid_lat = (c1[1] + c2[1]) / 2.0
@@ -306,8 +320,10 @@ module Jekyll
 
           if covered
             covered_lines << [c1, c2]
+            covered_length += len
           else
             uncovered_lines << [c1, c2]
+            uncovered_length += len
           end
         end
       end
@@ -320,13 +336,16 @@ module Jekyll
         'uncovered' => uncovered_lines.empty? ? nil : {
           'type' => 'MultiLineString',
           'coordinates' => uncovered_lines
-        }
+        },
+        'coveredLength' => covered_length,
+        'uncoveredLength' => uncovered_length
       }
     end
 
     # Computes coverage metrics for each unique waterway.
     # Returns an array of metric hashes with slug, name (placeholder),
-    # spotCount, coveredSegments, and uncoveredSegments.
+    # spotCount, coveredSegments, uncoveredSegments, coveredLength, and
+    # uncoveredLength.
     # Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 10.1, 10.2, 10.3, 10.4
     def compute_coverage_metrics(unique_waterways, unique_spots_by_waterway)
       metrics = []
@@ -354,11 +373,27 @@ module Jekyll
           'name' => 'placeholder',
           'spotCount' => spots.size,
           'coveredSegments' => segments['covered'],
-          'uncoveredSegments' => segments['uncovered']
+          'uncoveredSegments' => segments['uncovered'],
+          'coveredLength' => segments['coveredLength'],
+          'uncoveredLength' => segments['uncoveredLength']
         }
       end
 
       metrics
+    end
+
+    # Aggregates coverage lengths across all waterways.
+    # Returns a hash with total coveredLength and uncoveredLength in metres.
+    def compute_coverage_summary(cached_coverage)
+      covered = 0.0
+      uncovered = 0.0
+
+      cached_coverage.each do |metric|
+        covered += metric['coveredLength'] || 0.0
+        uncovered += metric['uncoveredLength'] || 0.0
+      end
+
+      { 'coveredLength' => covered.round(1), 'uncoveredLength' => uncovered.round(1) }
     end
   end
 end
