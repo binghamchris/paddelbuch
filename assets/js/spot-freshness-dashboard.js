@@ -99,25 +99,31 @@
         var chartArea = chart.chartArea;
         var chartHeight = chartArea.bottom - chartArea.top;
         var fontSize = Math.floor(chartHeight * 0.9);
-        var meta, bar, pct, text, textWidth, segCenterX, centerY;
-
-        centerY = chartArea.top + chartHeight / 2;
+        var xScale = chart.scales.x;
+        var centerY = chartArea.top + chartHeight / 2;
+        var cumulative = 0;
 
         for (var d = 0; d < chart.data.datasets.length; d++) {
-          meta = chart.getDatasetMeta(d);
-          if (!meta || !meta.data || !meta.data[0]) continue;
-          bar = meta.data[0];
-          pct = total > 0 ? (segments[d].count / total) * 100 : 0;
+          var pct = total > 0 ? (segments[d].count / total) * 100 : 0;
+          var segStart = cumulative;
+          var segEnd = cumulative + pct;
+          cumulative = segEnd;
+
           if (pct < 1) continue;
-          text = Math.round(pct) + '%';
+
+          var leftPx = xScale.getPixelForValue(segStart);
+          var rightPx = xScale.getPixelForValue(segEnd);
+          var segCenterX = (leftPx + rightPx) / 2;
+          var segWidth = rightPx - leftPx;
+
+          var text = Math.round(pct) + '%';
           ctx.save();
           ctx.fillStyle = '#fff';
           ctx.font = 'bold ' + fontSize + 'px Quicksand, Helvetica, Arial, sans-serif';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
-          textWidth = ctx.measureText(text).width;
-          segCenterX = bar.x - bar.width / 2 + bar.width / 2;
-          if ((bar.width || 0) > textWidth + 4) {
+          var textWidth = ctx.measureText(text).width;
+          if (segWidth > textWidth + 4) {
             ctx.fillText(text, segCenterX, centerY);
           }
           ctx.restore();
