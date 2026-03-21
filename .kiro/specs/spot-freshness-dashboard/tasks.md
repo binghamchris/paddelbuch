@@ -126,8 +126,8 @@ Implement the Spot Freshness Dashboard as a new dashboard module on the data qua
     - Remove `spot_freshness_title`, `freshness_fresh`, `freshness_aging`, `freshness_stale` keys
     - _Requirements: 3.5_
 
-- [ ] 7. Add i18n translation keys
-  - [~] 7.1 Add `dashboards.spot_freshness` keys to the i18n data files
+- [x] 7. Add i18n translation keys
+  - [x] 7.1 Add `dashboards.spot_freshness` keys to the i18n data files
     - Add keys for `name`, `description`, `fresh`, `aging`, `stale`, `chart_title` in all supported locales (de, en)
     - _Requirements: 7.1, 7.2_
 

@@ -188,10 +188,7 @@ dashboards:
     with_portage: "Mit Portage-Route"
     without_portage: "Ohne Portage-Route"
     no_entry: "Kein Zutritt"
-    spot_freshness_title: "Aktualität der Einstiegsorte (Verfügbare Einstiegsorte)"
-    freshness_fresh: "Aktuell (≤ 2 Jahre)"
-    freshness_aging: "Alternd (2–5 Jahre)"
-    freshness_stale: "Veraltet (> 5 Jahre)"
+
   coverage:
     name: "Gewässerabdeckung"
     description: "Wie viel der Länge jedes Flusses oder des Ufers jedes Sees Einstiegsorte hat."
@@ -199,3 +196,10 @@ dashboards:
     covered: "Abgedeckt (innerhalb 5 km)"
     not_covered: "Nicht abgedeckt"
     popup_spots: "Einstiegsorte"
+  spot_freshness:
+    name: "Einstiegsort-Aktualität"
+    description: "Aktualität der einzelnen Einstiegsorte."
+    fresh: "Aktuell (≤ 2 Jahre)"
+    aging: "Alternd (2–5 Jahre)"
+    stale: "Veraltet (> 5 Jahre)"
+    chart_title: "Aktualität der Einstiegsorte"

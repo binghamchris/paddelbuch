@@ -188,10 +188,7 @@ dashboards:
     with_portage: "With Portage Route"
     without_portage: "Without Portage Route"
     no_entry: "No Entry"
-    spot_freshness_title: "Spot Freshness (Available Spots)"
-    freshness_fresh: "Fresh (≤ 2 years)"
-    freshness_aging: "Aging (2–5 years)"
-    freshness_stale: "Stale (> 5 years)"
+
   coverage:
     name: "Waterway Coverage"
     description: "How much of the length of each river or shore of each lake has spots."
@@ -199,3 +196,10 @@ dashboards:
     covered: "Covered (within 5 km)"
     not_covered: "Not Covered"
     popup_spots: "Spots"
+  spot_freshness:
+    name: "Spot Freshness"
+    description: "Freshness of individual spots."
+    fresh: "Fresh (≤ 2 years)"
+    aging: "Aging (2–5 years)"
+    stale: "Stale (> 5 years)"
+    chart_title: "Spot Freshness"
