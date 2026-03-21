@@ -13,23 +13,26 @@
   }
 
   @media screen and (min-width: 768px) {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 0 0.75rem;
+    // Only apply the two-column grid to chart sections
+    &:has(> .statistics-section-body) {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0 0.75rem;
 
-    // Title spans both columns
-    > .statistics-section-title {
-      grid-column: 1 / -1;
-    }
+      // Title spans both columns
+      > .statistics-section-title {
+        grid-column: 1 / -1;
+      }
 
-    // Body children flow into the two-column grid
-    > .statistics-section-body {
-      display: contents;
-    }
+      // Body children flow into the two-column grid
+      > .statistics-section-body {
+        display: contents;
+      }
 
-    // Legend aligns with the chart (second column)
-    > .statistics-legend {
-      grid-column: 2;
+      // Legend aligns with the chart (second column)
+      > .statistics-legend {
+        grid-column: 2;
+      }
     }
   }
 }
