@@ -8,7 +8,7 @@ Implementation follows the existing dashboard module pattern (IIFE, registry pus
 
 ## Tasks
 
-- [-] 1. Add colour variables and i18n keys
+- [x] 1. Add colour variables and i18n keys
   - [x] 1.1 Add statistics dashboard colour variables to `_sass/settings/_paddelbuch_colours.scss`
     - Add spot type colours: `$spot-type-entry-exit`, `$spot-type-entry-only`, `$spot-type-exit-only`, `$spot-type-rest`, `$spot-type-emergency`, `$spot-type-no-entry`
     - Add obstacle colours: `$obstacle-with-portage`, `$obstacle-without-portage`
@@ -16,7 +16,7 @@ Implementation follows the existing dashboard module pattern (IIFE, registry pus
     - The existing `color_generator.rb` will automatically expose these to JS via `site.data['paddelbuch_colors']`
     - _Requirements: 10.1, 10.2, 10.3, 10.6_
 
-  - [~] 1.2 Add statistics dashboard i18n keys to `_i18n/de.yml` and `_i18n/en.yml`
+  - [x] 1.2 Add statistics dashboard i18n keys to `_i18n/de.yml` and `_i18n/en.yml`
     - Add `dashboards.statistics` section with keys: `name`, `description`, `spots_title`, `obstacles_title`, `protected_areas_title`, `paddle_craft_title`, `data_source_title`, `data_license_title`, `with_portage`, `without_portage`, `no_entry`
     - _Requirements: 9.1, 9.2, 9.4_
 
