@@ -221,9 +221,12 @@
     var color = getColor(colorKey);
     var ageYears = spot.ageDays != null ? (spot.ageDays / 365.25).toFixed(1) : '–';
 
+    var shapeFn = SHAPES[spot.category];
+    var shapeSvg = shapeFn ? shapeFn(color) : '';
+
     var html = '';
     html += '<div class="popup-icon-div">';
-    html += '<span class="dashboard-popup-icon" style="background:' + color + ';"></span>';
+    html += '<span class="dashboard-popup-icon">' + shapeSvg + '</span>';
     html += strings.popup_age + ': ' + ageYears + ' ' + strings.popup_years;
     html += '</div>';
     html += '<span class="popup-title"><h1>' + escapeHtml(spot.name) + '</h1></span>';
