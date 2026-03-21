@@ -102,7 +102,7 @@ Implement the Spot Freshness Dashboard as a new dashboard module on the data qua
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 5. Modify the dashboard switcher for dual-container support
-  - [~] 5.1 Update `updateContainerVisibility` in `dashboard-switcher.js`
+  - [-] 5.1 Update `updateContainerVisibility` in `dashboard-switcher.js`
     - Accept the dashboard module object (instead of just `usesMap` boolean)
     - Check for `usesBoth` flag: if true, show both `#dashboard-map` and `#dashboard-content`
     - Existing dashboards with only `usesMap: true` or `usesMap: false` continue to work as before
