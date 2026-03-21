@@ -126,7 +126,7 @@ Implementation follows the existing dashboard module pattern (IIFE, registry pus
     - Confirm the dashboard-switcher activates the statistics dashboard by default (first entry in registry)
     - _Requirements: 1.1, 1.2, 11.1, 11.2, 11.3_
 
-  - [~] 7.2 Write unit tests for script load order and integration
+  - [x] 7.2 Write unit tests for script load order and integration
     - Verify the front matter `scripts` array ordering in `datenqualitaet.html`
     - Verify the statistics dashboard module interface contract (id, getName, usesMap, activate, deactivate)
     - _Requirements: 11.1, 11.2, 11.3_

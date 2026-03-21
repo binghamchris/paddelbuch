@@ -354,3 +354,91 @@ RSpec.describe 'statistics-dashboard.js deactivate cleanup (Property 8)' do
     end
   end
 end
+
+# ── Unit Tests: Script load order and integration (Task 7.2) ──────────────────
+# **Validates: Requirements 11.1, 11.2, 11.3**
+
+RSpec.describe 'datenqualitaet.html script load order' do
+  let(:html_path) { File.join(File.dirname(__FILE__), '..', '..', 'offene-daten', 'datenqualitaet.html') }
+  let(:html_source) { File.read(html_path) }
+
+  # Extract the YAML front matter scripts array
+  let(:scripts) do
+    # Front matter is between the first pair of '---' lines
+    front_matter_match = html_source.match(/\A---\n(.*?)---/m)
+    expect(front_matter_match).not_to be_nil, 'Could not find YAML front matter in datenqualitaet.html'
+    yaml = YAML.safe_load(front_matter_match[1])
+    yaml['scripts']
+  end
+
+  it 'includes statistics-dashboard.js in the scripts array' do
+    expect(scripts).to include('/assets/js/statistics-dashboard.js')
+  end
+
+  it 'lists statistics-dashboard.js AFTER dashboard-data.js' do
+    data_idx = scripts.index('/assets/js/dashboard-data.js')
+    stats_idx = scripts.index('/assets/js/statistics-dashboard.js')
+    expect(data_idx).not_to be_nil, 'dashboard-data.js not found in scripts array'
+    expect(stats_idx).not_to be_nil, 'statistics-dashboard.js not found in scripts array'
+    expect(stats_idx).to be > data_idx,
+      "statistics-dashboard.js (index #{stats_idx}) must come after dashboard-data.js (index #{data_idx})"
+  end
+
+  it 'lists statistics-dashboard.js BEFORE freshness-dashboard.js' do
+    stats_idx = scripts.index('/assets/js/statistics-dashboard.js')
+    freshness_idx = scripts.index('/assets/js/freshness-dashboard.js')
+    expect(stats_idx).not_to be_nil, 'statistics-dashboard.js not found in scripts array'
+    expect(freshness_idx).not_to be_nil, 'freshness-dashboard.js not found in scripts array'
+    expect(stats_idx).to be < freshness_idx,
+      "statistics-dashboard.js (index #{stats_idx}) must come before freshness-dashboard.js (index #{freshness_idx})"
+  end
+
+  it 'lists statistics-dashboard.js BEFORE coverage-dashboard.js' do
+    stats_idx = scripts.index('/assets/js/statistics-dashboard.js')
+    coverage_idx = scripts.index('/assets/js/coverage-dashboard.js')
+    expect(stats_idx).not_to be_nil, 'statistics-dashboard.js not found in scripts array'
+    expect(coverage_idx).not_to be_nil, 'coverage-dashboard.js not found in scripts array'
+    expect(stats_idx).to be < coverage_idx,
+      "statistics-dashboard.js (index #{stats_idx}) must come before coverage-dashboard.js (index #{coverage_idx})"
+  end
+end
+
+RSpec.describe 'statistics-dashboard.js module interface contract' do
+  let(:js_path) { File.join(File.dirname(__FILE__), '..', '..', 'assets', 'js', 'statistics-dashboard.js') }
+  let(:js_source) { File.read(js_path) }
+
+  it "sets the module id to 'statistics'" do
+    expect(js_source).to match(/id:\s*['"]statistics['"]/),
+      "statistics-dashboard.js must define id: 'statistics'"
+  end
+
+  it 'sets usesMap to false' do
+    expect(js_source).to match(/usesMap:\s*false/),
+      'statistics-dashboard.js must define usesMap: false'
+  end
+
+  it 'defines an activate function accepting a context parameter' do
+    expect(js_source).to match(/activate:\s*function\s*\(\s*context\s*\)/),
+      'statistics-dashboard.js must define activate: function(context)'
+  end
+
+  it 'defines a deactivate function' do
+    expect(js_source).to match(/deactivate:\s*function\s*\(\s*\)/),
+      'statistics-dashboard.js must define deactivate: function()'
+  end
+
+  it 'defines a getName function' do
+    expect(js_source).to match(/getName:\s*function\s*\(\s*\)/),
+      'statistics-dashboard.js must define getName: function()'
+  end
+
+  it 'registers on PaddelbuchDashboardRegistry' do
+    expect(js_source).to include('PaddelbuchDashboardRegistry'),
+      'statistics-dashboard.js must register on PaddelbuchDashboardRegistry'
+  end
+
+  it 'exposes the module as global.PaddelbuchStatisticsDashboard' do
+    expect(js_source).to include('PaddelbuchStatisticsDashboard'),
+      'statistics-dashboard.js must expose global.PaddelbuchStatisticsDashboard'
+  end
+end
