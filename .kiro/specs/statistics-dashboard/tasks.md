@@ -75,7 +75,7 @@ Implementation follows the existing dashboard module pattern (IIFE, registry pus
     - Generate random type definitions with `name_de`/`name_en` using Rantly; verify correct name is selected for each locale
     - **Validates: Requirements 5.4, 6.4, 7.4, 9.3**
 
-- [~] 3. Checkpoint
+- [x] 3. Checkpoint
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 4. Extend dashboard-data.js and update the HTML template
