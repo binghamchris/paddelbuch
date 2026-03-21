@@ -131,7 +131,7 @@ Implement the Spot Freshness Dashboard as a new dashboard module on the data qua
     - Add keys for `name`, `description`, `fresh`, `aging`, `stale`, `chart_title` in all supported locales (de, en)
     - _Requirements: 7.1, 7.2_
 
-- [~] 8. Final checkpoint - Ensure all tests pass
+- [x] 8. Final checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Notes
