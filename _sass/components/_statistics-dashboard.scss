@@ -12,6 +12,14 @@
     margin-top: 2.5em;
   }
 
+  &--sub {
+    margin-top: 1em;
+
+    > .statistics-section-title {
+      font-size: 1.1em;
+    }
+  }
+
   @media screen and (min-width: 768px) {
     // Only apply the two-column grid to chart sections
     &:has(> .statistics-section-body) {
@@ -113,6 +121,11 @@
 .statistics-figure--swiss-canoe-meldestelle {}
 .statistics-figure--cc-by-sa-4 {}
 .statistics-figure--lizenz-odbl {}
+.statistics-figure--spot-freshness {
+  .statistics-figure-value {
+    font-size: 2.75em;
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Chart containers
@@ -167,6 +180,11 @@
 // Legend swatch BEM modifiers — Obstacle types
 .statistics-legend-swatch--with-portage    { background-color: $obstacle-with-portage; }
 .statistics-legend-swatch--without-portage { background-color: $obstacle-without-portage; }
+
+// Legend swatch BEM modifiers — Spot freshness buckets
+.statistics-legend-swatch--fresh   { background-color: $green-1; }
+.statistics-legend-swatch--aging   { background-color: $warning-yellow; }
+.statistics-legend-swatch--stale   { background-color: $danger-red; }
 
 // Legend swatch BEM modifiers — Protected area types
 .statistics-legend-swatch--naturschutzgebiet { background-color: $pa-type-naturschutzgebiet; }

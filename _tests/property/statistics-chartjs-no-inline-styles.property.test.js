@@ -139,7 +139,11 @@ describe('No inline styles in rendered output (Property 4)', function () {
       paTypeSchiesszone: '#a93226',
       paTypeTeleskizone: '#d68910',
       paTypePrivatbesitz: '#839192',
-      paTypeWasserskizone: '#1f618d'
+      paTypeWasserskizone: '#1f618d',
+      green1: '#07753f',
+      warningYellow: '#ffb200',
+      dangerRed: '#c40200',
+      purple1: '#69599b'
     };
 
     // Initialise dashboard data holder

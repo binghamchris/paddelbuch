@@ -99,6 +99,12 @@ module Jekyll
       license_metrics = compute_data_license_metrics(spots, obstacles, protected_areas, waterways, notices, data_license_types)
       Jekyll.logger.info 'StatisticsMetrics:', "Data license metrics complete: #{license_metrics.size} types"
 
+      Jekyll.logger.info 'StatisticsMetrics:', 'Computing spot freshness metrics...'
+      freshness_metrics = compute_spot_freshness_metrics(spots)
+      Jekyll.logger.info 'StatisticsMetrics:', "Spot freshness metrics complete: fresh=#{freshness_metrics['fresh']}, aging=#{freshness_metrics['aging']}, stale=#{freshness_metrics['stale']}"
+
+      spot_metrics['freshness'] = freshness_metrics
+
       {
         'spots' => spot_metrics,
         'obstacles' => obstacle_metrics,
@@ -214,6 +220,38 @@ module Jekyll
         end
         { 'slug' => slug, 'name' => slug, 'count' => count }
       end
+    end
+
+    # Spot freshness: classifies non-rejected spots into freshness buckets
+    # using the same thresholds as the waterway freshness dashboard.
+    # Fresh: ≤ 730.5 days (≤ 2 years)
+    # Aging: > 730.5 and ≤ 1826.25 days (2–5 years)
+    # Stale: > 1826.25 days (> 5 years)
+    # No data: nil updatedAt
+    def compute_spot_freshness_metrics(spots)
+      now = Time.now
+      fresh = 0
+      aging = 0
+      stale = 0
+
+      spots.each do |spot|
+        next if spot['rejected'] == true
+
+        updated_at = spot['updatedAt']
+        next if updated_at.nil?
+
+        days = (now - Time.parse(updated_at)) / 86_400.0
+        days = [days, 0].max
+        if days <= 730.5
+          fresh += 1
+        elsif days <= 1826.25
+          aging += 1
+        else
+          stale += 1
+        end
+      end
+
+      { 'fresh' => fresh, 'aging' => aging, 'stale' => stale }
     end
 
     # Deep-clones cached metrics and replaces placeholder type names with
