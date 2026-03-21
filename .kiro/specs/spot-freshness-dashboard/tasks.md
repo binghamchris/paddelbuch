@@ -37,7 +37,7 @@ Implement the Spot Freshness Dashboard as a new dashboard module on the data qua
     - Implement `activate(context)` and `deactivate()` stubs
     - _Requirements: 1.1, 1.2, 1.3, 2.3, 7.2_
 
-  - [~] 3.2 Write property test for i18n fallback
+  - [x] 3.2 Write property test for i18n fallback
     - **Property 10: i18n fallback to German defaults**
     - **Validates: Requirements 7.2, 1.2**
     - Use fast-check to generate arbitrary i18n JSON content (missing block, empty object, partial keys); assert `getStrings()` always returns a complete object with non-empty values
