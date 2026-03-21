@@ -138,7 +138,11 @@ describe('Summary figure BEM-modifier classes (Property 6)', function () {
       paTypeSchiesszone: '#a93226',
       paTypeTeleskizone: '#d68910',
       paTypePrivatbesitz: '#839192',
-      paTypeWasserskizone: '#1f618d'
+      paTypeWasserskizone: '#1f618d',
+      green1: '#07753f',
+      warningYellow: '#ffb200',
+      dangerRed: '#c40200',
+      purple1: '#69599b'
     };
 
     // Initialise dashboard data holder
@@ -183,7 +187,7 @@ describe('Summary figure BEM-modifier classes (Property 6)', function () {
         dashboard.activate({ contentEl: contentEl });
 
         // --- Bar chart section figures: spots, obstacles, protected-areas ---
-        var barSections = ['spots', 'obstacles', 'protected-areas'];
+        var barSections = ['spots', 'spot-freshness', 'obstacles', 'protected-areas'];
         for (var b = 0; b < barSections.length; b++) {
           var sectionSlug = barSections[b];
           var figure = contentEl.querySelector('.statistics-figure--' + sectionSlug);

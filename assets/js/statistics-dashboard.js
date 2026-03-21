@@ -58,6 +58,15 @@
   };
 
   /**
+   * Colour-to-slug mapping for spot freshness buckets.
+   */
+  var FRESHNESS_COLOR_MAP = {
+    'fresh': 'green1',
+    'aging': 'warningYellow',
+    'stale': 'dangerRed'
+  };
+
+  /**
    * Minimal HTML escaping for user-facing text.
    */
   function escapeHtml(str) {
@@ -85,7 +94,11 @@
       data_license_title: 'Einträge nach Datenlizenz',
       with_portage: 'Mit Portage-Route',
       without_portage: 'Ohne Portage-Route',
-      no_entry: 'Kein Zutritt'
+      no_entry: 'Kein Zutritt',
+      spot_freshness_title: 'Aktualität der Einstiegsorte (Verfügbare Einstiegsorte)',
+      freshness_fresh: 'Aktuell (≤ 2 Jahre)',
+      freshness_aging: 'Alternd (2–5 Jahre)',
+      freshness_stale: 'Veraltet (> 5 Jahre)'
     };
 
     var el = document.getElementById('statistics-i18n');
@@ -247,10 +260,17 @@
    * @param {string} section - Section identifier for BEM modifier and canvas data attribute
    * @returns {string} HTML string for the full section
    */
-  function renderBarSection(title, total, segments, section) {
+  function renderBarSection(title, total, segments, section, options) {
+    var opts = options || {};
+    var headingTag = opts.headingTag || 'h3';
+    var sectionModifier = opts.sectionModifier || '';
     segments.sort(function(a, b) { return b.count - a.count; });
-    var html = '<div class="statistics-section">';
-    html += '<h3 class="statistics-section-title">' + escapeHtml(title) + '</h3>';
+    var sectionCls = 'statistics-section';
+    if (sectionModifier) {
+      sectionCls += ' statistics-section--' + sectionModifier;
+    }
+    var html = '<div class="' + sectionCls + '">';
+    html += '<' + headingTag + ' class="statistics-section-title">' + escapeHtml(title) + '</' + headingTag + '>';
     html += '<div class="statistics-section-body">';
     var figureCls = 'statistics-figure';
     if (section) {
@@ -332,6 +352,21 @@
     return segments;
   }
 
+  /**
+   * Builds freshness segments from the spot freshness metrics hash.
+   *
+   * @param {Object} freshness - { fresh, aging, stale, noData }
+   * @param {Object} strings - Localised string map
+   * @returns {Array} Segment objects for the freshness chart
+   */
+  function buildFreshnessSegments(freshness, strings) {
+    return [
+      { name: strings.freshness_fresh, count: freshness.fresh || 0, colorKey: FRESHNESS_COLOR_MAP['fresh'], slug: 'fresh' },
+      { name: strings.freshness_aging, count: freshness.aging || 0, colorKey: FRESHNESS_COLOR_MAP['aging'], slug: 'aging' },
+      { name: strings.freshness_stale, count: freshness.stale || 0, colorKey: FRESHNESS_COLOR_MAP['stale'], slug: 'stale' }
+    ];
+  }
+
   var strings = getStrings();
 
   var module = {
@@ -369,6 +404,12 @@
       var spots = metrics.spots || { total: 0, byType: [] };
       var spotSegments = buildSpotSegments(spots.byType || []);
       html += renderBarSection(strings.spots_title, spots.total || 0, spotSegments, 'spots');
+
+      // --- Spot freshness sub-section ---
+      var freshness = spots.freshness || { fresh: 0, aging: 0, stale: 0, noData: 0 };
+      var freshnessTotal = (freshness.fresh || 0) + (freshness.aging || 0) + (freshness.stale || 0);
+      var freshnessSegments = buildFreshnessSegments(freshness, strings);
+      html += renderBarSection(strings.spot_freshness_title, freshnessTotal, freshnessSegments, 'spot-freshness', { headingTag: 'h4', sectionModifier: 'sub' });
 
       // --- Obstacles section ---
       var obstacles = metrics.obstacles || { total: 0, withPortageRoute: 0, withoutPortageRoute: 0 };

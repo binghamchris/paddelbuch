@@ -139,7 +139,11 @@ describe('Canvas rendering for bar chart sections (Property 1)', function () {
       paTypeSchiesszone: '#a93226',
       paTypeTeleskizone: '#d68910',
       paTypePrivatbesitz: '#839192',
-      paTypeWasserskizone: '#1f618d'
+      paTypeWasserskizone: '#1f618d',
+      green1: '#07753f',
+      warningYellow: '#ffb200',
+      dangerRed: '#c40200',
+      purple1: '#69599b'
     };
 
     // Initialise dashboard data holder
@@ -187,9 +191,9 @@ describe('Canvas rendering for bar chart sections (Property 1)', function () {
         var canvases = contentEl.querySelectorAll('canvas');
 
         // Verify exactly 3 canvas elements
-        if (canvases.length !== 3) {
+        if (canvases.length !== 4) {
           throw new Error(
-            'Expected 3 canvas elements but found ' + canvases.length
+            'Expected 4 canvas elements but found ' + canvases.length
           );
         }
 
