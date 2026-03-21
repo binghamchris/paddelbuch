@@ -177,11 +177,12 @@ module Jekyll
       { 'total' => protected_areas.size, 'byType' => type_entries }
     end
 
-    # Paddle craft types: count of unique spots per craft type.
+    # Paddle craft types: count of unique non-rejected spots per craft type.
     def compute_paddle_craft_metrics(spots, paddle_craft_types)
+      available_spots = spots.reject { |spot| spot['rejected'] == true }
       paddle_craft_types.map do |pct|
         slug = pct['slug']
-        count = spots.count do |spot|
+        count = available_spots.count do |spot|
           craft_types = spot['paddleCraftTypes']
           craft_types.is_a?(Array) && craft_types.include?(slug)
         end

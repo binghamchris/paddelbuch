@@ -182,7 +182,7 @@ dashboards:
     spots_title: "Spots"
     obstacles_title: "Obstacles"
     protected_areas_title: "Protected Areas"
-    paddle_craft_title: "Spots by Paddle Craft Type"
+    paddle_craft_title: "Available Spots by Paddle Craft Type"
     data_source_title: "Entries by Data Source"
     data_license_title: "Entries by Data License"
     with_portage: "With Portage Route"
