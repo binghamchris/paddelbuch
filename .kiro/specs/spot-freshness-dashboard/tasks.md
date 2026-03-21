@@ -12,7 +12,7 @@ Implement the Spot Freshness Dashboard as a new dashboard module on the data qua
     - Expose the result as `site.data['dashboard_spot_freshness_map_data']` alongside the existing metrics
     - _Requirements: 6.1_
 
-  - [-] 1.2 Write property test for `compute_spot_freshness_map_data` (RSpec)
+  - [x] 1.2 Write property test for `compute_spot_freshness_map_data` (RSpec)
     - **Property 9: Generator produces correct per-spot freshness data**
     - **Validates: Requirements 6.1**
     - Use randomly generated spot arrays; assert output contains only non-rejected spots with valid location and updatedAt, and that each category matches the threshold rules
