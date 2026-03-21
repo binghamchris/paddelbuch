@@ -46,6 +46,12 @@ module Jekyll
         unique_waterways = deduplicate_by_slug(all_waterways)
         Jekyll.logger.info 'DashboardMetrics:', "Deduplicated #{all_waterways.size} waterway entries to #{unique_waterways.size} unique waterways"
 
+        # Exclude wildwasser waterways from dashboard metrics
+        pre_filter_count = unique_waterways.size
+        unique_waterways = unique_waterways.reject { |w| w['paddlingEnvironmentType_slug'] == 'wildwasser' }
+        excluded_count = pre_filter_count - unique_waterways.size
+        Jekyll.logger.info 'DashboardMetrics:', "Excluded #{excluded_count} wildwasser waterways, #{unique_waterways.size} remaining"
+
         # Deduplicate spots by waterway_slug (updatedAt/location are identical across locales)
         spots_by_waterway = all_spots.group_by { |s| s['waterway_slug'] }
         unique_spots_by_waterway = deduplicate_spots_by_waterway(spots_by_waterway)
