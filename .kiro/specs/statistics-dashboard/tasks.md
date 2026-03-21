@@ -8,8 +8,8 @@ Implementation follows the existing dashboard module pattern (IIFE, registry pus
 
 ## Tasks
 
-- [ ] 1. Add colour variables and i18n keys
-  - [~] 1.1 Add statistics dashboard colour variables to `_sass/settings/_paddelbuch_colours.scss`
+- [-] 1. Add colour variables and i18n keys
+  - [x] 1.1 Add statistics dashboard colour variables to `_sass/settings/_paddelbuch_colours.scss`
     - Add spot type colours: `$spot-type-entry-exit`, `$spot-type-entry-only`, `$spot-type-exit-only`, `$spot-type-rest`, `$spot-type-emergency`, `$spot-type-no-entry`
     - Add obstacle colours: `$obstacle-with-portage`, `$obstacle-without-portage`
     - Add protected area type colours: `$pa-type-naturschutzgebiet`, `$pa-type-fahrverbotzone`, `$pa-type-schilfgebiet`, `$pa-type-schwimmbereich`, `$pa-type-industriegebiet`, `$pa-type-schiesszone`, `$pa-type-teleskizone`, `$pa-type-privatbesitz`, `$pa-type-wasserskizone`
@@ -120,18 +120,18 @@ Implementation follows the existing dashboard module pattern (IIFE, registry pus
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 7. Wire everything together and verify script load order
-  - [ ] 7.1 Verify script load order and default dashboard registration
+  - [~] 7.1 Verify script load order and default dashboard registration
     - Confirm `datenqualitaet.html` front matter `scripts` array lists `statistics-dashboard.js` after `dashboard-data.js` and before `freshness-dashboard.js` and `coverage-dashboard.js`
     - Confirm `statistics-dashboard.js` registers on `PaddelbuchDashboardRegistry` before freshness and coverage modules
     - Confirm the dashboard-switcher activates the statistics dashboard by default (first entry in registry)
     - _Requirements: 1.1, 1.2, 11.1, 11.2, 11.3_
 
-  - [ ] 7.2 Write unit tests for script load order and integration
+  - [~] 7.2 Write unit tests for script load order and integration
     - Verify the front matter `scripts` array ordering in `datenqualitaet.html`
     - Verify the statistics dashboard module interface contract (id, getName, usesMap, activate, deactivate)
     - _Requirements: 11.1, 11.2, 11.3_
 
-- [ ] 8. Final checkpoint
+- [~] 8. Final checkpoint
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Notes
