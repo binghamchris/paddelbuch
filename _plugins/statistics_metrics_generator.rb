@@ -32,6 +32,7 @@ module Jekyll
 
       localized = localize_metrics(@@cached_metrics, locale, site)
       site.data['dashboard_statistics_metrics'] = localized
+      site.data['dashboard_spot_freshness_map_data'] = localize_spot_freshness_map_data(@@cached_metrics['spotFreshnessMapData'], locale, site)
       Jekyll.logger.info 'StatisticsMetrics:', "Localized statistics metrics for locale '#{locale}'"
     end
 
@@ -105,13 +106,18 @@ module Jekyll
 
       spot_metrics['freshness'] = freshness_metrics
 
+      Jekyll.logger.info 'StatisticsMetrics:', 'Computing spot freshness map data...'
+      spot_freshness_map_data = compute_spot_freshness_map_data(spots)
+      Jekyll.logger.info 'StatisticsMetrics:', "Spot freshness map data complete: #{spot_freshness_map_data.size} entries"
+
       {
         'spots' => spot_metrics,
         'obstacles' => obstacle_metrics,
         'protectedAreas' => pa_metrics,
         'paddleCraftTypes' => craft_metrics,
         'dataSourceTypes' => source_metrics,
-        'dataLicenseTypes' => license_metrics
+        'dataLicenseTypes' => license_metrics,
+        'spotFreshnessMapData' => spot_freshness_map_data
       }
     end
 
@@ -219,6 +225,47 @@ module Jekyll
           entities.count { |e| e['dataLicenseType_slug'] == slug }
         end
         { 'slug' => slug, 'name' => slug, 'count' => count }
+      end
+    end
+
+    # Per-spot freshness map data: returns an array of { slug, lat, lon, category }
+    # for each non-rejected spot with valid location and updatedAt.
+    # Used by the Spot Freshness Dashboard map.
+    def compute_spot_freshness_map_data(spots)
+      now = Time.now
+      spots.filter_map do |spot|
+        next if spot['rejected'] == true
+
+        location = spot['location']
+        next if location.nil? || location['lat'].nil? || location['lon'].nil?
+
+        updated_at = spot['updatedAt']
+        next if updated_at.nil?
+
+        days = [(now - Time.parse(updated_at)) / 86_400.0, 0].max
+        category = if days <= 730.5 then 'fresh'
+                   elsif days <= 1826.25 then 'aging'
+                   else 'stale'
+                   end
+
+        { 'slug' => spot['slug'], 'name' => 'placeholder', 'lat' => location['lat'], 'lon' => location['lon'], 'category' => category, 'ageDays' => days.round(1) }
+      end
+    end
+
+    # Deep-clones cached spot freshness map data and replaces placeholder
+    # names with locale-specific spot names.
+    def localize_spot_freshness_map_data(cached_map_data, locale, site)
+      spot_names = {}
+      (site.data['spots'] || []).each do |s|
+        next unless s['locale'] == locale && s['slug']
+
+        spot_names[s['slug']] = s['name']
+      end
+
+      cached_map_data.map do |entry|
+        cloned = entry.dup
+        cloned['name'] = spot_names[cloned['slug']] || cloned['slug']
+        cloned
       end
     end
 

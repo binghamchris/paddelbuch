@@ -191,9 +191,9 @@ describe('Canvas rendering for bar chart sections (Property 1)', function () {
         var canvases = contentEl.querySelectorAll('canvas');
 
         // Verify exactly 3 canvas elements
-        if (canvases.length !== 4) {
+        if (canvases.length !== 3) {
           throw new Error(
-            'Expected 4 canvas elements but found ' + canvases.length
+            'Expected 3 canvas elements but found ' + canvases.length
           );
         }
 

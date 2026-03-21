@@ -33,10 +33,21 @@
   &--uncovered { background-color: $uncovered-red; }
 }
 
+.dashboard-legend-shape {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 14px;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
 .dashboard-popup-icon {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  margin-right: 6px;
+  height: 1.2em;
+  margin-right: 10px;
 }
