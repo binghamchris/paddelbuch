@@ -248,6 +248,7 @@
    * @returns {string} HTML string for the full section
    */
   function renderBarSection(title, total, segments, section) {
+    segments.sort(function(a, b) { return b.count - a.count; });
     var html = '<div class="statistics-section">';
     html += '<h3 class="statistics-section-title">' + escapeHtml(title) + '</h3>';
     html += '<div class="statistics-section-body">';
