@@ -101,21 +101,21 @@ Implement the Spot Freshness Dashboard as a new dashboard module on the data qua
 - [x] 4. Checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 5. Modify the dashboard switcher for dual-container support
+- [x] 5. Modify the dashboard switcher for dual-container support
   - [x] 5.1 Update `updateContainerVisibility` in `dashboard-switcher.js`
     - Accept the dashboard module object (instead of just `usesMap` boolean)
     - Check for `usesBoth` flag: if true, show both `#dashboard-map` and `#dashboard-content`
     - Existing dashboards with only `usesMap: true` or `usesMap: false` continue to work as before
     - _Requirements: 2.1, 2.2, 2.3_
 
-  - [-] 5.2 Write property tests for container visibility
+  - [x] 5.2 Write property tests for container visibility
     - **Property 1: Dual-container visibility on activation**
     - **Validates: Requirements 2.1**
     - **Property 2: Container visibility reverts on dashboard switch**
     - **Validates: Requirements 2.2**
 
 - [ ] 6. Remove freshness chart from the Statistics Dashboard
-  - [~] 6.1 Clean up `statistics-dashboard.js`
+  - [x] 6.1 Clean up `statistics-dashboard.js`
     - Remove `FRESHNESS_COLOR_MAP`
     - Remove `buildFreshnessSegments()` function
     - Remove the freshness `renderBarSection()` call from `activate()`

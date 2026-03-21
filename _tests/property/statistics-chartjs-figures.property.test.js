@@ -187,7 +187,7 @@ describe('Summary figure BEM-modifier classes (Property 6)', function () {
         dashboard.activate({ contentEl: contentEl });
 
         // --- Bar chart section figures: spots, obstacles, protected-areas ---
-        var barSections = ['spots', 'spot-freshness', 'obstacles', 'protected-areas'];
+        var barSections = ['spots', 'obstacles', 'protected-areas'];
         for (var b = 0; b < barSections.length; b++) {
           var sectionSlug = barSections[b];
           var figure = contentEl.querySelector('.statistics-figure--' + sectionSlug);

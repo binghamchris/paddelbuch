@@ -190,9 +190,9 @@ describe('Chart.js instance lifecycle (Property 3)', function () {
         var contentEl = document.getElementById('dashboard-content');
         dashboard.activate({ contentEl: contentEl });
 
-        if (window._chartInstances.length !== 4) {
+        if (window._chartInstances.length !== 3) {
           throw new Error(
-            'Step 1: Expected 4 Chart.js instances after activate(), got ' +
+            'Step 1: Expected 3 Chart.js instances after activate(), got ' +
             window._chartInstances.length
           );
         }
@@ -233,9 +233,9 @@ describe('Chart.js instance lifecycle (Property 3)', function () {
         contentEl = document.getElementById('dashboard-content');
         dashboard.activate({ contentEl: contentEl });
 
-        if (window._chartInstances.length !== 4) {
+        if (window._chartInstances.length !== 3) {
           throw new Error(
-            'Step 4: Expected 4 fresh Chart.js instances after re-activate(), got ' +
+            'Step 4: Expected 3 fresh Chart.js instances after re-activate(), got ' +
             window._chartInstances.length
           );
         }
