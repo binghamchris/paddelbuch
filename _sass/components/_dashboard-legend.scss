@@ -44,7 +44,9 @@
 }
 
 .dashboard-popup-icon {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 12px;
   height: 1.2em;
   margin-right: 10px;
