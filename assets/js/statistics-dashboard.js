@@ -139,6 +139,10 @@
    */
   function createStackedBarChart(canvas, segments) {
     if (!canvas || !Chart) return null;
+    var total = 0;
+    for (var i = 0; i < segments.length; i++) {
+      total += segments[i].count;
+    }
     var chart = new Chart(canvas, {
       type: 'bar',
       data: {
@@ -146,7 +150,7 @@
         datasets: segments.map(function(seg) {
           return {
             label: seg.name,
-            data: [seg.count],
+            data: [total > 0 ? (seg.count / total) * 100 : 0],
             backgroundColor: getColor(seg.colorKey)
           };
         })
@@ -157,10 +161,18 @@
         maintainAspectRatio: false,
         plugins: {
           legend: { display: false },
-          tooltip: { enabled: true }
+          tooltip: {
+            enabled: true,
+            callbacks: {
+              label: function(context) {
+                var seg = segments[context.datasetIndex];
+                return seg ? seg.name + ': ' + seg.count : '';
+              }
+            }
+          }
         },
         scales: {
-          x: { stacked: true, display: false },
+          x: { stacked: true, display: false, min: 0, max: 100 },
           y: { stacked: true, display: false }
         }
       }
