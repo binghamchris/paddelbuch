@@ -168,8 +168,13 @@
   flex-shrink: 0;
 }
 
-// Legend swatch BEM modifiers - Spot types
-// Colours assigned dynamically by sort position in statistics-dashboard.js
+// Legend swatch BEM modifiers - Spot types (positional: index 0 = largest category)
+.statistics-legend-swatch--spot-pos-0 { background-color: $chart-gradient-spot-1; }
+.statistics-legend-swatch--spot-pos-1 { background-color: $chart-gradient-spot-2; }
+.statistics-legend-swatch--spot-pos-2 { background-color: $chart-gradient-spot-3; }
+.statistics-legend-swatch--spot-pos-3 { background-color: $chart-gradient-spot-4; }
+.statistics-legend-swatch--spot-pos-4 { background-color: $chart-gradient-spot-5; }
+.statistics-legend-swatch--spot-pos-5 { background-color: $chart-gradient-spot-6; }
 
 // Legend swatch BEM modifiers - Obstacle types
 .statistics-legend-swatch--with-portage    { background-color: $obstacle-with-portage; }
@@ -180,5 +185,13 @@
 .statistics-legend-swatch--aging   { background-color: $warning-yellow; }
 .statistics-legend-swatch--stale   { background-color: $danger-red; }
 
-// Legend swatch BEM modifiers - Protected area types
-// Colours assigned dynamically by sort position in statistics-dashboard.js
+// Legend swatch BEM modifiers - Protected area types (positional: index 0 = largest category)
+.statistics-legend-swatch--pa-pos-0 { background-color: $chart-gradient-pa-1; }
+.statistics-legend-swatch--pa-pos-1 { background-color: $chart-gradient-pa-2; }
+.statistics-legend-swatch--pa-pos-2 { background-color: $chart-gradient-pa-3; }
+.statistics-legend-swatch--pa-pos-3 { background-color: $chart-gradient-pa-4; }
+.statistics-legend-swatch--pa-pos-4 { background-color: $chart-gradient-pa-5; }
+.statistics-legend-swatch--pa-pos-5 { background-color: $chart-gradient-pa-6; }
+.statistics-legend-swatch--pa-pos-6 { background-color: $chart-gradient-pa-7; }
+.statistics-legend-swatch--pa-pos-7 { background-color: $chart-gradient-pa-8; }
+.statistics-legend-swatch--pa-pos-8 { background-color: $chart-gradient-pa-9; }

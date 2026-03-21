@@ -39,58 +39,45 @@ var PA_TYPE_SLUGS = [
   'wasserskizone'
 ];
 
-// --- Colour maps (must match the module's internal maps) ---
+// --- Gradient arrays (must match the module's SPOT_GRADIENT / PA_GRADIENT) ---
+// Colours are assigned by sort position (index 0 = largest category = darkest).
 
-var SPOT_COLOR_MAP = {
-  'einstieg-ausstieg': 'spotTypeEntryExit',
-  'nur-einstieg': 'spotTypeEntryOnly',
-  'nur-ausstieg': 'spotTypeExitOnly',
-  'rasthalte': 'spotTypeRest',
-  'notauswasserungsstelle': 'spotTypeEmergency',
-  'no-entry': 'spotTypeNoEntry'
-};
+var SPOT_GRADIENT_COLORS = [
+  '#4c0561', '#e07a5f', '#2a9d8f', '#cb3cf6', '#69599b', '#e693be'
+];
+
+var PA_GRADIENT_COLORS = [
+  '#4c0561', '#e07a5f', '#2a9d8f', '#cb3cf6', '#437695', '#e693be',
+  '#69599b', '#3cc4f6', '#606589'
+];
 
 var OBSTACLE_COLOR_MAP = {
   'with-portage': 'obstacleWithPortage',
   'without-portage': 'obstacleWithoutPortage'
 };
 
-var PA_COLOR_MAP = {
-  'naturschutzgebiet': 'paTypeNaturschutzgebiet',
-  'fahrverbotzone': 'paTypeFahrverbotzone',
-  'schilfgebiet': 'paTypeSchilfgebiet',
-  'schwimmbereich': 'paTypeSchwimmbereich',
-  'industriegebiet': 'paTypeIndustriegebiet',
-  'schiesszone': 'paTypeSchiesszone',
-  'teleskizone': 'paTypeTeleskizone',
-  'privatbesitz': 'paTypePrivatbesitz',
-  'wasserskizone': 'paTypeWasserskizone'
-};
-
 // --- Mock PaddelbuchColors values ---
 
 var MOCK_COLORS = {
-  spotTypeEntryExit: '#2e86c1',
-  spotTypeEntryOnly: '#28b463',
-  spotTypeExitOnly: '#e67e22',
-  spotTypeRest: '#8e44ad',
-  spotTypeEmergency: '#c0392b',
-  spotTypeNoEntry: '#7f8c8d',
+  // Gradient palette keys used by SPOT_GRADIENT / PA_GRADIENT in the module
+  chartGradientSpot1: '#4c0561',
+  chartGradientSpot2: '#e07a5f',
+  chartGradientSpot3: '#2a9d8f',
+  chartGradientSpot4: '#cb3cf6',
+  chartGradientSpot5: '#69599b',
+  chartGradientSpot6: '#e693be',
+  chartGradientPa1: '#4c0561',
+  chartGradientPa2: '#e07a5f',
+  chartGradientPa3: '#2a9d8f',
+  chartGradientPa4: '#cb3cf6',
+  chartGradientPa5: '#437695',
+  chartGradientPa6: '#e693be',
+  chartGradientPa7: '#69599b',
+  chartGradientPa8: '#3cc4f6',
+  chartGradientPa9: '#606589',
+  // Obstacle colours (slug-based)
   obstacleWithPortage: '#07753f',
-  obstacleWithoutPortage: '#c40200',
-  paTypeNaturschutzgebiet: '#1a5276',
-  paTypeFahrverbotzone: '#d4ac0d',
-  paTypeSchilfgebiet: '#117a65',
-  paTypeSchwimmbereich: '#2980b9',
-  paTypeIndustriegebiet: '#6c3483',
-  paTypeSchiesszone: '#a93226',
-  paTypeTeleskizone: '#d68910',
-  paTypePrivatbesitz: '#839192',
-  paTypeWasserskizone: '#1f618d',
-  green1: '#07753f',
-  warningYellow: '#ffb200',
-  dangerRed: '#c40200',
-  purple1: '#69599b'
+  obstacleWithoutPortage: '#c40200'
 };
 
 // --- Arbitraries ---
@@ -236,8 +223,7 @@ describe('Chart.js dataset colour and label correctness (Property 2)', function 
         for (var i = 0; i < spotsByType.length; i++) {
           var spotEntry = spotsByType[i];
           var spotDataset = spotsDatasets[i];
-          var expectedColorKey = SPOT_COLOR_MAP[spotEntry.slug] || 'spotTypeNoEntry';
-          var expectedColor = MOCK_COLORS[expectedColorKey] || '#999999';
+          var expectedColor = SPOT_GRADIENT_COLORS[i] || '#999999';
 
           if (spotDataset.backgroundColor !== expectedColor) {
             throw new Error(
@@ -311,8 +297,7 @@ describe('Chart.js dataset colour and label correctness (Property 2)', function 
         for (var j = 0; j < paByType.length; j++) {
           var paEntry = paByType[j];
           var paDataset = paDatasets[j];
-          var paColorKey = PA_COLOR_MAP[paEntry.slug] || 'paTypeNaturschutzgebiet';
-          var expectedPaColor = MOCK_COLORS[paColorKey] || '#999999';
+          var expectedPaColor = PA_GRADIENT_COLORS[j] || '#999999';
 
           if (paDataset.backgroundColor !== expectedPaColor) {
             throw new Error(
