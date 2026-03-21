@@ -83,13 +83,13 @@ Implement the Spot Freshness Dashboard as a new dashboard module on the data qua
     - **Property 8: Legend has exactly three entries**
     - **Validates: Requirements 5.2**
 
-  - [-] 3.10 Complete `deactivate()` cleanup
+  - [x] 3.10 Complete `deactivate()` cleanup
     - Ensure `deactivate()` clears `#dashboard-legend`, `#dashboard-content`, `#dashboard-title`, `#dashboard-description`
     - Ensure all map markers are removed and all Chart.js instances are destroyed
     - Make `deactivate()` idempotent
     - _Requirements: 8.1, 8.2, 8.3_
 
-  - [~] 3.11 Write property test for full deactivation cleanup
+  - [-] 3.11 Write property test for full deactivation cleanup
     - **Property 11: All UI elements cleared on deactivation**
     - **Validates: Requirements 8.1, 8.3, 5.5**
 
