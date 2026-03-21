@@ -59,7 +59,7 @@ Implement the Spot Freshness Dashboard as a new dashboard module on the data qua
     - **Property 5: Chart destroyed on deactivation**
     - **Validates: Requirements 3.4, 8.2**
 
-  - [-] 3.6 Implement map markers in `activate()`
+  - [x] 3.6 Implement map markers in `activate()`
     - Read spot data from `PaddelbuchDashboardData.spotFreshnessMapData`
     - For each entry with valid `lat`, `lon`, and `category`, create a Leaflet `divIcon` marker with inline SVG shape (circle for fresh, triangle for aging, square for stale) filled with the corresponding `PaddelbuchColors` colour
     - Add all markers to a `L.layerGroup` on the map
@@ -67,7 +67,7 @@ Implement the Spot Freshness Dashboard as a new dashboard module on the data qua
     - Skip entries with null/missing `updatedAt` or `location` (already filtered at build time, but guard at runtime too)
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 8.1_
 
-  - [~] 3.7 Write property tests for marker count and shape/colour
+  - [-] 3.7 Write property tests for marker count and shape/colour
     - **Property 6: Marker count equals valid spots**
     - **Validates: Requirements 4.1, 4.5, 4.6**
     - **Property 7: Marker shape and colour match freshness category**
