@@ -20,11 +20,13 @@ var path = require('path');
 
 var GERMAN_DEFAULTS = {
   name: 'Einstiegsort-Aktualität',
-  description: 'Aktualität der einzelnen Einstiegsorte.',
+  description: 'Wie kürzlich jeder einzelne Einstiegsort, der Paddlern zur Verfügung steht, aktualisiert wurde.',
   fresh: 'Aktuell (≤ 2 Jahre)',
   aging: 'Alternd (2–5 Jahre)',
   stale: 'Veraltet (> 5 Jahre)',
-  chart_title: 'Aktualität der Einstiegsorte'
+  chart_title: 'Aktualität der Einstiegsorte',
+  popup_age: 'Alter',
+  popup_years: 'Jahre'
 };
 
 var ALL_KEYS = Object.keys(GERMAN_DEFAULTS);

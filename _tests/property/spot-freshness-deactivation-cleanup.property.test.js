@@ -87,7 +87,7 @@ describe('Spot Freshness Deactivation Cleanup (Property 11)', function () {
         };
       },
       marker: function (latlng, opts) {
-        return { latlng: latlng, options: opts };
+        return { latlng: latlng, options: opts, bindPopup: function () { return this; } };
       },
       divIcon: function (opts) { return opts; }
     };
