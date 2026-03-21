@@ -135,7 +135,7 @@
   function getStrings() {
     var defaults = {
       name: 'Einstiegsort-Aktualität',
-      description: 'Aktualität der einzelnen Einstiegsorte.',
+      description: 'Wie kürzlich jeder einzelne Einstiegsort, der Paddlern zur Verfügung steht, aktualisiert wurde.',
       fresh: 'Aktuell (≤ 2 Jahre)',
       aging: 'Alternd (2–5 Jahre)',
       stale: 'Veraltet (> 5 Jahre)',

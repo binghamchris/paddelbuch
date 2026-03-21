@@ -198,7 +198,7 @@ dashboards:
     popup_spots: "Spots"
   spot_freshness:
     name: "Spot Freshness"
-    description: "Freshness of individual spots."
+    description: "How recently each individual spot which is available for paddlers to use was updated."
     fresh: "Fresh (≤ 2 years)"
     aging: "Aging (2–5 years)"
     stale: "Stale (> 5 years)"
