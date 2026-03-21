@@ -2,9 +2,9 @@
  * Paddelbuch Statistics Dashboard Module
  *
  * Renders pre-computed statistics metrics as summary figures and horizontal
- * stacked bar charts. Displays totals and breakdowns for spots, obstacles,
- * protected areas, paddle craft types, data source types, and data license
- * types.
+ * stacked bar charts using Chart.js. Displays totals and breakdowns for spots,
+ * obstacles, protected areas, paddle craft types, data source types, and data
+ * license types.
  *
  * All metric computation is done at Jekyll build time by
  * statistics_metrics_generator.rb — this module only renders pre-computed data.
@@ -17,7 +17,10 @@
 (function(global) {
   'use strict';
 
+  var Chart = global.Chart;
   var colors = global.PaddelbuchColors || {};
+  var chartInstances = [];
+  var pendingCharts = [];
 
   /**
    * Colour-to-slug mapping for spot types.
@@ -114,14 +117,72 @@
   }
 
   /**
+   * Destroys all active Chart.js instances and clears the tracking array.
+   */
+  function destroyCharts() {
+    for (var i = 0; i < chartInstances.length; i++) {
+      try {
+        chartInstances[i].destroy();
+      } catch (e) {
+        // Continue destroying remaining instances
+      }
+    }
+    chartInstances = [];
+  }
+
+  /**
+   * Creates a horizontal stacked bar chart on a canvas element.
+   *
+   * @param {HTMLCanvasElement} canvas - The canvas element to render into
+   * @param {Array} segments - Array of { name, count, colorKey, slug } objects
+   * @returns {Object|null} The Chart instance, or null if Chart is unavailable
+   */
+  function createStackedBarChart(canvas, segments) {
+    if (!canvas || !Chart) return null;
+    var chart = new Chart(canvas, {
+      type: 'bar',
+      data: {
+        labels: [''],
+        datasets: segments.map(function(seg) {
+          return {
+            label: seg.name,
+            data: [seg.count],
+            backgroundColor: getColor(seg.colorKey)
+          };
+        })
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { enabled: true }
+        },
+        scales: {
+          x: { stacked: true, display: false },
+          y: { stacked: true, display: false }
+        }
+      }
+    });
+    chartInstances.push(chart);
+    return chart;
+  }
+
+  /**
    * Renders a summary figure (prominent number + label).
    *
    * @param {number} value - The numeric value to display
    * @param {string} label - The label text below the number
+   * @param {string} [modifier] - Optional BEM modifier slug (e.g. 'spots')
    * @returns {string} HTML string
    */
-  function renderFigure(value, label) {
-    var html = '<div class="statistics-figure">';
+  function renderFigure(value, label, modifier) {
+    var cls = 'statistics-figure';
+    if (modifier) {
+      cls += ' statistics-figure--' + modifier;
+    }
+    var html = '<div class="' + cls + '">';
     html += '<div class="statistics-figure-value">' + escapeHtml(String(value)) + '</div>';
     html += '<div class="statistics-figure-label">' + escapeHtml(label) + '</div>';
     html += '</div>';
@@ -129,28 +190,27 @@
   }
 
   /**
-   * Renders a horizontal stacked bar chart from an array of segments.
+   * Renders a horizontal stacked bar chart placeholder as a canvas element
+   * inside a chart container div. Stores segment data in pendingCharts for
+   * later Chart.js instantiation after innerHTML is set.
    *
-   * @param {Array} segments - Array of { name, count, colorKey } objects
-   * @param {number} total - The total count (sum of all segments)
-   * @returns {string} HTML string for the bar
+   * @param {Array} segments - Array of { name, count, colorKey, slug } objects
+   * @param {string} section - Section identifier (e.g. 'spots', 'obstacles')
+   * @returns {string} HTML string for the chart container with canvas
    */
-  function renderStackedBar(segments, total) {
-    var html = '<div class="statistics-bar">';
-    for (var i = 0; i < segments.length; i++) {
-      var seg = segments[i];
-      var pct = total > 0 ? (seg.count / total) * 100 : 0;
-      html += '<div class="statistics-bar-segment" style="width:' + pct + '%;background-color:' + getColor(seg.colorKey) + ';">';
-      html += '</div>';
-    }
+  function renderStackedBar(segments, section) {
+    pendingCharts.push({ section: section, segments: segments });
+    var html = '<div class="statistics-chart-container">';
+    html += '<canvas data-chart-section="' + escapeHtml(section) + '"></canvas>';
     html += '</div>';
     return html;
   }
 
   /**
-   * Renders a colour-coded legend for a set of segments.
+   * Renders a colour-coded legend for a set of segments using BEM-modifier
+   * CSS classes instead of inline styles.
    *
-   * @param {Array} segments - Array of { name, colorKey } objects
+   * @param {Array} segments - Array of { name, slug } objects
    * @returns {string} HTML string for the legend
    */
   function renderLegend(segments) {
@@ -158,7 +218,7 @@
     for (var i = 0; i < segments.length; i++) {
       var seg = segments[i];
       html += '<div class="statistics-legend-item">';
-      html += '<span class="statistics-legend-swatch" style="background-color:' + getColor(seg.colorKey) + ';"></span>';
+      html += '<span class="statistics-legend-swatch statistics-legend-swatch--' + escapeHtml(seg.slug) + '"></span>';
       html += '<span>' + escapeHtml(seg.name) + '</span>';
       html += '</div>';
     }
@@ -171,15 +231,16 @@
    *
    * @param {string} title - Section heading text
    * @param {number} total - Total count for the summary figure
-   * @param {Array} segments - Array of { name, count, colorKey } objects
+   * @param {Array} segments - Array of { name, count, colorKey, slug } objects
+   * @param {string} section - Section identifier for BEM modifier and canvas data attribute
    * @returns {string} HTML string for the full section
    */
-  function renderBarSection(title, total, segments) {
+  function renderBarSection(title, total, segments, section) {
     var html = '<div class="statistics-section">';
     html += '<h3 class="statistics-section-title">' + escapeHtml(title) + '</h3>';
     html += '<div class="statistics-section-body">';
-    html += renderFigure(total, escapeHtml(title));
-    html += renderStackedBar(segments, total);
+    html += renderFigure(total, escapeHtml(title), section);
+    html += renderStackedBar(segments, section);
     html += '</div>';
     html += renderLegend(segments);
     html += '</div>';
@@ -190,7 +251,7 @@
    * Renders a section with only summary figures (no bar chart).
    *
    * @param {string} title - Section heading text
-   * @param {Array} items - Array of { name, count } objects
+   * @param {Array} items - Array of { name, count, slug } objects
    * @returns {string} HTML string for the figures section
    */
   function renderFiguresSection(title, items) {
@@ -198,7 +259,8 @@
     html += '<h3 class="statistics-section-title">' + escapeHtml(title) + '</h3>';
     html += '<div class="statistics-figures-grid">';
     for (var i = 0; i < items.length; i++) {
-      html += renderFigure(items[i].count, items[i].name);
+      var modifier = items[i].slug || undefined;
+      html += renderFigure(items[i].count, items[i].name, modifier);
     }
     html += '</div>';
     html += '</div>';
@@ -209,14 +271,14 @@
    * Builds spot type segments from metrics data.
    *
    * @param {Array} byType - Array of { slug, name, count } from metrics
-   * @returns {Array} Segments with colorKey added
+   * @returns {Array} Segments with colorKey and slug added
    */
   function buildSpotSegments(byType) {
     var segments = [];
     for (var i = 0; i < byType.length; i++) {
       var item = byType[i];
       var colorKey = SPOT_COLOR_MAP[item.slug] || 'spotTypeNoEntry';
-      segments.push({ name: item.name, count: item.count, colorKey: colorKey });
+      segments.push({ name: item.name, count: item.count, colorKey: colorKey, slug: item.slug });
     }
     return segments;
   }
@@ -226,12 +288,12 @@
    *
    * @param {Object} obstacles - { total, withPortageRoute, withoutPortageRoute }
    * @param {Object} strings - Localised string map
-   * @returns {Array} Segments with colorKey added
+   * @returns {Array} Segments with colorKey and slug added
    */
   function buildObstacleSegments(obstacles, strings) {
     return [
-      { name: strings.with_portage, count: obstacles.withPortageRoute || 0, colorKey: OBSTACLE_COLOR_MAP['with-portage'] },
-      { name: strings.without_portage, count: obstacles.withoutPortageRoute || 0, colorKey: OBSTACLE_COLOR_MAP['without-portage'] }
+      { name: strings.with_portage, count: obstacles.withPortageRoute || 0, colorKey: OBSTACLE_COLOR_MAP['with-portage'], slug: 'with-portage' },
+      { name: strings.without_portage, count: obstacles.withoutPortageRoute || 0, colorKey: OBSTACLE_COLOR_MAP['without-portage'], slug: 'without-portage' }
     ];
   }
 
@@ -239,14 +301,14 @@
    * Builds protected area type segments from metrics data.
    *
    * @param {Array} byType - Array of { slug, name, count } from metrics
-   * @returns {Array} Segments with colorKey added
+   * @returns {Array} Segments with colorKey and slug added
    */
   function buildPASegments(byType) {
     var segments = [];
     for (var i = 0; i < byType.length; i++) {
       var item = byType[i];
       var colorKey = PA_COLOR_MAP[item.slug] || 'paTypeNaturschutzgebiet';
-      segments.push({ name: item.name, count: item.count, colorKey: colorKey });
+      segments.push({ name: item.name, count: item.count, colorKey: colorKey, slug: item.slug });
     }
     return segments;
   }
@@ -263,6 +325,9 @@
     usesMap: false,
 
     activate: function(context) {
+      destroyCharts();
+      pendingCharts = [];
+
       var contentEl = context.contentEl || document.getElementById('dashboard-content');
       var descriptionEl = document.getElementById('dashboard-description');
       var titleEl = document.getElementById('dashboard-title');
@@ -284,17 +349,17 @@
       // --- Spots section ---
       var spots = metrics.spots || { total: 0, byType: [] };
       var spotSegments = buildSpotSegments(spots.byType || []);
-      html += renderBarSection(strings.spots_title, spots.total || 0, spotSegments);
+      html += renderBarSection(strings.spots_title, spots.total || 0, spotSegments, 'spots');
 
       // --- Obstacles section ---
       var obstacles = metrics.obstacles || { total: 0, withPortageRoute: 0, withoutPortageRoute: 0 };
       var obstacleSegments = buildObstacleSegments(obstacles, strings);
-      html += renderBarSection(strings.obstacles_title, obstacles.total || 0, obstacleSegments);
+      html += renderBarSection(strings.obstacles_title, obstacles.total || 0, obstacleSegments, 'obstacles');
 
       // --- Protected areas section ---
       var protectedAreas = metrics.protectedAreas || { total: 0, byType: [] };
       var paSegments = buildPASegments(protectedAreas.byType || []);
-      html += renderBarSection(strings.protected_areas_title, protectedAreas.total || 0, paSegments);
+      html += renderBarSection(strings.protected_areas_title, protectedAreas.total || 0, paSegments, 'protected-areas');
 
       // --- Paddle craft types section ---
       var paddleCraftTypes = metrics.paddleCraftTypes || [];
@@ -310,10 +375,21 @@
 
       if (contentEl) {
         contentEl.innerHTML = html;
+
+        // Create Chart.js instances on the now-rendered canvas elements
+        for (var i = 0; i < pendingCharts.length; i++) {
+          var pending = pendingCharts[i];
+          var canvas = contentEl.querySelector('canvas[data-chart-section="' + pending.section + '"]');
+          createStackedBarChart(canvas, pending.segments);
+        }
       }
+
+      pendingCharts = [];
     },
 
     deactivate: function() {
+      destroyCharts();
+
       var contentEl = document.getElementById('dashboard-content');
       if (contentEl) {
         contentEl.innerHTML = '';
