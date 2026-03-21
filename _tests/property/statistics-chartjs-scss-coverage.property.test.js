@@ -17,13 +17,9 @@ var path = require('path');
 
 var SCSS_PATH = path.resolve(__dirname, '../../_sass/components/_statistics-dashboard.scss');
 
-var SPOT_TYPE_SLUGS = [
-  'einstieg-ausstieg',
-  'nur-einstieg',
-  'nur-ausstieg',
-  'rasthalte',
-  'notauswasserungsstelle',
-  'no-entry'
+var SPOT_TYPE_CLASSES = [
+  'spot-pos-0', 'spot-pos-1', 'spot-pos-2',
+  'spot-pos-3', 'spot-pos-4', 'spot-pos-5'
 ];
 
 var OBSTACLE_TYPE_SLUGS = [
@@ -31,19 +27,13 @@ var OBSTACLE_TYPE_SLUGS = [
   'without-portage'
 ];
 
-var PA_TYPE_SLUGS = [
-  'naturschutzgebiet',
-  'fahrverbotzone',
-  'schilfgebiet',
-  'schwimmbereich',
-  'industriegebiet',
-  'schiesszone',
-  'teleskizone',
-  'privatbesitz',
-  'wasserskizone'
+var PA_TYPE_CLASSES = [
+  'pa-pos-0', 'pa-pos-1', 'pa-pos-2',
+  'pa-pos-3', 'pa-pos-4', 'pa-pos-5',
+  'pa-pos-6', 'pa-pos-7', 'pa-pos-8'
 ];
 
-var ALL_SLUGS = SPOT_TYPE_SLUGS.concat(OBSTACLE_TYPE_SLUGS).concat(PA_TYPE_SLUGS);
+var ALL_SLUGS = SPOT_TYPE_CLASSES.concat(OBSTACLE_TYPE_SLUGS).concat(PA_TYPE_CLASSES);
 
 describe('SCSS BEM-modifier coverage (Property 7)', function () {
   var scssContent;
