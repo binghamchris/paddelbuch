@@ -23,16 +23,19 @@
   var pendingCharts = [];
 
   /**
-   * Colour-to-slug mapping for spot types.
+   * Ordered gradient arrays for spot and protected-area charts.
+   * Colours are assigned by sort position (index 0 = largest category = darkest).
+   * Values come from PaddelbuchColors, sourced from _paddelbuch_colours.scss.
    */
-  var SPOT_COLOR_MAP = {
-    'einstieg-ausstieg': 'spotTypeEntryExit',
-    'nur-einstieg': 'spotTypeEntryOnly',
-    'nur-ausstieg': 'spotTypeExitOnly',
-    'rasthalte': 'spotTypeRest',
-    'notauswasserungsstelle': 'spotTypeEmergency',
-    'no-entry': 'spotTypeNoEntry'
-  };
+  var SPOT_GRADIENT = [
+    colors.chartGradientSpot1, colors.chartGradientSpot2, colors.chartGradientSpot3,
+    colors.chartGradientSpot4, colors.chartGradientSpot5, colors.chartGradientSpot6
+  ];
+  var PA_GRADIENT = [
+    colors.chartGradientPa1, colors.chartGradientPa2, colors.chartGradientPa3,
+    colors.chartGradientPa4, colors.chartGradientPa5, colors.chartGradientPa6,
+    colors.chartGradientPa7, colors.chartGradientPa8, colors.chartGradientPa9
+  ];
 
   /**
    * Colour-to-slug mapping for obstacle segments.
@@ -40,21 +43,6 @@
   var OBSTACLE_COLOR_MAP = {
     'with-portage': 'obstacleWithPortage',
     'without-portage': 'obstacleWithoutPortage'
-  };
-
-  /**
-   * Colour-to-slug mapping for protected area types.
-   */
-  var PA_COLOR_MAP = {
-    'naturschutzgebiet': 'paTypeNaturschutzgebiet',
-    'fahrverbotzone': 'paTypeFahrverbotzone',
-    'schilfgebiet': 'paTypeSchilfgebiet',
-    'schwimmbereich': 'paTypeSchwimmbereich',
-    'industriegebiet': 'paTypeIndustriegebiet',
-    'schiesszone': 'paTypeSchiesszone',
-    'teleskizone': 'paTypeTeleskizone',
-    'privatbesitz': 'paTypePrivatbesitz',
-    'wasserskizone': 'paTypeWasserskizone'
   };
 
   /**
@@ -134,7 +122,7 @@
    * Creates a horizontal stacked bar chart on a canvas element.
    *
    * @param {HTMLCanvasElement} canvas - The canvas element to render into
-   * @param {Array} segments - Array of { name, count, colorKey, slug } objects
+   * @param {Array} segments - Array of { name, count, color, slug } objects
    * @returns {Object|null} The Chart instance, or null if Chart is unavailable
    */
   function createStackedBarChart(canvas, segments) {
@@ -151,7 +139,7 @@
           return {
             label: seg.name,
             data: [total > 0 ? (seg.count / total) * 100 : 0],
-            backgroundColor: getColor(seg.colorKey)
+            backgroundColor: seg.color
           };
         })
       },
@@ -219,10 +207,11 @@
   }
 
   /**
-   * Renders a colour-coded legend for a set of segments using BEM-modifier
-   * CSS classes instead of inline styles.
+   * Renders a colour-coded legend for a set of segments using inline
+   * background-color styles (colour is determined by sort position at
+   * render time, not by category).
    *
-   * @param {Array} segments - Array of { name, slug } objects
+   * @param {Array} segments - Array of { name, slug, color } objects
    * @returns {string} HTML string for the legend
    */
   function renderLegend(segments) {
@@ -230,7 +219,11 @@
     for (var i = 0; i < segments.length; i++) {
       var seg = segments[i];
       html += '<div class="statistics-legend-item">';
-      html += '<span class="statistics-legend-swatch statistics-legend-swatch--' + escapeHtml(seg.slug) + '"></span>';
+      html += '<span class="statistics-legend-swatch statistics-legend-swatch--' + escapeHtml(seg.slug) + '"';
+      if (seg.color) {
+        html += ' style="background-color:' + escapeHtml(seg.color) + '"';
+      }
+      html += '></span>';
       html += '<span>' + escapeHtml(seg.name) + '</span>';
       html += '</div>';
     }
@@ -247,11 +240,29 @@
    * @param {string} section - Section identifier for BEM modifier and canvas data attribute
    * @returns {string} HTML string for the full section
    */
+  /**
+   * Renders a section with a summary figure, stacked bar chart, and legend.
+   *
+   * @param {string} title - Section heading text
+   * @param {number} total - Total count for the summary figure
+   * @param {Array} segments - Array of { name, count, slug } objects
+   * @param {string} section - Section identifier for BEM modifier and canvas data attribute
+   * @param {Object} [options] - Optional settings
+   * @param {Array} [options.gradient] - Ordered colour array (dark→light) to assign by sort position
+   * @returns {string} HTML string for the full section
+   */
   function renderBarSection(title, total, segments, section, options) {
     var opts = options || {};
     var headingTag = opts.headingTag || 'h3';
     var sectionModifier = opts.sectionModifier || '';
+    var gradient = opts.gradient || null;
     segments.sort(function(a, b) { return b.count - a.count; });
+    // Assign gradient colours by sort position (index 0 = largest = darkest)
+    if (gradient) {
+      for (var g = 0; g < segments.length; g++) {
+        segments[g].color = gradient[g] || '#999999';
+      }
+    }
     var sectionCls = 'statistics-section';
     if (sectionModifier) {
       sectionCls += ' statistics-section--' + sectionModifier;
@@ -297,14 +308,13 @@
    * Builds spot type segments from metrics data.
    *
    * @param {Array} byType - Array of { slug, name, count } from metrics
-   * @returns {Array} Segments with colorKey and slug added
+   * @returns {Array} Segments with slug added (colour assigned later by sort position)
    */
   function buildSpotSegments(byType) {
     var segments = [];
     for (var i = 0; i < byType.length; i++) {
       var item = byType[i];
-      var colorKey = SPOT_COLOR_MAP[item.slug] || 'spotTypeNoEntry';
-      segments.push({ name: item.name, count: item.count, colorKey: colorKey, slug: item.slug });
+      segments.push({ name: item.name, count: item.count, slug: item.slug });
     }
     return segments;
   }
@@ -318,8 +328,8 @@
    */
   function buildObstacleSegments(obstacles, strings) {
     return [
-      { name: strings.with_portage, count: obstacles.withPortageRoute || 0, colorKey: OBSTACLE_COLOR_MAP['with-portage'], slug: 'with-portage' },
-      { name: strings.without_portage, count: obstacles.withoutPortageRoute || 0, colorKey: OBSTACLE_COLOR_MAP['without-portage'], slug: 'without-portage' }
+      { name: strings.with_portage, count: obstacles.withPortageRoute || 0, color: getColor(OBSTACLE_COLOR_MAP['with-portage']), slug: 'with-portage' },
+      { name: strings.without_portage, count: obstacles.withoutPortageRoute || 0, color: getColor(OBSTACLE_COLOR_MAP['without-portage']), slug: 'without-portage' }
     ];
   }
 
@@ -327,14 +337,13 @@
    * Builds protected area type segments from metrics data.
    *
    * @param {Array} byType - Array of { slug, name, count } from metrics
-   * @returns {Array} Segments with colorKey and slug added
+   * @returns {Array} Segments with slug added (colour assigned later by sort position)
    */
   function buildPASegments(byType) {
     var segments = [];
     for (var i = 0; i < byType.length; i++) {
       var item = byType[i];
-      var colorKey = PA_COLOR_MAP[item.slug] || 'paTypeNaturschutzgebiet';
-      segments.push({ name: item.name, count: item.count, colorKey: colorKey, slug: item.slug });
+      segments.push({ name: item.name, count: item.count, slug: item.slug });
     }
     return segments;
   }
@@ -375,7 +384,7 @@
       // --- Spots section ---
       var spots = metrics.spots || { total: 0, byType: [] };
       var spotSegments = buildSpotSegments(spots.byType || []);
-      html += renderBarSection(strings.spots_title, spots.total || 0, spotSegments, 'spots');
+      html += renderBarSection(strings.spots_title, spots.total || 0, spotSegments, 'spots', { gradient: SPOT_GRADIENT });
 
       // --- Obstacles section ---
       var obstacles = metrics.obstacles || { total: 0, withPortageRoute: 0, withoutPortageRoute: 0 };
@@ -385,7 +394,7 @@
       // --- Protected areas section ---
       var protectedAreas = metrics.protectedAreas || { total: 0, byType: [] };
       var paSegments = buildPASegments(protectedAreas.byType || []);
-      html += renderBarSection(strings.protected_areas_title, protectedAreas.total || 0, paSegments, 'protected-areas');
+      html += renderBarSection(strings.protected_areas_title, protectedAreas.total || 0, paSegments, 'protected-areas', { gradient: PA_GRADIENT });
 
       // --- Paddle craft types section ---
       var paddleCraftTypes = metrics.paddleCraftTypes || [];

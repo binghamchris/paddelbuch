@@ -165,17 +165,11 @@
   display: inline-block;
   width: 0.85rem;
   height: 0.85rem;
-  border-radius: 2px;
   flex-shrink: 0;
 }
 
 // Legend swatch BEM modifiers — Spot types
-.statistics-legend-swatch--einstieg-ausstieg   { background-color: $spot-type-entry-exit; }
-.statistics-legend-swatch--nur-einstieg         { background-color: $spot-type-entry-only; }
-.statistics-legend-swatch--nur-ausstieg         { background-color: $spot-type-exit-only; }
-.statistics-legend-swatch--rasthalte            { background-color: $spot-type-rest; }
-.statistics-legend-swatch--notauswasserungsstelle { background-color: $spot-type-emergency; }
-.statistics-legend-swatch--no-entry             { background-color: $spot-type-no-entry; }
+// Colours assigned dynamically by sort position in statistics-dashboard.js
 
 // Legend swatch BEM modifiers — Obstacle types
 .statistics-legend-swatch--with-portage    { background-color: $obstacle-with-portage; }
@@ -187,12 +181,4 @@
 .statistics-legend-swatch--stale   { background-color: $danger-red; }
 
 // Legend swatch BEM modifiers — Protected area types
-.statistics-legend-swatch--naturschutzgebiet { background-color: $pa-type-naturschutzgebiet; }
-.statistics-legend-swatch--fahrverbotzone    { background-color: $pa-type-fahrverbotzone; }
-.statistics-legend-swatch--schilfgebiet      { background-color: $pa-type-schilfgebiet; }
-.statistics-legend-swatch--schwimmbereich    { background-color: $pa-type-schwimmbereich; }
-.statistics-legend-swatch--industriegebiet   { background-color: $pa-type-industriegebiet; }
-.statistics-legend-swatch--schiesszone       { background-color: $pa-type-schiesszone; }
-.statistics-legend-swatch--teleskizone       { background-color: $pa-type-teleskizone; }
-.statistics-legend-swatch--privatbesitz      { background-color: $pa-type-privatbesitz; }
-.statistics-legend-swatch--wasserskizone     { background-color: $pa-type-wasserskizone; }
+// Colours assigned dynamically by sort position in statistics-dashboard.js
