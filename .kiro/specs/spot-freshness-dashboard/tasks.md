@@ -73,13 +73,13 @@ Implement the Spot Freshness Dashboard as a new dashboard module on the data qua
     - **Property 7: Marker shape and colour match freshness category**
     - **Validates: Requirements 4.2, 4.3**
 
-  - [-] 3.8 Implement the shared legend in `activate()`
+  - [x] 3.8 Implement the shared legend in `activate()`
     - Render exactly three legend entries (Fresh, Aging, Stale) in `#dashboard-legend`
     - Each entry uses an SVG shape indicator (circle, triangle, square) filled with the corresponding `PaddelbuchColors` colour — no plain colour swatches
     - Clear `#dashboard-legend` in `deactivate()`
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5_
 
-  - [~] 3.9 Write property test for legend entries
+  - [-] 3.9 Write property test for legend entries
     - **Property 8: Legend has exactly three entries**
     - **Validates: Requirements 5.2**
 
