@@ -48,6 +48,10 @@ const FILE_COPIES = [
     src: 'node_modules/@maplibre/maplibre-gl-leaflet/leaflet-maplibre-gl.js',
     dest: 'assets/js/vendor/leaflet-maplibre-gl.js',
   },
+  {
+    src: 'node_modules/chart.js/dist/chart.umd.js',
+    dest: 'assets/js/vendor/chart.umd.js',
+  },
 ];
 
 function createDirectories() {
