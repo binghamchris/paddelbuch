@@ -7,7 +7,7 @@
  * Popups show waterway name, spot count, and median age.
  *
  * All metric computation is done at Jekyll build time by
- * dashboard_metrics_generator.rb — this module only renders pre-computed data.
+ * dashboard_metrics_generator.rb - this module only renders pre-computed data.
  *
  * Requirements: 3.1, 3.9, 3.10, 6.5, 7.1
  */

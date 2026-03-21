@@ -57,7 +57,7 @@ TYPE_FILTER_SLUGS = case TARGET_TYPE
 
 BASE_URL = "https://api.contentful.com/spaces/#{SPACE_ID}/environments/#{ENVIRONMENT}"
 
-# Douglas-Peucker tolerance in degrees (~25m at 47°N latitude)
+# Douglas-Peucker tolerance in degrees (~25m at 47degN latitude)
 TOLERANCE = 25.0 / 93_000.0
 PRECISION = 6
 
@@ -212,7 +212,7 @@ end
 # Main
 # ---------------------------------------------------------------------------
 
-puts DRY_RUN ? '=== DRY RUN — no changes will be written ===' : '=== LIVE RUN — changes will be written to Contentful ==='
+puts DRY_RUN ? '=== DRY RUN - no changes will be written ===' : '=== LIVE RUN - changes will be written to Contentful ==='
 puts "=== Target: #{TARGET_SLUG ? "slug '#{TARGET_SLUG}'" : 'all waterways'} ===" if TARGET_SLUG
 puts "=== Type filter: #{TARGET_TYPE} ===" if TARGET_TYPE
 puts
@@ -293,7 +293,7 @@ waterways.each_with_index do |entry, idx|
              end
 
   unless full_geo
-    puts "  [#{idx + 1}/#{waterways.size}] #{slug}: could not parse fullGeometry — skipping"
+    puts "  [#{idx + 1}/#{waterways.size}] #{slug}: could not parse fullGeometry - skipping"
     skipped_no_full_geometry += 1
     next
   end

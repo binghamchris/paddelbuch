@@ -10,7 +10,7 @@
  * total waterway length that is covered vs uncovered.
  *
  * All metric computation is done at Jekyll build time by
- * dashboard_metrics_generator.rb — this module only renders pre-computed data.
+ * dashboard_metrics_generator.rb - this module only renders pre-computed data.
  *
  * Requirements: 4.1, 4.6, 4.7, 6.5, 7.1
  */
@@ -282,7 +282,7 @@
         var metric = metrics[i];
         var popupHtml = buildPopupHtml(metric, strings);
 
-        // Uncovered segments (red) — added first so they render below
+        // Uncovered segments (red) - added first so they render below
         if (metric.uncoveredSegments) {
           var uncoveredLayer = L.geoJSON(metric.uncoveredSegments, {
             style: {
@@ -296,7 +296,7 @@
           layers.push(uncoveredLayer);
         }
 
-        // Covered segments (green) — added second so they render on top
+        // Covered segments (green) - added second so they render on top
         if (metric.coveredSegments) {
           var coveredLayer = L.geoJSON(metric.coveredSegments, {
             style: {

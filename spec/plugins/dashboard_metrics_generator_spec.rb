@@ -19,7 +19,7 @@ RSpec.describe Jekyll::DashboardMetricsGenerator do
 
   let(:line_geometry_json) { '{"type":"LineString","coordinates":[[8.5,47.3],[8.6,47.4]]}' }
 
-  # ── median_age ──────────────────────────────────────────────────────────────
+  # -- median_age --------------------------------------------------------------
 
   describe '#median_age' do
     let(:now) { Time.utc(2025, 1, 1) }
@@ -30,7 +30,7 @@ RSpec.describe Jekyll::DashboardMetricsGenerator do
     end
 
     it 'returns the middle value for an odd-count array (Requirement 9.2)' do
-      # 3 timestamps: 10, 20, 30 days before now → median = 20
+      # 3 timestamps: 10, 20, 30 days before now -> median = 20
       timestamps = [
         (now - 10 * 86_400).iso8601,
         (now - 30 * 86_400).iso8601,
@@ -41,7 +41,7 @@ RSpec.describe Jekyll::DashboardMetricsGenerator do
     end
 
     it 'returns the average of two middle values for an even-count array (Requirement 9.3)' do
-      # 4 timestamps: 10, 20, 30, 40 days before now → median = (20+30)/2 = 25
+      # 4 timestamps: 10, 20, 30, 40 days before now -> median = (20+30)/2 = 25
       timestamps = [
         (now - 40 * 86_400).iso8601,
         (now - 10 * 86_400).iso8601,
@@ -53,7 +53,7 @@ RSpec.describe Jekyll::DashboardMetricsGenerator do
     end
   end
 
-  # ── freshness_color ─────────────────────────────────────────────────────────
+  # -- freshness_color ---------------------------------------------------------
 
   describe '#freshness_color' do
     it 'returns green-1 at 0 days (Requirement 3.4)' do
@@ -92,7 +92,7 @@ RSpec.describe Jekyll::DashboardMetricsGenerator do
     end
   end
 
-  # ── classify_segments ───────────────────────────────────────────────────────
+  # -- classify_segments -------------------------------------------------------
 
   describe '#classify_segments' do
     let(:geometry) { JSON.parse(line_geometry_json) }
@@ -127,7 +127,7 @@ RSpec.describe Jekyll::DashboardMetricsGenerator do
     end
   end
 
-  # ── malformed geometry ──────────────────────────────────────────────────────
+  # -- malformed geometry ------------------------------------------------------
 
   describe 'malformed geometry handling' do
     it 'skips waterways with malformed geometry JSON gracefully' do
@@ -147,7 +147,7 @@ RSpec.describe Jekyll::DashboardMetricsGenerator do
     end
   end
 
-  # ── deduplicate_by_slug ─────────────────────────────────────────────────────
+  # -- deduplicate_by_slug -----------------------------------------------------
 
   describe '#deduplicate_by_slug' do
     it 'returns one entry per unique slug' do
@@ -172,7 +172,7 @@ RSpec.describe Jekyll::DashboardMetricsGenerator do
     end
   end
 
-  # ── deduplicate_spots_by_waterway ───────────────────────────────────────────
+  # -- deduplicate_spots_by_waterway -------------------------------------------
 
   describe '#deduplicate_spots_by_waterway' do
     it 'returns one spot per unique slug per waterway group' do
@@ -200,7 +200,7 @@ RSpec.describe Jekyll::DashboardMetricsGenerator do
     end
   end
 
-  # ── localize_metrics ────────────────────────────────────────────────────────
+  # -- localize_metrics --------------------------------------------------------
 
   describe '#localize_metrics' do
     it 'swaps names correctly for the given locale' do
@@ -236,7 +236,7 @@ RSpec.describe Jekyll::DashboardMetricsGenerator do
     end
   end
 
-  # ── cross-locale caching ────────────────────────────────────────────────────
+  # -- cross-locale caching ----------------------------------------------------
 
   describe 'cross-locale caching' do
     before do

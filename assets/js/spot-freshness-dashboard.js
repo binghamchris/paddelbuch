@@ -7,7 +7,7 @@
  * freshness category. A shared legend explains both chart and map symbols.
  *
  * All metric computation is done at Jekyll build time by
- * statistics_metrics_generator.rb — this module only renders pre-computed data.
+ * statistics_metrics_generator.rb - this module only renders pre-computed data.
  *
  * Requirements: 1.1, 1.2, 1.3, 2.3, 3.1, 3.2, 3.3, 3.4, 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 7.2, 8.1, 8.2
  */
