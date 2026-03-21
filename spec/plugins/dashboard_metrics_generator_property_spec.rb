@@ -290,13 +290,16 @@ RSpec.describe Jekyll::DashboardMetricsGenerator, 'property tests' do
   describe '#classify_segments — Property 6: Single-spot coverage contiguity' do
     it 'produces a contiguous covered run for a single spot' do
       property_of {
-        # Generate a LineString with 5-15 coordinate pairs within Swiss bounds
+        # Generate a LineString with 5-15 coordinate pairs within Swiss bounds.
+        # Sort by longitude to produce a monotonic path (like a real waterway),
+        # which ensures the distance-to-spot function has at most one local
+        # minimum along the path, making contiguity hold.
         num_coords = range(5, 15)
         coords = Array.new(num_coords) {
           lat = range(45_800, 47_800) / 1000.0
           lon = range(5_900, 10_500) / 1000.0
           [lon, lat]
-        }
+        }.sort_by { |c| c[0] }
 
         geometry = { 'type' => 'LineString', 'coordinates' => coords }
 

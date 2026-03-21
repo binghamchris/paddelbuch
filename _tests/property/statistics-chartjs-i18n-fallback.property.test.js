@@ -28,11 +28,7 @@ var GERMAN_DEFAULTS = {
   data_license_title: 'Einträge nach Datenlizenz',
   with_portage: 'Mit Portage-Route',
   without_portage: 'Ohne Portage-Route',
-  no_entry: 'Kein Zutritt',
-  spot_freshness_title: 'Aktualität der Einstiegsorte (Verfügbare Einstiegsorte)',
-  freshness_fresh: 'Aktuell (≤ 2 Jahre)',
-  freshness_aging: 'Alternd (2–5 Jahre)',
-  freshness_stale: 'Veraltet (> 5 Jahre)'
+  no_entry: 'Kein Zutritt'
 };
 
 var ALL_KEYS = Object.keys(GERMAN_DEFAULTS);
@@ -97,8 +93,8 @@ describe('i18n German fallback (Property 8)', function () {
     // Mock PaddelbuchColors
     window.PaddelbuchColors = {
       spotTypeEntryExit: '#2e86c1',
-      obstacleWithPortage: '#27ae60',
-      obstacleWithoutPortage: '#e74c3c',
+      obstacleWithPortage: '#07753f',
+      obstacleWithoutPortage: '#c40200',
       paTypeNaturschutzgebiet: '#1a5276',
       green1: '#07753f',
       warningYellow: '#ffb200',
@@ -140,7 +136,7 @@ describe('i18n German fallback (Property 8)', function () {
   }
 
   it('uses German defaults for all keys when #statistics-i18n is absent or has empty/missing values', function () {
-    // Load the module once — getStrings() is called fresh on each activate()
+    // Load the module once - getStrings() is called fresh on each activate()
     require(modulePath);
 
     var dashboard = window.PaddelbuchStatisticsDashboard;
@@ -198,7 +194,7 @@ describe('i18n German fallback (Property 8)', function () {
         // --- Verify section headings ---
         var sectionTitles = contentEl.querySelectorAll('.statistics-section-title');
         var headingKeys = [
-          'spots_title', 'spot_freshness_title', 'obstacles_title', 'protected_areas_title',
+          'spots_title', 'obstacles_title', 'protected_areas_title',
           'paddle_craft_title', 'data_source_title', 'data_license_title'
         ];
 

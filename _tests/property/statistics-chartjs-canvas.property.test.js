@@ -129,8 +129,8 @@ describe('Canvas rendering for bar chart sections (Property 1)', function () {
       spotTypeRest: '#8e44ad',
       spotTypeEmergency: '#c0392b',
       spotTypeNoEntry: '#7f8c8d',
-      obstacleWithPortage: '#27ae60',
-      obstacleWithoutPortage: '#e74c3c',
+      obstacleWithPortage: '#07753f',
+      obstacleWithoutPortage: '#c40200',
       paTypeNaturschutzgebiet: '#1a5276',
       paTypeFahrverbotzone: '#d4ac0d',
       paTypeSchilfgebiet: '#117a65',
@@ -191,9 +191,9 @@ describe('Canvas rendering for bar chart sections (Property 1)', function () {
         var canvases = contentEl.querySelectorAll('canvas');
 
         // Verify exactly 3 canvas elements
-        if (canvases.length !== 4) {
+        if (canvases.length !== 3) {
           throw new Error(
-            'Expected 4 canvas elements but found ' + canvases.length
+            'Expected 3 canvas elements but found ' + canvases.length
           );
         }
 

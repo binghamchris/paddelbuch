@@ -8,6 +8,7 @@ scripts:
   - /assets/js/dashboard-map.js
   - /assets/js/vendor/chart.umd.js
   - /assets/js/statistics-dashboard.js
+  - /assets/js/spot-freshness-dashboard.js
   - /assets/js/freshness-dashboard.js
   - /assets/js/coverage-dashboard.js
   - /assets/js/dashboard-switcher.js
@@ -52,7 +53,10 @@ scripts:
 <script type="application/json" id="statistics-data">{{ site.data.dashboard_statistics_metrics | jsonify }}</script>
 
 <script type="application/json" id="freshness-data">{{ site.data.dashboard_freshness_metrics | jsonify }}</script>
+<script type="application/json" id="freshness-summary-data">{{ site.data.dashboard_freshness_summary | jsonify }}</script>
 <script type="application/json" id="coverage-data">{{ site.data.dashboard_coverage_metrics | jsonify }}</script>
+<script type="application/json" id="coverage-summary-data">{{ site.data.dashboard_coverage_summary | jsonify }}</script>
+<script type="application/json" id="spot-freshness-map-data">{{ site.data.dashboard_spot_freshness_map_data | jsonify }}</script>
 
 <script type="application/json" id="statistics-i18n">
 {
@@ -66,11 +70,7 @@ scripts:
   "data_license_title": "{% t dashboards.statistics.data_license_title %}",
   "with_portage": "{% t dashboards.statistics.with_portage %}",
   "without_portage": "{% t dashboards.statistics.without_portage %}",
-  "no_entry": "{% t dashboards.statistics.no_entry %}",
-  "spot_freshness_title": "{% t dashboards.statistics.spot_freshness_title %}",
-  "freshness_fresh": "{% t dashboards.statistics.freshness_fresh %}",
-  "freshness_aging": "{% t dashboards.statistics.freshness_aging %}",
-  "freshness_stale": "{% t dashboards.statistics.freshness_stale %}"
+  "no_entry": "{% t dashboards.statistics.no_entry %}"
 }
 </script>
 <script type="application/json" id="freshness-i18n">
@@ -96,5 +96,17 @@ scripts:
   "covered": "{% t dashboards.coverage.covered %}",
   "not_covered": "{% t dashboards.coverage.not_covered %}",
   "popup_spots": "{% t dashboards.coverage.popup_spots %}"
+}
+</script>
+<script type="application/json" id="spot-freshness-i18n">
+{
+  "name": "{% t dashboards.spot_freshness.name %}",
+  "description": "{% t dashboards.spot_freshness.description %}",
+  "fresh": "{% t dashboards.spot_freshness.fresh %}",
+  "aging": "{% t dashboards.spot_freshness.aging %}",
+  "stale": "{% t dashboards.spot_freshness.stale %}",
+  "chart_title": "{% t dashboards.spot_freshness.chart_title %}",
+  "popup_age": "{% t dashboards.spot_freshness.popup_age %}",
+  "popup_years": "{% t dashboards.spot_freshness.popup_years %}"
 }
 </script>

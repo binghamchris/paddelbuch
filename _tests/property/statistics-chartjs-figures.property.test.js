@@ -128,8 +128,8 @@ describe('Summary figure BEM-modifier classes (Property 6)', function () {
       spotTypeRest: '#8e44ad',
       spotTypeEmergency: '#c0392b',
       spotTypeNoEntry: '#7f8c8d',
-      obstacleWithPortage: '#27ae60',
-      obstacleWithoutPortage: '#e74c3c',
+      obstacleWithPortage: '#07753f',
+      obstacleWithoutPortage: '#c40200',
       paTypeNaturschutzgebiet: '#1a5276',
       paTypeFahrverbotzone: '#d4ac0d',
       paTypeSchilfgebiet: '#117a65',
@@ -187,7 +187,7 @@ describe('Summary figure BEM-modifier classes (Property 6)', function () {
         dashboard.activate({ contentEl: contentEl });
 
         // --- Bar chart section figures: spots, obstacles, protected-areas ---
-        var barSections = ['spots', 'spot-freshness', 'obstacles', 'protected-areas'];
+        var barSections = ['spots', 'obstacles', 'protected-areas'];
         for (var b = 0; b < barSections.length; b++) {
           var sectionSlug = barSections[b];
           var figure = contentEl.querySelector('.statistics-figure--' + sectionSlug);

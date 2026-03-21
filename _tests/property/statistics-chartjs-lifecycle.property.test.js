@@ -132,8 +132,8 @@ describe('Chart.js instance lifecycle (Property 3)', function () {
       spotTypeRest: '#8e44ad',
       spotTypeEmergency: '#c0392b',
       spotTypeNoEntry: '#7f8c8d',
-      obstacleWithPortage: '#27ae60',
-      obstacleWithoutPortage: '#e74c3c',
+      obstacleWithPortage: '#07753f',
+      obstacleWithoutPortage: '#c40200',
       paTypeNaturschutzgebiet: '#1a5276',
       paTypeFahrverbotzone: '#d4ac0d',
       paTypeSchilfgebiet: '#117a65',
@@ -190,9 +190,9 @@ describe('Chart.js instance lifecycle (Property 3)', function () {
         var contentEl = document.getElementById('dashboard-content');
         dashboard.activate({ contentEl: contentEl });
 
-        if (window._chartInstances.length !== 4) {
+        if (window._chartInstances.length !== 3) {
           throw new Error(
-            'Step 1: Expected 4 Chart.js instances after activate(), got ' +
+            'Step 1: Expected 3 Chart.js instances after activate(), got ' +
             window._chartInstances.length
           );
         }
@@ -223,7 +223,7 @@ describe('Chart.js instance lifecycle (Property 3)', function () {
 
         // --- Step 3: Re-create DOM elements (deactivate clears innerHTML) ---
         // deactivate() clears innerHTML of #dashboard-content, #dashboard-title,
-        // #dashboard-description, #dashboard-legend — the elements still exist,
+        // #dashboard-description, #dashboard-legend - the elements still exist,
         // but their content is empty. No need to re-create the elements themselves.
 
         // Reset tracking array to count only new instances
@@ -233,9 +233,9 @@ describe('Chart.js instance lifecycle (Property 3)', function () {
         contentEl = document.getElementById('dashboard-content');
         dashboard.activate({ contentEl: contentEl });
 
-        if (window._chartInstances.length !== 4) {
+        if (window._chartInstances.length !== 3) {
           throw new Error(
-            'Step 4: Expected 4 fresh Chart.js instances after re-activate(), got ' +
+            'Step 4: Expected 3 fresh Chart.js instances after re-activate(), got ' +
             window._chartInstances.length
           );
         }
