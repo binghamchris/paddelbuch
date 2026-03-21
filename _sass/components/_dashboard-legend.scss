@@ -18,7 +18,6 @@
   display: inline-block;
   width: 20px;
   height: 12px;
-  border-radius: 3px;
   margin-right: 8px;
   flex-shrink: 0;
 
@@ -29,8 +28,8 @@
   &--no-data { background-color: $purple-1; }
 
   // Coverage colours
-  &--covered { background-color: $covered-green; }
-  &--uncovered { background-color: $uncovered-red; }
+  &--covered { background-color: $green-1; }
+  &--uncovered { background-color: $danger-red; }
 }
 
 .dashboard-legend-shape {

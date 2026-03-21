@@ -17,35 +17,42 @@ $purple-1: #69599b; //Royal Purple: rgb(105, 89, 155)
 $green-1: #07753f; //Dartmouth Green: rgb(7, 117, 63)
 $green-2: #38676d; //Ming: rgb(56, 103, 109)
 $green-3: #839420; //Olive Drab 3: rgb(131, 148, 32)
+$teal-1: #2a9d8f; //Persian Green: rgb(42, 157, 143)
+$coral-1: #e07a5f; //Terra Cotta: rgb(224, 122, 95)
+$steel-blue-1: #437695; //Steel Blue: rgb(67, 118, 149)
 
 // Coverage Dashboard Colours
-$covered-green: #4ab31f; //Kelly Green: rgb(74, 179, 31)
-$uncovered-red: #d0021b; //Lava Red: rgb(208, 2, 27)
 $white-40pc: rgba(255, 255, 255, 0.4);
 $secondary-blue-20:#60658920;
 
 // Text colours
 $text-muted: $secondary-blue;
 
-// Statistics Dashboard - Spot Type Colours
-$spot-type-entry-exit: #2e86c1;
-$spot-type-entry-only: #28b463;
-$spot-type-exit-only: #e67e22;
-$spot-type-rest: #8e44ad;
-$spot-type-emergency: #c0392b;
-$spot-type-no-entry: #7f8c8d;
+// Statistics Dashboard - Obstacle Colours (matches coverage dashboard: green-1 / danger-red)
+$obstacle-with-portage: #07753f; // = $green-1
+$obstacle-without-portage: #c40200; // = $danger-red
 
-// Statistics Dashboard - Obstacle Colours
-$obstacle-with-portage: #27ae60;
-$obstacle-without-portage: #e74c3c;
+// Statistics Dashboard - Chart Colour Palettes (ordered by sort position)
+// Uses existing site colours for maximum distinction between categories.
+// Avoids $danger-red, $warning-yellow, $green-1/2/3 (used semantically on other charts).
+// Ordered to maximise adjacent contrast in hue and lightness.
+// Assigned by sort position at render time (index 1 = largest category).
 
-// Statistics Dashboard - Protected Area Type Colours
-$pa-type-naturschutzgebiet: #1a5276;
-$pa-type-fahrverbotzone: #6c3483;
-$pa-type-schilfgebiet: #117a65;
-$pa-type-schwimmbereich: #2e86c1;
-$pa-type-industriegebiet: #7d6608;
-$pa-type-schiesszone: #943126;
-$pa-type-teleskizone: #1e8449;
-$pa-type-privatbesitz: #af601a;
-$pa-type-wasserskizone: #148f77;
+// Spot chart palette (6 stops)
+$chart-gradient-spot-1: #4c0561; // $routes-purple      (286°, L20%)
+$chart-gradient-spot-2: #e07a5f; // $coral-1            ( 14°, L63%)
+$chart-gradient-spot-3: #2a9d8f; // $teal-1             (173°, L39%)
+$chart-gradient-spot-4: #cb3cf6; // $startingspots-purple(286°, L60%)
+$chart-gradient-spot-5: #69599b; // $purple-1           (255°, L48%)
+$chart-gradient-spot-6: #e693be; // $othersport-pink    (329°, L74%)
+
+// Protected area chart palette (9 stops)
+$chart-gradient-pa-1: #4c0561; // $routes-purple       (286°, L20%)
+$chart-gradient-pa-2: #e07a5f; // $coral-1             ( 14°, L63%)
+$chart-gradient-pa-3: #2a9d8f; // $teal-1              (173°, L39%)
+$chart-gradient-pa-4: #cb3cf6; // $startingspots-purple (286°, L60%)
+$chart-gradient-pa-5: #437695; // $steel-blue-1        (203°, L42%)
+$chart-gradient-pa-6: #e693be; // $othersport-pink     (329°, L74%)
+$chart-gradient-pa-7: #69599b; // $purple-1            (255°, L48%)
+$chart-gradient-pa-8: #3cc4f6; // $water-blue          (196°, L60%)
+$chart-gradient-pa-9: #606589; // $secondary-blue      (233°, L46%)

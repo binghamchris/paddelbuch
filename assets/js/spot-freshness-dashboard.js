@@ -118,7 +118,7 @@
 
           var text = Math.round(pct) + '%';
           ctx.save();
-          ctx.fillStyle = '#fff';
+          ctx.fillStyle = segments[d].colorKey === 'warningYellow' ? '#000' : '#fff';
           ctx.font = '400 ' + fontSize + 'px ' + (window.getComputedStyle(chart.canvas).fontFamily || 'Quicksand, Helvetica, Arial, sans-serif');
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';

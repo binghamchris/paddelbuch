@@ -46,6 +46,12 @@ module Jekyll
         unique_waterways = deduplicate_by_slug(all_waterways)
         Jekyll.logger.info 'DashboardMetrics:', "Deduplicated #{all_waterways.size} waterway entries to #{unique_waterways.size} unique waterways"
 
+        # Exclude wildwasser waterways from dashboard metrics
+        pre_filter_count = unique_waterways.size
+        unique_waterways = unique_waterways.reject { |w| w['paddlingEnvironmentType_slug'] == 'wildwasser' }
+        excluded_count = pre_filter_count - unique_waterways.size
+        Jekyll.logger.info 'DashboardMetrics:', "Excluded #{excluded_count} wildwasser waterways, #{unique_waterways.size} remaining"
+
         # Deduplicate spots by waterway_slug (updatedAt/location are identical across locales)
         spots_by_waterway = all_spots.group_by { |s| s['waterway_slug'] }
         unique_spots_by_waterway = deduplicate_spots_by_waterway(spots_by_waterway)
@@ -69,11 +75,40 @@ module Jekyll
       waterway_names = build_waterway_name_lookup(site.data['waterways'] || [], locale)
 
       site.data['dashboard_freshness_metrics'] = localize_metrics(@@cached_freshness, waterway_names)
+      site.data['dashboard_freshness_summary'] = compute_freshness_summary(@@cached_freshness)
       site.data['dashboard_coverage_metrics'] = localize_metrics(@@cached_coverage, waterway_names)
+      site.data['dashboard_coverage_summary'] = compute_coverage_summary(@@cached_coverage)
       Jekyll.logger.info 'DashboardMetrics:', "Localized #{@@cached_freshness.size} freshness + #{@@cached_coverage.size} coverage metrics for locale '#{locale}'"
     end
 
     private
+
+    # Sums waterway lengths (km) per freshness category from the cached
+    # freshness metrics. For rivers the stored `length` field is used; for
+    # lakes the shore-line length is computed from the polygon geometry.
+    # Returns a hash with fresh, aging, stale, and noData totals in km.
+    def compute_freshness_summary(cached_freshness)
+      fresh = 0.0
+      aging = 0.0
+      stale = 0.0
+      no_data = 0.0
+
+      cached_freshness.each do |metric|
+        km = metric['lengthKm'] || 0.0
+        days = metric['medianAgeDays']
+        if days.nil?
+          no_data += km
+        elsif days <= 730.5
+          fresh += km
+        elsif days <= 1826.25
+          aging += km
+        else
+          stale += km
+        end
+      end
+
+      { 'fresh' => fresh.round(1), 'aging' => aging.round(1), 'stale' => stale.round(1), 'noData' => no_data.round(1) }
+    end
 
     # Returns one waterway hash per unique slug, picking the first occurrence.
     # Since geometry, length, and area are identical across locales, any
@@ -159,17 +194,62 @@ module Jekyll
         median_days = median_age(timestamps, now)
         color = freshness_color(median_days, colors)
 
+        # Determine effective length in km: use stored length for rivers,
+        # compute shore-line perimeter for lakes.
+        env_type = waterway['paddlingEnvironmentType_slug']
+        length_km = if env_type == 'see'
+                      geometry_perimeter(geometry) / 1000.0
+                    else
+                      (waterway['length'] || 0).to_f
+                    end
+
         metrics << {
           'slug' => slug,
           'name' => 'placeholder',
           'spotCount' => spots.size,
           'medianAgeDays' => median_days,
           'color' => color,
-          'geometry' => geometry
+          'geometry' => geometry,
+          'lengthKm' => length_km.round(1)
         }
       end
 
       metrics
+    end
+
+    # Computes the total perimeter in metres of a GeoJSON geometry.
+    # For Polygon / MultiPolygon geometries the outer-ring perimeter is
+    # summed (shore-line length for lakes). For LineString / MultiLineString
+    # the line length is summed. GeometryCollections are handled recursively.
+    def geometry_perimeter(geometry)
+      return 0.0 if geometry.nil?
+
+      case geometry['type']
+      when 'LineString'
+        line_length(geometry['coordinates'] || [])
+      when 'MultiLineString'
+        (geometry['coordinates'] || []).sum { |coords| line_length(coords) }
+      when 'Polygon'
+        # Outer ring is the first element
+        line_length((geometry['coordinates'] || []).first || [])
+      when 'MultiPolygon'
+        (geometry['coordinates'] || []).sum { |poly| line_length((poly || []).first || []) }
+      when 'GeometryCollection'
+        (geometry['geometries'] || []).sum { |g| geometry_perimeter(g) }
+      else
+        0.0
+      end
+    end
+
+    # Sums the haversine length in metres along a coordinate array.
+    def line_length(coords)
+      return 0.0 if coords.nil? || coords.size < 2
+
+      total = 0.0
+      (0...(coords.size - 1)).each do |i|
+        total += segment_length(coords[i], coords[i + 1])
+      end
+      total
     end
 
     # Computes the median age in days from an array of ISO 8601 timestamp
@@ -230,6 +310,12 @@ module Jekyll
       r * c
     end
 
+    # Computes the haversine length in metres of a 2-point segment.
+    # Coordinates are in GeoJSON [lon, lat] order.
+    def segment_length(c1, c2)
+      haversine_distance(c1[1], c1[0], c2[1], c2[0])
+    end
+
     # Classifies each segment of a geometry as covered or uncovered based
     # on whether the segment midpoint is within `radius` metres of any spot.
     #
@@ -238,12 +324,17 @@ module Jekyll
     #
     # GeoJSON coordinates are [lon, lat] order.
     #
-    # Returns { 'covered' => [...], 'uncovered' => [...] } where each
-    # value is an array of GeoJSON LineString Feature hashes (2-point segments).
+    # Returns a hash with:
+    #   'covered'          — MultiLineString geometry or nil
+    #   'uncovered'        — MultiLineString geometry or nil
+    #   'coveredLength'    — total length of covered segments in metres
+    #   'uncoveredLength'  — total length of uncovered segments in metres
     # Requirements: 4.1, 4.2, 4.3, 4.4, 10.1, 10.2
     def classify_segments(geometry, spots, radius = 5000)
       covered_lines = []
       uncovered_lines = []
+      covered_length = 0.0
+      uncovered_length = 0.0
 
       geo_type = geometry['type']
       coord_arrays = case geo_type
@@ -257,9 +348,25 @@ module Jekyll
                      when 'MultiPolygon'
                        # Each polygon's outer ring (first element)
                        (geometry['coordinates'] || []).map { |poly| poly&.first }
+                     when 'GeometryCollection'
+                       merged = { 'covered' => nil, 'uncovered' => nil, 'coveredLength' => 0.0, 'uncoveredLength' => 0.0 }
+                       (geometry['geometries'] || []).each do |sub_geom|
+                         sub_result = classify_segments(sub_geom, spots, radius)
+                         merged['coveredLength'] += sub_result['coveredLength']
+                         merged['uncoveredLength'] += sub_result['uncoveredLength']
+                         if sub_result['covered']
+                           merged['covered'] ||= { 'type' => 'MultiLineString', 'coordinates' => [] }
+                           merged['covered']['coordinates'].concat(sub_result['covered']['coordinates'])
+                         end
+                         if sub_result['uncovered']
+                           merged['uncovered'] ||= { 'type' => 'MultiLineString', 'coordinates' => [] }
+                           merged['uncovered']['coordinates'].concat(sub_result['uncovered']['coordinates'])
+                         end
+                       end
+                       return merged
                      else
                        Jekyll.logger.warn 'DashboardMetrics:', "Unknown geometry type '#{geo_type}', skipping segment classification"
-                       return { 'covered' => nil, 'uncovered' => nil }
+                       return { 'covered' => nil, 'uncovered' => nil, 'coveredLength' => 0.0, 'uncoveredLength' => 0.0 }
                      end
 
       spot_locations = spots.map { |s| s['location'] }.compact
@@ -271,6 +378,8 @@ module Jekyll
           c1 = coords[i]
           c2 = coords[i + 1]
 
+          len = segment_length(c1, c2)
+
           # GeoJSON: [lon, lat]
           mid_lon = (c1[0] + c2[0]) / 2.0
           mid_lat = (c1[1] + c2[1]) / 2.0
@@ -281,8 +390,10 @@ module Jekyll
 
           if covered
             covered_lines << [c1, c2]
+            covered_length += len
           else
             uncovered_lines << [c1, c2]
+            uncovered_length += len
           end
         end
       end
@@ -295,13 +406,16 @@ module Jekyll
         'uncovered' => uncovered_lines.empty? ? nil : {
           'type' => 'MultiLineString',
           'coordinates' => uncovered_lines
-        }
+        },
+        'coveredLength' => covered_length,
+        'uncoveredLength' => uncovered_length
       }
     end
 
     # Computes coverage metrics for each unique waterway.
     # Returns an array of metric hashes with slug, name (placeholder),
-    # spotCount, coveredSegments, and uncoveredSegments.
+    # spotCount, coveredSegments, uncoveredSegments, coveredLength, and
+    # uncoveredLength.
     # Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 10.1, 10.2, 10.3, 10.4
     def compute_coverage_metrics(unique_waterways, unique_spots_by_waterway)
       metrics = []
@@ -329,11 +443,27 @@ module Jekyll
           'name' => 'placeholder',
           'spotCount' => spots.size,
           'coveredSegments' => segments['covered'],
-          'uncoveredSegments' => segments['uncovered']
+          'uncoveredSegments' => segments['uncovered'],
+          'coveredLength' => segments['coveredLength'],
+          'uncoveredLength' => segments['uncoveredLength']
         }
       end
 
       metrics
+    end
+
+    # Aggregates coverage lengths across all waterways.
+    # Returns a hash with total coveredLength and uncoveredLength in metres.
+    def compute_coverage_summary(cached_coverage)
+      covered = 0.0
+      uncovered = 0.0
+
+      cached_coverage.each do |metric|
+        covered += metric['coveredLength'] || 0.0
+        uncovered += metric['uncoveredLength'] || 0.0
+      end
+
+      { 'coveredLength' => covered.round(1), 'uncoveredLength' => uncovered.round(1) }
     end
   end
 end
