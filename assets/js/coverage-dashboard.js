@@ -282,21 +282,7 @@
         var metric = metrics[i];
         var popupHtml = buildPopupHtml(metric, strings);
 
-        // Covered segments (green) — single MultiLineString geometry
-        if (metric.coveredSegments) {
-          var coveredLayer = L.geoJSON(metric.coveredSegments, {
-            style: {
-              color: COVERED_COLOR,
-              weight: 3,
-              opacity: 0.8
-            }
-          });
-          coveredLayer.bindPopup(popupHtml);
-          coveredLayer.addTo(map);
-          layers.push(coveredLayer);
-        }
-
-        // Uncovered segments (red) — single MultiLineString geometry
+        // Uncovered segments (red) — added first so they render below
         if (metric.uncoveredSegments) {
           var uncoveredLayer = L.geoJSON(metric.uncoveredSegments, {
             style: {
@@ -308,6 +294,20 @@
           uncoveredLayer.bindPopup(popupHtml);
           uncoveredLayer.addTo(map);
           layers.push(uncoveredLayer);
+        }
+
+        // Covered segments (green) — added second so they render on top
+        if (metric.coveredSegments) {
+          var coveredLayer = L.geoJSON(metric.coveredSegments, {
+            style: {
+              color: COVERED_COLOR,
+              weight: 3,
+              opacity: 0.8
+            }
+          });
+          coveredLayer.bindPopup(popupHtml);
+          coveredLayer.addTo(map);
+          layers.push(coveredLayer);
         }
       }
 
