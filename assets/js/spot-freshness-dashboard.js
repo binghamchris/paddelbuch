@@ -119,7 +119,7 @@
           var text = Math.round(pct) + '%';
           ctx.save();
           ctx.fillStyle = '#fff';
-          ctx.font = '400 ' + fontSize + 'px Quicksand, Helvetica, Arial, sans-serif';
+          ctx.font = '400 ' + fontSize + 'px ' + (window.getComputedStyle(chart.canvas).fontFamily || 'Quicksand, Helvetica, Arial, sans-serif');
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
           var textWidth = ctx.measureText(text).width;
