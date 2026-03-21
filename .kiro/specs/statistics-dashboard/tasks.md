@@ -90,7 +90,7 @@ Implementation follows the existing dashboard module pattern (IIFE, registry pus
     - Add `<script type="application/json" id="statistics-i18n">` block with localised strings using `{% t %}` tags for all `dashboards.statistics.*` keys
     - _Requirements: 8.9, 9.1, 9.2, 11.1, 11.2_
 
-- [-] 5. Implement the statistics-dashboard.js module
+- [x] 5. Implement the statistics-dashboard.js module
   - [x] 5.1 Create `assets/js/statistics-dashboard.js`
     - Implement as IIFE following the exact pattern of `freshness-dashboard.js` and `coverage-dashboard.js`
     - Set `id: 'statistics'`, `usesMap: false`
@@ -110,7 +110,7 @@ Implementation follows the existing dashboard module pattern (IIFE, registry pus
     - Ensure responsive layout using CSS classes (no inline styles for layout)
     - _Requirements: 1.1, 1.3, 1.4, 1.5, 2.1, 2.2, 2.3, 2.6, 2.7, 3.1, 3.2, 3.5, 3.6, 4.1, 4.2, 4.4, 4.5, 5.1, 5.4, 6.1, 6.4, 7.1, 7.4, 8.10, 9.1, 9.4, 10.1, 10.4, 10.5, 11.3_
 
-  - [~] 5.2 Write property test: Deactivation cleanup (Property 8)
+  - [x] 5.2 Write property test: Deactivation cleanup (Property 8)
     - **Property 8: Deactivation cleanup**
     - Generate random valid metrics; call activate then deactivate; verify `#dashboard-content`, `#dashboard-title`, `#dashboard-description`, and `#dashboard-legend` containers are empty
     - This test can be a simple RSpec example test (or JS-based if a JS test runner is available) verifying the cleanup contract
