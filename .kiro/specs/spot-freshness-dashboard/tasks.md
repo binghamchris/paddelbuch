@@ -6,7 +6,7 @@ Implement the Spot Freshness Dashboard as a new dashboard module on the data qua
 
 ## Tasks
 
-- [ ] 1. Extend the build-time data pipeline
+- [x] 1. Extend the build-time data pipeline
   - [x] 1.1 Add `compute_spot_freshness_map_data` to `statistics_metrics_generator.rb`
     - Add a new method that iterates non-rejected spots, filters for valid `location` (non-nil `lat`/`lon`) and non-nil `updatedAt`, computes the freshness category using the existing thresholds (≤ 730.5 → fresh, ≤ 1826.25 → aging, else stale), and returns an array of `{ slug, lat, lon, category }` hashes
     - Expose the result as `site.data['dashboard_spot_freshness_map_data']` alongside the existing metrics
@@ -18,7 +18,7 @@ Implement the Spot Freshness Dashboard as a new dashboard module on the data qua
     - Use randomly generated spot arrays; assert output contains only non-rejected spots with valid location and updatedAt, and that each category matches the threshold rules
 
 - [ ] 2. Embed spot freshness data in the HTML page and parse it
-  - [~] 2.1 Add JSON data block and i18n block to `datenqualitaet.html`
+  - [x] 2.1 Add JSON data block and i18n block to `datenqualitaet.html`
     - Add `<script type="application/json" id="spot-freshness-map-data">{{ site.data.dashboard_spot_freshness_map_data | jsonify }}</script>`
     - Add `<script type="application/json" id="spot-freshness-i18n">` block with `{% t %}` tags for keys: `name`, `description`, `fresh`, `aging`, `stale`, `chart_title`
     - Add `spot-freshness-dashboard.js` to the `scripts` front matter list (after `coverage-dashboard.js`, before `dashboard-switcher.js`)
