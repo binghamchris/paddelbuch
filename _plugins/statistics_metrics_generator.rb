@@ -30,7 +30,9 @@ module Jekyll
         Jekyll.logger.info 'StatisticsMetrics:', "Using cached metrics for locale '#{locale}'"
       end
 
-      site.data['dashboard_statistics_metrics'] = localize_metrics(@@cached_metrics, locale, site)
+      localized = localize_metrics(@@cached_metrics, locale, site)
+      site.data['dashboard_statistics_metrics'] = localized
+      Jekyll.logger.info 'StatisticsMetrics:', "Localized statistics metrics for locale '#{locale}'"
     end
 
     private
@@ -56,21 +58,54 @@ module Jekyll
       waterways = deduplicate_by_slug(site.data['waterways'])
       notices = deduplicate_by_slug(site.data['notices'])
 
+      Jekyll.logger.warn 'StatisticsMetrics:', 'No spot data found — spot metrics will be empty' if spots.empty?
+      Jekyll.logger.warn 'StatisticsMetrics:', 'No obstacle data found — obstacle metrics will be empty' if obstacles.empty?
+
       spot_types = deduplicate_by_slug(site.data.dig('types', 'spot_types'))
       protected_area_types = deduplicate_by_slug(site.data.dig('types', 'protected_area_types'))
       paddle_craft_types = deduplicate_by_slug(site.data.dig('types', 'paddle_craft_types'))
       data_source_types = deduplicate_by_slug(site.data.dig('types', 'data_source_types'))
       data_license_types = deduplicate_by_slug(site.data.dig('types', 'data_license_types'))
 
+      Jekyll.logger.warn 'StatisticsMetrics:', 'No spot type definitions found' if spot_types.empty?
+      Jekyll.logger.warn 'StatisticsMetrics:', 'No paddle craft type definitions found' if paddle_craft_types.empty?
+      Jekyll.logger.warn 'StatisticsMetrics:', 'No data source type definitions found' if data_source_types.empty?
+      Jekyll.logger.warn 'StatisticsMetrics:', 'No data license type definitions found' if data_license_types.empty?
+
       Jekyll.logger.info 'StatisticsMetrics:', "Entities: #{spots.size} spots, #{obstacles.size} obstacles, #{protected_areas.size} protected areas, #{waterways.size} waterways, #{notices.size} notices"
+      Jekyll.logger.info 'StatisticsMetrics:', "Types: #{spot_types.size} spot types, #{protected_area_types.size} PA types, #{paddle_craft_types.size} craft types, #{data_source_types.size} source types, #{data_license_types.size} license types"
+
+      Jekyll.logger.info 'StatisticsMetrics:', 'Computing spot metrics...'
+      spot_metrics = compute_spot_metrics(spots, spot_types)
+      Jekyll.logger.info 'StatisticsMetrics:', "Spot metrics complete: #{spot_metrics['total']} total (#{spot_metrics['byType'].size} segments)"
+
+      Jekyll.logger.info 'StatisticsMetrics:', 'Computing obstacle metrics...'
+      obstacle_metrics = compute_obstacle_metrics(obstacles)
+      Jekyll.logger.info 'StatisticsMetrics:', "Obstacle metrics complete: #{obstacle_metrics['total']} total (#{obstacle_metrics['withPortageRoute']} with portage, #{obstacle_metrics['withoutPortageRoute']} without)"
+
+      Jekyll.logger.info 'StatisticsMetrics:', 'Computing protected area metrics...'
+      pa_metrics = compute_protected_area_metrics(protected_areas, protected_area_types)
+      Jekyll.logger.info 'StatisticsMetrics:', "Protected area metrics complete: #{pa_metrics['total']} total (#{pa_metrics['byType'].size} segments)"
+
+      Jekyll.logger.info 'StatisticsMetrics:', 'Computing paddle craft type metrics...'
+      craft_metrics = compute_paddle_craft_metrics(spots, paddle_craft_types)
+      Jekyll.logger.info 'StatisticsMetrics:', "Paddle craft metrics complete: #{craft_metrics.size} types"
+
+      Jekyll.logger.info 'StatisticsMetrics:', 'Computing data source type metrics...'
+      source_metrics = compute_data_source_metrics(spots, obstacles, protected_areas, waterways, notices, data_source_types)
+      Jekyll.logger.info 'StatisticsMetrics:', "Data source metrics complete: #{source_metrics.size} types"
+
+      Jekyll.logger.info 'StatisticsMetrics:', 'Computing data license type metrics...'
+      license_metrics = compute_data_license_metrics(spots, obstacles, protected_areas, waterways, notices, data_license_types)
+      Jekyll.logger.info 'StatisticsMetrics:', "Data license metrics complete: #{license_metrics.size} types"
 
       {
-        'spots' => compute_spot_metrics(spots, spot_types),
-        'obstacles' => compute_obstacle_metrics(obstacles),
-        'protectedAreas' => compute_protected_area_metrics(protected_areas, protected_area_types),
-        'paddleCraftTypes' => compute_paddle_craft_metrics(spots, paddle_craft_types),
-        'dataSourceTypes' => compute_data_source_metrics(spots, obstacles, protected_areas, waterways, notices, data_source_types),
-        'dataLicenseTypes' => compute_data_license_metrics(spots, obstacles, protected_areas, waterways, notices, data_license_types)
+        'spots' => spot_metrics,
+        'obstacles' => obstacle_metrics,
+        'protectedAreas' => pa_metrics,
+        'paddleCraftTypes' => craft_metrics,
+        'dataSourceTypes' => source_metrics,
+        'dataLicenseTypes' => license_metrics
       }
     end
 
