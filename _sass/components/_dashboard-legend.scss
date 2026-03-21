@@ -29,8 +29,8 @@
   &--no-data { background-color: $purple-1; }
 
   // Coverage colours
-  &--covered { background-color: $covered-green; }
-  &--uncovered { background-color: $uncovered-red; }
+  &--covered { background-color: $green-1; }
+  &--uncovered { background-color: $danger-red; }
 }
 
 .dashboard-legend-shape {
