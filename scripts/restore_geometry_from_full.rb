@@ -18,6 +18,7 @@
 # Options:
 #   --dry-run      Preview changes without writing to Contentful
 #   --slug SLUG    Process only the waterway with the given slug
+#   --type TYPE    Limit to a waterway type: "rivers" or "lakes"
 
 require 'dotenv'
 require 'json'
@@ -32,10 +33,27 @@ CMA_TOKEN   = ENV.fetch('CONTENTFUL_MANAGEMENT_TOKEN')
 DRY_RUN     = ARGV.include?('--dry-run')
 SLUG_INDEX  = ARGV.index('--slug')
 TARGET_SLUG = SLUG_INDEX ? ARGV[SLUG_INDEX + 1] : nil
+TYPE_INDEX  = ARGV.index('--type')
+TARGET_TYPE = TYPE_INDEX ? ARGV[TYPE_INDEX + 1] : nil
 
 if SLUG_INDEX && TARGET_SLUG.nil?
   abort 'Error: --slug requires a value, e.g. --slug langensee'
 end
+
+if TYPE_INDEX && TARGET_TYPE.nil?
+  abort 'Error: --type requires a value: "rivers" or "lakes"'
+end
+
+if TARGET_TYPE && !%w[rivers lakes].include?(TARGET_TYPE)
+  abort "Error: --type must be 'rivers' or 'lakes', got '#{TARGET_TYPE}'"
+end
+
+# Mapping from --type option to paddlingEnvironmentType slugs
+TYPE_FILTER_SLUGS = case TARGET_TYPE
+                    when 'rivers' then %w[fluss wildwasser]
+                    when 'lakes'  then %w[see]
+                    else nil
+                    end
 
 BASE_URL = "https://api.contentful.com/spaces/#{SPACE_ID}/environments/#{ENVIRONMENT}"
 
@@ -163,13 +181,50 @@ def fetch_all_waterways
   entries
 end
 
+def fetch_type_slug_map
+  entries = []
+  skip = 0
+  limit = 100
+
+  loop do
+    resp = cma_request(:get, "/entries?content_type=paddlingEnvironmentType&limit=#{limit}&skip=#{skip}")
+    unless resp.is_a?(Net::HTTPSuccess)
+      abort "Failed to fetch paddlingEnvironmentType entries: #{resp.code} #{resp.body}"
+    end
+    data = JSON.parse(resp.body)
+    entries.concat(data['items'])
+    total = data['total']
+    skip += limit
+    break if skip >= total
+  end
+
+  map = {}
+  entries.each do |e|
+    id = e.dig('sys', 'id')
+    slug_field = e.dig('fields', 'slug')
+    slug = slug_field&.values&.first
+    map[id] = slug if slug
+  end
+  map
+end
+
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
 puts DRY_RUN ? '=== DRY RUN — no changes will be written ===' : '=== LIVE RUN — changes will be written to Contentful ==='
 puts "=== Target: #{TARGET_SLUG ? "slug '#{TARGET_SLUG}'" : 'all waterways'} ===" if TARGET_SLUG
+puts "=== Type filter: #{TARGET_TYPE} ===" if TARGET_TYPE
 puts
+
+# Build type ID -> slug map if filtering by type
+type_slug_map = nil
+if TYPE_FILTER_SLUGS
+  puts 'Fetching paddlingEnvironmentType entries...'
+  type_slug_map = fetch_type_slug_map
+  puts "  Found #{type_slug_map.size} type entries"
+  puts
+end
 
 puts 'Fetching all waterway entries from Contentful CMA...'
 waterways = fetch_all_waterways
@@ -186,6 +241,20 @@ if TARGET_SLUG
     abort "Error: no waterway found with slug '#{TARGET_SLUG}'"
   end
   puts "Filtered to #{waterways.size} entry matching slug '#{TARGET_SLUG}'"
+end
+
+if TYPE_FILTER_SLUGS
+  waterways = waterways.select do |e|
+    fields = e['fields'] || {}
+    pet_field = fields['paddlingEnvironmentType']
+    next false unless pet_field
+    locale = pet_field.keys.first
+    ref = pet_field[locale]
+    type_id = ref&.dig('sys', 'id')
+    type_slug = type_slug_map[type_id]
+    TYPE_FILTER_SLUGS.include?(type_slug)
+  end
+  puts "Filtered to #{waterways.size} #{TARGET_TYPE}"
 end
 
 puts
