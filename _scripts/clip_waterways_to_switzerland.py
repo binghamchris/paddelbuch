@@ -9,11 +9,12 @@ For each waterway entry in Contentful:
   4. Updates the geometry field in Contentful and publishes the entry
 
 Usage:
-    python3 _scripts/clip_waterways_to_switzerland.py [--dry-run] [--slug SLUG]
+    python3 _scripts/clip_waterways_to_switzerland.py [--dry-run] [--slug SLUG] [--type TYPE]
 
 Options:
     --dry-run      Preview changes without writing to Contentful
     --slug SLUG    Process only the waterway with the given slug
+    --type TYPE    Limit to a waterway type: "rivers" or "lakes"
 
 Dependencies:
     pip3 install shapely requests python-dotenv
@@ -58,6 +59,23 @@ EXCLUDED_SLUGS = {
     "alter-rhein",
     "lutzel"
 }
+
+# --type filter
+TARGET_TYPE = None
+if '--type' in sys.argv:
+    tidx = sys.argv.index('--type')
+    if tidx + 1 >= len(sys.argv):
+        print("Error: --type requires a value: 'rivers' or 'lakes'", file=sys.stderr)
+        sys.exit(1)
+    TARGET_TYPE = sys.argv[tidx + 1]
+    if TARGET_TYPE not in ('rivers', 'lakes'):
+        print(f"Error: --type must be 'rivers' or 'lakes', got '{TARGET_TYPE}'", file=sys.stderr)
+        sys.exit(1)
+
+TYPE_FILTER_SLUGS = {
+    'rivers': {'fluss', 'wildwasser'},
+    'lakes': {'see'},
+}.get(TARGET_TYPE)
 
 # Swiss border cache
 CACHE_DIR = os.path.join(os.path.dirname(__file__), '.cache')
@@ -173,6 +191,33 @@ def fetch_all_waterways():
     return entries
 
 
+def fetch_type_slug_map():
+    """Fetch paddlingEnvironmentType entries and build id -> slug map."""
+    entries = []
+    skip = 0
+    limit = 100
+    while True:
+        url = f"{BASE_URL}/entries?content_type=paddlingEnvironmentType&limit={limit}&skip={skip}"
+        resp = requests.get(url, headers=cma_headers())
+        if not resp.ok:
+            print(f"ERROR fetching types: {resp.status_code} {resp.text}", file=sys.stderr)
+            sys.exit(1)
+        data = resp.json()
+        entries.extend(data["items"])
+        total = data["total"]
+        skip += limit
+        if skip >= total:
+            break
+    id_to_slug = {}
+    for entry in entries:
+        eid = entry["sys"]["id"]
+        slug_field = entry.get("fields", {}).get("slug", {})
+        slug = next(iter(slug_field.values()), None) if slug_field else None
+        if slug:
+            id_to_slug[eid] = slug
+    return id_to_slug
+
+
 def update_entry(entry_id, version, fields):
     """Update a Contentful entry via CMA PUT."""
     url = f"{BASE_URL}/entries/{entry_id}"
@@ -200,7 +245,17 @@ def main():
     print(f"=== {mode} — {'no changes will be written' if DRY_RUN else 'changes will be written to Contentful'} ===")
     if TARGET_SLUG:
         print(f"=== Target: slug '{TARGET_SLUG}' ===")
+    if TARGET_TYPE:
+        print(f"=== Type filter: {TARGET_TYPE} ===")
     print()
+
+    # Build type ID -> slug map if filtering by type
+    type_slug_map = None
+    if TYPE_FILTER_SLUGS:
+        print("Fetching paddlingEnvironmentType entries...")
+        type_slug_map = fetch_type_slug_map()
+        print(f"  Found {len(type_slug_map)} type entries")
+        print()
 
     # Load Swiss border
     print("Loading Swiss border...")
@@ -223,6 +278,23 @@ def main():
             print(f"Error: no waterway found with slug '{TARGET_SLUG}'", file=sys.stderr)
             sys.exit(1)
         print(f"  Filtered to {len(waterways)} entry matching slug '{TARGET_SLUG}'")
+
+    # Filter by type if requested
+    if TYPE_FILTER_SLUGS:
+        def _get_type_slug(entry):
+            fields = entry.get("fields", {})
+            pet = fields.get("paddlingEnvironmentType", {})
+            locale = next(iter(pet), None) if pet else None
+            if not locale:
+                return None
+            ref = pet.get(locale)
+            if ref and isinstance(ref, dict):
+                type_id = ref.get("sys", {}).get("id")
+                return type_slug_map.get(type_id)
+            return None
+
+        waterways = [e for e in waterways if _get_type_slug(e) in TYPE_FILTER_SLUGS]
+        print(f"  Filtered to {len(waterways)} {TARGET_TYPE}")
 
     print()
 
