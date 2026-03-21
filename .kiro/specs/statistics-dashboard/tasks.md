@@ -90,8 +90,8 @@ Implementation follows the existing dashboard module pattern (IIFE, registry pus
     - Add `<script type="application/json" id="statistics-i18n">` block with localised strings using `{% t %}` tags for all `dashboards.statistics.*` keys
     - _Requirements: 8.9, 9.1, 9.2, 11.1, 11.2_
 
-- [ ] 5. Implement the statistics-dashboard.js module
-  - [~] 5.1 Create `assets/js/statistics-dashboard.js`
+- [-] 5. Implement the statistics-dashboard.js module
+  - [x] 5.1 Create `assets/js/statistics-dashboard.js`
     - Implement as IIFE following the exact pattern of `freshness-dashboard.js` and `coverage-dashboard.js`
     - Set `id: 'statistics'`, `usesMap: false`
     - Implement `getStrings()` reading from `#statistics-i18n` JSON block with German fallback defaults
