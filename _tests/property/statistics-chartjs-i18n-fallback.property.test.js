@@ -136,7 +136,7 @@ describe('i18n German fallback (Property 8)', function () {
   }
 
   it('uses German defaults for all keys when #statistics-i18n is absent or has empty/missing values', function () {
-    // Load the module once — getStrings() is called fresh on each activate()
+    // Load the module once - getStrings() is called fresh on each activate()
     require(modulePath);
 
     var dashboard = window.PaddelbuchStatisticsDashboard;

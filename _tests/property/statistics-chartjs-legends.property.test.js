@@ -194,7 +194,7 @@ describe('Legend BEM-modifier classes and entry counts (Property 5)', function (
         var contentEl = document.getElementById('dashboard-content');
         dashboard.activate({ contentEl: contentEl });
 
-        // Query all .statistics-legend elements — they appear in order:
+        // Query all .statistics-legend elements - they appear in order:
         // index 0 = spots, index 1 = obstacles, index 2 = protected areas
         var legends = contentEl.querySelectorAll('.statistics-legend');
 

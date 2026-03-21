@@ -223,7 +223,7 @@ describe('Chart.js instance lifecycle (Property 3)', function () {
 
         // --- Step 3: Re-create DOM elements (deactivate clears innerHTML) ---
         // deactivate() clears innerHTML of #dashboard-content, #dashboard-title,
-        // #dashboard-description, #dashboard-legend — the elements still exist,
+        // #dashboard-description, #dashboard-legend - the elements still exist,
         // but their content is empty. No need to re-create the elements themselves.
 
         // Reset tracking array to count only new instances
