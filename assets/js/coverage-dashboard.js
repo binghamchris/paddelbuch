@@ -20,8 +20,8 @@
 
   var Chart = global.Chart;
   var colors = global.PaddelbuchColors || {};
-  var COVERED_COLOR = colors.coveredGreen || '#4ab31f';
-  var UNCOVERED_COLOR = colors.uncoveredRed || '#d0021b';
+  var COVERED_COLOR = colors.green1 || '#07753f';
+  var UNCOVERED_COLOR = colors.dangerRed || '#c40200';
 
   var layers = [];
   var legendEl = null;
