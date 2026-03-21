@@ -30,7 +30,7 @@ Implement the Spot Freshness Dashboard as a new dashboard module on the data qua
     - _Requirements: 6.3_
 
 - [ ] 3. Implement the Spot Freshness Dashboard module
-  - [~] 3.1 Create `assets/js/spot-freshness-dashboard.js` with registration and i18n
+  - [x] 3.1 Create `assets/js/spot-freshness-dashboard.js` with registration and i18n
     - Register on `PaddelbuchDashboardRegistry` with id `spot-freshness`
     - Implement `getName()` reading from `#spot-freshness-i18n` JSON block with German fallback defaults
     - Set `usesMap: true` and `usesBoth: true`
