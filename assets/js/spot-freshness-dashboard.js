@@ -294,10 +294,10 @@
             continue;
           }
 
-          var shapeFn = SHAPES[spot.category];
-          if (!shapeFn) {
+          if (!SHAPES.hasOwnProperty(spot.category)) {
             continue;
           }
+          var shapeFn = SHAPES[spot.category];
 
           var colorKey = FRESHNESS_COLOR_MAP[spot.category];
           var markerColor = getColor(colorKey);
