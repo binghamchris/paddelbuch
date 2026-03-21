@@ -239,7 +239,13 @@
     var html = '<div class="statistics-section">';
     html += '<h3 class="statistics-section-title">' + escapeHtml(title) + '</h3>';
     html += '<div class="statistics-section-body">';
-    html += renderFigure(total, escapeHtml(title), section);
+    var figureCls = 'statistics-figure';
+    if (section) {
+      figureCls += ' statistics-figure--' + section;
+    }
+    html += '<div class="' + figureCls + '">';
+    html += '<div class="statistics-figure-value">' + escapeHtml(String(total)) + '</div>';
+    html += '</div>';
     html += renderStackedBar(segments, section);
     html += '</div>';
     html += renderLegend(segments);
