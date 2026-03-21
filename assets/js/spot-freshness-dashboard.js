@@ -208,32 +208,6 @@
 
       pendingCharts.push({ section: 'spot-freshness', segments: freshnessSegments });
 
-      var html = '';
-      html += '<div class="statistics-section">';
-      html += '<h3 class="statistics-section-title">' + escapeHtml(strings.chart_title) + '</h3>';
-      html += '<div class="statistics-section-body">';
-      html += '<div class="statistics-figure statistics-figure--spot-freshness">';
-      html += '<div class="statistics-figure-value">' + escapeHtml(String(freshnessTotal)) + '</div>';
-      html += '</div>';
-      html += '<div class="statistics-chart-container">';
-      html += '<canvas data-chart-section="spot-freshness"></canvas>';
-      html += '</div>';
-      html += '</div>';
-      html += '</div>';
-
-      if (contentEl) {
-        contentEl.innerHTML = html;
-
-        // Create Chart.js instances on the now-rendered canvas elements
-        for (var i = 0; i < pendingCharts.length; i++) {
-          var pending = pendingCharts[i];
-          var canvas = contentEl.querySelector('canvas[data-chart-section="' + pending.section + '"]');
-          createStackedBarChart(canvas, pending.segments);
-        }
-      }
-
-      pendingCharts = [];
-
       // --- Map markers ---
       var map = context.map;
       if (map && L && L.layerGroup && L.marker && L.divIcon) {
@@ -271,7 +245,7 @@
         markerLayerGroup.addTo(map);
       }
 
-      // --- Shared legend ---
+      // --- Shared legend + chart ---
       var legendEl = document.getElementById('dashboard-legend');
       if (legendEl) {
         var legendHtml = '';
@@ -296,7 +270,21 @@
         }
 
         legendHtml += '</div>';
+
+        // Render chart immediately after legend entries
+        legendHtml += '<div class="statistics-chart-container">';
+        legendHtml += '<canvas data-chart-section="spot-freshness"></canvas>';
+        legendHtml += '</div>';
+
         legendEl.innerHTML = legendHtml;
+
+        // Create Chart.js instances on the now-rendered canvas elements
+        for (var i = 0; i < pendingCharts.length; i++) {
+          var pending = pendingCharts[i];
+          var canvas = legendEl.querySelector('canvas[data-chart-section="' + pending.section + '"]');
+          createStackedBarChart(canvas, pending.segments);
+        }
+        pendingCharts = [];
       }
     },
 
