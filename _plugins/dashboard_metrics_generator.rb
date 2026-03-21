@@ -83,28 +83,31 @@ module Jekyll
 
     private
 
-    # Counts waterways per freshness category from the cached freshness metrics.
-    # Returns a hash with fresh, aging, stale, and noData counts.
+    # Sums waterway lengths (km) per freshness category from the cached
+    # freshness metrics. For rivers the stored `length` field is used; for
+    # lakes the shore-line length is computed from the polygon geometry.
+    # Returns a hash with fresh, aging, stale, and noData totals in km.
     def compute_freshness_summary(cached_freshness)
-      fresh = 0
-      aging = 0
-      stale = 0
-      no_data = 0
+      fresh = 0.0
+      aging = 0.0
+      stale = 0.0
+      no_data = 0.0
 
       cached_freshness.each do |metric|
+        km = metric['lengthKm'] || 0.0
         days = metric['medianAgeDays']
         if days.nil?
-          no_data += 1
+          no_data += km
         elsif days <= 730.5
-          fresh += 1
+          fresh += km
         elsif days <= 1826.25
-          aging += 1
+          aging += km
         else
-          stale += 1
+          stale += km
         end
       end
 
-      { 'fresh' => fresh, 'aging' => aging, 'stale' => stale, 'noData' => no_data }
+      { 'fresh' => fresh.round(1), 'aging' => aging.round(1), 'stale' => stale.round(1), 'noData' => no_data.round(1) }
     end
 
     # Returns one waterway hash per unique slug, picking the first occurrence.
@@ -191,17 +194,62 @@ module Jekyll
         median_days = median_age(timestamps, now)
         color = freshness_color(median_days, colors)
 
+        # Determine effective length in km: use stored length for rivers,
+        # compute shore-line perimeter for lakes.
+        env_type = waterway['paddlingEnvironmentType_slug']
+        length_km = if env_type == 'see'
+                      geometry_perimeter(geometry) / 1000.0
+                    else
+                      (waterway['length'] || 0).to_f
+                    end
+
         metrics << {
           'slug' => slug,
           'name' => 'placeholder',
           'spotCount' => spots.size,
           'medianAgeDays' => median_days,
           'color' => color,
-          'geometry' => geometry
+          'geometry' => geometry,
+          'lengthKm' => length_km.round(1)
         }
       end
 
       metrics
+    end
+
+    # Computes the total perimeter in metres of a GeoJSON geometry.
+    # For Polygon / MultiPolygon geometries the outer-ring perimeter is
+    # summed (shore-line length for lakes). For LineString / MultiLineString
+    # the line length is summed. GeometryCollections are handled recursively.
+    def geometry_perimeter(geometry)
+      return 0.0 if geometry.nil?
+
+      case geometry['type']
+      when 'LineString'
+        line_length(geometry['coordinates'] || [])
+      when 'MultiLineString'
+        (geometry['coordinates'] || []).sum { |coords| line_length(coords) }
+      when 'Polygon'
+        # Outer ring is the first element
+        line_length((geometry['coordinates'] || []).first || [])
+      when 'MultiPolygon'
+        (geometry['coordinates'] || []).sum { |poly| line_length((poly || []).first || []) }
+      when 'GeometryCollection'
+        (geometry['geometries'] || []).sum { |g| geometry_perimeter(g) }
+      else
+        0.0
+      end
+    end
+
+    # Sums the haversine length in metres along a coordinate array.
+    def line_length(coords)
+      return 0.0 if coords.nil? || coords.size < 2
+
+      total = 0.0
+      (0...(coords.size - 1)).each do |i|
+        total += segment_length(coords[i], coords[i + 1])
+      end
+      total
     end
 
     # Computes the median age in days from an array of ISO 8601 timestamp
@@ -300,6 +348,22 @@ module Jekyll
                      when 'MultiPolygon'
                        # Each polygon's outer ring (first element)
                        (geometry['coordinates'] || []).map { |poly| poly&.first }
+                     when 'GeometryCollection'
+                       merged = { 'covered' => nil, 'uncovered' => nil, 'coveredLength' => 0.0, 'uncoveredLength' => 0.0 }
+                       (geometry['geometries'] || []).each do |sub_geom|
+                         sub_result = classify_segments(sub_geom, spots, radius)
+                         merged['coveredLength'] += sub_result['coveredLength']
+                         merged['uncoveredLength'] += sub_result['uncoveredLength']
+                         if sub_result['covered']
+                           merged['covered'] ||= { 'type' => 'MultiLineString', 'coordinates' => [] }
+                           merged['covered']['coordinates'].concat(sub_result['covered']['coordinates'])
+                         end
+                         if sub_result['uncovered']
+                           merged['uncovered'] ||= { 'type' => 'MultiLineString', 'coordinates' => [] }
+                           merged['uncovered']['coordinates'].concat(sub_result['uncovered']['coordinates'])
+                         end
+                       end
+                       return merged
                      else
                        Jekyll.logger.warn 'DashboardMetrics:', "Unknown geometry type '#{geo_type}', skipping segment classification"
                        return { 'covered' => nil, 'uncovered' => nil, 'coveredLength' => 0.0, 'uncoveredLength' => 0.0 }

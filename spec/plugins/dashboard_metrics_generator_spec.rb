@@ -131,7 +131,7 @@ RSpec.describe Jekyll::DashboardMetricsGenerator do
 
   describe 'malformed geometry handling' do
     it 'skips waterways with malformed geometry JSON gracefully' do
-      waterways = [{ 'slug' => 'bad-river', 'geometry' => '{not valid json}' }]
+      waterways = [{ 'slug' => 'bad-river', 'geometry' => '{not valid json}', 'paddlingEnvironmentType_slug' => 'fluss', 'length' => 10 }]
       spots_by_waterway = {}
 
       result = generator.send(:compute_freshness_metrics, waterways, spots_by_waterway, colors)
@@ -139,7 +139,7 @@ RSpec.describe Jekyll::DashboardMetricsGenerator do
     end
 
     it 'skips waterways with nil geometry' do
-      waterways = [{ 'slug' => 'nil-river', 'geometry' => nil }]
+      waterways = [{ 'slug' => 'nil-river', 'geometry' => nil, 'paddlingEnvironmentType_slug' => 'fluss', 'length' => 10 }]
       spots_by_waterway = {}
 
       result = generator.send(:compute_freshness_metrics, waterways, spots_by_waterway, colors)
@@ -248,14 +248,16 @@ RSpec.describe Jekyll::DashboardMetricsGenerator do
     let(:waterways_de) do
       [
         { 'slug' => 'aare', 'name' => 'Aare', 'locale' => 'de',
-          'geometry' => line_geometry_json }
+          'geometry' => line_geometry_json,
+          'paddlingEnvironmentType_slug' => 'fluss', 'length' => 50 }
       ]
     end
 
     let(:waterways_en) do
       [
         { 'slug' => 'aare', 'name' => 'Aare River', 'locale' => 'en',
-          'geometry' => line_geometry_json }
+          'geometry' => line_geometry_json,
+          'paddlingEnvironmentType_slug' => 'fluss', 'length' => 50 }
       ]
     end
 
