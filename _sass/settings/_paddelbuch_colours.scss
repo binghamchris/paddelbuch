@@ -17,6 +17,9 @@ $purple-1: #69599b; //Royal Purple: rgb(105, 89, 155)
 $green-1: #07753f; //Dartmouth Green: rgb(7, 117, 63)
 $green-2: #38676d; //Ming: rgb(56, 103, 109)
 $green-3: #839420; //Olive Drab 3: rgb(131, 148, 32)
+$teal-1: #2a9d8f; //Persian Green: rgb(42, 157, 143)
+$coral-1: #e07a5f; //Terra Cotta: rgb(224, 122, 95)
+$steel-blue-1: #437695; //Steel Blue: rgb(67, 118, 149)
 
 // Coverage Dashboard Colours
 $white-40pc: rgba(255, 255, 255, 0.4);
@@ -29,25 +32,27 @@ $text-muted: $secondary-blue;
 $obstacle-with-portage: #07753f; // = $green-1
 $obstacle-without-portage: #c40200; // = $danger-red
 
-// Statistics Dashboard - Chart Gradients (light → dark)
-// Derived from: $othersport-pink → $routes-purple
-// Assigned by sort position at render time (largest category = lightest colour).
+// Statistics Dashboard - Chart Colour Palettes (ordered by sort position)
+// Uses existing site colours for maximum distinction between categories.
+// Avoids $danger-red, $warning-yellow, $green-1/2/3 (used semantically on other charts).
+// Ordered to maximise adjacent contrast in hue and lightness.
+// Assigned by sort position at render time (index 1 = largest category).
 
-// Spot chart gradient (6 stops)
-$chart-gradient-spot-1: #e693be;
-$chart-gradient-spot-2: #e161b5;
-$chart-gradient-spot-3: #df2cbb;
-$chart-gradient-spot-4: #be16b4;
-$chart-gradient-spot-5: #850c91;
-$chart-gradient-spot-6: #4c0561;
+// Spot chart palette (6 stops)
+$chart-gradient-spot-1: #4c0561; // $routes-purple      (286°, L20%)
+$chart-gradient-spot-2: #e07a5f; // $coral-1            ( 14°, L63%)
+$chart-gradient-spot-3: #2a9d8f; // $teal-1             (173°, L39%)
+$chart-gradient-spot-4: #cb3cf6; // $startingspots-purple(286°, L60%)
+$chart-gradient-spot-5: #69599b; // $purple-1           (255°, L48%)
+$chart-gradient-spot-6: #e693be; // $othersport-pink    (329°, L74%)
 
-// Protected area chart gradient (9 stops)
-$chart-gradient-pa-1: #e693be;
-$chart-gradient-pa-2: #e274b7;
-$chart-gradient-pa-3: #e054b5;
-$chart-gradient-pa-4: #df33ba;
-$chart-gradient-pa-5: #d31cbc;
-$chart-gradient-pa-6: #b815b2;
-$chart-gradient-pa-7: #950e9c;
-$chart-gradient-pa-8: #6f097f;
-$chart-gradient-pa-9: #4c0561;
+// Protected area chart palette (9 stops)
+$chart-gradient-pa-1: #4c0561; // $routes-purple       (286°, L20%)
+$chart-gradient-pa-2: #e07a5f; // $coral-1             ( 14°, L63%)
+$chart-gradient-pa-3: #2a9d8f; // $teal-1              (173°, L39%)
+$chart-gradient-pa-4: #cb3cf6; // $startingspots-purple (286°, L60%)
+$chart-gradient-pa-5: #437695; // $steel-blue-1        (203°, L42%)
+$chart-gradient-pa-6: #e693be; // $othersport-pink     (329°, L74%)
+$chart-gradient-pa-7: #69599b; // $purple-1            (255°, L48%)
+$chart-gradient-pa-8: #3cc4f6; // $water-blue          (196°, L60%)
+$chart-gradient-pa-9: #606589; // $secondary-blue      (233°, L46%)
