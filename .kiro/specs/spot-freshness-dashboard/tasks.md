@@ -114,7 +114,7 @@ Implement the Spot Freshness Dashboard as a new dashboard module on the data qua
     - **Property 2: Container visibility reverts on dashboard switch**
     - **Validates: Requirements 2.2**
 
-- [ ] 6. Remove freshness chart from the Statistics Dashboard
+- [x] 6. Remove freshness chart from the Statistics Dashboard
   - [x] 6.1 Clean up `statistics-dashboard.js`
     - Remove `FRESHNESS_COLOR_MAP`
     - Remove `buildFreshnessSegments()` function
@@ -122,7 +122,7 @@ Implement the Spot Freshness Dashboard as a new dashboard module on the data qua
     - Remove freshness-related i18n key defaults (`spot_freshness_title`, `freshness_fresh`, `freshness_aging`, `freshness_stale`) from `getStrings()`
     - _Requirements: 3.5_
 
-  - [~] 6.2 Remove freshness i18n keys from the `#statistics-i18n` block in `datenqualitaet.html`
+  - [x] 6.2 Remove freshness i18n keys from the `#statistics-i18n` block in `datenqualitaet.html`
     - Remove `spot_freshness_title`, `freshness_fresh`, `freshness_aging`, `freshness_stale` keys
     - _Requirements: 3.5_
 
