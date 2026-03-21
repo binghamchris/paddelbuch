@@ -242,7 +242,7 @@ def publish_entry(entry_id, version):
 
 def main():
     mode = "DRY RUN" if DRY_RUN else "LIVE"
-    print(f"=== {mode} — {'no changes will be written' if DRY_RUN else 'changes will be written to Contentful'} ===")
+    print(f"=== {mode} - {'no changes will be written' if DRY_RUN else 'changes will be written to Contentful'} ===")
     if TARGET_SLUG:
         print(f"=== Target: slug '{TARGET_SLUG}' ===")
     if TARGET_TYPE:
@@ -333,7 +333,7 @@ def main():
 
         # Check exclusion list
         if slug in EXCLUDED_SLUGS:
-            print(f"  [{idx+1}/{len(waterways)}] {slug}: excluded — skipping")
+            print(f"  [{idx+1}/{len(waterways)}] {slug}: excluded - skipping")
             continue
 
         # Parse into Shapely
@@ -342,27 +342,27 @@ def main():
             if not geom.is_valid:
                 geom = make_valid(geom)
         except Exception as e:
-            print(f"  [{idx+1}/{len(waterways)}] {slug}: ERROR parsing geometry — {e}")
+            print(f"  [{idx+1}/{len(waterways)}] {slug}: ERROR parsing geometry - {e}")
             errors += 1
             continue
 
         # Check if clipping is needed
         if not geometry_needs_clipping(geom, swiss_border):
             skipped_inside += 1
-            print(f"  [{idx+1}/{len(waterways)}] {slug}: fully inside Switzerland — skipping")
+            print(f"  [{idx+1}/{len(waterways)}] {slug}: fully inside Switzerland - skipping")
             continue
 
         # Clip
         try:
             clipped = clip_geometry(geom, swiss_border)
         except Exception as e:
-            print(f"  [{idx+1}/{len(waterways)}] {slug}: ERROR clipping — {e}")
+            print(f"  [{idx+1}/{len(waterways)}] {slug}: ERROR clipping - {e}")
             errors += 1
             continue
 
         if clipped.is_empty:
             skipped_empty += 1
-            print(f"  [{idx+1}/{len(waterways)}] {slug}: clipped geometry is empty — skipping")
+            print(f"  [{idx+1}/{len(waterways)}] {slug}: clipped geometry is empty - skipping")
             continue
 
         # Stats
@@ -371,14 +371,14 @@ def main():
         pct = (clipped_area / original_area * 100) if original_area > 0 else 0
         clipped_geojson = mapping(clipped)
 
-        print(f"  [{idx+1}/{len(waterways)}] {slug}: needs clipping — {pct:.1f}% area retained, "
+        print(f"  [{idx+1}/{len(waterways)}] {slug}: needs clipping - {pct:.1f}% area retained, "
               f"type {geom.geom_type} -> {clipped.geom_type}")
 
         if DRY_RUN:
             processed += 1
             continue
 
-        # Build updated fields — update geometry for ALL locales
+        # Build updated fields - update geometry for ALL locales
         updated_fields = dict(fields)
         updated_fields["geometry"] = {}
         for loc in geo_field:
@@ -415,7 +415,7 @@ def main():
             print(f"    ERROR publishing {slug}: {pub_resp.status_code} {pub_resp.text}")
             errors += 1
 
-        # Rate limiting — CMA allows ~10 req/s, we make 2 per entry
+        # Rate limiting - CMA allows ~10 req/s, we make 2 per entry
         time.sleep(0.25)
 
     print()
