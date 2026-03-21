@@ -325,10 +325,10 @@ module Jekyll
     # GeoJSON coordinates are [lon, lat] order.
     #
     # Returns a hash with:
-    #   'covered'          — MultiLineString geometry or nil
-    #   'uncovered'        — MultiLineString geometry or nil
-    #   'coveredLength'    — total length of covered segments in metres
-    #   'uncoveredLength'  — total length of uncovered segments in metres
+    #   'covered'          - MultiLineString geometry or nil
+    #   'uncovered'        - MultiLineString geometry or nil
+    #   'coveredLength'    - total length of covered segments in metres
+    #   'uncoveredLength'  - total length of uncovered segments in metres
     # Requirements: 4.1, 4.2, 4.3, 4.4, 10.1, 10.2
     def classify_segments(geometry, spots, radius = 5000)
       covered_lines = []
