@@ -89,11 +89,11 @@ Implement the Spot Freshness Dashboard as a new dashboard module on the data qua
     - Make `deactivate()` idempotent
     - _Requirements: 8.1, 8.2, 8.3_
 
-  - [-] 3.11 Write property test for full deactivation cleanup
+  - [x] 3.11 Write property test for full deactivation cleanup
     - **Property 11: All UI elements cleared on deactivation**
     - **Validates: Requirements 8.1, 8.3, 5.5**
 
-  - [~] 3.12 Write property test for CSP compliance
+  - [-] 3.12 Write property test for CSP compliance
     - **Property 12: No inline style attributes in rendered HTML**
     - **Validates: Requirements 9.2, 9.4**
     - Assert that rendered legend, chart container, and marker HTML contain no `style="..."` attributes
