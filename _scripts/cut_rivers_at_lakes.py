@@ -191,7 +191,7 @@ def extract_lines(geom):
 
 def main():
     mode = "DRY RUN" if DRY_RUN else "LIVE"
-    print(f"=== {mode} — {'no changes will be written' if DRY_RUN else 'changes will be written to Contentful'} ===")
+    print(f"=== {mode} - {'no changes will be written' if DRY_RUN else 'changes will be written to Contentful'} ===")
     if TARGET_SLUG:
         print(f"=== Target: slug '{TARGET_SLUG}' ===")
     print()
@@ -303,14 +303,14 @@ def main():
         try:
             river_geom = safe_shape(geo_dict)
         except Exception as e:
-            print(f"  [{idx+1}/{len(rivers)}] {slug}: ERROR parsing geometry — {e}")
+            print(f"  [{idx+1}/{len(rivers)}] {slug}: ERROR parsing geometry - {e}")
             errors += 1
             continue
 
         # Check intersection
         if not river_geom.intersects(combined_lakes):
             skipped_no_intersect += 1
-            print(f"  [{idx+1}/{len(rivers)}] {slug}: no lake intersection — skipping")
+            print(f"  [{idx+1}/{len(rivers)}] {slug}: no lake intersection - skipping")
             continue
 
         # Cut out lake portions
@@ -318,12 +318,12 @@ def main():
             cut_geom = river_geom.difference(combined_lakes)
             cut_geom = extract_lines(cut_geom)
         except Exception as e:
-            print(f"  [{idx+1}/{len(rivers)}] {slug}: ERROR computing difference — {e}")
+            print(f"  [{idx+1}/{len(rivers)}] {slug}: ERROR computing difference - {e}")
             errors += 1
             continue
 
         if cut_geom.is_empty:
-            print(f"  [{idx+1}/{len(rivers)}] {slug}: geometry empty after cutting — skipping")
+            print(f"  [{idx+1}/{len(rivers)}] {slug}: geometry empty after cutting - skipping")
             errors += 1
             continue
 
@@ -331,14 +331,14 @@ def main():
         orig_length = river_geom.length
         cut_length = cut_geom.length
         pct = (cut_length / orig_length * 100) if orig_length > 0 else 0
-        print(f"  [{idx+1}/{len(rivers)}] {slug}: cut at lakes — {pct:.1f}% length retained, "
+        print(f"  [{idx+1}/{len(rivers)}] {slug}: cut at lakes - {pct:.1f}% length retained, "
               f"{river_geom.geom_type} -> {cut_geom.geom_type}")
 
         if DRY_RUN:
             processed += 1
             continue
 
-        # Build updated fields — update geometry for ALL locales
+        # Build updated fields - update geometry for ALL locales
         updated_fields = dict(fields)
         updated_fields["geometry"] = {}
         for loc in geo_field:

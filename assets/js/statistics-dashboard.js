@@ -7,7 +7,7 @@
  * license types.
  *
  * All metric computation is done at Jekyll build time by
- * statistics_metrics_generator.rb — this module only renders pre-computed data.
+ * statistics_metrics_generator.rb - this module only renders pre-computed data.
  *
  * Requirements: 1.1, 1.3, 1.4, 1.5, 2.1, 2.2, 2.3, 2.6, 2.7, 3.1, 3.2,
  *               3.5, 3.6, 4.1, 4.2, 4.4, 4.5, 5.1, 5.4, 6.1, 6.4, 7.1,
@@ -248,7 +248,7 @@
    * @param {Array} segments - Array of { name, count, slug } objects
    * @param {string} section - Section identifier for BEM modifier and canvas data attribute
    * @param {Object} [options] - Optional settings
-   * @param {Array} [options.gradient] - Ordered colour array (dark→light) to assign by sort position
+   * @param {Array} [options.gradient] - Ordered colour array (dark->light) to assign by sort position
    * @returns {string} HTML string for the full section
    */
   function renderBarSection(title, total, segments, section, options) {

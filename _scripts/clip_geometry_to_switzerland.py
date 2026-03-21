@@ -94,9 +94,9 @@ def clip_to_switzerland(input_path, output_path):
     print(f"Clipped geometry type: {clipped.geom_type}")
 
     if clipped.is_empty:
-        print("WARNING: The clipped geometry is empty — no overlap with Switzerland.")
+        print("WARNING: The clipped geometry is empty - no overlap with Switzerland.")
 
-    # Approximate area comparison (in degrees², just for a ratio)
+    # Approximate area comparison (in degrees^2, just for a ratio)
     original_area = input_geom.area
     clipped_area = clipped.area
     if original_area > 0:
