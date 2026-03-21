@@ -301,8 +301,11 @@
     },
 
     deactivate: function() {
+      // Destroy all Chart.js instances (already wrapped in try/catch internally)
       destroyCharts();
+      pendingCharts = [];
 
+      // Clear all four DOM containers
       var titleEl = document.getElementById('dashboard-title');
       if (titleEl) {
         titleEl.textContent = '';
@@ -323,9 +326,13 @@
         legendEl.innerHTML = '';
       }
 
-      // Remove marker layer group from the map
+      // Remove marker layer group from the map (wrapped in try/catch for safety)
       if (markerLayerGroup) {
-        markerLayerGroup.remove();
+        try {
+          markerLayerGroup.remove();
+        } catch (e) {
+          // Layer may already have been removed or map destroyed
+        }
         markerLayerGroup = null;
       }
     }
