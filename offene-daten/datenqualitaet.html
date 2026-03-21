@@ -6,6 +6,8 @@ permalink: /offene-daten/datenqualitaet/
 scripts:
   - /assets/js/dashboard-data.js
   - /assets/js/dashboard-map.js
+  - /assets/js/vendor/chart.umd.js
+  - /assets/js/statistics-dashboard.js
   - /assets/js/freshness-dashboard.js
   - /assets/js/coverage-dashboard.js
   - /assets/js/dashboard-switcher.js
@@ -37,7 +39,7 @@ scripts:
 
   <div id="dashboard-map" class="map"></div>
 
-  <div id="dashboard-content" class="d-none"></div>
+  <div id="dashboard-content"></div>
 
   <!-- Last Updated (build time) -->
   <div class="static-page-meta">
@@ -47,9 +49,30 @@ scripts:
   </div>
 </div>
 
+<script type="application/json" id="statistics-data">{{ site.data.dashboard_statistics_metrics | jsonify }}</script>
+
 <script type="application/json" id="freshness-data">{{ site.data.dashboard_freshness_metrics | jsonify }}</script>
 <script type="application/json" id="coverage-data">{{ site.data.dashboard_coverage_metrics | jsonify }}</script>
 
+<script type="application/json" id="statistics-i18n">
+{
+  "name": "{% t dashboards.statistics.name %}",
+  "description": "{% t dashboards.statistics.description %}",
+  "spots_title": "{% t dashboards.statistics.spots_title %}",
+  "obstacles_title": "{% t dashboards.statistics.obstacles_title %}",
+  "protected_areas_title": "{% t dashboards.statistics.protected_areas_title %}",
+  "paddle_craft_title": "{% t dashboards.statistics.paddle_craft_title %}",
+  "data_source_title": "{% t dashboards.statistics.data_source_title %}",
+  "data_license_title": "{% t dashboards.statistics.data_license_title %}",
+  "with_portage": "{% t dashboards.statistics.with_portage %}",
+  "without_portage": "{% t dashboards.statistics.without_portage %}",
+  "no_entry": "{% t dashboards.statistics.no_entry %}",
+  "spot_freshness_title": "{% t dashboards.statistics.spot_freshness_title %}",
+  "freshness_fresh": "{% t dashboards.statistics.freshness_fresh %}",
+  "freshness_aging": "{% t dashboards.statistics.freshness_aging %}",
+  "freshness_stale": "{% t dashboards.statistics.freshness_stale %}"
+}
+</script>
 <script type="application/json" id="freshness-i18n">
 {
   "name": "{% t dashboards.freshness.name %}",
