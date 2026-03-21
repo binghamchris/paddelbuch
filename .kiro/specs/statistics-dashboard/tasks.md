@@ -20,7 +20,7 @@ Implementation follows the existing dashboard module pattern (IIFE, registry pus
     - Add `dashboards.statistics` section with keys: `name`, `description`, `spots_title`, `obstacles_title`, `protected_areas_title`, `paddle_craft_title`, `data_source_title`, `data_license_title`, `with_portage`, `without_portage`, `no_entry`
     - _Requirements: 9.1, 9.2, 9.4_
 
-- [-] 2. Implement the StatisticsMetricsGenerator Ruby plugin
+- [x] 2. Implement the StatisticsMetricsGenerator Ruby plugin
   - [x] 2.1 Create `_plugins/statistics_metrics_generator.rb`
     - Implement `Jekyll::StatisticsMetricsGenerator < Generator` with `safe true`, `priority :normal`
     - Use class-level `@@cached_metrics = nil` for compute-once-cache-across-locales pattern
@@ -39,38 +39,38 @@ Implementation follows the existing dashboard module pattern (IIFE, registry pus
     - Handle entities with missing slug, type slug, or data source/license slug gracefully (skip or log warning)
     - _Requirements: 2.1, 2.4, 2.5, 3.1, 3.3, 3.4, 4.1, 4.3, 5.1, 5.2, 5.3, 6.1, 6.2, 6.3, 7.1, 7.2, 7.3, 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.7, 8.8, 9.3, 12.1, 12.2, 12.3, 12.4, 12.5, 12.6_
 
-  - [~] 2.2 Write property test: Deduplication correctness (Property 1)
+  - [x] 2.2 Write property test: Deduplication correctness (Property 1)
     - **Property 1: Deduplication correctness**
     - Generate random entity lists with duplicate slugs across 2 locales using Rantly; verify dedup count equals unique slug count
     - Create `spec/plugins/statistics_metrics_generator_spec.rb`
     - **Validates: Requirements 2.1, 3.1, 4.1, 8.3, 8.4, 8.5, 8.6, 8.7, 12.1, 12.2, 12.3, 12.4, 12.5, 12.6**
 
-  - [~] 2.3 Write property test: Spot type partitioning (Property 2)
+  - [x] 2.3 Write property test: Spot type partitioning (Property 2)
     - **Property 2: Spot type partitioning**
     - Generate random spots with varying `rejected` and `spotType_slug` using Rantly; verify every spot is classified into exactly one segment and segment counts sum to total
     - **Validates: Requirements 2.4, 2.5**
 
-  - [~] 2.4 Write property test: Obstacle portage partitioning (Property 3)
+  - [x] 2.4 Write property test: Obstacle portage partitioning (Property 3)
     - **Property 3: Obstacle portage partitioning**
     - Generate random obstacles with nil/non-nil `portageRoute` using Rantly; verify partitioning into exactly two segments and counts sum to total
     - **Validates: Requirements 3.3, 3.4**
 
-  - [~] 2.5 Write property test: Paddle craft type counting (Property 4)
+  - [x] 2.5 Write property test: Paddle craft type counting (Property 4)
     - **Property 4: Paddle craft type counting**
     - Generate random spots with random `paddleCraftTypes` arrays using Rantly; verify count per craft type equals number of unique spots containing that slug
     - **Validates: Requirements 5.2, 5.3**
 
-  - [~] 2.6 Write property test: Data source type counting (Property 5)
+  - [x] 2.6 Write property test: Data source type counting (Property 5)
     - **Property 5: Data source type counting**
     - Generate random entities across all five entity types with random `dataSourceType_slug` using Rantly; verify sum across entity types for each data source type
     - **Validates: Requirements 6.2, 6.3**
 
-  - [~] 2.7 Write property test: Data license type counting (Property 6)
+  - [x] 2.7 Write property test: Data license type counting (Property 6)
     - **Property 6: Data license type counting**
     - Generate random entities across all five entity types with random `dataLicenseType_slug` using Rantly; verify sum across entity types for each data license type
     - **Validates: Requirements 7.2, 7.3**
 
-  - [~] 2.8 Write property test: Type name localisation (Property 7)
+  - [x] 2.8 Write property test: Type name localisation (Property 7)
     - **Property 7: Type name localisation**
     - Generate random type definitions with `name_de`/`name_en` using Rantly; verify correct name is selected for each locale
     - **Validates: Requirements 5.4, 6.4, 7.4, 9.3**
