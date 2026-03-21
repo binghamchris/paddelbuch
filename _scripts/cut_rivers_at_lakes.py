@@ -26,7 +26,7 @@ import time
 
 import requests
 from dotenv import load_dotenv
-from shapely.geometry import shape, mapping
+from shapely.geometry import shape, mapping, MultiLineString, LineString, GeometryCollection
 from shapely.ops import unary_union
 from shapely.validation import make_valid
 
@@ -154,6 +154,34 @@ def safe_shape(geo_dict):
     geom = shape(geo_dict)
     if not geom.is_valid:
         geom = make_valid(geom)
+    return geom
+
+
+def extract_lines(geom):
+    """Extract only LineString/MultiLineString parts from a geometry.
+
+    Shapely's difference() can produce a GeometryCollection containing
+    a mix of LineStrings and stray Points. This filters to lines only,
+    returning a MultiLineString (or LineString if just one).
+    """
+    if isinstance(geom, (LineString, MultiLineString)):
+        return geom
+
+    if isinstance(geom, GeometryCollection):
+        lines = [g for g in geom.geoms if isinstance(g, (LineString, MultiLineString))]
+        # Flatten any MultiLineStrings
+        flat = []
+        for g in lines:
+            if isinstance(g, MultiLineString):
+                flat.extend(g.geoms)
+            else:
+                flat.append(g)
+        if not flat:
+            return LineString()  # empty
+        if len(flat) == 1:
+            return flat[0]
+        return MultiLineString(flat)
+
     return geom
 
 
@@ -288,6 +316,7 @@ def main():
         # Cut out lake portions
         try:
             cut_geom = river_geom.difference(combined_lakes)
+            cut_geom = extract_lines(cut_geom)
         except Exception as e:
             print(f"  [{idx+1}/{len(rivers)}] {slug}: ERROR computing difference — {e}")
             errors += 1
@@ -318,6 +347,7 @@ def main():
                 try:
                     loc_geom = safe_shape(loc_geo_dict)
                     loc_cut = loc_geom.difference(combined_lakes)
+                    loc_cut = extract_lines(loc_cut)
                     if not loc_cut.is_empty:
                         updated_fields["geometry"][loc] = mapping(loc_cut)
                     else:
