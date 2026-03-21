@@ -20,8 +20,8 @@ Implementation follows the existing dashboard module pattern (IIFE, registry pus
     - Add `dashboards.statistics` section with keys: `name`, `description`, `spots_title`, `obstacles_title`, `protected_areas_title`, `paddle_craft_title`, `data_source_title`, `data_license_title`, `with_portage`, `without_portage`, `no_entry`
     - _Requirements: 9.1, 9.2, 9.4_
 
-- [ ] 2. Implement the StatisticsMetricsGenerator Ruby plugin
-  - [~] 2.1 Create `_plugins/statistics_metrics_generator.rb`
+- [-] 2. Implement the StatisticsMetricsGenerator Ruby plugin
+  - [x] 2.1 Create `_plugins/statistics_metrics_generator.rb`
     - Implement `Jekyll::StatisticsMetricsGenerator < Generator` with `safe true`, `priority :normal`
     - Use class-level `@@cached_metrics = nil` for compute-once-cache-across-locales pattern
     - In `generate(site)`: compute metrics on first locale pass, cache, then localize type names for each locale pass
