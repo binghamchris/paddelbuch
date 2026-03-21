@@ -182,7 +182,7 @@ dashboards:
     spots_title: "Einstiegsorte"
     obstacles_title: "Hindernisse"
     protected_areas_title: "Schutzgebiete"
-    paddle_craft_title: "Einstiegsorte nach Paddelboot-Typ"
+    paddle_craft_title: "Verfügbare Einstiegsorte nach Paddelboot-Typ"
     data_source_title: "Einträge nach Datenquelle"
     data_license_title: "Einträge nach Datenlizenz"
     with_portage: "Mit Portage-Route"
