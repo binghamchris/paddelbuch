@@ -17,14 +17,14 @@ Implement the Spot Freshness Dashboard as a new dashboard module on the data qua
     - **Validates: Requirements 6.1**
     - Use randomly generated spot arrays; assert output contains only non-rejected spots with valid location and updatedAt, and that each category matches the threshold rules
 
-- [ ] 2. Embed spot freshness data in the HTML page and parse it
+- [x] 2. Embed spot freshness data in the HTML page and parse it
   - [x] 2.1 Add JSON data block and i18n block to `datenqualitaet.html`
     - Add `<script type="application/json" id="spot-freshness-map-data">{{ site.data.dashboard_spot_freshness_map_data | jsonify }}</script>`
     - Add `<script type="application/json" id="spot-freshness-i18n">` block with `{% t %}` tags for keys: `name`, `description`, `fresh`, `aging`, `stale`, `chart_title`
     - Add `spot-freshness-dashboard.js` to the `scripts` front matter list (after `coverage-dashboard.js`, before `dashboard-switcher.js`)
     - _Requirements: 6.2, 7.1_
 
-  - [~] 2.2 Extend `dashboard-data.js` to parse the new JSON block
+  - [x] 2.2 Extend `dashboard-data.js` to parse the new JSON block
     - Parse `#spot-freshness-map-data` using the existing `parseJsonBlock` function
     - Expose it as `PaddelbuchDashboardData.spotFreshnessMapData`
     - _Requirements: 6.3_
