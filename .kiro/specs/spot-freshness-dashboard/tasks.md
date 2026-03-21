@@ -49,7 +49,7 @@ Implement the Spot Freshness Dashboard as a new dashboard module on the data qua
     - Destroy Chart.js instance in `deactivate()`
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 8.2_
 
-  - [~] 3.4 Write property tests for chart colours and data
+  - [x] 3.4 Write property tests for chart colours and data
     - **Property 3: Chart colours match PaddelbuchColors**
     - **Validates: Requirements 3.2, 5.4**
     - **Property 4: Chart data reflects pre-computed metrics**
