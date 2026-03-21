@@ -134,7 +134,7 @@
             callbacks: {
               label: function(context) {
                 var seg = segments[context.datasetIndex];
-                return seg ? seg.name + ': ' + seg.count : '';
+                return seg ? seg.name + ': ' + Math.round(seg.count) + ' km' : '';
               }
             }
           }
