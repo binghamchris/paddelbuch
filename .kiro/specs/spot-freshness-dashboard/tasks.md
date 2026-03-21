@@ -29,7 +29,7 @@ Implement the Spot Freshness Dashboard as a new dashboard module on the data qua
     - Expose it as `PaddelbuchDashboardData.spotFreshnessMapData`
     - _Requirements: 6.3_
 
-- [ ] 3. Implement the Spot Freshness Dashboard module
+- [x] 3. Implement the Spot Freshness Dashboard module
   - [x] 3.1 Create `assets/js/spot-freshness-dashboard.js` with registration and i18n
     - Register on `PaddelbuchDashboardRegistry` with id `spot-freshness`
     - Implement `getName()` reading from `#spot-freshness-i18n` JSON block with German fallback defaults
@@ -93,12 +93,12 @@ Implement the Spot Freshness Dashboard as a new dashboard module on the data qua
     - **Property 11: All UI elements cleared on deactivation**
     - **Validates: Requirements 8.1, 8.3, 5.5**
 
-  - [-] 3.12 Write property test for CSP compliance
+  - [x] 3.12 Write property test for CSP compliance
     - **Property 12: No inline style attributes in rendered HTML**
     - **Validates: Requirements 9.2, 9.4**
     - Assert that rendered legend, chart container, and marker HTML contain no `style="..."` attributes
 
-- [~] 4. Checkpoint - Ensure all tests pass
+- [x] 4. Checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 5. Modify the dashboard switcher for dual-container support
