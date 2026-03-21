@@ -90,6 +90,35 @@
     for (var i = 0; i < segments.length; i++) {
       total += segments[i].count;
     }
+
+    // Inline plugin: draw percentage labels centred inside each bar segment
+    var percentageLabelPlugin = {
+      id: 'spotFreshnessPercentageLabels',
+      afterDraw: function(chart) {
+        var ctx = chart.ctx;
+        var meta, bar, pct, text, textWidth;
+        for (var d = 0; d < chart.data.datasets.length; d++) {
+          meta = chart.getDatasetMeta(d);
+          if (!meta || !meta.data || !meta.data[0]) continue;
+          bar = meta.data[0];
+          pct = total > 0 ? (segments[d].count / total) * 100 : 0;
+          if (pct < 1) continue; // skip tiny segments where label won't fit
+          text = Math.round(pct) + '%';
+          ctx.save();
+          ctx.fillStyle = '#fff';
+          ctx.font = 'bold 12px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          textWidth = ctx.measureText(text).width;
+          // Only draw if the segment is wide enough for the text
+          if ((bar.width || 0) > textWidth + 4) {
+            ctx.fillText(text, bar.x - bar.width / 2 + bar.width / 2, bar.y);
+          }
+          ctx.restore();
+        }
+      }
+    };
+
     var chart = new Chart(canvas, {
       type: 'bar',
       data: {
@@ -106,6 +135,9 @@
         indexAxis: 'y',
         responsive: true,
         maintainAspectRatio: false,
+        layout: {
+          padding: 0
+        },
         plugins: {
           legend: { display: false },
           tooltip: {
@@ -122,7 +154,8 @@
           x: { stacked: true, display: false, min: 0, max: 100 },
           y: { stacked: true, display: false }
         }
-      }
+      },
+      plugins: [percentageLabelPlugin]
     });
     chartInstances.push(chart);
     return chart;
