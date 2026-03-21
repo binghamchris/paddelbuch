@@ -25,25 +25,29 @@ $secondary-blue-20:#60658920;
 // Text colours
 $text-muted: $secondary-blue;
 
-// Statistics Dashboard - Spot Type Colours
-$spot-type-entry-exit: #2e86c1;
-$spot-type-entry-only: #28b463;
-$spot-type-exit-only: #e67e22;
-$spot-type-rest: #8e44ad;
-$spot-type-emergency: #c0392b;
-$spot-type-no-entry: #7f8c8d;
-
 // Statistics Dashboard - Obstacle Colours (matches coverage dashboard: green-1 / danger-red)
 $obstacle-with-portage: #07753f; // = $green-1
 $obstacle-without-portage: #c40200; // = $danger-red
 
-// Statistics Dashboard - Protected Area Type Colours
-$pa-type-naturschutzgebiet: #1a5276;
-$pa-type-fahrverbotzone: #6c3483;
-$pa-type-schilfgebiet: #117a65;
-$pa-type-schwimmbereich: #2e86c1;
-$pa-type-industriegebiet: #7d6608;
-$pa-type-schiesszone: #943126;
-$pa-type-teleskizone: #1e8449;
-$pa-type-privatbesitz: #af601a;
-$pa-type-wasserskizone: #148f77;
+// Statistics Dashboard - Chart Gradients (light → dark)
+// Derived from: $othersport-pink → $routes-purple
+// Assigned by sort position at render time (largest category = lightest colour).
+
+// Spot chart gradient (6 stops)
+$chart-gradient-spot-1: #e693be;
+$chart-gradient-spot-2: #e161b5;
+$chart-gradient-spot-3: #df2cbb;
+$chart-gradient-spot-4: #be16b4;
+$chart-gradient-spot-5: #850c91;
+$chart-gradient-spot-6: #4c0561;
+
+// Protected area chart gradient (9 stops)
+$chart-gradient-pa-1: #e693be;
+$chart-gradient-pa-2: #e274b7;
+$chart-gradient-pa-3: #e054b5;
+$chart-gradient-pa-4: #df33ba;
+$chart-gradient-pa-5: #d31cbc;
+$chart-gradient-pa-6: #b815b2;
+$chart-gradient-pa-7: #950e9c;
+$chart-gradient-pa-8: #6f097f;
+$chart-gradient-pa-9: #4c0561;
