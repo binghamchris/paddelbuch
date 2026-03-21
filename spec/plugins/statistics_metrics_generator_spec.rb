@@ -286,3 +286,71 @@ RSpec.describe Jekyll::StatisticsMetricsGenerator do
     end
   end
 end
+
+# ── Property 8: Deactivation cleanup (static analysis of JS source) ──────────
+# Feature: statistics-dashboard, Property 8: Deactivation cleanup
+# **Validates: Requirements 1.5**
+#
+# Since there is no JS test runner in this project, this test performs static
+# analysis on the statistics-dashboard.js source file to verify that the
+# deactivate() function clears all four required DOM containers.
+RSpec.describe 'statistics-dashboard.js deactivate cleanup (Property 8)' do
+  let(:js_path) { File.join(File.dirname(__FILE__), '..', '..', 'assets', 'js', 'statistics-dashboard.js') }
+  let(:js_source) { File.read(js_path) }
+
+  # Extract the deactivate function body from the JS source
+  let(:deactivate_body) do
+    # Match the deactivate function — it starts with "deactivate: function()"
+    # and ends at the next closing brace at the same indentation level
+    match = js_source.match(/deactivate:\s*function\s*\(\)\s*\{(.*?)\n    \}/m)
+    expect(match).not_to be_nil, 'Could not find deactivate function in statistics-dashboard.js'
+    match[1]
+  end
+
+  # The four container IDs that must be cleared per the design contract
+  let(:required_container_ids) do
+    %w[dashboard-content dashboard-title dashboard-description dashboard-legend]
+  end
+
+  it 'references all four required container element IDs' do
+    required_container_ids.each do |container_id|
+      expect(deactivate_body).to include(container_id),
+        "deactivate() must reference '#{container_id}' but it was not found"
+    end
+  end
+
+  it 'retrieves each container via getElementById' do
+    required_container_ids.each do |container_id|
+      pattern = /getElementById\(\s*['"]#{Regexp.escape(container_id)}['"]\s*\)/
+      expect(deactivate_body).to match(pattern),
+        "deactivate() must call getElementById('#{container_id}')"
+    end
+  end
+
+  it 'sets innerHTML or textContent to empty string for each container' do
+    # Each container must have its content cleared — either innerHTML = '' or textContent = ''
+    required_container_ids.each do |container_id|
+      # Find the block for this container (getElementById call through the clearing assignment)
+      id_pattern = /getElementById\(\s*['"]#{Regexp.escape(container_id)}['"]\s*\)/
+      id_match = deactivate_body.match(id_pattern)
+      expect(id_match).not_to be_nil, "deactivate() must reference '#{container_id}'"
+    end
+
+    # Verify there are at least 4 clearing assignments (innerHTML = '' or textContent = '')
+    clearing_pattern = /\.(innerHTML|textContent)\s*=\s*['"]['"];/
+    clearing_matches = deactivate_body.scan(clearing_pattern)
+    expect(clearing_matches.size).to be >= required_container_ids.size,
+      "deactivate() must clear all #{required_container_ids.size} containers, " \
+      "but only found #{clearing_matches.size} clearing assignment(s)"
+  end
+
+  it 'uses conditional guards before clearing each container' do
+    # The deactivate function should check if each element exists before clearing
+    required_container_ids.each do |container_id|
+      # Look for a pattern like: if (someVar) { someVar.innerHTML = ''; }
+      # The variable name is derived from the getElementById call
+      expect(deactivate_body).to match(/if\s*\(/),
+        "deactivate() should use conditional guards when clearing '#{container_id}'"
+    end
+  end
+end
