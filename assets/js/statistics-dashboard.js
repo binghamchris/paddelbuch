@@ -207,23 +207,29 @@
   }
 
   /**
-   * Renders a colour-coded legend for a set of segments using inline
-   * background-color styles (colour is determined by sort position at
-   * render time, not by category).
+   * Renders a colour-coded legend for a set of segments using BEM-modifier
+   * classes. Spot and PA sections use positional classes (--spot-pos-0, etc.)
+   * that map to gradient colours in SCSS. Obstacle sections use slug-based
+   * classes (--with-portage, --without-portage).
    *
-   * @param {Array} segments - Array of { name, slug, color } objects
+   * @param {Array} segments - Array of { name, slug, color } objects (sorted by count desc)
+   * @param {string} section - Section identifier ('spots', 'protected-areas', 'obstacles')
    * @returns {string} HTML string for the legend
    */
-  function renderLegend(segments) {
+  function renderLegend(segments, section) {
     var html = '<div class="statistics-legend">';
     for (var i = 0; i < segments.length; i++) {
       var seg = segments[i];
-      html += '<div class="statistics-legend-item">';
-      html += '<span class="statistics-legend-swatch statistics-legend-swatch--' + escapeHtml(seg.slug) + '"';
-      if (seg.color) {
-        html += ' style="background-color:' + escapeHtml(seg.color) + '"';
+      var swatchClass = 'statistics-legend-swatch';
+      if (section === 'spots') {
+        swatchClass += ' statistics-legend-swatch--spot-pos-' + i;
+      } else if (section === 'protected-areas') {
+        swatchClass += ' statistics-legend-swatch--pa-pos-' + i;
+      } else {
+        swatchClass += ' statistics-legend-swatch--' + escapeHtml(seg.slug);
       }
-      html += '></span>';
+      html += '<div class="statistics-legend-item">';
+      html += '<span class="' + swatchClass + '"></span>';
       html += '<span>' + escapeHtml(seg.name) + '</span>';
       html += '</div>';
     }
@@ -279,7 +285,7 @@
     html += '</div>';
     html += renderStackedBar(segments, section);
     html += '</div>';
-    html += renderLegend(segments);
+    html += renderLegend(segments, section);
     html += '</div>';
     return html;
   }
