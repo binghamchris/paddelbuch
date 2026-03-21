@@ -78,8 +78,8 @@ Implementation follows the existing dashboard module pattern (IIFE, registry pus
 - [x] 3. Checkpoint
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 4. Extend dashboard-data.js and update the HTML template
-  - [~] 4.1 Add `parseJsonObjectBlock` to `assets/js/dashboard-data.js` and expose `statisticsMetrics`
+- [-] 4. Extend dashboard-data.js and update the HTML template
+  - [x] 4.1 Add `parseJsonObjectBlock` to `assets/js/dashboard-data.js` and expose `statisticsMetrics`
     - Add a `parseJsonObjectBlock(id)` function that returns `{}` on failure (instead of `[]` for arrays)
     - Parse `#statistics-data` JSON block and expose as `PaddelbuchDashboardData.statisticsMetrics`
     - _Requirements: 8.9, 8.10_
