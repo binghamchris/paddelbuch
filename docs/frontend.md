@@ -157,3 +157,49 @@ _sass/
 ```
 
 The main entry point is `assets/css/application.scss`, which imports Bootstrap and then the project's settings, utilities, components, and page styles.
+
+## Content Security Policy
+
+The site enforces a strict Content Security Policy (CSP) via the CloudFormation template (`deploy/frontend-deploy.yaml`). This is a deliberate design constraint that shapes how frontend code can be written.
+
+### Active Policy
+
+```
+default-src 'self';
+img-src 'self' data: raw.githubusercontent.com api.mapbox.com;
+style-src 'self';
+script-src 'self';
+font-src 'self' data:;
+connect-src 'self' tiles.openfreemap.org;
+worker-src 'self' blob:
+```
+
+### Design Decisions
+
+- No `'unsafe-inline'` for `script-src` or `style-src`. All JavaScript must be in `.js` files, all CSS in `.css`/`.scss` files. Inline `<script>` blocks and inline `style=""` attributes are blocked by the browser.
+- No `'unsafe-eval'`. No `eval()`, `new Function()`, or similar dynamic code execution.
+- No CDN dependencies. All vendor assets (Bootstrap, Leaflet, Chart.js, fonts) are self-hosted. The `copy-vendor-assets.js` and `download-google-fonts.js` scripts exist specifically to support this constraint.
+- Allowlisted external domains are limited to what the map layers require:
+  - `raw.githubusercontent.com` and `api.mapbox.com` — image sources for map tiles and markers
+  - `tiles.openfreemap.org` — vector tile data fetched by MapLibre GL
+- `worker-src 'self' blob:` — required by MapLibre GL JS, which spawns web workers from blob URLs for vector tile parsing.
+- `font-src 'self' data:` — allows self-hosted font files and data URIs (used by some icon fonts).
+
+### Implications for Development
+
+- JSON configuration is injected into pages via `<script type="application/json">` data blocks (not inline JS), then parsed by external `.js` files at runtime. This is how `PrecomputeGenerator` output reaches the frontend without violating `script-src 'self'`.
+- Adding a new external service (e.g., analytics, a new tile provider) requires updating the CSP in the CloudFormation template — it cannot be done in frontend code alone.
+- The `style-src 'self'` directive means Leaflet plugins or libraries that inject inline styles may break. Test any new vendor library against the CSP before integrating.
+
+### Other Security Headers
+
+The CloudFormation template also sets these headers on all responses (`**/*`):
+
+| Header | Value | Purpose |
+|--------|-------|---------|
+| `Strict-Transport-Security` | `max-age=31536000; includeSubDomains; preload` | Forces HTTPS for 1 year |
+| `X-Frame-Options` | `DENY` | Prevents embedding in iframes |
+| `X-XSS-Protection` | `1; mode=block` | Legacy XSS filter |
+| `X-Content-Type-Options` | `nosniff` | Prevents MIME-type sniffing |
+| `Referrer-Policy` | `strict-origin-when-cross-origin` | Limits referrer information to external sites |
+| `Permissions-Policy` | (restrictive) | Only `fullscreen`, `geolocation`, and `vertical-scroll` are allowed for `self`; all other browser features are disabled |
