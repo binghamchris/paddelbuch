@@ -6,7 +6,7 @@ Downloads the Swiss border from Natural Earth (via GitHub) and computes
 the intersection so only the portion inside Switzerland remains.
 
 Usage:
-    python3 _scripts/clip_geometry_to_switzerland.py input.geojson output.geojson
+    python3 scripts/clip_geometry_to_switzerland.py input.geojson output.geojson
 
 Dependencies:
     pip3 install shapely requests

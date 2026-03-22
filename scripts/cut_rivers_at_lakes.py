@@ -9,7 +9,7 @@ For each river (paddlingEnvironmentType = "fluss" or "wildwasser"):
   4. Updates the geometry field in Contentful and publishes the entry
 
 Usage:
-    python3 _scripts/cut_rivers_at_lakes.py [--dry-run] [--slug SLUG]
+    python3 scripts/cut_rivers_at_lakes.py [--dry-run] [--slug SLUG]
 
 Options:
     --dry-run      Preview changes without writing to Contentful

@@ -9,7 +9,7 @@ For each waterway entry in Contentful:
   4. Updates the geometry field in Contentful and publishes the entry
 
 Usage:
-    python3 _scripts/clip_waterways_to_switzerland.py [--dry-run] [--slug SLUG] [--type TYPE]
+    python3 scripts/clip_waterways_to_switzerland.py [--dry-run] [--slug SLUG] [--type TYPE]
 
 Options:
     --dry-run      Preview changes without writing to Contentful
