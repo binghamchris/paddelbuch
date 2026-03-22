@@ -1,5 +1,6 @@
 ---
 inclusion: auto
+description: Strict Content Security Policy constraints from deployment environment. Use when implementing frontend script, style, and vendor assets.
 ---
 
 # Content Security Policy Constraints
