@@ -13,7 +13,7 @@ module Jekyll
       return [] if waterways.nil? || waterways.empty?
       
       waterways
-        .select { |w| w['locale'] == locale && w['paddlingEnvironmentType_slug'] == 'see' && w['showInMenu'] == true }
+        .select { |w| w['locale'] == locale && w['paddlingEnvironmentType_slug'] == 'see' && w['showInMenu'] == true && w['navigableByPaddlers'] != false }
         .sort_by { |w| -(w['area'] || 0) }
         .first(limit)
         .sort_by { |w| w['name'].to_s.downcase }
@@ -25,7 +25,7 @@ module Jekyll
       return [] if waterways.nil? || waterways.empty?
       
       waterways
-        .select { |w| w['locale'] == locale && w['paddlingEnvironmentType_slug'] == 'fluss' && w['showInMenu'] == true }
+        .select { |w| w['locale'] == locale && w['paddlingEnvironmentType_slug'] == 'fluss' && w['showInMenu'] == true && w['navigableByPaddlers'] != false }
         .sort_by { |w| -(w['length'] || 0) }
         .first(limit)
         .sort_by { |w| w['name'].to_s.downcase }
@@ -48,7 +48,7 @@ module Jekyll
       return [] if waterways.nil? || waterways.empty?
       
       waterways
-        .select { |w| w['locale'] == locale && w['paddlingEnvironmentType_slug'] == 'see' }
+        .select { |w| w['locale'] == locale && w['paddlingEnvironmentType_slug'] == 'see' && w['navigableByPaddlers'] != false }
         .sort_by { |w| w['name'].to_s.downcase }
     end
     
@@ -60,7 +60,7 @@ module Jekyll
       return [] if waterways.nil? || waterways.empty?
       
       waterways
-        .select { |w| w['locale'] == locale && w['paddlingEnvironmentType_slug'] == 'fluss' }
+        .select { |w| w['locale'] == locale && w['paddlingEnvironmentType_slug'] == 'fluss' && w['navigableByPaddlers'] != false }
         .sort_by { |w| w['name'].to_s.downcase }
     end
   end
