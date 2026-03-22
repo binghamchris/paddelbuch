@@ -472,6 +472,7 @@ module Jekyll
       result['paddlingEnvironmentType'] = wrap_slug_ref(item['paddlingEnvironmentType_slug'])
       result['dataSourceType'] = wrap_slug_ref(item['dataSourceType_slug'])
       result['dataLicenseType'] = wrap_slug_ref(item['dataLicenseType_slug'])
+      result['navigableByPaddlers'] = item['navigableByPaddlers']
       result
     end
 
