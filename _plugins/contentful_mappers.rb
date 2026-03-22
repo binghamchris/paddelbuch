@@ -69,7 +69,7 @@ module ContentfulMappers
         field_hash
       end
     else
-      # Raw field value with no locale wrapping — return directly
+      # Raw field value with no locale wrapping -- return directly
       field_hash
     end
   end
@@ -121,7 +121,7 @@ module ContentfulMappers
     return nil unless field
 
     if field.is_a?(Hash) && field['raw']
-      # Contentful rich text with 'raw' JSON string — parse and render the document
+      # Contentful rich text with 'raw' JSON string -- parse and render the document
       begin
         doc = JSON.parse(field['raw'])
         if doc.is_a?(Hash) && doc['nodeType'] == 'document' && doc['content']
@@ -208,13 +208,13 @@ module ContentfulMappers
     return nil if field.nil?
 
     if field.is_a?(Hash) && field.key?('raw')
-      # Already in Contentful raw format — return the raw JSON string
+      # Already in Contentful raw format -- return the raw JSON string
       field['raw']
     elsif field.is_a?(Hash) && (field.key?('content') || field.key?('nodeType'))
-      # Rich text document hash — serialize to JSON string
+      # Rich text document hash -- serialize to JSON string
       JSON.generate(field)
     elsif field.respond_to?(:content) && field.respond_to?(:node_type)
-      # Contentful SDK rich text object — attempt to serialize
+      # Contentful SDK rich text object -- attempt to serialize
       JSON.generate(field)
     else
       nil
@@ -222,7 +222,7 @@ module ContentfulMappers
   end
 
   # ---------------------------------------------------------------------------
-  # Entry flattening — produces one hash per locale from a locale: '*' entry
+  # Entry flattening -- produces one hash per locale from a locale: '*' entry
   # ---------------------------------------------------------------------------
 
   # Flatten a single Contentful entry (fetched with locale: '*') into an array
@@ -282,6 +282,7 @@ module ContentfulMappers
       '_raw_geometry' => geometry_field,
       'showInMenu' => resolve_field(fields, :show_in_menu, locale) || false,
       'paddlingEnvironmentType_slug' => extract_reference_slug(resolve_field(fields, :paddling_environment_type, locale)),
+      'navigableByPaddlers' => resolve_field(fields, :navigable_by_paddlers, locale),
       'dataSourceType_slug' => extract_reference_slug(resolve_field(fields, :data_source_type, locale)),
       'dataLicenseType_slug' => extract_reference_slug(resolve_field(fields, :data_license_type, locale))
     }

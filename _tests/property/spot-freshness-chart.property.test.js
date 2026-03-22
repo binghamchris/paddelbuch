@@ -6,7 +6,7 @@
  *
  * Property 3: For any PaddelbuchColors configuration, the spot freshness chart
  * datasets shall use colors.green1 for the Fresh segment, colors.warningYellow
- * for the Aging segment, and colors.dangerRed for the Stale segment — with no
+ * for the Aging segment, and colors.dangerRed for the Stale segment -- with no
  * hardcoded hex values.
  *
  * Property 4: For any freshness metrics object { fresh: F, aging: A, stale: S },
@@ -69,7 +69,7 @@ describe('Spot Freshness Chart Properties', function () {
       '<div id="dashboard-description"></div>' +
       '<div id="dashboard-legend"></div>';
 
-    // Mock Chart.js — captures every instance created
+    // Mock Chart.js -- captures every instance created
     window.Chart = function MockChart(canvas, config) {
       var instance = {
         canvas: canvas,

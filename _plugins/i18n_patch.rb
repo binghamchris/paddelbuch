@@ -25,7 +25,7 @@ Jekyll::Hooks.register :site, :after_init do |site|
   next if I18nPatch.patched?
 
   if i18n_version && !i18n_version.start_with?('1.8')
-    Jekyll.logger.warn 'I18nPatch:', "jekyll-multiple-languages-plugin #{i18n_version} detected, patch targets 1.8.x — skipping patch"
+    Jekyll.logger.warn 'I18nPatch:', "jekyll-multiple-languages-plugin #{i18n_version} detected, patch targets 1.8.x -- skipping patch"
     I18nPatch.patched!
     next
   end
