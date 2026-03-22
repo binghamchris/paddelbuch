@@ -244,8 +244,8 @@ RSpec.describe Jekyll::ApiGenerator, '#cache_hit_logging — Property 9: Generat
         generator.generate(site)
 
         expect(Jekyll.logger).to have_received(:info).with(
-          'API Generator:', 'Cache empty/missing — performing full generation'
-        ), "Expected 'Cache empty/missing — performing full generation' log for cache miss scenario"
+          'API Generator:', 'Cache empty/missing -- performing full generation'
+        ), "Expected 'Cache empty/missing -- performing full generation' log for cache miss scenario"
       end
     }
   end
@@ -334,7 +334,7 @@ RSpec.describe Jekyll::ApiGenerator, 'caching unit tests' do
       generator.generate(site)
 
       expect(Jekyll.logger).to have_received(:info).with(
-        'API Generator:', 'Cache empty/missing — performing full generation'
+        'API Generator:', 'Cache empty/missing -- performing full generation'
       )
     end
 
@@ -345,7 +345,7 @@ RSpec.describe Jekyll::ApiGenerator, 'caching unit tests' do
       generator.generate(site)
 
       expect(Jekyll.logger).to have_received(:info).with(
-        'API Generator:', 'Cache empty/missing — performing full generation'
+        'API Generator:', 'Cache empty/missing -- performing full generation'
       )
     end
   end
