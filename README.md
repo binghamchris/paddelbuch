@@ -8,7 +8,7 @@ More information about the technological evolution of the project can be found i
 
 - [Contributing Guide](CONTRIBUTING.md) — How to contribute to the project
 - [Architecture Overview](docs/architecture.md) — Build pipeline, data flow, and system design
-- [Plugin Reference](docs/plugins.md) — All 18 custom Jekyll plugins documented
+- [Plugin Reference](docs/plugins.md) — All 20 custom Jekyll plugins documented
 - [Frontend Guide](docs/frontend.md) — JavaScript modules, SCSS structure, and vendor assets
 - [Content Model](docs/content-model.md) — Contentful content types and how to add new ones
 - [Testing Guide](docs/testing.md) — Test suites, property-based testing, and how to write new tests
@@ -74,16 +74,21 @@ paddelbuch/
 │   ├── collection_generator.rb # Collection page generation
 │   ├── contentful_fetcher.rb  # Contentful data fetching
 │   ├── contentful_mappers.rb  # Contentful → Jekyll data mapping
+│   ├── dashboard_metrics_generator.rb # Data quality dashboard metrics
 │   ├── env_loader.rb          # .env file loading
 │   ├── favicon_generator.rb   # Favicon and Apple Touch Icon handling
 │   ├── i18n_patch.rb          # i18n compatibility patch
 │   ├── locale_filter.rb       # Locale-aware filtering
 │   ├── ssl_patch.rb           # SSL fix for Ruby 3.4+/OpenSSL 3.x
+│   ├── statistics_metrics_generator.rb # Statistics dashboard metrics
 │   ├── sync_checker.rb        # Contentful Sync API integration
 │   ├── tile_generator.rb      # Spatial tile generation
 │   └── waterway_filters.rb    # Waterway-specific filters
 ├── _scripts/             # Build helper scripts
-│   └── generate_apple_touch_icon.py  # SVG → PNG icon generation
+│   ├── generate_apple_touch_icon.py  # SVG → PNG icon generation
+│   ├── clip_geometry_to_switzerland.py  # Clip GeoJSON geometry to Swiss border
+│   ├── clip_waterways_to_switzerland.py # Clip waterway geometries to Swiss border
+│   └── cut_rivers_at_lakes.py        # Cut river geometries at lake boundaries
 ├── _sass/                # SCSS stylesheets
 ├── _spots/               # Spot collection (generated)
 ├── _waterways/           # Waterway collection (generated)
@@ -105,6 +110,11 @@ paddelbuch/
 ├── docs/                 # Project documentation
 ├── gewaesser/            # Waterway list pages
 ├── offene-daten/         # Open data/API pages
+├── scripts/              # Utility scripts
+│   ├── copy-vendor-assets.js          # Copies vendor JS/CSS from node_modules
+│   ├── download-google-fonts.js       # Downloads and self-hosts Google Fonts
+│   ├── restore_geometry_from_full.rb  # Restores waterway geometry from full GeoJSON
+│   └── simplify_waterway_geometry.rb  # Simplifies waterway geometry in Contentful
 ├── amplify.yml           # AWS Amplify build configuration
 ├── Gemfile               # Ruby dependencies
 └── package.json          # Node.js dependencies (for testing)
