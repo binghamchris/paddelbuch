@@ -59,7 +59,7 @@ Jekyll::Hooks.register :site, :after_init do |site|
   env_file = File.join(source, ".env.#{jekyll_env}")
   env_vars.merge!(Jekyll::EnvLoader.load_env_file(env_file))
 
-  # System env vars take highest priority — check known keys directly
+  # System env vars take highest priority -- check known keys directly
   # so they are picked up even when no .env file exists
   Jekyll::EnvLoader::KNOWN_KEYS.each do |key|
     env_vars[key] = ENV[key] if ENV[key]

@@ -36,7 +36,7 @@ var validSpotArb = fc.record({
 });
 
 /**
- * Generates an invalid spot entry — missing lat, lon, or category.
+ * Generates an invalid spot entry -- missing lat, lon, or category.
  */
 var invalidSpotArb = fc.oneof(
   fc.record({
@@ -117,7 +117,7 @@ describe('Spot Freshness CSP Compliance (Property 12)', function () {
 
     window.PaddelbuchDashboardData = { statisticsMetrics: {} };
 
-    // Mock Leaflet — capture divIcon HTML for inspection
+    // Mock Leaflet -- capture divIcon HTML for inspection
     window.L = {
       layerGroup: function () {
         return {

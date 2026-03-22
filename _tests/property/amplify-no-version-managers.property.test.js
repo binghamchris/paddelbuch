@@ -133,7 +133,7 @@ describe('No runtime version manager commands in build pipeline - Property 1', (
         'maneuver'
       ];
 
-      // Only 'rvmrc_is_not...' could be tricky — but \brvm\b won't match inside 'rvmrc'
+      // Only 'rvmrc_is_not...' could be tricky -- but \brvm\b won't match inside 'rvmrc'
       // because 'rvmrc' has no word boundary after 'rvm'
       for (const cmd of falsePositiveCandidates) {
         // These should all pass since rvm/nvm don't appear as whole words

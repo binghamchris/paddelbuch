@@ -14,14 +14,14 @@
 # CRL verification failures.
 #
 # Activation conditions (ALL must be true):
-#   1. JEKYLL_ENV is "development" (the default) — skipped for "production"
+#   1. JEKYLL_ENV is "development" (the default) -- skipped for "production"
 #   2. Ruby >= 3.4 OR OpenSSL 3.x is detected
 #   3. HTTP::Connection#start_tls is defined (http gem loaded)
 
 jekyll_env = ENV['JEKYLL_ENV'] || 'development'
 
 unless jekyll_env == 'development'
-  Jekyll.logger.debug 'SSLPatch:', "Skipped — not needed in #{jekyll_env} environment"
+  Jekyll.logger.debug 'SSLPatch:', "Skipped -- not needed in #{jekyll_env} environment"
   return
 end
 
@@ -31,7 +31,7 @@ if RUBY_VERSION >= '3.4' || (defined?(OpenSSL::OPENSSL_LIBRARY_VERSION) &&
   if defined?(HTTP::Connection) && HTTP::Connection.method_defined?(:start_tls)
     http_gem_version = Gem.loaded_specs['http']&.version&.to_s
     if http_gem_version && !http_gem_version.start_with?('5.')
-      Jekyll.logger.warn 'SSLPatch:', "http gem version #{http_gem_version} detected, patch targets 5.x — patch may not work correctly"
+      Jekyll.logger.warn 'SSLPatch:', "http gem version #{http_gem_version} detected, patch targets 5.x -- patch may not work correctly"
     end
 
     Jekyll.logger.info 'SSLPatch:', 'Applying local-dev CRL workaround for HTTP::Connection#start_tls'
@@ -52,8 +52,8 @@ if RUBY_VERSION >= '3.4' || (defined?(OpenSSL::OPENSSL_LIBRARY_VERSION) &&
       end
     end
   else
-    Jekyll.logger.debug 'SSLPatch:', 'HTTP::Connection#start_tls not found — skipping'
+    Jekyll.logger.debug 'SSLPatch:', 'HTTP::Connection#start_tls not found -- skipping'
   end
 else
-  Jekyll.logger.debug 'SSLPatch:', 'Ruby/OpenSSL version does not require CRL workaround — skipping'
+  Jekyll.logger.debug 'SSLPatch:', 'Ruby/OpenSSL version does not require CRL workaround -- skipping'
 end

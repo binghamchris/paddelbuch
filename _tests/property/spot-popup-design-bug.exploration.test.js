@@ -1,5 +1,5 @@
 /**
- * Bug Condition Exploration Test — Spot Popup Design Fix
+ * Bug Condition Exploration Test -- Spot Popup Design Fix
  *
  * Tests that generateSpotPopupContent() produces HTML matching the
  * original Gatsby popup structure.
@@ -39,7 +39,7 @@ const REPRESENTATIVE_SPOT = {
   paddleCraftTypes: ['seekajak', 'kanadier', 'stand-up-paddle-board']
 };
 
-describe('Bug Condition Exploration — Spot Popup Design (Property 1)', () => {
+describe('Bug Condition Exploration -- Spot Popup Design (Property 1)', () => {
   let htmlDe;
   let htmlEn;
 

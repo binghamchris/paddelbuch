@@ -59,8 +59,8 @@ module Jekyll
       waterways = deduplicate_by_slug(site.data['waterways'])
       notices = deduplicate_by_slug(site.data['notices'])
 
-      Jekyll.logger.warn 'StatisticsMetrics:', 'No spot data found — spot metrics will be empty' if spots.empty?
-      Jekyll.logger.warn 'StatisticsMetrics:', 'No obstacle data found — obstacle metrics will be empty' if obstacles.empty?
+      Jekyll.logger.warn 'StatisticsMetrics:', 'No spot data found -- spot metrics will be empty' if spots.empty?
+      Jekyll.logger.warn 'StatisticsMetrics:', 'No obstacle data found -- obstacle metrics will be empty' if obstacles.empty?
 
       spot_types = deduplicate_by_slug(site.data.dig('types', 'spot_types'))
       protected_area_types = deduplicate_by_slug(site.data.dig('types', 'protected_area_types'))
@@ -271,8 +271,8 @@ module Jekyll
 
     # Spot freshness: classifies non-rejected spots into freshness buckets
     # using the same thresholds as the waterway freshness dashboard.
-    # Fresh: ≤ 730.5 days (≤ 2 years)
-    # Aging: > 730.5 and ≤ 1826.25 days (2–5 years)
+    # Fresh: <= 730.5 days (<= 2 years)
+    # Aging: > 730.5 and <= 1826.25 days (2-5 years)
     # Stale: > 1826.25 days (> 5 years)
     # No data: nil updatedAt
     def compute_spot_freshness_metrics(spots)

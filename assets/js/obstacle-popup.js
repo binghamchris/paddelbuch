@@ -63,16 +63,16 @@
     var localeStrings = strings[locale] || strings.de;
     var localePrefix = (locale && locale !== 'de') ? '/' + locale : '';
     
-    // Obstacle name — matches Gatsby's .popup-title > h1 structure
+    // Obstacle name -- matches Gatsby's .popup-title > h1 structure
     var html = '<span class="popup-title"><h1>' + PaddelbuchHtmlUtils.escapeHtml(obstacle.name || 'Obstacle') + '</h1></span>';
     
-    // Portage possibility status in a table — matches Gatsby's table layout
+    // Portage possibility status in a table -- matches Gatsby's table layout
     html += '<table><tbody>';
     html += '<tr><th>' + localeStrings.portageLabel + ':</th>';
     html += '<td>' + getPortageStatus(obstacle, locale) + '</td></tr>';
     html += '</tbody></table>';
     
-    // Link to obstacle detail page — matches Gatsby's .popup-btn structure
+    // Link to obstacle detail page -- matches Gatsby's .popup-btn structure
     if (obstacle.slug) {
       html += '<button class="popup-btn popup-btn-right obstacle-details-btn">';
       html += '<a class="popup-btn-right" hreflang="' + (locale || 'de') + '" href="' + localePrefix + '/hindernisse/' + encodeURIComponent(obstacle.slug) + '/">';

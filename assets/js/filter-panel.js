@@ -39,7 +39,7 @@
         // Content area
         var content = L.DomUtil.create('div', 'filter-panel-content', container);
 
-        // Spot filter section — one fieldset per dimension
+        // Spot filter section -- one fieldset per dimension
         for (var i = 0; i < dimensionConfigs.length; i++) {
           var dim = dimensionConfigs[i];
           var fieldset = document.createElement('fieldset');
