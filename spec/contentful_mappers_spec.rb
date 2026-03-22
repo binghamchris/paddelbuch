@@ -1825,5 +1825,34 @@ RSpec.describe ContentfulMappers do
       expect(result).to include('Display name of the spot')
     end
   end
+
+  # --- Feature: navigable-by-paddlers, Property 1: Mapper tri-state preservation ---
+
+  describe '.map_waterway navigableByPaddlers tri-state preservation' do
+    # **Validates: Requirements 1.1, 1.2, 1.3, 1.4**
+
+    it '[PBT] preserves navigableByPaddlers tri-state value (true, false, nil) through mapping' do
+      property_of {
+        nav_value = choose(true, false, nil)
+        [nav_value]
+      }.check(100) { |nav_value|
+        fields = build_fields(
+          slug: 'test-waterway',
+          name: 'Test Waterway',
+          navigable_by_paddlers: nav_value
+        )
+        # When nav_value is nil, remove the field entirely to simulate unset
+        fields.delete(:navigable_by_paddlers) if nav_value.nil?
+
+        entry = build_entry(fields)
+        result = ContentfulMappers.map_waterway(entry, fields, 'de')
+
+        expect(result).to have_key('navigableByPaddlers'),
+          "Expected mapped hash to contain 'navigableByPaddlers' key"
+        expect(result['navigableByPaddlers']).to eq(nav_value),
+          "Expected navigableByPaddlers to be #{nav_value.inspect}, got #{result['navigableByPaddlers'].inspect}"
+      }
+    end
+  end
 end
 

@@ -2,7 +2,7 @@
  * Regression Tests: Event Notice Date Filtering in layer-control.html
  *
  * Prevents regression of the bug where layer-control.html called
- * PaddelbuchEventNoticePopup.isDateInFuture() — a function that does not exist
+ * PaddelbuchEventNoticePopup.isDateInFuture() -- a function that does not exist
  * on that module. The correct module is PaddelbuchDateUtils.
  *
  * The bug caused a JS runtime error that silently killed all event notice

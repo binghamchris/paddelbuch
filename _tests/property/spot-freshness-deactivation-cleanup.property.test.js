@@ -38,7 +38,7 @@ var validSpotArb = fc.record({
 });
 
 /**
- * Generates a random array of spot data entries (0–30 items).
+ * Generates a random array of spot data entries (0-30 items).
  */
 var spotArrayArb = fc.array(validSpotArb, { minLength: 0, maxLength: 30 });
 
