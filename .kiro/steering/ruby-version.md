@@ -1,5 +1,6 @@
 ---
-inclusion: always
+inclusion: auto
+description: Use whenever you're working with Ruby.
 ---
 
 # Ruby Version Management
