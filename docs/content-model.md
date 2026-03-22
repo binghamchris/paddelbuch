@@ -48,6 +48,7 @@ Lakes and rivers with GeoJSON geometry.
 | `geometry` | JSON | GeoJSON geometry (LineString for rivers, Polygon for lakes) |
 | `show_in_menu` | Boolean | Whether to show in the navigation menu |
 | `paddling_environment_type` | Reference → paddlingEnvironmentType | `see` (lake) or `fluss` (river) |
+| `navigable_by_paddlers` | Boolean (tri-state) | Whether the waterway is navigable by paddlers (`true`, `false`, or `null` = unknown). Non-navigable waterways are excluded from dashboards and detail page generation |
 | `data_source_type` | Reference → dataSourceType | Data provenance |
 | `data_license_type` | Reference → dataLicenseType | Licensing terms |
 

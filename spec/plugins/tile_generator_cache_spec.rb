@@ -339,8 +339,8 @@ RSpec.describe Jekyll::TileGenerator, '#cache_hit_logging — Property 9: Genera
         generator.generate(site)
 
         expect(Jekyll.logger).to have_received(:info).with(
-          'Tile Generator:', 'Cache empty/missing — performing full generation'
-        ), "Expected 'Cache empty/missing — performing full generation' log for cache miss scenario"
+          'Tile Generator:', 'Cache empty/missing -- performing full generation'
+        ), "Expected 'Cache empty/missing -- performing full generation' log for cache miss scenario"
       end
     }
   end
@@ -447,7 +447,7 @@ RSpec.describe Jekyll::TileGenerator, 'caching unit tests' do
       generator.generate(site)
 
       expect(Jekyll.logger).to have_received(:info).with(
-        'Tile Generator:', 'Cache empty/missing — performing full generation'
+        'Tile Generator:', 'Cache empty/missing -- performing full generation'
       )
     end
 
@@ -463,7 +463,7 @@ RSpec.describe Jekyll::TileGenerator, 'caching unit tests' do
       generator.generate(site)
 
       expect(Jekyll.logger).to have_received(:info).with(
-        'Tile Generator:', 'Cache empty/missing — performing full generation'
+        'Tile Generator:', 'Cache empty/missing -- performing full generation'
       )
     end
   end
