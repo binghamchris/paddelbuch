@@ -20,7 +20,7 @@ module Jekyll
     COLLECTION_NAMES = %w[spots waterways obstacles notices static_pages].freeze
 
     def generate(site)
-      # Skip duplicate runs — with parallel_localization: true, Jekyll runs all
+      # Skip duplicate runs -- with parallel_localization: true, Jekyll runs all
       # generators once per language. This generator already produces bilingual
       # URLs internally, so only run during the default-language pass.
       default_lang = site.config['default_lang'] || 'de'

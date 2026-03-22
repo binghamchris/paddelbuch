@@ -80,7 +80,7 @@
       var dim = dimensionConfigs[i];
       var selected = filterState[dim.key];
 
-      // Inactive dimension — skip
+      // Inactive dimension -- skip
       if (!selected || selected.size === 0) {
         continue;
       }

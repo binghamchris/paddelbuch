@@ -101,7 +101,7 @@ describe('Rejected Spots Exclusion - Property 6', () => {
 
           if (spotIsRejected) {
             // Rejected: do NOT register in registry (add to noEntry LayerGroup instead)
-            // This is the path we're testing — no registration happens
+            // This is the path we're testing -- no registration happens
           } else {
             registry.register(slug, marker, metadata);
           }
@@ -132,7 +132,7 @@ describe('Rejected Spots Exclusion - Property 6', () => {
           const spotIsRejected = isRejected(rejectedFlag);
 
           if (spotIsRejected) {
-            // Would go to noEntry LayerGroup — skip registration
+            // Would go to noEntry LayerGroup -- skip registration
           } else {
             registry.register(slug, marker, metadata);
           }
@@ -146,7 +146,7 @@ describe('Rejected Spots Exclusion - Property 6', () => {
   });
 
   /**
-   * Property 6c: Mixed batch — rejected spots are excluded while
+   * Property 6c: Mixed batch -- rejected spots are excluded while
    * non-rejected spots are registered. Verifies that in a batch of spots,
    * only non-rejected ones end up in the registry.
    */

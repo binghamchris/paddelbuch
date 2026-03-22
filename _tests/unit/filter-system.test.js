@@ -294,11 +294,11 @@ describe('Filter System Integration', () => {
       engine.setOption('paddleCraftType', 'seekajak', false);
       engine.applyFilters();
 
-      // Spot A: fails spot type (rasthalte unchecked) → hidden
+      // Spot A: fails spot type (rasthalte unchecked) -> hidden
       expect(markerA.remove).toHaveBeenCalled();
-      // Spot B: passes spot type (einstieg-ausstieg checked) but fails craft (seekajak unchecked) → hidden
+      // Spot B: passes spot type (einstieg-ausstieg checked) but fails craft (seekajak unchecked) -> hidden
       expect(markerB.remove).toHaveBeenCalled();
-      // Spot C: passes spot type (einstieg-ausstieg checked) AND passes craft (kanadier checked) → visible
+      // Spot C: passes spot type (einstieg-ausstieg checked) AND passes craft (kanadier checked) -> visible
       expect(markerC.addTo).toHaveBeenCalledWith(map);
     });
   });
@@ -318,7 +318,7 @@ describe('Filter System Integration', () => {
 
       engine.init(configs, map);
 
-      // Uncheck ALL craft types → dimension becomes inactive
+      // Uncheck ALL craft types -> dimension becomes inactive
       engine.setOption('paddleCraftType', 'seekajak', false);
       engine.setOption('paddleCraftType', 'kanadier', false);
       engine.setOption('paddleCraftType', 'stand-up-paddle-board', false);
@@ -349,7 +349,7 @@ describe('Filter System Integration', () => {
 
       engine.applyFilters();
 
-      // Both dimensions inactive → all spots visible
+      // Both dimensions inactive -> all spots visible
       expect(marker.addTo).toHaveBeenCalledWith(map);
     });
   });

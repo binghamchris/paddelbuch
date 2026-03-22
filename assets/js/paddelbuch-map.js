@@ -30,7 +30,7 @@
 
     var config = JSON.parse(configEl.textContent);
 
-    // Build map options — start with required fields
+    // Build map options -- start with required fields
     var mapOptions = {
       center: [config.center.lat, config.center.lon],
       zoom: config.zoom
@@ -49,7 +49,7 @@
       mapOptions.minZoom = config.minZoom;
     }
 
-    // Optional: zoomControl — when explicitly false, we add it manually later
+    // Optional: zoomControl -- when explicitly false, we add it manually later
     if (config.zoomControl === false) {
       mapOptions.zoomControl = false;
     } else {
