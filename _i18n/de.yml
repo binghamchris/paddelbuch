@@ -19,6 +19,7 @@ nav:
   language: "Sprache"
   more_lakes: "Weitere Seen"
   more_rivers: "Weitere Flüsse"
+  data_quality_dashboards: "Datenqualität"
 
 # Spot types
 spot_types:
@@ -159,3 +160,49 @@ map:
 date:
   format: "%d.%m.%Y"
   format_long: "%d. %B %Y"
+
+# Dashboard page
+dashboards:
+  title: "Datenqualität"
+  description: "Diese Visualisierungen zeigen wichtige Informationen über die aktuelle Gesamtqualität der Inhalte der Paddel Buch Datenbank."
+  freshness:
+    name: "Gewässeraktualität"
+    description: "Wie aktuell die Einstiegsorte für jedes Gewässer sind. Berechnet anhand des Median-Einstiegsorts basierend auf dem <code>updatedAt</code>-Feld."
+    legend_title: "Median-Alter der Einträge"
+    fresh: "Aktuell (≤ 2 Jahre)"
+    aging: "Alternd (2–5 Jahre)"
+    stale: "Veraltet (> 5 Jahre)"
+    no_data: "Keine Einstiegsorte"
+    popup_spots: "Einstiegsorte"
+    popup_median_age: "Median-Alter"
+    popup_years: "Jahre"
+    popup_no_data: "Keine Daten vorhanden"
+  statistics:
+    name: "Statistiken"
+    description: "Übersicht über den Inhalt der Paddel Buch Datenbank."
+    spots_title: "Einstiegsorte"
+    obstacles_title: "Hindernisse"
+    protected_areas_title: "Schutzgebiete"
+    paddle_craft_title: "Verfügbare Einstiegsorte nach Paddelboot-Typ"
+    data_source_title: "Einträge nach Datenquelle"
+    data_license_title: "Einträge nach Datenlizenz"
+    with_portage: "Mit Portage-Route"
+    without_portage: "Ohne Portage-Route"
+    no_entry: "Kein Zutritt"
+
+  coverage:
+    name: "Gewässerabdeckung"
+    description: "Wie viel der Länge jedes Flusses oder des Ufers jedes Sees Einstiegsorte hat."
+    legend_title: "Abdeckung der Gewässer"
+    covered: "Abgedeckt (innerhalb 5 km)"
+    not_covered: "Nicht abgedeckt"
+    popup_spots: "Einstiegsorte"
+  spot_freshness:
+    name: "Einstiegsort-Aktualität"
+    description: "Wie kürzlich jeder einzelne Einstiegsort, der Paddlern zur Verfügung steht, aktualisiert wurde."
+    fresh: "Aktuell (≤ 2 Jahre)"
+    aging: "Alternd (2–5 Jahre)"
+    stale: "Veraltet (> 5 Jahre)"
+    chart_title: "Aktualität der Einstiegsorte"
+    popup_age: "Alter"
+    popup_years: "Jahre"

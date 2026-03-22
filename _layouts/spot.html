@@ -21,7 +21,7 @@ pageName: spot-details
 {% assign is_rejected = spot.rejected %}
 
 {% assign spot_type_name = page.spot_type_name %}
-{% assign locale_prefix = site.locale_prefix %}
+{% include locale-prefix.html %}
 
 <div class="container-fluid">
   <div class="row">

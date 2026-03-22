@@ -107,7 +107,7 @@ const optionSlugArb = fc.stringMatching(/^[a-z][a-z0-9-]{0,14}$/);
 const dimensionKeyArb = fc.stringMatching(/^[a-z]{1,10}$/);
 
 /**
- * Arbitrary: a single dimension config with 1–8 options.
+ * Arbitrary: a single dimension config with 1-8 options.
  */
 const dimensionConfigArb = fc.record({
   key: dimensionKeyArb,
@@ -127,7 +127,7 @@ const dimensionConfigArb = fc.record({
 }));
 
 /**
- * Arbitrary: array of 1–5 dimension configs with unique keys.
+ * Arbitrary: array of 1-5 dimension configs with unique keys.
  */
 const dimensionConfigsArb = fc.uniqueArray(dimensionConfigArb, {
   minLength: 1,

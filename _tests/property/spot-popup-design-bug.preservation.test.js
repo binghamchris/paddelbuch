@@ -1,7 +1,7 @@
 /**
- * Preservation Property Tests — Spot Popup Design Fix
+ * Preservation Property Tests -- Spot Popup Design Fix
  *
- * **Property 2: Preservation** — Existing Functional Behavior Unchanged
+ * **Property 2: Preservation** -- Existing Functional Behavior Unchanged
  * **Validates: Requirements 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7**
  *
  * Tests use the Gatsby HTML structure (popup-btn, popup-icon-div, etc.)
@@ -76,10 +76,10 @@ const arbRejectedSpot = fc.record({
   location: arbLocation, approximateAddress: arbAddress, paddleCraftTypes: arbCraftTypes
 });
 
-describe('Preservation Property Tests — Spot Popup Design (Property 2)', () => {
+describe('Preservation Property Tests -- Spot Popup Design (Property 2)', () => {
 
-  describe('3.1 — Spots without description omit description section', () => {
-    test('property: no description → no <p> content after popup-title', () => {
+  describe('3.1 -- Spots without description omit description section', () => {
+    test('property: no description -> no <p> content after popup-title', () => {
       fc.assert(fc.property(
         fc.record({
           name: arbSpotName, slug: arbSlug, description: fc.constantFrom(undefined, null, ''),
@@ -97,7 +97,7 @@ describe('Preservation Property Tests — Spot Popup Design (Property 2)', () =>
       ), { numRuns: 50 });
     });
 
-    test('property: spot WITH description → description paragraph IS present', () => {
+    test('property: spot WITH description -> description paragraph IS present', () => {
       fc.assert(fc.property(
         fc.record({
           name: arbSpotName, slug: arbSlug,
@@ -116,8 +116,8 @@ describe('Preservation Property Tests — Spot Popup Design (Property 2)', () =>
     });
   });
 
-  describe('3.2 — Spots without GPS omit navigate button', () => {
-    test('property: no location → no navigate button', () => {
+  describe('3.2 -- Spots without GPS omit navigate button', () => {
+    test('property: no location -> no navigate button', () => {
       fc.assert(fc.property(
         fc.record({
           name: arbSpotName, slug: arbSlug, description: arbDescription,
@@ -132,7 +132,7 @@ describe('Preservation Property Tests — Spot Popup Design (Property 2)', () =>
       ), { numRuns: 50 });
     });
 
-    test('property: spot WITH location → navigate button IS present', () => {
+    test('property: spot WITH location -> navigate button IS present', () => {
       fc.assert(fc.property(
         fc.record({
           name: arbSpotName, slug: arbSlug, description: arbDescription,
@@ -149,7 +149,7 @@ describe('Preservation Property Tests — Spot Popup Design (Property 2)', () =>
     });
   });
 
-  describe('3.5 — Rejected spot popup layout matches Gatsby design', () => {
+  describe('3.5 -- Rejected spot popup layout matches Gatsby design', () => {
     test('property: rejected spot uses popup-icon-div with no-entry icon and popup-title', () => {
       fc.assert(fc.property(arbRejectedSpot, arbLocale, (spot, locale) => {
         const html = generateRejectedSpotPopupContent(spot, locale);
@@ -190,8 +190,8 @@ describe('Preservation Property Tests — Spot Popup Design (Property 2)', () =>
     });
   });
 
-  describe('3.6 — Detail page link format is preserved with correct locale prefix', () => {
-    test('property: de locale → detail link has no locale prefix', () => {
+  describe('3.6 -- Detail page link format is preserved with correct locale prefix', () => {
+    test('property: de locale -> detail link has no locale prefix', () => {
       fc.assert(fc.property(arbSpot, (spot) => {
         const html = generateSpotPopupContent(spot, 'de');
         if (spot.slug) {
@@ -201,7 +201,7 @@ describe('Preservation Property Tests — Spot Popup Design (Property 2)', () =>
       }), { numRuns: 50 });
     });
 
-    test('property: en locale → detail link has /en prefix', () => {
+    test('property: en locale -> detail link has /en prefix', () => {
       fc.assert(fc.property(arbSpot, (spot) => {
         const html = generateSpotPopupContent(spot, 'en');
         if (spot.slug) {
@@ -221,7 +221,7 @@ describe('Preservation Property Tests — Spot Popup Design (Property 2)', () =>
     });
   });
 
-  describe('3.7a — Navigation URL format is preserved with correct coordinates', () => {
+  describe('3.7a -- Navigation URL format is preserved with correct coordinates', () => {
     test('property: navigate button links to Google Maps with spot coordinates', () => {
       fc.assert(fc.property(
         fc.record({

@@ -22,7 +22,7 @@
 {% assign obstacle_type_name = include.obstacle_type_name %}
 {% assign current_locale = site.lang | default: 'de' %}
 
-{% assign locale_prefix = site.locale_prefix %}
+{% include locale-prefix.html %}
 
 <!-- Obstacle Details Table (Requirement 5.4) -->
 <table>

@@ -57,7 +57,7 @@
 
     /**
      * Gets the layer group for a rejected spot.
-     * Only used for rejected spots — non-rejected spots are managed via Marker Registry.
+     * Only used for rejected spots -- non-rejected spots are managed via Marker Registry.
      *
      * @param {Object} spot - The spot object
      * @returns {L.LayerGroup|null} The noEntry layer group if rejected, null otherwise
@@ -168,7 +168,7 @@
       }
 
       if (isRejected) {
-        // Rejected spots go to the noEntry LayerGroup — not registered in Marker Registry
+        // Rejected spots go to the noEntry LayerGroup -- not registered in Marker Registry
         marker.addTo(layerGroups.noEntry);
       } else {
         // Register in marker registry (Requirements 4.1, 9.1, 9.3)
@@ -216,7 +216,7 @@
         if (window.PaddelbuchObstaclePopup) {
           popupContent = window.PaddelbuchObstaclePopup.generateObstaclePopupContent(obstacle, currentLocale);
         } else {
-          // Fallback popup content — matches Gatsby structure
+          // Fallback popup content -- matches Gatsby structure
           popupContent = '<span class="popup-title"><h1>' + (obstacle.name || 'Obstacle') + '</h1></span>';
 
           // Portage possibility status (Requirement 5.3)

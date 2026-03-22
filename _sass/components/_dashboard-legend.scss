@@ -1,0 +1,52 @@
+#dashboard-legend {
+  margin: 1em 0;
+}
+
+.dashboard-legend-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25em 1.25em;
+}
+
+.dashboard-legend-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.25em;
+}
+
+.dashboard-legend-swatch {
+  display: inline-block;
+  width: 20px;
+  height: 12px;
+  margin-right: 8px;
+  flex-shrink: 0;
+
+  // Freshness traffic-light colours
+  &--fresh { background-color: $green-1; }
+  &--aging { background-color: $warning-yellow; }
+  &--stale { background-color: $danger-red; }
+  &--no-data { background-color: $purple-1; }
+
+  // Coverage colours
+  &--covered { background-color: $green-1; }
+  &--uncovered { background-color: $danger-red; }
+}
+
+.dashboard-legend-shape {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 14px;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+.dashboard-popup-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 12px;
+  height: 1.2em;
+  margin-right: 10px;
+}

@@ -9,6 +9,10 @@
     background: $blue-grey-50;
   }
 
+  .leaflet-gl-layer {
+    opacity: 0.55;
+  }
+
 }
 
 .map-loading {
@@ -52,6 +56,8 @@
   font-family: $font-brand;
   font-size: 1.2em;
   font-weight: 400;
+  display: flex;
+  align-items: center;
 }
 
 .popup-details-table {
@@ -207,7 +213,7 @@ a.popup-btn-right,
   margin-top: 1.5em;
 }
 
-/* Obstacle popup table — cells sized to content; override Bootstrap table width */
+/* Obstacle popup table - cells sized to content; override Bootstrap table width */
 .leaflet-popup-content table:not(.popup-details-table) {
   width: min-content !important;
 
@@ -355,4 +361,4 @@ a.popup-btn-right,
   color: $white;
 }
 
-/* Rejected Spot Popup — uses same structure as regular spot popups (Requirement 3.7) */
+/* Rejected Spot Popup - uses same structure as regular spot popups (Requirement 3.7) */

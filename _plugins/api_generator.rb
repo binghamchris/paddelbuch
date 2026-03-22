@@ -67,7 +67,7 @@ module Jekyll
     def generate(site)
       @site = site
 
-      # Skip duplicate runs — with parallel_localization: true, Jekyll runs all
+      # Skip duplicate runs -- with parallel_localization: true, Jekyll runs all
       # generators once per language. This generator already handles both locales
       # internally, so only run during the default-language pass.
       # However, site.data['last_updates'] must be set on every pass so Liquid
@@ -91,7 +91,7 @@ module Jekyll
           load_api_from_cache(site, cache_dir)
           cache_hit = true
         rescue => e
-          Jekyll.logger.warn "API Generator:", "Corrupted cache file: #{e.message} — falling back to full generation"
+          Jekyll.logger.warn "API Generator:", "Corrupted cache file: #{e.message} -- falling back to full generation"
           clear_cache(cache_dir)
         end
       end
@@ -100,7 +100,7 @@ module Jekyll
 
       # Log the appropriate message for the generation path
       if !data_changed
-        Jekyll.logger.info "API Generator:", "Cache empty/missing — performing full generation"
+        Jekyll.logger.info "API Generator:", "Cache empty/missing -- performing full generation"
       else
         Jekyll.logger.info "API Generator:", "Generating JSON API files"
       end
@@ -364,7 +364,7 @@ module Jekyll
     end
 
     # -------------------------------------------------------------------------
-    # Fact table transformers — convert flattened YAML hashes to Gatsby structure
+    # Fact table transformers -- convert flattened YAML hashes to Gatsby structure
     # These create NEW hashes and do NOT mutate the source item.
     # -------------------------------------------------------------------------
 
@@ -475,6 +475,7 @@ module Jekyll
       result['paddlingEnvironmentType'] = wrap_slug_ref(item['paddlingEnvironmentType_slug'])
       result['dataSourceType'] = wrap_slug_ref(item['dataSourceType_slug'])
       result['dataLicenseType'] = wrap_slug_ref(item['dataLicenseType_slug'])
+      result['navigableByPaddlers'] = item['navigableByPaddlers']
       result
     end
 
@@ -503,7 +504,7 @@ module Jekyll
     end
 
     # -------------------------------------------------------------------------
-    # Dimension table transformer — converts flattened YAML dimension hash
+    # Dimension table transformer -- converts flattened YAML dimension hash
     # into Gatsby-compatible structure. Creates a NEW hash; does NOT mutate
     # the source item.
     # -------------------------------------------------------------------------

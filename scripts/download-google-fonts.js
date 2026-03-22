@@ -17,7 +17,7 @@ const USER_AGENT =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 
 /**
- * Build individual Google Fonts URLs — one per family+weight.
+ * Build individual Google Fonts URLs -- one per family+weight.
  * Requesting a single weight forces the API to return a static (non-variable) font file.
  */
 function buildGoogleFontsUrls() {
