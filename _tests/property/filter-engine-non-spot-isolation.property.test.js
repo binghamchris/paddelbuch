@@ -8,7 +8,7 @@
  * the visibility state of non-spot LayerGroups (event notices, obstacles,
  * protected areas) on the map shall remain unchanged. The Filter_Engine only
  * iterates markers in PaddelbuchMarkerRegistry and calls addTo(map) or
- * marker.remove() on them — it never touches non-spot LayerGroups.
+ * marker.remove() on them -- it never touches non-spot LayerGroups.
  */
 
 const fc = require('fast-check');
@@ -42,7 +42,7 @@ const spotTypeSlugs = ['einstieg-ausstieg', 'nur-einstieg', 'nur-ausstieg', 'ras
 const craftTypeSlugs = ['seekajak', 'kanadier', 'stand-up-paddle-board'];
 
 /**
- * Arbitrary: generate a filter state scenario — a subset of selected slugs
+ * Arbitrary: generate a filter state scenario -- a subset of selected slugs
  * per dimension (spot type and craft type).
  */
 const filterStateArb = fc.record({
@@ -97,7 +97,7 @@ describe('Filter Engine Non-Spot Layer Isolation - Property 7', () => {
             remove: jest.fn()
           };
 
-          // Mock map object — non-spot layers are "on" the map but the filter
+          // Mock map object -- non-spot layers are "on" the map but the filter
           // engine should never interact with them
           const mockMap = {
             _eventNotices: eventNoticesLayer,

@@ -28,7 +28,7 @@ var freshnessMetricsArb = fc.record({
 });
 
 /**
- * Generates a random number of activate/deactivate cycles (1–5).
+ * Generates a random number of activate/deactivate cycles (1-5).
  */
 var cycleCountArb = fc.integer({ min: 1, max: 5 });
 
@@ -43,7 +43,7 @@ describe('Spot Freshness Chart Destruction (Property 5)', function () {
       '<div id="dashboard-description"></div>' +
       '<div id="dashboard-legend"></div>';
 
-    // Mock Chart.js — captures every instance created
+    // Mock Chart.js -- captures every instance created
     chartInstances = [];
     window.Chart = function MockChart(canvas, config) {
       var instance = {

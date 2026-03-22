@@ -47,7 +47,7 @@ var validSpotArb = fc.record({
 });
 
 /**
- * Generates an invalid spot entry — missing lat, lon, or category.
+ * Generates an invalid spot entry -- missing lat, lon, or category.
  */
 var invalidSpotArb = fc.oneof(
   // null lat
@@ -152,12 +152,12 @@ describe('Spot Freshness Marker Properties', function () {
       return instance;
     };
 
-    // Mutable colours object — the module captures a reference to this
+    // Mutable colours object -- the module captures a reference to this
     colorsObj = { green1: '#07753f', warningYellow: '#ffb200', dangerRed: '#c40200' };
     window.PaddelbuchColors = colorsObj;
     window.PaddelbuchDashboardData = { statisticsMetrics: {} };
 
-    // Mock Leaflet — the module captures window.L at load time
+    // Mock Leaflet -- the module captures window.L at load time
     window.L = {
       layerGroup: function () {
         return {

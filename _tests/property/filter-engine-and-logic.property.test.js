@@ -192,7 +192,7 @@ describe('Filter Engine AND-Logic Evaluation - Property 1', () => {
             engine.setOption(key, 'opt-b', false);
           });
 
-          // All dimensions inactive → should return true
+          // All dimensions inactive -> should return true
           return engine.evaluateMarker(metadata) === true;
         }
       ),

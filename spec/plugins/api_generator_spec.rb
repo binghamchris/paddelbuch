@@ -75,3 +75,54 @@ RSpec.describe 'Property 2: Timestamp normalization round trip' do
     end
   end
 end
+
+# Feature: navigable-by-paddlers, Property 2: API transformer tri-state pass-through
+
+RSpec.describe 'Property 2: API transformer tri-state pass-through' do
+  # Validates: Requirements 2.1, 2.2, 2.3, 2.4
+
+  let(:generator) do
+    gen = Jekyll::ApiGenerator.new
+    gen.instance_variable_set(:@timestamp_cache, {})
+    gen
+  end
+
+  def random_slug
+    length = rand(3..12)
+    chars = ('a'..'z').to_a + ('0'..'9').to_a + ['-']
+    length.times.map { chars.sample }.join
+  end
+
+  def random_waterway_hash(navigable_value)
+    {
+      'slug' => random_slug,
+      'locale' => %w[de en].sample,
+      'name' => "Waterway-#{rand(1000)}",
+      'length' => rand(1..500).to_f,
+      'area' => [nil, rand(1..200).to_f].sample,
+      'geometry' => ['{"type":"LineString","coordinates":[[7.0,46.0],[7.1,46.1]]}', nil].sample,
+      'paddlingEnvironmentType_slug' => %w[fluss see wildwasser].sample,
+      'dataSourceType_slug' => %w[community official].sample,
+      'dataLicenseType_slug' => %w[cc-by-sa cc-by].sample,
+      'createdAt' => '2025-01-10T08:30:00Z',
+      'updatedAt' => '2025-01-15T10:00:00Z',
+      'navigableByPaddlers' => navigable_value
+    }
+  end
+
+  it 'preserves navigableByPaddlers value through transform_waterway for 100 random waterways' do
+    100.times do |i|
+      navigable_value = [true, false, nil].sample
+      waterway = random_waterway_hash(navigable_value)
+
+      result = generator.send(:transform_waterway, waterway)
+
+      expect(result).to have_key('navigableByPaddlers'),
+        "Iteration #{i + 1}: transformed hash missing 'navigableByPaddlers' key"
+
+      expect(result['navigableByPaddlers']).to eq(navigable_value),
+        "Iteration #{i + 1}: expected navigableByPaddlers=#{navigable_value.inspect}, " \
+        "got #{result['navigableByPaddlers'].inspect} for waterway #{waterway['slug']}"
+    end
+  end
+end

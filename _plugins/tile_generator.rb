@@ -62,7 +62,7 @@ module Jekyll
     def generate(site)
       @site = site
 
-      # Skip duplicate runs — with parallel_localization: true, Jekyll runs all
+      # Skip duplicate runs -- with parallel_localization: true, Jekyll runs all
       # generators once per language. This generator already handles both locales
       # internally, so only run during the default-language pass.
       default_lang = site.config['default_lang'] || 'de'
@@ -82,7 +82,7 @@ module Jekyll
           load_tile_from_cache(site, cache_dir)
           cache_hit = true
         rescue => e
-          Jekyll.logger.warn "Tile Generator:", "Corrupted cache file: #{e.message} — falling back to full generation"
+          Jekyll.logger.warn "Tile Generator:", "Corrupted cache file: #{e.message} -- falling back to full generation"
           clear_cache(cache_dir)
         end
       end
@@ -91,7 +91,7 @@ module Jekyll
 
       # Log the appropriate message for the generation path
       if !data_changed
-        Jekyll.logger.info "Tile Generator:", "Cache empty/missing — performing full generation"
+        Jekyll.logger.info "Tile Generator:", "Cache empty/missing -- performing full generation"
       else
         Jekyll.logger.info "Tile Generator:", "Generating spatial tile files"
       end

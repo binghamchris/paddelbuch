@@ -52,6 +52,9 @@ module Jekyll
         excluded_count = pre_filter_count - unique_waterways.size
         Jekyll.logger.info 'DashboardMetrics:', "Excluded #{excluded_count} wildwasser waterways, #{unique_waterways.size} remaining"
 
+        # Exclude non-navigable waterways from dashboard metrics
+        unique_waterways = unique_waterways.reject { |w| w['navigableByPaddlers'] == false }
+
         # Deduplicate spots by waterway_slug (updatedAt/location are identical across locales)
         spots_by_waterway = all_spots.group_by { |s| s['waterway_slug'] }
         unique_spots_by_waterway = deduplicate_spots_by_waterway(spots_by_waterway)

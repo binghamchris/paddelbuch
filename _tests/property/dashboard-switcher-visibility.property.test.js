@@ -107,7 +107,7 @@ describe('Dashboard Switcher Container Visibility - Property 9', function () {
         var mapEl = document.getElementById('dashboard-map');
         var contentEl = document.getElementById('dashboard-content');
 
-        // After init, dashboard 0 is active — verify its visibility
+        // After init, dashboard 0 is active -- verify its visibility
         if (dashboards[0].usesMap) {
           expect(mapEl.style.display).toBe('');
           expect(contentEl.style.display).toBe('none');

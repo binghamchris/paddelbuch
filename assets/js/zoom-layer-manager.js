@@ -133,7 +133,7 @@
       layerVisibility.protected = map.hasLayer(layerGroups.protectedAreas);
     }
 
-    // Listen for zoom changes — only toggle visibility, data loading is
+    // Listen for zoom changes -- only toggle visibility, data loading is
     // handled by the caller (map-init / detail-map-layers) via its own
     // moveend handler to avoid duplicate layers stacking up.
     map.on('zoomend', function() {
