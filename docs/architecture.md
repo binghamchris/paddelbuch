@@ -57,6 +57,8 @@ Jekyll plugins run in priority order during the generate phase. The Paddel Buch 
 | `:high` | `CollectionGenerator` | Creates Jekyll collection documents from `_data/` YAML |
 | `:high` | `ColorGenerator` | Parses SCSS colour variables into `site.data` for JS |
 | `:normal` | `PrecomputeGenerator` | Pre-computes navigation, map config, and layer config JSON |
+| `:normal` | `DashboardMetricsGenerator` | Computes freshness and coverage metrics for data quality dashboards |
+| `:normal` | `StatisticsMetricsGenerator` | Computes statistics counts and spot freshness map data |
 | `:low` | `ApiGenerator` | Generates JSON API files in `api/` |
 | `:low` | `TileGenerator` | Generates spatial tile JSON files in `api/tiles/` |
 | `:low` | `SitemapGenerator` | Generates XML sitemap files |
@@ -190,10 +192,18 @@ graph TD
 | `color-vars.js` | Reads CSS custom properties set by `ColorGenerator` |
 | `locale-filter.js` | Client-side locale detection |
 | `clipboard.js` | GPS/address copy-to-clipboard functionality |
+| `dashboard-data.js` | Parses JSON data blocks for data quality and statistics dashboards |
+| `dashboard-map.js` | Creates Leaflet maps with Positron vector tiles for dashboards |
+| `dashboard-switcher.js` | Tab-style switcher for toggling between dashboard views |
+| `coverage-dashboard.js` | Waterway coverage dashboard (covered/uncovered segments) |
+| `freshness-dashboard.js` | Waterway freshness dashboard (median age colour gradient) |
+| `spot-freshness-dashboard.js` | Spot freshness dashboard (per-spot age chart and map markers) |
+| `statistics-dashboard.js` | Statistics dashboard (Chart.js bar charts for spot/obstacle/area counts) |
+| `obstacle-portage-dashboard.js` | Obstacle portage routes data quality dashboard |
 
 ### Vendor Assets
 
-Third-party libraries (Bootstrap, Leaflet, Leaflet.locatecontrol) are installed via npm but copied to `assets/js/vendor/` and `assets/css/vendor/` by the `scripts/copy-vendor-assets.js` script. Google Fonts are downloaded and self-hosted by `scripts/download-google-fonts.js`. This ensures the site has no external runtime dependencies (CDN-free).
+Third-party libraries (Bootstrap, Leaflet, Leaflet.locatecontrol, MapLibre GL, Chart.js) are installed via npm but copied to `assets/js/vendor/` and `assets/css/vendor/` by the `scripts/copy-vendor-assets.js` script. Google Fonts are downloaded and self-hosted by `scripts/download-google-fonts.js`. This ensures the site has no external runtime dependencies (CDN-free).
 
 ## Internationalisation
 

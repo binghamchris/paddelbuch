@@ -33,6 +33,7 @@ module Jekyll
       localized = localize_metrics(@@cached_metrics, locale, site)
       site.data['dashboard_statistics_metrics'] = localized
       site.data['dashboard_spot_freshness_map_data'] = localize_spot_freshness_map_data(@@cached_metrics['spotFreshnessMapData'], locale, site)
+      site.data['dashboard_obstacle_portage_map_data'] = localize_obstacle_portage_map_data(@@cached_metrics['obstaclePortageMapData'], locale, site)
       Jekyll.logger.info 'StatisticsMetrics:', "Localized statistics metrics for locale '#{locale}'"
     end
 
@@ -110,6 +111,10 @@ module Jekyll
       spot_freshness_map_data = compute_spot_freshness_map_data(spots)
       Jekyll.logger.info 'StatisticsMetrics:', "Spot freshness map data complete: #{spot_freshness_map_data.size} entries"
 
+      Jekyll.logger.info 'StatisticsMetrics:', 'Computing obstacle portage map data...'
+      obstacle_portage_map_data = compute_obstacle_portage_map_data(obstacles)
+      Jekyll.logger.info 'StatisticsMetrics:', "Obstacle portage map data complete: #{obstacle_portage_map_data.size} entries"
+
       {
         'spots' => spot_metrics,
         'obstacles' => obstacle_metrics,
@@ -117,7 +122,8 @@ module Jekyll
         'paddleCraftTypes' => craft_metrics,
         'dataSourceTypes' => source_metrics,
         'dataLicenseTypes' => license_metrics,
-        'spotFreshnessMapData' => spot_freshness_map_data
+        'spotFreshnessMapData' => spot_freshness_map_data,
+        'obstaclePortageMapData' => obstacle_portage_map_data
       }
     end
 
@@ -266,6 +272,86 @@ module Jekyll
         cloned = entry.dup
         cloned['name'] = spot_names[cloned['slug']] || cloned['slug']
         cloned
+      end
+    end
+
+    # Per-obstacle portage map data: returns an array of
+    # { slug, name, lat, lon, hasPortageRoute } for each obstacle with
+    # valid geometry. The lat/lon is the centroid of the geometry.
+    def compute_obstacle_portage_map_data(obstacles)
+      obstacles.filter_map do |obstacle|
+        geometry_json = obstacle['geometry']
+        next if geometry_json.nil? || geometry_json.empty?
+
+        geometry = begin
+          JSON.parse(geometry_json)
+        rescue JSON::ParserError
+          next
+        end
+
+        centroid = geometry_centroid(geometry)
+        next if centroid.nil?
+
+        {
+          'slug' => obstacle['slug'],
+          'name' => 'placeholder',
+          'lat' => centroid[1],
+          'lon' => centroid[0],
+          'hasPortageRoute' => !obstacle['portageRoute'].nil?
+        }
+      end
+    end
+
+    # Deep-clones cached obstacle portage map data and replaces placeholder
+    # names with locale-specific obstacle names.
+    def localize_obstacle_portage_map_data(cached_map_data, locale, site)
+      obstacle_names = {}
+      (site.data['obstacles'] || []).each do |o|
+        next unless o['locale'] == locale && o['slug']
+
+        obstacle_names[o['slug']] = o['name']
+      end
+
+      cached_map_data.map do |entry|
+        cloned = entry.dup
+        cloned['name'] = obstacle_names[cloned['slug']] || cloned['slug']
+        cloned
+      end
+    end
+
+    # Computes the centroid of a GeoJSON geometry by averaging all
+    # coordinates. Returns [lon, lat] or nil if no coordinates found.
+    def geometry_centroid(geometry)
+      coords = collect_coordinates(geometry)
+      return nil if coords.empty?
+
+      sum_lon = 0.0
+      sum_lat = 0.0
+      coords.each do |c|
+        sum_lon += c[0]
+        sum_lat += c[1]
+      end
+      [sum_lon / coords.size, sum_lat / coords.size]
+    end
+
+    # Recursively collects all [lon, lat] coordinate pairs from a GeoJSON
+    # geometry object.
+    def collect_coordinates(geometry)
+      return [] if geometry.nil?
+
+      case geometry['type']
+      when 'Point'
+        [geometry['coordinates']]
+      when 'LineString', 'MultiPoint'
+        geometry['coordinates'] || []
+      when 'Polygon', 'MultiLineString'
+        (geometry['coordinates'] || []).flatten(1)
+      when 'MultiPolygon'
+        (geometry['coordinates'] || []).flatten(2)
+      when 'GeometryCollection'
+        (geometry['geometries'] || []).flat_map { |g| collect_coordinates(g) }
+      else
+        []
       end
     end
 

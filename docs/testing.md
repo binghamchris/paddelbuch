@@ -115,6 +115,9 @@ spec/
     ├── parallel_build_spec.rb               ← Parallel build pipeline tests
     ├── pipeline_version_consistency_spec.rb  ← Version consistency tests
     ├── precompute_generator_spec.rb         ← PrecomputeGenerator tests
+    ├── dashboard_metrics_generator_spec.rb  ← DashboardMetricsGenerator tests
+    ├── dashboard_metrics_generator_property_spec.rb ← Dashboard metrics property tests
+    ├── statistics_metrics_generator_spec.rb ← StatisticsMetricsGenerator tests
     ├── tile_generator_cache_spec.rb         ← Tile caching tests
     ├── tile_generator_spatial_spec.rb       ← Spatial tiling correctness tests
     └── waterway_filters_spec.rb             ← WaterwayFilters tests
@@ -128,18 +131,30 @@ _tests/
 ├── date-utils.test.js                      ← Date utility tests (root level, legacy)
 ├── html-utils.test.js                      ← HTML utility tests (root level, legacy)
 ├── unit/
+│   ├── ascii-compliance.test.js            ← ASCII-only character compliance tests
 │   ├── copy-vendor-assets.test.js          ← Vendor asset copy script tests
-│   ├── custom-build-image-*.test.js        ← Custom build image consistency tests (5 files)
+│   ├── custom-build-image-*.test.js        ← Custom build image consistency tests (6 files)
+│   ├── dashboard-coverage.test.js          ← Coverage dashboard unit tests
+│   ├── dashboard-csp.test.js               ← CSP configuration unit tests
+│   ├── dashboard-data.test.js              ← Dashboard data parsing unit tests
+│   ├── dashboard-freshness.test.js         ← Freshness dashboard unit tests
+│   ├── dashboard-map.test.js               ← Dashboard map unit tests
+│   ├── dashboard-switcher.test.js          ← Dashboard switcher unit tests
 │   ├── date-utils.test.js                  ← Date formatting unit tests
 │   ├── download-google-fonts.test.js       ← Font download script tests
 │   ├── filter-panel-toggles.test.js        ← Filter panel UI tests
 │   ├── filter-system.test.js               ← Filter engine unit tests
 │   ├── geojson-utils.test.js               ← GeoJSON utility tests
 │   ├── spatial-utils.test.js               ← Spatial utility tests
-│   └── spot-popup-utils.test.js            ← Spot popup rendering tests
+│   ├── spot-popup-utils.test.js            ← Spot popup rendering tests
+│   ├── statistics-chartjs-no-inline-source.test.js ← No inline styles in JS source
+│   ├── statistics-chartjs-scss.test.js     ← SCSS component structure tests
+│   └── statistics-chartjs-vendor.test.js   ← Vendor dependency and load order tests
 ├── property/
 │   ├── amplify-no-version-managers.property.test.js  ← Verifies no rvm/nvm in amplify.yml
 │   ├── api-data-sorting.property.test.js             ← API output sorting invariants
+│   ├── dashboard-i18n.property.test.js               ← Dashboard translation key completeness
+│   ├── dashboard-switcher-*.property.test.js         ← Dashboard switcher invariants (3 files)
 │   ├── data-loading-idempotence.property.test.js     ← Data loading is idempotent
 │   ├── date-locale-formatting.property.test.js       ← Date format matches locale
 │   ├── event-notice-*.property.test.js               ← Event notice rendering (4 files)
@@ -151,10 +166,12 @@ _tests/
 │   ├── locale-filtering.property.test.js             ← Locale filter correctness
 │   ├── map-layers-*.property.test.js                 ← Map layer invariants (3 files)
 │   ├── marker-registry-*.property.test.js            ← Marker deduplication (2 files)
-│   ├── obstacle-*.property.test.js                   ← Obstacle rendering (3 files)
+│   ├── obstacle-*.property.test.js                   ← Obstacle rendering (4 files)
 │   ├── protected-area-popup.property.test.js         ← Protected area popups
 │   ├── rejected-spot.property.test.js                ← Rejected spot handling
+│   ├── spot-freshness-*.property.test.js             ← Spot freshness dashboard invariants (8 files)
 │   ├── spot-*.property.test.js                       ← Spot rendering (4 files)
+│   ├── statistics-chartjs-*.property.test.js         ← Statistics Chart.js invariants (8 files)
 │   ├── tile-coverage.property.test.js                ← Tile grid covers Switzerland
 │   ├── url-pattern-generation.property.test.js       ← URL pattern correctness
 │   ├── vendor-css-paths.property.test.js             ← Vendor CSS path correctness

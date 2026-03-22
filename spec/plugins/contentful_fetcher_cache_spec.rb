@@ -267,9 +267,9 @@ RSpec.describe Jekyll::ContentfulFetcher, '#change_flag_logging — Property 8: 
 
   # Expected log messages for each code path
   LOG_MESSAGES = {
-    hash_match:     'Content hash unchanged — setting change flag to false',
-    hash_mismatch:  'Content hash changed — setting change flag to true',
-    nil_previous:   'No previous content hash — setting change flag to true'
+    hash_match:     'Content hash unchanged -- setting change flag to false',
+    hash_mismatch:  'Content hash changed -- setting change flag to true',
+    nil_previous:   'No previous content hash -- setting change flag to true'
   }.freeze
 
   # Property 8: For any code path that sets the change flag via compute_and_set_change_flag,
@@ -525,7 +525,7 @@ RSpec.describe Jekyll::ContentfulFetcher, '#generate — change flag unit tests'
     end
 
     it 'logs force sync reason' do
-      expect(Jekyll.logger).to receive(:info).with('Contentful:', /Force sync — setting change flag to true/)
+      expect(Jekyll.logger).to receive(:info).with('Contentful:', /Force sync -- setting change flag to true/)
       fetcher.generate(site)
     end
 
@@ -555,7 +555,7 @@ RSpec.describe Jekyll::ContentfulFetcher, '#generate — change flag unit tests'
     end
 
     it 'logs force sync reason' do
-      expect(Jekyll.logger).to receive(:info).with('Contentful:', /Force sync — setting change flag to true/)
+      expect(Jekyll.logger).to receive(:info).with('Contentful:', /Force sync -- setting change flag to true/)
       fetcher.generate(site)
     end
 
