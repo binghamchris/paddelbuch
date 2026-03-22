@@ -205,4 +205,110 @@ RSpec.describe Jekyll::WaterwayFilters do
       expect(helper.rivers_alphabetically([], 'de')).to eq([])
     end
   end
+
+  # ── Property 4: WaterwayFilters non-navigable exclusion ────────────────────
+  # Feature: navigable-by-paddlers, Property 4: WaterwayFilters non-navigable exclusion
+  # **Validates: Requirements 5.1, 5.2, 5.3, 5.4, 5.5, 5.6**
+  #
+  # For any array of waterway hashes with mixed navigableByPaddlers values,
+  # all four WaterwayFilters methods shall return no waterway where
+  # navigableByPaddlers equals false, and shall include every waterway where
+  # navigableByPaddlers is true or nil that matches the method's other
+  # selection criteria (locale, type, showInMenu).
+  describe 'Property 4: WaterwayFilters non-navigable exclusion' do
+    def build_waterways_with_nav(count)
+      locales = %w[de en]
+      types = %w[see fluss]
+      count.times.map do |i|
+        {
+          'name' => "Waterway#{i}_#{('a'..'z').to_a.sample(5).join}",
+          'locale' => locales.sample,
+          'paddlingEnvironmentType_slug' => types.sample,
+          'showInMenu' => [true, false].sample,
+          'area' => rand(1..10_000),
+          'length' => rand(1..5000),
+          'navigableByPaddlers' => [true, false, nil].sample
+        }
+      end
+    end
+
+    it 'all four filter methods exclude non-navigable waterways and include navigable ones' do
+      property_of {
+        count = range(5, 30)
+        locale = choose('de', 'en')
+        limit = range(1, 10)
+        [count, locale, limit]
+      }.check(100) { |count, locale, limit|
+        waterways = build_waterways_with_nav(count)
+
+        # ── rivers_alphabetically ──
+        rivers_result = helper.rivers_alphabetically(waterways, locale)
+
+        rivers_result.each do |w|
+          expect(w['navigableByPaddlers']).not_to eq(false),
+            "rivers_alphabetically returned non-navigable waterway '#{w['name']}'"
+        end
+
+        expected_rivers = waterways
+          .select { |w| w['locale'] == locale && w['paddlingEnvironmentType_slug'] == 'fluss' && w['navigableByPaddlers'] != false }
+          .map { |w| w['name'] }
+          .sort
+
+        expect(rivers_result.map { |w| w['name'] }.sort).to eq(expected_rivers),
+          "rivers_alphabetically missing navigable waterways"
+
+        # ── lakes_alphabetically ──
+        lakes_result = helper.lakes_alphabetically(waterways, locale)
+
+        lakes_result.each do |w|
+          expect(w['navigableByPaddlers']).not_to eq(false),
+            "lakes_alphabetically returned non-navigable waterway '#{w['name']}'"
+        end
+
+        expected_lakes = waterways
+          .select { |w| w['locale'] == locale && w['paddlingEnvironmentType_slug'] == 'see' && w['navigableByPaddlers'] != false }
+          .map { |w| w['name'] }
+          .sort
+
+        expect(lakes_result.map { |w| w['name'] }.sort).to eq(expected_lakes),
+          "lakes_alphabetically missing navigable waterways"
+
+        # ── top_lakes_by_area ──
+        top_lakes_result = helper.top_lakes_by_area(waterways, locale, limit)
+
+        top_lakes_result.each do |w|
+          expect(w['navigableByPaddlers']).not_to eq(false),
+            "top_lakes_by_area returned non-navigable waterway '#{w['name']}'"
+        end
+
+        expected_top_lakes = waterways
+          .select { |w| w['locale'] == locale && w['paddlingEnvironmentType_slug'] == 'see' && w['showInMenu'] == true && w['navigableByPaddlers'] != false }
+          .sort_by { |w| -(w['area'] || 0) }
+          .first(limit)
+          .map { |w| w['name'] }
+          .sort
+
+        expect(top_lakes_result.map { |w| w['name'] }.sort).to eq(expected_top_lakes),
+          "top_lakes_by_area missing navigable waterways"
+
+        # ── top_rivers_by_length ──
+        top_rivers_result = helper.top_rivers_by_length(waterways, locale, limit)
+
+        top_rivers_result.each do |w|
+          expect(w['navigableByPaddlers']).not_to eq(false),
+            "top_rivers_by_length returned non-navigable waterway '#{w['name']}'"
+        end
+
+        expected_top_rivers = waterways
+          .select { |w| w['locale'] == locale && w['paddlingEnvironmentType_slug'] == 'fluss' && w['showInMenu'] == true && w['navigableByPaddlers'] != false }
+          .sort_by { |w| -(w['length'] || 0) }
+          .first(limit)
+          .map { |w| w['name'] }
+          .sort
+
+        expect(top_rivers_result.map { |w| w['name'] }.sort).to eq(expected_top_rivers),
+          "top_rivers_by_length missing navigable waterways"
+      }
+    end
+  end
 end
