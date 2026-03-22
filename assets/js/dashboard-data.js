@@ -66,6 +66,7 @@
   var coverageSummary = parseJsonObjectBlock('coverage-summary-data');
   var statisticsMetrics = parseJsonObjectBlock('statistics-data');
   var spotFreshnessMapData = parseJsonBlock('spot-freshness-map-data');
+  var obstaclePortageMapData = parseJsonBlock('obstacle-portage-map-data');
 
   global.PaddelbuchDashboardData = {
     freshnessMetrics: freshnessMetrics,
@@ -73,7 +74,8 @@
     coverageMetrics: coverageMetrics,
     coverageSummary: coverageSummary,
     statisticsMetrics: statisticsMetrics,
-    spotFreshnessMapData: spotFreshnessMapData
+    spotFreshnessMapData: spotFreshnessMapData,
+    obstaclePortageMapData: obstaclePortageMapData
   };
 
 })(typeof window !== 'undefined' ? window : this);
