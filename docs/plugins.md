@@ -1,6 +1,6 @@
 # Jekyll Plugin Reference
 
-Paddel Buch uses 18 custom Jekyll plugins in `_plugins/`. This document describes each plugin's purpose, configuration, inputs, outputs, and dependencies.
+Paddel Buch uses 20 custom Jekyll plugins in `_plugins/`. This document describes each plugin's purpose, configuration, inputs, outputs, and dependencies.
 
 ## Plugin Execution Order
 
@@ -16,6 +16,8 @@ Plugins run in priority order. Hooks run at specific lifecycle points.
 | Generate | `CollectionGenerator` | `:high` |
 | Generate | `ColorGenerator` | `:high` |
 | Generate | `PrecomputeGenerator` | `:normal` |
+| Generate | `DashboardMetricsGenerator` | `:normal` |
+| Generate | `StatisticsMetricsGenerator` | `:normal` |
 | Generate | `ApiGenerator` | `:low` |
 | Generate | `TileGenerator` | `:low` |
 | Generate | `SitemapGenerator` | `:low` |
@@ -152,6 +154,45 @@ Plugins run in priority order. Hooks run at specific lifecycle points.
 **Caching:** Uses `_data/.tile_cache/` to skip regeneration when `contentful_data_changed` is `false`.
 
 **Dependencies:** `ContentfulFetcher` (data), `GeneratorCache` (caching mixin)
+
+---
+
+### DashboardMetricsGenerator
+
+**File:** `dashboard_metrics_generator.rb`
+**Priority:** `:normal`
+**Purpose:** Pre-computes data quality dashboard metrics at build time. Computes freshness (median age + colour gradient) and coverage (segment classification) metrics for every waterway, then exposes them as JSON for the frontend dashboards.
+
+**Inputs:** `site.data['spots']`, `site.data['waterways']`, `site.data['paddelbuch_colors']`
+
+**Outputs:**
+- `site.data['dashboard_freshness_metrics']` — Per-waterway freshness data (median age, colour, spot count)
+- `site.data['dashboard_coverage_metrics']` — Per-waterway coverage segments (covered/uncovered GeoJSON)
+
+**Caching:** Uses the compute-once-cache-across-locales pattern. Numerical computations run once on the first locale pass and are cached in class-level variables. Subsequent locale passes only swap in localised waterway names.
+
+**Exclusions:** Wildwasser waterways and non-navigable waterways (`navigableByPaddlers == false`) are excluded from metrics.
+
+**Dependencies:** `ContentfulFetcher` (data), `ColorGenerator` (colour palette)
+
+---
+
+### StatisticsMetricsGenerator
+
+**File:** `statistics_metrics_generator.rb`
+**Priority:** `:normal`
+**Purpose:** Pre-computes statistics dashboard metrics at build time. Computes counts for spots (by type), obstacles (by portage route), protected areas (by type), paddle craft types, data source types, and data license types. Also computes spot freshness map data (per-spot coordinates, age, and category) and obstacle portage route map data.
+
+**Inputs:** `site.data['spots']`, `site.data['obstacles']`, `site.data['protected_areas']`, `site.data['waterways']`, `site.data['types/*']`
+
+**Outputs:**
+- `site.data['dashboard_statistics_metrics']` — Localised statistics counts per section
+- `site.data['dashboard_spot_freshness_map_data']` — Per-spot freshness data with coordinates for map rendering
+- `site.data['dashboard_obstacle_portage_map_data']` — Per-obstacle portage route data with coordinates for map rendering
+
+**Caching:** Uses the same compute-once-cache-across-locales pattern as `DashboardMetricsGenerator`.
+
+**Dependencies:** `ContentfulFetcher` (data)
 
 ---
 
