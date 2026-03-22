@@ -205,3 +205,10 @@ dashboards:
     chart_title: "Spot Freshness"
     popup_age: "Age"
     popup_years: "years"
+    more_details: "More details"
+  obstacle_portage:
+    name: "Obstacle Portage Routes"
+    description: "Which obstacles have a documented portage route and which do not."
+    with_portage: "With Portage Route"
+    without_portage: "Without Portage Route"
+    more_details: "More details"

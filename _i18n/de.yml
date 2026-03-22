@@ -205,3 +205,10 @@ dashboards:
     chart_title: "Aktualität der Einstiegsorte"
     popup_age: "Alter"
     popup_years: "Jahre"
+    more_details: "Weitere Details"
+  obstacle_portage:
+    name: "Hindernis-Portage-Routen"
+    description: "Welche Hindernisse eine dokumentierte Portage-Route haben und welche nicht."
+    with_portage: "Mit Portage-Route"
+    without_portage: "Ohne Portage-Route"
+    more_details: "Weitere Details"

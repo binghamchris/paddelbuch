@@ -42,24 +42,34 @@
 
     var geometry = parseGeometry(config.geometry, 'obstacle geometry');
 
+    var bounds = null;
+
     if (geometry) {
       // Render obstacle polygon (red)
       var obstacleLayer = L.geoJSON(geometry, {
         style: PaddelbuchLayerStyles.getLayerStyle('obstacle')
       }).addTo(map);
 
-      var bounds = obstacleLayer.getBounds();
-      if (bounds.isValid()) {
-        map.fitBounds(bounds, { padding: [50, 50] });
-      }
+      bounds = obstacleLayer.getBounds();
     }
 
     // Render portage route if present (Requirement 5.2)
     var portageRoute = parseGeometry(config.portageRoute, 'portage route');
     if (portageRoute) {
-      L.geoJSON(portageRoute, {
+      var portageLayer = L.geoJSON(portageRoute, {
         style: PaddelbuchLayerStyles.getLayerStyle('portageRoute')
       }).addTo(map);
+
+      // Extend bounds to include the portage route
+      var portageBounds = portageLayer.getBounds();
+      if (portageBounds.isValid()) {
+        bounds = bounds ? bounds.extend(portageBounds) : portageBounds;
+      }
+    }
+
+    // Fit map to combined bounds of obstacle + portage route
+    if (bounds && bounds.isValid()) {
+      map.fitBounds(bounds, { padding: [50, 50] });
     }
 
     // Store map globally for the data layer pipeline

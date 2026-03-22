@@ -11,6 +11,7 @@ scripts:
   - /assets/js/spot-freshness-dashboard.js
   - /assets/js/freshness-dashboard.js
   - /assets/js/coverage-dashboard.js
+  - /assets/js/obstacle-portage-dashboard.js
   - /assets/js/dashboard-switcher.js
 ---
 <!--
@@ -57,6 +58,7 @@ scripts:
 <script type="application/json" id="coverage-data">{{ site.data.dashboard_coverage_metrics | jsonify }}</script>
 <script type="application/json" id="coverage-summary-data">{{ site.data.dashboard_coverage_summary | jsonify }}</script>
 <script type="application/json" id="spot-freshness-map-data">{{ site.data.dashboard_spot_freshness_map_data | jsonify }}</script>
+<script type="application/json" id="obstacle-portage-map-data">{{ site.data.dashboard_obstacle_portage_map_data | jsonify }}</script>
 
 <script type="application/json" id="statistics-i18n">
 {
@@ -107,6 +109,16 @@ scripts:
   "stale": "{% t dashboards.spot_freshness.stale %}",
   "chart_title": "{% t dashboards.spot_freshness.chart_title %}",
   "popup_age": "{% t dashboards.spot_freshness.popup_age %}",
-  "popup_years": "{% t dashboards.spot_freshness.popup_years %}"
+  "popup_years": "{% t dashboards.spot_freshness.popup_years %}",
+  "more_details": "{% t dashboards.spot_freshness.more_details %}"
+}
+</script>
+<script type="application/json" id="obstacle-portage-i18n">
+{
+  "name": "{% t dashboards.obstacle_portage.name %}",
+  "description": "{% t dashboards.obstacle_portage.description %}",
+  "with_portage": "{% t dashboards.obstacle_portage.with_portage %}",
+  "without_portage": "{% t dashboards.obstacle_portage.without_portage %}",
+  "more_details": "{% t dashboards.obstacle_portage.more_details %}"
 }
 </script>

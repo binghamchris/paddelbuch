@@ -11,6 +11,9 @@ Third-party libraries are installed via npm but served locally (no CDN dependenc
 | Bootstrap | 5.3.x | CSS framework and JS components |
 | Leaflet | 1.9.x | Interactive map rendering |
 | Leaflet.locatecontrol | 0.89.x | "Locate me" button on the map |
+| MapLibre GL JS | 4.x | Vector tile rendering for dashboard maps (Positron basemap) |
+| leaflet-maplibre-gl | 0.0.x | Bridge plugin to use MapLibre GL layers inside Leaflet maps |
+| Chart.js | 4.5.x | Canvas-based chart rendering for statistics dashboards |
 
 ### Asset Pipeline
 
@@ -79,6 +82,19 @@ All modules live in `assets/js/`. They are plain scripts that attach functions t
 | `notice-map.js` | Map for event notice detail pages (affected area) |
 | `home-map.js` | Main homepage map with all layers |
 
+### Data Quality Dashboards
+
+| Module | Purpose |
+|--------|---------|
+| `dashboard-data.js` | Parses JSON data blocks embedded in the page for dashboard consumption |
+| `dashboard-map.js` | Creates Leaflet map instances with Positron vector tiles (via MapLibre GL) for dashboard views |
+| `dashboard-switcher.js` | Tab-style switcher that auto-discovers dashboard containers and toggles visibility |
+| `coverage-dashboard.js` | Waterway coverage dashboard: renders covered/uncovered GeoJSON segments on a map |
+| `freshness-dashboard.js` | Waterway freshness dashboard: renders waterways coloured by median spot age |
+| `spot-freshness-dashboard.js` | Spot freshness dashboard: Chart.js doughnut chart + map markers with SVG shapes per age category |
+| `statistics-dashboard.js` | Statistics dashboard: Chart.js horizontal bar charts for spot types, obstacles, protected areas, craft types |
+| `obstacle-portage-dashboard.js` | Obstacle portage routes dashboard: renders portage route data on a map |
+
 ## Map Initialisation Flow
 
 On the homepage, the map initialisation follows this sequence:
@@ -124,6 +140,9 @@ _sass/
 │   ├── _filter-panel.scss           ← Filter panel UI
 │   ├── _container.scss              ← Layout containers
 │   ├── _waterway-list.scss          ← Waterway list pages
+│   ├── _dashboard-legend.scss       ← Shared legend styles for data quality dashboards
+│   ├── _dashboard-switcher.scss     ← Dashboard tab switcher styles
+│   ├── _statistics-dashboard.scss   ← Statistics dashboard chart and figure layout
 │   └── _components.scss             ← Barrel file
 └── pages/
     ├── _home.scss                   ← Homepage
