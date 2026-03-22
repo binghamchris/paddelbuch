@@ -25,7 +25,7 @@ beforeAll(() => {
   template = yaml.load(raw, { schema: CF_SCHEMA });
 });
 
-describe('Amplify template – custom build image support', () => {
+describe('Amplify template - custom build image support', () => {
   // Requirement 4.1: CustomBuildImageUri parameter exists with default empty string
   test('CustomBuildImageUri parameter exists with default empty string', () => {
     expect(template.Parameters).toHaveProperty('CustomBuildImageUri');

@@ -40,7 +40,7 @@ end
 
 BASE_URL = "https://api.contentful.com/spaces/#{SPACE_ID}/environments/#{ENVIRONMENT}"
 
-# Douglas-Peucker tolerance in degrees (~25m at 47°N latitude)
+# Douglas-Peucker tolerance in degrees (~25m at 47 deg N latitude)
 TOLERANCE = 25.0 / 93_000.0
 PRECISION = 6
 
@@ -168,7 +168,7 @@ end
 # Main
 # ---------------------------------------------------------------------------
 
-puts DRY_RUN ? '=== DRY RUN — no changes will be written ===' : '=== LIVE RUN — changes will be written to Contentful ==='
+puts DRY_RUN ? '=== DRY RUN -- no changes will be written ===' : '=== LIVE RUN -- changes will be written to Contentful ==='
 puts "=== Target: #{TARGET_SLUG ? "slug '#{TARGET_SLUG}'" : 'all waterways'} ===" if TARGET_SLUG
 puts
 
@@ -205,7 +205,7 @@ waterways.each_with_index do |entry, idx|
   # default locale (Contentful falls back de -> en).
   fields = entry['fields'] || {}
 
-  # Geometry could be under any locale key — find the first non-nil value
+  # Geometry could be under any locale key -- find the first non-nil value
   geo_field = fields['geometry']
   full_geo_field = fields['fullGeometry']
 
@@ -227,7 +227,7 @@ waterways.each_with_index do |entry, idx|
   if full_geo_field && full_geo_field[locale]
     skipped_already_done += 1
     slug = fields.dig('slug', locale) || fields.dig('slug', 'en') || entry_id
-    puts "  [#{idx + 1}/#{waterways.size}] #{slug}: fullGeometry already set — skipping"
+    puts "  [#{idx + 1}/#{waterways.size}] #{slug}: fullGeometry already set -- skipping"
     next
   end
 
@@ -314,7 +314,7 @@ waterways.each_with_index do |entry, idx|
     errors += 1
   end
 
-  # Rate limiting — CMA allows ~10 req/s, we make 2 per entry (update + publish)
+  # Rate limiting -- CMA allows ~10 req/s, we make 2 per entry (update + publish)
   sleep 0.25
 end
 

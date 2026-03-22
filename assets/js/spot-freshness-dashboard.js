@@ -181,8 +181,8 @@
     var defaults = {
       name: 'Einstiegsort-Aktualität',
       description: 'Wie kürzlich jeder einzelne Einstiegsort, der Paddlern zur Verfügung steht, aktualisiert wurde.',
-      fresh: 'Aktuell (≤ 2 Jahre)',
-      aging: 'Alternd (2–5 Jahre)',
+      fresh: 'Aktuell (<= 2 Jahre)',
+      aging: 'Alternd (2-5 Jahre)',
       stale: 'Veraltet (> 5 Jahre)',
       chart_title: 'Aktualität der Einstiegsorte',
       popup_age: 'Alter',
@@ -219,7 +219,7 @@
   function buildPopupHtml(spot, strings) {
     var colorKey = FRESHNESS_COLOR_MAP[spot.category];
     var color = getColor(colorKey);
-    var ageYears = spot.ageDays != null ? (spot.ageDays / 365.25).toFixed(1) : '–';
+    var ageYears = spot.ageDays != null ? (spot.ageDays / 365.25).toFixed(1) : '-';
 
     var shapeFn = SHAPES[spot.category];
     var shapeSvg = shapeFn ? shapeFn(color) : '';

@@ -1,7 +1,7 @@
 /**
  * Property-Based Test for Paddle Craft Type Match Function
  *
- * // Feature: multi-dimension-spot-filter, Property 3: Paddle craft type match function — set intersection
+ * // Feature: multi-dimension-spot-filter, Property 3: Paddle craft type match function -- set intersection
  * **Validates: Requirements 3.5**
  *
  * Property: For any spot with a paddleCraftTypes array and for any set of selected
@@ -29,7 +29,7 @@ const slugArb = fc.stringMatching(/^[a-z][a-z0-9-]{0,14}$/);
 
 describe('Filter Engine Craft Type Match - Property 3', () => {
   /**
-   * Property 3: Paddle craft type match function — set intersection
+   * Property 3: Paddle craft type match function -- set intersection
    *
    * The paddle craft type matchFn iterates the spot's paddleCraftTypes array
    * and returns true if any element is in the selected set.
@@ -80,7 +80,7 @@ describe('Filter Engine Craft Type Match - Property 3', () => {
 
           const metadata = { paddleCraftTypes: paddleCraftTypes };
 
-          // Compute expected: if selected set is empty, dimension is inactive → true
+          // Compute expected: if selected set is empty, dimension is inactive -> true
           // Otherwise, true iff intersection of paddleCraftTypes and selectedSet is non-empty
           const hasIntersection = paddleCraftTypes.some(t => selectedSet.has(t));
           const expected = selectedSet.size === 0 ? true : hasIntersection;
