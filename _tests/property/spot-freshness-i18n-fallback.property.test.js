@@ -21,8 +21,8 @@ var path = require('path');
 var GERMAN_DEFAULTS = {
   name: 'Einstiegsort-Aktualität',
   description: 'Wie kürzlich jeder einzelne Einstiegsort, der Paddlern zur Verfügung steht, aktualisiert wurde.',
-  fresh: 'Aktuell (≤ 2 Jahre)',
-  aging: 'Alternd (2–5 Jahre)',
+  fresh: 'Aktuell (<= 2 Jahre)',
+  aging: 'Alternd (2-5 Jahre)',
   stale: 'Veraltet (> 5 Jahre)',
   chart_title: 'Aktualität der Einstiegsorte',
   popup_age: 'Alter',
@@ -91,7 +91,7 @@ describe('Property 10: i18n fallback to German defaults', function () {
   }
 
   it('getStrings() returns complete object with non-empty values for any i18n content', function () {
-    // Load the module once — getStrings() is exposed on the global and reads
+    // Load the module once -- getStrings() is exposed on the global and reads
     // from the DOM on each call, so we can manipulate the DOM per iteration.
     require(modulePath);
 

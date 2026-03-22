@@ -18,7 +18,7 @@ beforeAll(() => {
 describe('Version parity checks', () => {
   // Requirement 7.2: Ruby version in Dockerfile matches .ruby-version file
   test('Ruby version in Dockerfile matches .ruby-version file', () => {
-    // .ruby-version contains "ruby-3.4.9" — extract the numeric version
+    // .ruby-version contains "ruby-3.4.9" -- extract the numeric version
     const rubyVersion = rubyVersionContent.replace(/^ruby-/, '');
 
     // Dockerfile downloads ruby-<version>.tar.gz

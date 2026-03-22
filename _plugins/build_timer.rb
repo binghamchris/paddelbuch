@@ -45,7 +45,7 @@ module BuildTimer
 end
 
 # ---------------------------------------------------------------------------
-# :site, :after_init — record the very start of the build
+# :site, :after_init -- record the very start of the build
 # ---------------------------------------------------------------------------
 Jekyll::Hooks.register :site, :after_init, priority: :high do |_site|
   BuildTimer.start('total_build')
@@ -53,7 +53,7 @@ Jekyll::Hooks.register :site, :after_init, priority: :high do |_site|
 end
 
 # ---------------------------------------------------------------------------
-# :site, :pre_render — fires before each language pass renders.
+# :site, :pre_render -- fires before each language pass renders.
 # The i18n plugin loads translations in its own :pre_render hook (default
 # priority). We register two hooks: one at :high priority (runs BEFORE the
 # plugin) to start the timer, and one at :low priority (runs AFTER) to stop it.
@@ -76,7 +76,7 @@ Jekyll::Hooks.register :site, :pre_render, priority: :low do |site, _payload|
 end
 
 # ---------------------------------------------------------------------------
-# :site, :post_render — fires after rendering, before writing files
+# :site, :post_render -- fires after rendering, before writing files
 # ---------------------------------------------------------------------------
 Jekyll::Hooks.register :site, :post_render do |site, _payload|
   lang = site.config['lang']
@@ -85,7 +85,7 @@ Jekyll::Hooks.register :site, :post_render do |site, _payload|
 end
 
 # ---------------------------------------------------------------------------
-# :site, :post_write — fires after files are written to disk
+# :site, :post_write -- fires after files are written to disk
 # ---------------------------------------------------------------------------
 Jekyll::Hooks.register :site, :post_write do |site|
   lang = site.config['lang']
@@ -95,7 +95,7 @@ end
 # ---------------------------------------------------------------------------
 # Monkey-patch Site#process to capture total build time and per-language
 # generator timing. The original process method loops over languages and
-# calls process_org for each one — we wrap process_org to time generators.
+# calls process_org for each one -- we wrap process_org to time generators.
 # ---------------------------------------------------------------------------
 
 # Depends on jekyll-multiple-languages-plugin providing process_org on Jekyll::Site
@@ -114,7 +114,7 @@ module BuildTimerSiteExtension
       super
     end
   else
-    Jekyll.logger.warn 'BuildTimer:', 'Jekyll::Site#process_org not found (jekyll-multiple-languages-plugin missing?) — skipping per-language generator timing'
+    Jekyll.logger.warn 'BuildTimer:', 'Jekyll::Site#process_org not found (jekyll-multiple-languages-plugin missing?) -- skipping per-language generator timing'
   end
 end
 
