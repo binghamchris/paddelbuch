@@ -2,7 +2,7 @@
  * Unit Tests for No Inline Styles in statistics-dashboard.js (Static Analysis)
  *
  * Reads the JS source file and verifies that it contains zero occurrences of
- * inline style patterns — both `style=` string literals used for HTML generation
+ * inline style patterns -- both `style=` string literals used for HTML generation
  * and `.style.` property assignments on DOM elements.
  *
  * Validates: Requirements 5.1, 5.2

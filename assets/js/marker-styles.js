@@ -77,7 +77,7 @@
   }
 
   /**
-   * Lazy marker styles accessor — creates icons on first access.
+   * Lazy marker styles accessor -- creates icons on first access.
    */
   var markerStyles = {
     get spotEinstiegAusstiegIcon() { return getOrCreateIcon('spotEinstiegAusstieg'); },

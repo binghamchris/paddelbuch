@@ -110,7 +110,7 @@ describe('Spot Freshness Container Visibility Properties', function () {
   it('both containers are visible when a usesBoth dashboard is activated', function () {
     fc.assert(
       fc.property(
-        // Generate 1–5 non-usesBoth dashboards as padding, plus one usesBoth dashboard
+        // Generate 1-5 non-usesBoth dashboards as padding, plus one usesBoth dashboard
         fc.array(dashboardConfigArb, { minLength: 0, maxLength: 5 }),
         dashboardConfigArb,
         function (otherConfigs, usesBothBase) {

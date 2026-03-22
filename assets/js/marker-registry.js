@@ -3,7 +3,7 @@
  *
  * Central registry of all spot markers and their metadata.
  * Provides O(1) lookup by slug and iteration for the Filter Engine.
- * Deduplicates entries — registering the same slug twice is a no-op.
+ * Deduplicates entries -- registering the same slug twice is a no-op.
  *
  * Requirements: 4.1, 4.2, 4.3, 4.4
  */

@@ -63,8 +63,8 @@ function setupDOM() {
     JSON.stringify({
       name: 'Waterway Freshness',
       legend_title: 'Median Age of Entries',
-      fresh: 'Fresh (≤ 2 years)',
-      aging: 'Aging (2–5 years)',
+      fresh: 'Fresh (<= 2 years)',
+      aging: 'Aging (2-5 years)',
       stale: 'Stale (> 5 years)',
       no_data: 'No Spots',
       popup_spots: 'Spots',
@@ -267,8 +267,8 @@ describe('PaddelbuchFreshnessDashboard', () => {
       mod.activate({ map: mockMap, legendEl: legendEl });
 
       var html = legendEl.innerHTML;
-      expect(html).toContain('Fresh (≤ 2 years)');
-      expect(html).toContain('Aging (2–5 years)');
+      expect(html).toContain('Fresh (&lt;= 2 years)');
+      expect(html).toContain('Aging (2-5 years)');
       expect(html).toContain('Stale (&gt; 5 years)');
     });
   });

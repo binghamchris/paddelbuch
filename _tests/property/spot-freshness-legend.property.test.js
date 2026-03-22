@@ -32,7 +32,7 @@ var validSpotArb = fc.record({
 });
 
 /**
- * Generates an invalid spot entry — missing lat, lon, or category.
+ * Generates an invalid spot entry -- missing lat, lon, or category.
  */
 var invalidSpotArb = fc.oneof(
   fc.record({
