@@ -3,6 +3,8 @@ frontend:
   phases:
     preBuild:
       commands:
+        - export LANG=en_US.UTF-8
+        - export LC_ALL=en_US.UTF-8
         - npm ci
         - npm run download-fonts
         - npm run copy-assets

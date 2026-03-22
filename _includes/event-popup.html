@@ -12,7 +12,7 @@
   Property 15: Event Notice Popup Contains Required Information
 -->
 
-{% assign locale_prefix = site.locale_prefix %}
+{% include locale-prefix.html %}
 
 {% assign notice = include.notice %}
 {% assign current_locale = include.locale | default: site.lang | default: 'de' %}

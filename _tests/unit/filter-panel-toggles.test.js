@@ -384,7 +384,7 @@ describe('Filter Panel Toggles', () => {
       const container = document.querySelector('.filter-panel');
       expect(container.classList.contains('expanded')).toBe(true);
 
-      // Popup opens → panel collapses
+      // Popup opens -> panel collapses
       mockMap._handlers.popupopen();
       expect(container.classList.contains('expanded')).toBe(false);
     });

@@ -66,7 +66,7 @@ function freshRegistry() {
 
 /**
  * Arbitrary: generate a sequence of register calls with intentional slug duplicates.
- * Uses a constrained slug pool (1–5 unique slugs) and draws 2–20 calls from that pool,
+ * Uses a constrained slug pool (1-5 unique slugs) and draws 2-20 calls from that pool,
  * guaranteeing at least some duplicates when the call count exceeds the pool size.
  */
 const registerCallSequenceArb = fc
@@ -157,7 +157,7 @@ describe('Marker Registry Deduplication - Property 5', () => {
   });
 
   /**
-   * Property 5: The first registration wins — duplicate register calls
+   * Property 5: The first registration wins -- duplicate register calls
    * do not overwrite the original marker or metadata.
    */
   test('duplicate register calls preserve the first marker and metadata', () => {

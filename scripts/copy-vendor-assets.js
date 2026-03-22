@@ -21,6 +21,10 @@ const FILE_COPIES = [
     dest: 'assets/js/vendor/leaflet.js',
   },
   {
+    src: 'node_modules/leaflet/dist/leaflet.js.map',
+    dest: 'assets/js/vendor/leaflet.js.map',
+  },
+  {
     src: 'node_modules/leaflet/dist/leaflet.css',
     dest: 'assets/css/vendor/leaflet.css',
   },
@@ -31,6 +35,22 @@ const FILE_COPIES = [
   {
     src: 'node_modules/leaflet.locatecontrol/dist/L.Control.Locate.min.css',
     dest: 'assets/css/vendor/L.Control.Locate.min.css',
+  },
+  {
+    src: 'node_modules/maplibre-gl/dist/maplibre-gl.js',
+    dest: 'assets/js/vendor/maplibre-gl.js',
+  },
+  {
+    src: 'node_modules/maplibre-gl/dist/maplibre-gl.css',
+    dest: 'assets/css/vendor/maplibre-gl.css',
+  },
+  {
+    src: 'node_modules/@maplibre/maplibre-gl-leaflet/leaflet-maplibre-gl.js',
+    dest: 'assets/js/vendor/leaflet-maplibre-gl.js',
+  },
+  {
+    src: 'node_modules/chart.js/dist/chart.umd.js',
+    dest: 'assets/js/vendor/chart.umd.js',
   },
 ];
 

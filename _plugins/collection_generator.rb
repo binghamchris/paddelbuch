@@ -68,6 +68,7 @@ module Jekyll
         locale_entries.each do |entry|
           slug = entry['slug']
           next unless slug && !slug.empty?
+          next if collection_name == 'waterways' && entry['navigableByPaddlers'] == false
 
           doc = create_document(site, collection, entry, slug, config[:page_name], current_locale)
           collection.docs << doc

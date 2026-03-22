@@ -75,7 +75,7 @@ describe('Filter Engine Spot Type Match - Property 2', () => {
 
           const metadata = { spotType_slug: spotTypeSlug };
 
-          // If selected set is empty, dimension is inactive → evaluateMarker returns true
+          // If selected set is empty, dimension is inactive -> evaluateMarker returns true
           // Otherwise, result should match selectedSet.has(spotTypeSlug)
           const expected = selectedSet.size === 0 ? true : selectedSet.has(spotTypeSlug);
           const actual = engine.evaluateMarker(metadata);
