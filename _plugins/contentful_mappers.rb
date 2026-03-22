@@ -282,6 +282,7 @@ module ContentfulMappers
       '_raw_geometry' => geometry_field,
       'showInMenu' => resolve_field(fields, :show_in_menu, locale) || false,
       'paddlingEnvironmentType_slug' => extract_reference_slug(resolve_field(fields, :paddling_environment_type, locale)),
+      'navigableByPaddlers' => resolve_field(fields, :navigable_by_paddlers, locale),
       'dataSourceType_slug' => extract_reference_slug(resolve_field(fields, :data_source_type, locale)),
       'dataLicenseType_slug' => extract_reference_slug(resolve_field(fields, :data_license_type, locale))
     }
