@@ -181,5 +181,76 @@ RSpec.describe Jekyll::CollectionGenerator do
       }
     end
   end
+
+  # ── Feature: navigable-by-paddlers, Property 5: CollectionGenerator non-navigable exclusion ──
+  # **Validates: Requirements 6.1, 6.2, 6.3**
+  #
+  # For any set of waterway data entries with mixed navigableByPaddlers values,
+  # the CollectionGenerator shall produce no document for a waterway where
+  # navigableByPaddlers equals false, and shall produce a document for every
+  # waterway where navigableByPaddlers is true or nil.
+  describe 'Property 5: CollectionGenerator non-navigable exclusion' do
+    it 'excludes non-navigable waterways and includes navigable/nil waterways' do
+      property_of {
+        num_waterways = range(1, 10)
+        waterways = Array.new(num_waterways) { |i|
+          nav_value = choose(true, false, nil)
+          {
+            'slug' => "ww-#{i}",
+            'name' => "Waterway #{i}",
+            'locale' => 'de',
+            'navigableByPaddlers' => nav_value
+          }
+        }
+        waterways
+      }.check(100) { |waterways|
+        Dir.mktmpdir do |tmpdir|
+          config = Jekyll.configuration(
+            'source' => tmpdir,
+            'destination' => File.join(tmpdir, '_site'),
+            'lang' => 'de',
+            'default_lang' => 'de',
+            'collections' => { 'waterways' => { 'output' => true } }
+          )
+          site = Jekyll::Site.new(config)
+          collection = site.collections['waterways']
+          FileUtils.mkdir_p(File.join(site.source, collection.relative_directory))
+
+          # Populate site.data with the generated waterways (and empty arrays for other data)
+          site.data['waterways'] = waterways
+          site.data['spots'] = []
+          site.data['obstacles'] = []
+          site.data['notices'] = []
+          site.data['static_pages'] = []
+          site.data['types'] = { 'spot_types' => [], 'obstacle_types' => [], 'paddle_craft_types' => [] }
+
+          generator = Jekyll::CollectionGenerator.new
+          generator.generate(site)
+
+          produced_slugs = collection.docs.map { |d| d.data['slug'] }
+
+          # Assert: no document for waterways with navigableByPaddlers == false
+          non_navigable_slugs = waterways
+            .select { |w| w['navigableByPaddlers'] == false }
+            .map { |w| w['slug'] }
+
+          non_navigable_slugs.each do |slug|
+            expect(produced_slugs).not_to include(slug),
+              "Document was produced for non-navigable waterway '#{slug}'"
+          end
+
+          # Assert: a document for every waterway with navigableByPaddlers true or nil
+          navigable_slugs = waterways
+            .select { |w| w['navigableByPaddlers'] != false }
+            .map { |w| w['slug'] }
+
+          navigable_slugs.each do |slug|
+            expect(produced_slugs).to include(slug),
+              "No document produced for navigable waterway '#{slug}'"
+          end
+        end
+      }
+    end
+  end
 end
 
