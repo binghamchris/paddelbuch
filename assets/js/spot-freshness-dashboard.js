@@ -186,7 +186,8 @@
       stale: 'Veraltet (> 5 Jahre)',
       chart_title: 'Aktualität der Einstiegsorte',
       popup_age: 'Alter',
-      popup_years: 'Jahre'
+      popup_years: 'Jahre',
+      more_details: 'Weitere Details'
     };
 
     var el = document.getElementById('spot-freshness-i18n');
@@ -224,12 +225,23 @@
     var shapeFn = SHAPES[spot.category];
     var shapeSvg = shapeFn ? shapeFn(color) : '';
 
+    var locale = document.documentElement.lang || 'de';
+    var localePrefix = (locale && locale !== 'de') ? '/' + locale : '';
+
     var html = '';
     html += '<div class="popup-icon-div">';
     html += '<span class="dashboard-popup-icon">' + shapeSvg + '</span>';
     html += strings.popup_age + ': ' + ageYears + ' ' + strings.popup_years;
     html += '</div>';
     html += '<span class="popup-title"><h1>' + escapeHtml(spot.name) + '</h1></span>';
+
+    if (spot.slug) {
+      html += '<button class="popup-btn popup-btn-right">';
+      html += '<a href="' + localePrefix + '/einstiegsorte/' + encodeURIComponent(spot.slug) + '/">';
+      html += escapeHtml(strings.more_details);
+      html += '</a></button>';
+    }
+
     return html;
   }
 
