@@ -279,6 +279,97 @@ RSpec.describe Jekyll::DashboardMetricsGenerator, 'property tests' do
     end
   end
 
+  # ── Property 7: Dashboard metrics non-navigable exclusion ─────────────────
+  # Feature: navigable-by-paddlers, Property 3: Dashboard metrics non-navigable exclusion
+  # **Validates: Requirements 3.1, 3.2, 3.3, 4.1, 4.2, 4.3**
+  #
+  # For any set of waterways with mixed navigableByPaddlers values (true,
+  # false, nil), the freshness and coverage metrics produced by
+  # DashboardMetricsGenerator shall contain no waterway whose
+  # navigableByPaddlers value is false, and shall contain every non-wildwasser
+  # waterway whose navigableByPaddlers value is true or nil (with valid geometry).
+  describe 'Property 7: Dashboard metrics non-navigable exclusion' do
+    let(:colors) do
+      {
+        'green1' => '#07753f',
+        'warningYellow' => '#ffb200',
+        'dangerRed' => '#c40200',
+        'purple1' => '#69599b'
+      }
+    end
+
+    # Simple valid LineString geometry within Swiss bounds
+    let(:valid_geometry_json) { '{"type":"LineString","coordinates":[[8.5,47.3],[8.6,47.4]]}' }
+
+    def build_mock_site(waterways)
+      config = { 'lang' => 'de', 'default_lang' => 'de' }
+      data = {
+        'paddelbuch_colors' => colors,
+        'spots' => [],
+        'waterways' => waterways
+      }
+      Struct.new(:config, :data).new(config, data)
+    end
+
+    it 'excludes all non-navigable waterways and includes all navigable non-wildwasser waterways' do
+      property_of {
+        num_waterways = range(1, 10)
+        waterways = Array.new(num_waterways) { |i|
+          nav_value = choose(true, false, nil)
+          env_type = choose('fluss', 'see', 'wildwasser')
+          {
+            'slug' => "waterway-#{i}",
+            'name' => "Waterway #{i}",
+            'locale' => 'de',
+            'geometry' => '{"type":"LineString","coordinates":[[8.5,47.3],[8.6,47.4]]}',
+            'paddlingEnvironmentType_slug' => env_type,
+            'length' => range(1, 200).to_f,
+            'navigableByPaddlers' => nav_value
+          }
+        }
+        waterways
+      }.check(100) { |waterways|
+        # Reset class-level cache before each iteration
+        described_class.class_variable_set(:@@cached_freshness, nil)
+        described_class.class_variable_set(:@@cached_coverage, nil)
+
+        site = build_mock_site(waterways)
+        generator.generate(site)
+
+        freshness_slugs = site.data['dashboard_freshness_metrics'].map { |m| m['slug'] }
+        coverage_slugs = site.data['dashboard_coverage_metrics'].map { |m| m['slug'] }
+
+        # Build lookup of input waterways by slug
+        input_by_slug = waterways.each_with_object({}) { |w, h| h[w['slug']] = w }
+
+        # Assert: no waterway with navigableByPaddlers == false in freshness metrics
+        freshness_slugs.each do |slug|
+          w = input_by_slug[slug]
+          expect(w['navigableByPaddlers']).not_to eq(false),
+            "Freshness metrics contain non-navigable waterway '#{slug}'"
+        end
+
+        # Assert: no waterway with navigableByPaddlers == false in coverage metrics
+        coverage_slugs.each do |slug|
+          w = input_by_slug[slug]
+          expect(w['navigableByPaddlers']).not_to eq(false),
+            "Coverage metrics contain non-navigable waterway '#{slug}'"
+        end
+
+        # Assert: all non-wildwasser waterways with navigableByPaddlers true or nil are included
+        expected_slugs = waterways
+          .select { |w| w['paddlingEnvironmentType_slug'] != 'wildwasser' }
+          .select { |w| w['navigableByPaddlers'] != false }
+          .map { |w| w['slug'] }
+
+        expect(freshness_slugs).to match_array(expected_slugs),
+          "Freshness metrics missing expected waterways. Expected: #{expected_slugs.sort}, Got: #{freshness_slugs.sort}"
+        expect(coverage_slugs).to match_array(expected_slugs),
+          "Coverage metrics missing expected waterways. Expected: #{expected_slugs.sort}, Got: #{coverage_slugs.sort}"
+      }
+    end
+  end
+
   # ── Property 6: Single-spot coverage contiguity ─────────────────────────────
   # **Validates: Requirements 10.5**
   #
