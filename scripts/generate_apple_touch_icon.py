@@ -6,7 +6,7 @@ Caches a checksum file alongside the output so the PNG is only
 regenerated when the source SVG changes.
 
 Usage:
-    python3 _scripts/generate_apple_touch_icon.py
+    python3 scripts/generate_apple_touch_icon.py
 
 Requires: rsvg-convert (brew install librsvg)
 """

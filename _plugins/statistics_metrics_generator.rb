@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'set'
+
 # Jekyll plugin to pre-compute statistics dashboard metrics at build time.
 #
 # Computes counts for spots (by type), obstacles (by portage route),
@@ -73,6 +75,16 @@ module Jekyll
       Jekyll.logger.warn 'StatisticsMetrics:', 'No paddle craft type definitions found' if paddle_craft_types.empty?
       Jekyll.logger.warn 'StatisticsMetrics:', 'No data source type definitions found' if data_source_types.empty?
       Jekyll.logger.warn 'StatisticsMetrics:', 'No data license type definitions found' if data_license_types.empty?
+
+      # Exclude obstacles linked to non-navigable waterways
+      non_navigable_slugs = waterways
+        .select { |w| w['navigableByPaddlers'] == false }
+        .map { |w| w['slug'] }
+        .to_set
+      pre_filter_obstacle_count = obstacles.size
+      obstacles = obstacles.reject { |o| non_navigable_slugs.include?(o['waterway_slug']) }
+      excluded_obstacle_count = pre_filter_obstacle_count - obstacles.size
+      Jekyll.logger.info 'StatisticsMetrics:', "Excluded #{excluded_obstacle_count} obstacles on non-navigable waterways, #{obstacles.size} remaining"
 
       Jekyll.logger.info 'StatisticsMetrics:', "Entities: #{spots.size} spots, #{obstacles.size} obstacles, #{protected_areas.size} protected areas, #{waterways.size} waterways, #{notices.size} notices"
       Jekyll.logger.info 'StatisticsMetrics:', "Types: #{spot_types.size} spot types, #{protected_area_types.size} PA types, #{paddle_craft_types.size} craft types, #{data_source_types.size} source types, #{data_license_types.size} license types"

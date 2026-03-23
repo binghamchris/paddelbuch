@@ -78,6 +78,7 @@ See [docs/architecture.md](docs/architecture.md) for a detailed architecture gui
 - `_i18n/` — Translation strings (German and English)
 - `spec/` — Ruby tests (RSpec)
 - `_tests/` — JavaScript tests (Jest)
+- `scripts/` — Build helpers and one-off data processing scripts
 
 ## Coding Standards
 
