@@ -80,7 +80,7 @@ Implement delta merge for the Contentful sync pipeline. Instead of re-fetching a
     - Assert: all `Entry` items with known types land in `changed_entries`, all `DeletedEntry` items with known types land in `deleted_entries`, unknown types excluded, `items_count` equals total items, `has_changes` is true iff delta is non-empty
     - Minimum 100 iterations
 
-- [-] 4. Checkpoint - Ensure all tests pass
+- [x] 4. Checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 5. Implement ContentfulFetcher delta merge path
