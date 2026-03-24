@@ -50,7 +50,7 @@ Implement delta merge for the Contentful sync pipeline. Instead of re-fetching a
     - Ensure existing fields (`success`, `has_changes`, `new_token`, `items_count`, `error`) remain unchanged
     - _Requirements: 2.1, 2.2, 2.3, 2.4_
 
-  - [~] 3.2 Update `check_for_changes` to accept `known_content_types` and classify delta items
+  - [-] 3.2 Update `check_for_changes` to accept `known_content_types` and classify delta items
     - New signature: `check_for_changes(client, sync_token, known_content_types = nil)`
     - When `known_content_types` is provided, iterate sync items and classify by `sys.type`:
       - `'Entry'` → changed entry (extract `content_type_id` from `sys.contentType.sys.id`)
