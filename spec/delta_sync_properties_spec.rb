@@ -18,7 +18,7 @@ RSpec.describe 'Delta Sync Properties' do
       if content_type_id
         ct_obj = double("ContentType(#{content_type_id})")
         allow(ct_obj).to receive(:sys).and_return({ id: content_type_id })
-        sys_hash[:contentType] = ct_obj
+        sys_hash[:content_type] = ct_obj
       end
       allow(item).to receive(:sys).and_return(sys_hash)
       item
