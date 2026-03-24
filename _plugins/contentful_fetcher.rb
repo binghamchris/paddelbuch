@@ -198,6 +198,26 @@ module Jekyll
       end
     end
 
+    def upsert_rows(yaml_data, filename, new_rows)
+      yaml_data[filename] ||= []
+      rows = yaml_data[filename]
+
+      new_rows.each do |new_row|
+        idx = rows.index { |r| r['slug'] == new_row['slug'] && r['locale'] == new_row['locale'] }
+        if idx
+          rows[idx] = new_row
+        else
+          rows << new_row
+        end
+      end
+    end
+
+    def remove_rows(yaml_data, filename, slug)
+      return unless yaml_data[filename]
+
+      yaml_data[filename].reject! { |row| row['slug'] == slug }
+    end
+
     def save_cache(cache, sync_token, space_id, environment, content_hash = nil)
       cache.sync_token   = sync_token
       cache.last_sync_at = Time.now.iso8601
