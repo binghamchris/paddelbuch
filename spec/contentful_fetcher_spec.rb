@@ -109,7 +109,7 @@ RSpec.describe Jekyll::ContentfulFetcher do
     if content_type_id
       content_type_sys = double('ContentTypeSys')
       allow(content_type_sys).to receive(:sys).and_return({ id: content_type_id })
-      sys_hash[:contentType] = content_type_sys
+      sys_hash[:content_type] = content_type_sys
     end
     allow(item).to receive(:sys).and_return(sys_hash)
     item

@@ -67,7 +67,7 @@ module SyncChecker
 
       case type
       when 'Entry', 'DeletedEntry'
-        content_type_obj = item.sys[:contentType]
+        content_type_obj = item.sys[:content_type]
         next if content_type_obj.nil?
 
         content_type_id = content_type_obj.sys[:id]
