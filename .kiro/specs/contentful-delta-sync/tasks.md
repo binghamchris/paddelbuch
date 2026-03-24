@@ -18,7 +18,7 @@ Implement delta merge for the Contentful sync pipeline. Instead of re-fetching a
     - `lookup_entry_id(entry_id)` returns `{ 'slug' => ..., 'content_type' => ... }` or `nil`
     - _Requirements: 7.1, 7.3, 7.4_
 
-  - [-] 1.3 Update `save` and `load` to persist and restore `entry_id_index`
+  - [x] 1.3 Update `save` and `load` to persist and restore `entry_id_index`
     - Serialize `entry_id_index` as a top-level key in the cache YAML file
     - On load, restore `entry_id_index` from the YAML data (default to `{}` if missing for backward compatibility)
     - _Requirements: 7.1, 7.5_
