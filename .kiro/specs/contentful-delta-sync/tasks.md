@@ -7,12 +7,12 @@ Implement delta merge for the Contentful sync pipeline. Instead of re-fetching a
 ## Tasks
 
 - [ ] 1. Extend CacheMetadata with Entry ID Index support
-  - [-] 1.1 Add `entry_id_index` field and accessor to `CacheMetadata`
+  - [x] 1.1 Add `entry_id_index` field and accessor to `CacheMetadata`
     - Add `attr_accessor :entry_id_index` to the class
     - Initialize `@entry_id_index` to `{}` in the constructor
     - _Requirements: 7.1, 7.5_
 
-  - [~] 1.2 Implement `add_to_entry_id_index`, `remove_from_entry_id_index`, and `lookup_entry_id` methods
+  - [-] 1.2 Implement `add_to_entry_id_index`, `remove_from_entry_id_index`, and `lookup_entry_id` methods
     - `add_to_entry_id_index(entry_id, slug, content_type)` adds/updates an entry
     - `remove_from_entry_id_index(entry_id)` removes an entry
     - `lookup_entry_id(entry_id)` returns `{ 'slug' => ..., 'content_type' => ... }` or `nil`
