@@ -7,11 +7,12 @@ require 'digest'
 class CacheMetadata
   CACHE_FILENAME = '.contentful_sync_cache.yml'
 
-  attr_accessor :sync_token, :last_sync_at, :space_id, :environment, :content_hash
+  attr_accessor :sync_token, :last_sync_at, :space_id, :environment, :content_hash, :entry_id_index
 
   def initialize(data_dir)
     @data_dir = data_dir
     @cache_path = File.join(data_dir, CACHE_FILENAME)
+    @entry_id_index = {}
   end
 
   def load
