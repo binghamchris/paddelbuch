@@ -891,4 +891,89 @@ RSpec.describe Jekyll::ContentfulFetcher do
       expect(site_data['types']['spot_types']).to eq(types_data)
     end
   end
+
+  # ─── build_entry_id_index ────────────────────────────────────────────
+
+  describe '#build_entry_id_index' do
+    # Helper: build a mock entry with sys[:id] and fields_with_locales
+    def mock_entry(id:, slug: nil)
+      entry = double("Entry-#{id}")
+      allow(entry).to receive(:sys).and_return({ id: id })
+      fields = slug ? { slug: { en: slug } } : {}
+      allow(entry).to receive(:fields_with_locales).and_return(fields)
+      entry
+    end
+
+    it 'builds an index mapping sys.id to slug and content_type' do
+      entries_by_type = {
+        'spot' => [mock_entry(id: 'abc123', slug: 'spiez-beach')],
+        'waterway' => [mock_entry(id: 'def456', slug: 'aare')]
+      }
+
+      index = fetcher.send(:build_entry_id_index, entries_by_type)
+
+      expect(index['abc123']).to eq({ 'slug' => 'spiez-beach', 'content_type' => 'spot' })
+      expect(index['def456']).to eq({ 'slug' => 'aare', 'content_type' => 'waterway' })
+    end
+
+    it 'handles multiple entries per content type' do
+      entries_by_type = {
+        'spot' => [
+          mock_entry(id: 'e1', slug: 'spiez'),
+          mock_entry(id: 'e2', slug: 'thun'),
+          mock_entry(id: 'e3', slug: 'bern')
+        ]
+      }
+
+      index = fetcher.send(:build_entry_id_index, entries_by_type)
+
+      expect(index.size).to eq(3)
+      expect(index['e1']).to eq({ 'slug' => 'spiez', 'content_type' => 'spot' })
+      expect(index['e2']).to eq({ 'slug' => 'thun', 'content_type' => 'spot' })
+      expect(index['e3']).to eq({ 'slug' => 'bern', 'content_type' => 'spot' })
+    end
+
+    it 'falls back to sys.id as slug when entry has no slug field' do
+      entries_by_type = {
+        'spot' => [mock_entry(id: 'no-slug-entry')]
+      }
+
+      index = fetcher.send(:build_entry_id_index, entries_by_type)
+
+      expect(index['no-slug-entry']['slug']).to eq('no-slug-entry')
+    end
+
+    it 'returns an empty hash when entries_by_type is empty' do
+      index = fetcher.send(:build_entry_id_index, {})
+
+      expect(index).to eq({})
+    end
+
+    it 'handles entries across all content types' do
+      entries_by_type = {
+        'spot' => [mock_entry(id: 's1', slug: 'spot-a')],
+        'waterway' => [mock_entry(id: 'w1', slug: 'waterway-a')],
+        'obstacle' => [mock_entry(id: 'o1', slug: 'obstacle-a')]
+      }
+
+      index = fetcher.send(:build_entry_id_index, entries_by_type)
+
+      expect(index.size).to eq(3)
+      expect(index['s1']['content_type']).to eq('spot')
+      expect(index['w1']['content_type']).to eq('waterway')
+      expect(index['o1']['content_type']).to eq('obstacle')
+    end
+
+    it 'last entry wins when duplicate sys.id appears across content types' do
+      entries_by_type = {
+        'spot' => [mock_entry(id: 'dup1', slug: 'first-slug')],
+        'waterway' => [mock_entry(id: 'dup1', slug: 'second-slug')]
+      }
+
+      index = fetcher.send(:build_entry_id_index, entries_by_type)
+
+      expect(index.size).to eq(1)
+      expect(index['dup1']['slug']).to eq('second-slug')
+    end
+  end
 end
