@@ -23,7 +23,7 @@ Implement delta merge for the Contentful sync pipeline. Instead of re-fetching a
     - On load, restore `entry_id_index` from the YAML data (default to `{}` if missing for backward compatibility)
     - _Requirements: 7.1, 7.5_
 
-  - [~] 1.4 Write unit tests for CacheMetadata Entry ID Index
+  - [x] 1.4 Write unit tests for CacheMetadata Entry ID Index
     - Test file: `spec/cache_metadata_spec.rb` (extend existing file)
     - Test save/load round-trip with `entry_id_index` populated
     - Test `add_to_entry_id_index`, `remove_from_entry_id_index`, `lookup_entry_id`
