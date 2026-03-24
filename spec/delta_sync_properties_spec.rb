@@ -298,4 +298,75 @@ RSpec.describe 'Delta Sync Properties' do
       }
     end
   end
+
+  # Feature: contentful-delta-sync, Property 5: Entry ID Index construction covers all entries
+  # **Validates: Requirements 7.2**
+  describe 'Property 5: Entry ID Index construction covers all entries' do
+    let(:fetcher) { Jekyll::ContentfulFetcher.new }
+
+    INDEX_CONTENT_TYPES = %w[spot waterway obstacle section spotType waterway_section region notice partner].freeze
+
+    def build_mock_entry(entry_id:, slug:)
+      entry = double("Entry(#{entry_id})")
+      allow(entry).to receive(:sys).and_return({ id: entry_id })
+      allow(entry).to receive(:fields_with_locales).and_return({ slug: { en: slug } })
+      entry
+    end
+
+    it 'builds an index covering every entry with correct slug and content type' do
+      property_of {
+        # Generate 1..20 content types, each with 0..5 entries
+        num_types = range(1, 5)
+        entries_by_type = {}
+        all_entries = [] # track [entry_id, slug, content_type_id] for assertions
+
+        num_types.times do
+          content_type_id = choose(*INDEX_CONTENT_TYPES)
+          num_entries = range(0, 5)
+          entries = []
+          num_entries.times do
+            entry_id = sized(range(5, 20)) { string(:alnum) }
+            slug = sized(range(3, 15)) { string(:alpha) }.downcase
+            entries << { entry_id: entry_id, slug: slug }
+            all_entries << { entry_id: entry_id, slug: slug, content_type_id: content_type_id }
+          end
+          # Merge entries into the same content type if it already exists
+          entries_by_type[content_type_id] ||= []
+          entries_by_type[content_type_id].concat(entries)
+        end
+
+        [entries_by_type, all_entries]
+      }.check(100) { |entries_by_type_raw, all_entries|
+        # Build mock entry objects from the raw data
+        entries_by_type = {}
+        entries_by_type_raw.each do |content_type_id, entry_specs|
+          entries_by_type[content_type_id] = entry_specs.map do |spec|
+            build_mock_entry(entry_id: spec[:entry_id], slug: spec[:slug])
+          end
+        end
+
+        index = fetcher.send(:build_entry_id_index, entries_by_type)
+
+        # Determine expected index: last entry wins for duplicate entry IDs
+        expected = {}
+        all_entries.each do |e|
+          expected[e[:entry_id]] = { 'slug' => e[:slug], 'content_type' => e[:content_type_id] }
+        end
+
+        # Property A: Every entry's sys.id maps to the correct slug and content type
+        expected.each do |entry_id, expected_value|
+          expect(index).to have_key(entry_id),
+            "Expected index to contain entry_id=#{entry_id}"
+          expect(index[entry_id]['slug']).to eq(expected_value['slug']),
+            "Expected slug='#{expected_value['slug']}' for entry_id=#{entry_id}, got '#{index[entry_id]['slug']}'"
+          expect(index[entry_id]['content_type']).to eq(expected_value['content_type']),
+            "Expected content_type='#{expected_value['content_type']}' for entry_id=#{entry_id}, got '#{index[entry_id]['content_type']}'"
+        end
+
+        # Property B: Index size equals the number of unique entry IDs
+        expect(index.size).to eq(expected.size),
+          "Expected index size=#{expected.size}, got #{index.size}"
+      }
+    end
+  end
 end

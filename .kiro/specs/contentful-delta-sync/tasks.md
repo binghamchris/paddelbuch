@@ -152,7 +152,7 @@ Implement delta merge for the Contentful sync pipeline. Instead of re-fetching a
     - Assert: no rows with deleted slug remain, all other rows unchanged and in same order, row count decreases by exactly the number of matching rows
     - Minimum 100 iterations
 
-  - [~] 5.11 Write property test for Entry ID Index construction (Property 5)
+  - [x] 5.11 Write property test for Entry ID Index construction (Property 5)
     - **Property 5: Entry ID Index construction covers all entries**
     - **Validates: Requirements 7.2**
     - Test file: `spec/delta_sync_properties_spec.rb`
