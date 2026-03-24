@@ -50,7 +50,7 @@ Implement delta merge for the Contentful sync pipeline. Instead of re-fetching a
     - Ensure existing fields (`success`, `has_changes`, `new_token`, `items_count`, `error`) remain unchanged
     - _Requirements: 2.1, 2.2, 2.3, 2.4_
 
-  - [-] 3.2 Update `check_for_changes` to accept `known_content_types` and classify delta items
+  - [x] 3.2 Update `check_for_changes` to accept `known_content_types` and classify delta items
     - New signature: `check_for_changes(client, sync_token, known_content_types = nil)`
     - When `known_content_types` is provided, iterate sync items and classify by `sys.type`:
       - `'Entry'` → changed entry (extract `content_type_id` from `sys.contentType.sys.id`)
@@ -62,7 +62,7 @@ Implement delta merge for the Contentful sync pipeline. Instead of re-fetching a
     - When `known_content_types` is nil, maintain backward-compatible behavior (existing callers unaffected)
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2_
 
-  - [~] 3.3 Write unit tests for SyncChecker delta extraction
+  - [x] 3.3 Write unit tests for SyncChecker delta extraction
     - Test file: `spec/sync_checker_spec.rb` (extend existing file)
     - Test empty delta returns empty `changed_entries` and `deleted_entries`
     - Test mixed item types (`Entry`, `DeletedEntry`, `Asset`, `DeletedAsset`) are classified correctly
