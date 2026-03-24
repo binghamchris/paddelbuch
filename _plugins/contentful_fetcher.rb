@@ -2,6 +2,7 @@
 
 require 'yaml'
 require 'fileutils'
+require 'set'
 require 'contentful'
 
 require_relative 'sync_checker'
@@ -144,6 +145,79 @@ module Jekyll
 
       new_token = sync_result.success? ? sync_result.new_token : nil
       cache.sync_token = new_token
+    end
+
+    def perform_delta_merge(result, cache, space_id, environment)
+      # Log unknown content types
+      if result.unknown_content_types&.any?
+        result.unknown_content_types.each do |ct|
+          Jekyll.logger.warn 'Contentful:', "Unknown content type in sync delta: '#{ct}' -- no mapper configured, skipping"
+        end
+      end
+
+      # Log delta summary
+      changed_count = result.changed_entries.values.flatten.size
+      deleted_count = result.deleted_entries.values.flatten.size
+      Jekyll.logger.info 'Contentful:', "Delta merge: #{changed_count} changed, #{deleted_count} deleted entries"
+
+      # Phase 1: Load all YAML files into memory
+      yaml_data = load_all_yaml_files
+      modified_files = Set.new
+
+      # Phase 2: Re-fetch and upsert changed entries
+      result.changed_entries.each do |content_type_id, entries|
+        config = CONTENT_TYPES[content_type_id]
+        entries.each do |delta_entry|
+          entry_id = delta_entry.sys[:id]
+          re_fetched = client.entry(entry_id, locale: '*', include: 2)
+          extra_args = config[:mapper] == :map_type ? [content_type_id] : []
+          new_rows = ContentfulMappers.flatten_entry(re_fetched, config[:mapper], *extra_args)
+
+          # Determine if this is an update or insert
+          slug = new_rows.first['slug']
+          existing = yaml_data[config[:filename]]&.any? { |r| r['slug'] == slug }
+          upsert_rows(yaml_data, config[:filename], new_rows)
+          modified_files << config[:filename]
+
+          # Update Entry ID Index
+          cache.add_to_entry_id_index(entry_id, slug, content_type_id)
+
+          action = existing ? 'Updated' : 'Inserted'
+          Jekyll.logger.info 'Contentful:', "#{action} #{content_type_id} entry '#{slug}'"
+        end
+      end
+
+      # Phase 3: Remove deleted entries
+      result.deleted_entries.each do |content_type_id, entries|
+        config = CONTENT_TYPES[content_type_id]
+        entries.each do |deleted_entry|
+          entry_id = deleted_entry.sys[:id]
+          index_entry = cache.lookup_entry_id(entry_id)
+          raise "Entry ID #{entry_id} not found in index -- cannot resolve slug for deletion" unless index_entry
+
+          slug = index_entry['slug']
+          remove_rows(yaml_data, config[:filename], slug)
+          modified_files << config[:filename]
+
+          cache.remove_from_entry_id_index(entry_id)
+          Jekyll.logger.info 'Contentful:', "Deleted #{content_type_id} entry '#{slug}'"
+        end
+      end
+
+      # Phase 4: Write modified YAML files to disk
+      modified_files.each do |filename|
+        write_yaml(filename, yaml_data[filename])
+      end
+
+      # Phase 5: Load all YAML into site.data
+      load_all_yaml_into_site_data
+
+      # Phase 6: Compute hash and set change flag, save cache
+      compute_and_set_change_flag(cache, result.new_token, space_id, environment)
+
+    rescue StandardError => e
+      Jekyll.logger.warn 'Contentful:', "Delta merge failed: #{e.message} -- falling back to full fetch"
+      perform_full_sync_and_cache(cache, space_id, environment)
     end
 
     def fetch_and_write_content
