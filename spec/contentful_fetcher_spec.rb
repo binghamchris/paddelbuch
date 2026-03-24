@@ -752,4 +752,143 @@ RSpec.describe Jekyll::ContentfulFetcher do
       expect(cache.environment).to eq('staging')
     end
   end
+
+  # ─── load_all_yaml_files ───────────────────────────────────────────
+
+  describe '#load_all_yaml_files' do
+    before do
+      set_credentials
+      fetcher.instance_variable_set(:@site, site)
+      fetcher.instance_variable_set(:@data_dir, data_dir)
+      FileUtils.mkdir_p(data_dir)
+    end
+
+    it 'returns a hash with all 13 content type filenames as keys' do
+      # Create empty YAML files for all content types
+      Jekyll::ContentfulFetcher::CONTENT_TYPES.each_value do |config|
+        filepath = File.join(data_dir, "#{config[:filename]}.yml")
+        FileUtils.mkdir_p(File.dirname(filepath))
+        File.write(filepath, YAML.dump([]))
+      end
+
+      result = fetcher.send(:load_all_yaml_files)
+
+      expect(result.keys.sort).to eq(Jekyll::ContentfulFetcher::CONTENT_TYPES.values.map { |c| c[:filename] }.sort)
+    end
+
+    it 'reads YAML data from existing files' do
+      spots_data = [{ 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' }]
+      filepath = File.join(data_dir, 'spots.yml')
+      File.write(filepath, YAML.dump(spots_data))
+
+      # Create empty files for remaining content types
+      Jekyll::ContentfulFetcher::CONTENT_TYPES.each_value do |config|
+        next if config[:filename] == 'spots'
+
+        fp = File.join(data_dir, "#{config[:filename]}.yml")
+        FileUtils.mkdir_p(File.dirname(fp))
+        File.write(fp, YAML.dump([]))
+      end
+
+      result = fetcher.send(:load_all_yaml_files)
+
+      expect(result['spots']).to eq(spots_data)
+    end
+
+    it 'returns empty array for missing files' do
+      result = fetcher.send(:load_all_yaml_files)
+
+      result.each_value do |rows|
+        expect(rows).to eq([])
+      end
+    end
+
+    it 'reads nested path files correctly' do
+      types_data = [{ 'slug' => 'launch', 'locale' => 'de', 'name' => 'Einstieg' }]
+      filepath = File.join(data_dir, 'types', 'spot_types.yml')
+      FileUtils.mkdir_p(File.dirname(filepath))
+      File.write(filepath, YAML.dump(types_data))
+
+      result = fetcher.send(:load_all_yaml_files)
+
+      expect(result['types/spot_types']).to eq(types_data)
+    end
+
+    it 'handles nil YAML content gracefully' do
+      filepath = File.join(data_dir, 'spots.yml')
+      File.write(filepath, "---\n")
+
+      result = fetcher.send(:load_all_yaml_files)
+
+      expect(result['spots']).to eq([])
+    end
+  end
+
+  # ─── load_all_yaml_into_site_data ──────────────────────────────────
+
+  describe '#load_all_yaml_into_site_data' do
+    before do
+      set_credentials
+      fetcher.instance_variable_set(:@site, site)
+      fetcher.instance_variable_set(:@data_dir, data_dir)
+      FileUtils.mkdir_p(data_dir)
+    end
+
+    it 'populates site.data with flat keys for top-level filenames' do
+      spots_data = [{ 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' }]
+      File.write(File.join(data_dir, 'spots.yml'), YAML.dump(spots_data))
+
+      fetcher.send(:load_all_yaml_into_site_data)
+
+      expect(site_data['spots']).to eq(spots_data)
+    end
+
+    it 'populates site.data with nested keys for paths containing /' do
+      types_data = [{ 'slug' => 'launch', 'locale' => 'de', 'name' => 'Einstieg' }]
+      filepath = File.join(data_dir, 'types', 'spot_types.yml')
+      FileUtils.mkdir_p(File.dirname(filepath))
+      File.write(filepath, YAML.dump(types_data))
+
+      fetcher.send(:load_all_yaml_into_site_data)
+
+      expect(site_data['types']).to be_a(Hash)
+      expect(site_data['types']['spot_types']).to eq(types_data)
+    end
+
+    it 'preserves existing nested site.data entries when loading multiple types' do
+      obstacle_types_data = [{ 'slug' => 'dam', 'locale' => 'de' }]
+      spot_types_data = [{ 'slug' => 'launch', 'locale' => 'de' }]
+
+      FileUtils.mkdir_p(File.join(data_dir, 'types'))
+      File.write(File.join(data_dir, 'types', 'obstacle_types.yml'), YAML.dump(obstacle_types_data))
+      File.write(File.join(data_dir, 'types', 'spot_types.yml'), YAML.dump(spot_types_data))
+
+      fetcher.send(:load_all_yaml_into_site_data)
+
+      expect(site_data['types']['obstacle_types']).to eq(obstacle_types_data)
+      expect(site_data['types']['spot_types']).to eq(spot_types_data)
+    end
+
+    it 'sets empty array for missing files' do
+      fetcher.send(:load_all_yaml_into_site_data)
+
+      expect(site_data['spots']).to eq([])
+    end
+
+    it 'uses same key structure as write_yaml' do
+      spots_data = [{ 'slug' => 'spiez', 'locale' => 'de' }]
+      types_data = [{ 'slug' => 'launch', 'locale' => 'de' }]
+
+      # Write via write_yaml
+      fetcher.send(:write_yaml, 'spots', spots_data)
+      fetcher.send(:write_yaml, 'types/spot_types', types_data)
+
+      # Clear site.data and reload via load_all_yaml_into_site_data
+      site_data.clear
+      fetcher.send(:load_all_yaml_into_site_data)
+
+      expect(site_data['spots']).to eq(spots_data)
+      expect(site_data['types']['spot_types']).to eq(types_data)
+    end
+  end
 end

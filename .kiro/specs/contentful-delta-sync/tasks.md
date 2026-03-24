@@ -89,7 +89,7 @@ Implement delta merge for the Contentful sync pipeline. Instead of re-fetching a
     - `remove_rows(yaml_data, filename, slug)`: remove all rows from `yaml_data[filename]` where `row['slug'] == slug`
     - _Requirements: 3.3, 3.4, 3.6, 3.7_
 
-  - [~] 5.2 Implement `load_all_yaml_files` and `load_all_yaml_into_site_data` methods
+  - [x] 5.2 Implement `load_all_yaml_files` and `load_all_yaml_into_site_data` methods
     - `load_all_yaml_files`: read all 13 YAML data files into `{ filename => [rows] }` hash
     - `load_all_yaml_into_site_data`: read all YAML files from disk and populate `site.data` using the same key structure as `write_yaml`
     - _Requirements: 6.1, 6.2_
