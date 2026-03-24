@@ -133,7 +133,8 @@ module Jekyll
     end
 
     def perform_full_sync_and_cache(cache, space_id, environment)
-      perform_full_fetch(cache, space_id, environment)
+      entries_by_type = perform_full_fetch(cache, space_id, environment)
+      cache.entry_id_index = build_entry_id_index(entries_by_type || {})
       new_hash = cache.compute_content_hash(yaml_file_paths)
       save_cache(cache, cache.sync_token, space_id, environment, new_hash)
       @site.config['contentful_data_changed'] = true
@@ -146,10 +147,12 @@ module Jekyll
         Jekyll.logger.warn 'Contentful:', "Initial sync failed: #{sync_result.error&.message} -- fetching without sync token"
       end
 
-      fetch_and_write_content
+      entries_by_type = fetch_and_write_content
 
       new_token = sync_result.success? ? sync_result.new_token : nil
       cache.sync_token = new_token
+
+      entries_by_type
     end
 
     def perform_delta_merge(result, cache, space_id, environment)
@@ -216,9 +219,11 @@ module Jekyll
     end
 
     def fetch_and_write_content
+      entries_by_type = {}
       CONTENT_TYPES.each do |content_type, config|
         begin
           entries = fetch_entries(content_type)
+          entries_by_type[content_type] = entries
           data = entries.flat_map { |entry| ContentfulMappers.flatten_entry(entry, config[:mapper]) }
           Jekyll.logger.info 'Contentful:', "Fetched #{entries.size} #{content_type} entries"
           write_yaml(config[:filename], data)
@@ -226,6 +231,7 @@ module Jekyll
           Jekyll.logger.warn 'Contentful:', "Error fetching #{content_type}: #{e.message} -- skipping"
         end
       end
+      entries_by_type
     end
 
     def fetch_entries(content_type)

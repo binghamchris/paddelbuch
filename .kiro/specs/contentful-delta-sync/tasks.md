@@ -113,13 +113,13 @@ Implement delta merge for the Contentful sync pipeline. Instead of re-fetching a
     - `log_unknown_content_types(unknown_types)`: log warning for each unknown content type ID
     - _Requirements: 9.1, 9.2, 9.3, 9.6_
 
-  - [-] 5.6 Update `generate` method to use delta merge path
+  - [x] 5.6 Update `generate` method to use delta merge path
     - Pass `CONTENT_TYPES.keys` to `check_for_changes` as `known_content_types`
     - When `result.has_changes` is true and `changed_entries` or `deleted_entries` are present, call `perform_delta_merge`
     - When sync reports changes but no classifiable entries, fall back to full fetch
     - _Requirements: 3.1, 3.7, 4.1, 4.2, 4.3, 4.4, 4.5, 4.6_
 
-  - [~] 5.7 Update `perform_full_sync_and_cache` to build and persist Entry ID Index
+  - [x] 5.7 Update `perform_full_sync_and_cache` to build and persist Entry ID Index
     - After `fetch_and_write_content`, call `build_entry_id_index` with all fetched entries
     - Store the index in `cache.entry_id_index` before saving
     - _Requirements: 7.2_
