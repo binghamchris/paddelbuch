@@ -309,7 +309,7 @@ module Jekyll
       CONTENT_TYPES.each_value do |config|
         filepath = File.join(@data_dir, "#{config[:filename]}.yml")
         yaml_data[config[:filename]] = if File.exist?(filepath)
-                                         YAML.safe_load(File.read(filepath), permitted_classes: [Symbol]) || []
+                                         YAML.safe_load(File.read(filepath), permitted_classes: [Symbol], aliases: true) || []
                                        else
                                          []
                                        end
@@ -321,7 +321,7 @@ module Jekyll
       CONTENT_TYPES.each_value do |config|
         filepath = File.join(@data_dir, "#{config[:filename]}.yml")
         data = if File.exist?(filepath)
-                 YAML.safe_load(File.read(filepath), permitted_classes: [Symbol]) || []
+                 YAML.safe_load(File.read(filepath), permitted_classes: [Symbol], aliases: true) || []
                else
                  []
                end
