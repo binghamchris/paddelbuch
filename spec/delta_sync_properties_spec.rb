@@ -369,4 +369,50 @@ RSpec.describe 'Delta Sync Properties' do
       }
     end
   end
+
+  # Feature: contentful-delta-sync, Property 6: Content hash equivalence
+  # **Validates: Requirements 5.1**
+  describe 'Property 6: Content hash is identical regardless of sync path' do
+    it 'compute_content_hash returns identical hashes for byte-identical files regardless of write path' do
+      property_of {
+        # Generate 1..10 random files with random contents
+        file_count = range(1, 10)
+        files = []
+        file_count.times do |i|
+          filename = "file_#{i}.yml"
+          content = sized(range(10, 200)) { string }
+          files << { filename: filename, content: content }
+        end
+        files
+      }.check(100) { |files|
+        Dir.mktmpdir do |dir_a|
+          Dir.mktmpdir do |dir_b|
+            cache = CacheMetadata.new(dir_a)
+
+            # Path A: write files one at a time using File.write
+            paths_a = files.map do |f|
+              path = File.join(dir_a, f[:filename])
+              File.write(path, f[:content])
+              path
+            end
+
+            # Path B: write the same contents via a different code path
+            # (write in reverse order, using File.open + IO#write)
+            paths_b = files.reverse.map do |f|
+              path = File.join(dir_b, f[:filename])
+              File.open(path, 'w') { |io| io.write(f[:content]) }
+              path
+            end
+
+            hash_a = cache.compute_content_hash(paths_a)
+            hash_b = cache.compute_content_hash(paths_b)
+
+            # Property: hashes are identical for byte-identical file contents
+            expect(hash_a).to eq(hash_b),
+              "Expected identical hashes but got hash_a=#{hash_a}, hash_b=#{hash_b}"
+          end
+        end
+      }
+    end
+  end
 end
