@@ -136,7 +136,7 @@ Implement delta merge for the Contentful sync pipeline. Instead of re-fetching a
     - Test `build_entry_id_index`: verify index built correctly from entries
     - _Requirements: 3.1, 3.3, 3.4, 3.6, 3.7, 3.9, 4.5, 4.6, 7.2, 8.1, 8.2, 8.3, 8.4, 9.1, 9.2, 9.3, 9.5, 9.6_
 
-  - [-] 5.9 Write property test for upsert correctness (Property 2)
+  - [x] 5.9 Write property test for upsert correctness (Property 2)
     - **Property 2: Upsert preserves data and updates correctly**
     - **Validates: Requirements 3.3, 3.4, 7.3**
     - Test file: `spec/delta_sync_properties_spec.rb`
@@ -144,7 +144,7 @@ Implement delta merge for the Contentful sync pipeline. Instead of re-fetching a
     - Assert: every new row's slug+locale is present in result, upserted values match new rows exactly, non-matching rows unchanged, total count equals original + genuinely new pairs
     - Minimum 100 iterations
 
-  - [~] 5.10 Write property test for deletion correctness (Property 3)
+  - [x] 5.10 Write property test for deletion correctness (Property 3)
     - **Property 3: Deletion removes exactly the target slug rows**
     - **Validates: Requirements 3.6, 3.7, 7.4**
     - Test file: `spec/delta_sync_properties_spec.rb`

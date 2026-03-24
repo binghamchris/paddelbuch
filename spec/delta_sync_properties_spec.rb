@@ -208,6 +208,61 @@ RSpec.describe 'Delta Sync Properties' do
     end
   end
 
+  # Feature: contentful-delta-sync, Property 3: Deletion removes exactly the target slug rows
+  # **Validates: Requirements 3.6, 3.7, 7.4**
+  describe 'Property 3: Deletion removes exactly the target slug rows' do
+    let(:fetcher) { Jekyll::ContentfulFetcher.new }
+
+    DELETE_SLUGS_POOL = %w[spiez thun bern aare limmat rhein zurich luzern brienz interlaken].freeze
+    DELETE_LOCALES = %w[de en].freeze
+
+    it 'removes exactly the target slug rows and preserves all others in order' do
+      property_of {
+        # Generate random existing rows (2..25 rows) — ensure at least one row exists
+        existing_count = range(2, 25)
+        existing_rows = []
+        existing_count.times do
+          slug = choose(*DELETE_SLUGS_POOL)
+          locale = choose(*DELETE_LOCALES)
+          name = sized(range(3, 10)) { string(:alpha) }
+          existing_rows << { 'slug' => slug, 'locale' => locale, 'name' => name }
+        end
+
+        # Pick a slug that is guaranteed to be present in the array
+        target_slug = existing_rows.sample['slug']
+
+        [existing_rows, target_slug]
+      }.check(100) { |existing_rows, target_slug|
+        filename = 'spots'
+        # Deep-copy so we can compare originals
+        original_rows = existing_rows.map(&:dup)
+        yaml_data = { filename => existing_rows.map(&:dup) }
+
+        # Count how many rows match the target slug before deletion
+        matching_count = original_rows.count { |r| r['slug'] == target_slug }
+        non_matching_rows = original_rows.reject { |r| r['slug'] == target_slug }
+
+        fetcher.send(:remove_rows, yaml_data, filename, target_slug)
+
+        result = yaml_data[filename]
+
+        # Property A: No rows with the deleted slug remain
+        remaining_with_slug = result.select { |r| r['slug'] == target_slug }
+        expect(remaining_with_slug).to be_empty,
+          "Expected no rows with slug='#{target_slug}' but found #{remaining_with_slug.size}"
+
+        # Property B: All rows with a different slug remain unchanged and in the same order
+        remaining_other = result.reject { |r| r['slug'] == target_slug }
+        expect(remaining_other).to eq(non_matching_rows),
+          "Expected non-matching rows to be preserved in order"
+
+        # Property C: Row count decreases by exactly the number of matching rows
+        expect(result.size).to eq(original_rows.size - matching_count),
+          "Expected #{original_rows.size - matching_count} rows, got #{result.size}"
+      }
+    end
+  end
+
   # Feature: contentful-delta-sync, Property 4: Entry ID Index round-trip through cache persistence
   # **Validates: Requirements 7.1, 7.5**
   describe 'Property 4: Entry ID Index round-trip through cache persistence' do
