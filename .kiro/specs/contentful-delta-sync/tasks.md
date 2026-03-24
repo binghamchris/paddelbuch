@@ -168,7 +168,7 @@ Implement delta merge for the Contentful sync pipeline. Instead of re-fetching a
     - Assert: both hashes are identical for byte-identical file contents
     - Minimum 100 iterations
 
-- [~] 6. Checkpoint - Ensure all tests pass
+- [x] 6. Checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 7. Update documentation
