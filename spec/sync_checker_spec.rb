@@ -221,5 +221,60 @@ RSpec.describe SyncChecker do
 
       expect(result.success?).to be false
     end
+
+    it 'includes changed_entries, deleted_entries, and unknown_content_types fields' do
+      changed = { 'spot' => [double('Entry1')] }
+      deleted = { 'waterway' => [double('DeletedEntry1')] }
+      unknown = ['unknownType']
+
+      result = SyncChecker::SyncResult.new(
+        success: true,
+        has_changes: true,
+        new_token: 'tok',
+        items_count: 3,
+        changed_entries: changed,
+        deleted_entries: deleted,
+        unknown_content_types: unknown
+      )
+
+      expect(result.changed_entries).to eq(changed)
+      expect(result.deleted_entries).to eq(deleted)
+      expect(result.unknown_content_types).to eq(unknown)
+    end
+
+    it 'defaults new fields to nil when not provided' do
+      result = SyncChecker::SyncResult.new(
+        success: true,
+        has_changes: false,
+        new_token: 'tok',
+        items_count: 0
+      )
+
+      expect(result.changed_entries).to be_nil
+      expect(result.deleted_entries).to be_nil
+      expect(result.unknown_content_types).to be_nil
+    end
+
+    it 'preserves existing fields unchanged alongside new fields' do
+      result = SyncChecker::SyncResult.new(
+        success: true,
+        has_changes: true,
+        new_token: 'new_tok',
+        items_count: 10,
+        error: nil,
+        changed_entries: {},
+        deleted_entries: {},
+        unknown_content_types: []
+      )
+
+      expect(result.success).to be true
+      expect(result.has_changes).to be true
+      expect(result.new_token).to eq('new_tok')
+      expect(result.items_count).to eq(10)
+      expect(result.error).to be_nil
+      expect(result.changed_entries).to eq({})
+      expect(result.deleted_entries).to eq({})
+      expect(result.unknown_content_types).to eq([])
+    end
   end
 end

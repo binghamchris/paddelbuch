@@ -3,7 +3,11 @@
 require 'uri'
 
 module SyncChecker
-  SyncResult = Struct.new(:success, :has_changes, :new_token, :items_count, :error, keyword_init: true) do
+  SyncResult = Struct.new(
+    :success, :has_changes, :new_token, :items_count, :error,
+    :changed_entries, :deleted_entries, :unknown_content_types,
+    keyword_init: true
+  ) do
     def success?
       success
     end
