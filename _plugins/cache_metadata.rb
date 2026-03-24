@@ -7,11 +7,12 @@ require 'digest'
 class CacheMetadata
   CACHE_FILENAME = '.contentful_sync_cache.yml'
 
-  attr_accessor :sync_token, :last_sync_at, :space_id, :environment, :content_hash
+  attr_accessor :sync_token, :last_sync_at, :space_id, :environment, :content_hash, :entry_id_index
 
   def initialize(data_dir)
     @data_dir = data_dir
     @cache_path = File.join(data_dir, CACHE_FILENAME)
+    @entry_id_index = {}
   end
 
   def load
@@ -25,6 +26,7 @@ class CacheMetadata
     @space_id    = data['space_id']
     @environment = data['environment']
     @content_hash = data['content_hash']
+    @entry_id_index = data['entry_id_index'] || {}
     true
   rescue Psych::SyntaxError
     false
@@ -38,10 +40,23 @@ class CacheMetadata
       'last_sync_at' => @last_sync_at,
       'space_id'     => @space_id,
       'environment'  => @environment,
-      'content_hash' => @content_hash
+      'content_hash' => @content_hash,
+      'entry_id_index' => @entry_id_index
     }
 
     File.write(@cache_path, YAML.dump(data))
+  end
+
+  def add_to_entry_id_index(entry_id, slug, content_type)
+    @entry_id_index[entry_id] = { 'slug' => slug, 'content_type' => content_type }
+  end
+
+  def remove_from_entry_id_index(entry_id)
+    @entry_id_index.delete(entry_id)
+  end
+
+  def lookup_entry_id(entry_id)
+    @entry_id_index[entry_id]
   end
 
   def valid?
