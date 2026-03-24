@@ -148,17 +148,8 @@ module Jekyll
     end
 
     def perform_delta_merge(result, cache, space_id, environment)
-      # Log unknown content types
-      if result.unknown_content_types&.any?
-        result.unknown_content_types.each do |ct|
-          Jekyll.logger.warn 'Contentful:', "Unknown content type in sync delta: '#{ct}' -- no mapper configured, skipping"
-        end
-      end
-
-      # Log delta summary
-      changed_count = result.changed_entries.values.flatten.size
-      deleted_count = result.deleted_entries.values.flatten.size
-      Jekyll.logger.info 'Contentful:', "Delta merge: #{changed_count} changed, #{deleted_count} deleted entries"
+      log_unknown_content_types(result.unknown_content_types)
+      log_delta_summary(result)
 
       # Phase 1: Load all YAML files into memory
       yaml_data = load_all_yaml_files
@@ -182,8 +173,7 @@ module Jekyll
           # Update Entry ID Index
           cache.add_to_entry_id_index(entry_id, slug, content_type_id)
 
-          action = existing ? 'Updated' : 'Inserted'
-          Jekyll.logger.info 'Contentful:', "#{action} #{content_type_id} entry '#{slug}'"
+          log_upsert(slug, content_type_id, existing)
         end
       end
 
@@ -200,7 +190,7 @@ module Jekyll
           modified_files << config[:filename]
 
           cache.remove_from_entry_id_index(entry_id)
-          Jekyll.logger.info 'Contentful:', "Deleted #{content_type_id} entry '#{slug}'"
+          log_deletion(slug, content_type_id)
         end
       end
 
@@ -334,6 +324,29 @@ module Jekyll
           @site.data[parent] ||= {}
           @site.data[parent][child] = data
         end
+      end
+    end
+
+    def log_delta_summary(result)
+      changed_count = result.changed_entries.values.flatten.size
+      deleted_count = result.deleted_entries.values.flatten.size
+      Jekyll.logger.info 'Contentful:', "Delta merge: #{changed_count} changed, #{deleted_count} deleted entries"
+    end
+
+    def log_upsert(slug, content_type, is_update)
+      action = is_update ? 'Updated' : 'Inserted'
+      Jekyll.logger.info 'Contentful:', "#{action} #{content_type} entry '#{slug}'"
+    end
+
+    def log_deletion(slug, content_type)
+      Jekyll.logger.info 'Contentful:', "Deleted #{content_type} entry '#{slug}'"
+    end
+
+    def log_unknown_content_types(unknown_types)
+      return unless unknown_types&.any?
+
+      unknown_types.each do |ct|
+        Jekyll.logger.warn 'Contentful:', "Unknown content type in sync delta: '#{ct}' -- no mapper configured, skipping"
       end
     end
 

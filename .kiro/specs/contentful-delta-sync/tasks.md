@@ -99,14 +99,14 @@ Implement delta merge for the Contentful sync pipeline. Instead of re-fetching a
     - Use `ContentfulMappers.extract_slug` to get the slug
     - _Requirements: 7.2_
 
-  - [-] 5.4 Implement `perform_delta_merge` method
+  - [x] 5.4 Implement `perform_delta_merge` method
     - Orchestrate the delta merge: log summary, re-fetch changed entries via `client.entry(id, locale: '*', include: 2)`, map with `ContentfulMappers.flatten_entry`, upsert rows, look up deleted entries in index, remove rows, write modified YAML files, load into `site.data`, compute hash and set change flag
     - Pass `content_type_id` as extra arg when mapper is `:map_type`
     - Update Entry ID Index for upserted and deleted entries
     - Wrap in `rescue StandardError` to fall back to full fetch on any failure
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 4.5, 4.6, 8.1, 8.2, 8.3, 8.4_
 
-  - [~] 5.5 Implement logging helpers for delta merge
+  - [x] 5.5 Implement logging helpers for delta merge
     - `log_delta_summary(result)`: log total changed and deleted entry counts
     - `log_upsert(slug, content_type, is_update)`: log slug, content type, and insert vs update
     - `log_deletion(slug, content_type)`: log slug and content type

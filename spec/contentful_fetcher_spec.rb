@@ -976,4 +976,76 @@ RSpec.describe Jekyll::ContentfulFetcher do
       expect(index['dup1']['slug']).to eq('second-slug')
     end
   end
+
+  # ─── logging helpers ─────────────────────────────────────────────────
+
+  describe 'logging helpers' do
+    before do
+      set_credentials
+      fetcher.instance_variable_set(:@site, site)
+      fetcher.instance_variable_set(:@data_dir, data_dir)
+    end
+
+    describe '#log_delta_summary' do
+      it 'logs total changed and deleted entry counts' do
+        result = double('SyncResult')
+        allow(result).to receive(:changed_entries).and_return(
+          'spot' => [double, double],
+          'waterway' => [double]
+        )
+        allow(result).to receive(:deleted_entries).and_return(
+          'obstacle' => [double]
+        )
+
+        expect(Jekyll.logger).to receive(:info).with('Contentful:', 'Delta merge: 3 changed, 1 deleted entries')
+        fetcher.send(:log_delta_summary, result)
+      end
+
+      it 'logs zero counts when no changes or deletions' do
+        result = double('SyncResult')
+        allow(result).to receive(:changed_entries).and_return({})
+        allow(result).to receive(:deleted_entries).and_return({})
+
+        expect(Jekyll.logger).to receive(:info).with('Contentful:', 'Delta merge: 0 changed, 0 deleted entries')
+        fetcher.send(:log_delta_summary, result)
+      end
+    end
+
+    describe '#log_upsert' do
+      it 'logs "Updated" when is_update is true' do
+        expect(Jekyll.logger).to receive(:info).with('Contentful:', "Updated spot entry 'spiez-beach'")
+        fetcher.send(:log_upsert, 'spiez-beach', 'spot', true)
+      end
+
+      it 'logs "Inserted" when is_update is false' do
+        expect(Jekyll.logger).to receive(:info).with('Contentful:', "Inserted waterway entry 'aare'")
+        fetcher.send(:log_upsert, 'aare', 'waterway', false)
+      end
+    end
+
+    describe '#log_deletion' do
+      it 'logs the slug and content type' do
+        expect(Jekyll.logger).to receive(:info).with('Contentful:', "Deleted obstacle entry 'dam-weir'")
+        fetcher.send(:log_deletion, 'dam-weir', 'obstacle')
+      end
+    end
+
+    describe '#log_unknown_content_types' do
+      it 'logs a warning for each unknown content type' do
+        expect(Jekyll.logger).to receive(:warn).with('Contentful:', "Unknown content type in sync delta: 'blogPost' -- no mapper configured, skipping")
+        expect(Jekyll.logger).to receive(:warn).with('Contentful:', "Unknown content type in sync delta: 'faqEntry' -- no mapper configured, skipping")
+        fetcher.send(:log_unknown_content_types, %w[blogPost faqEntry])
+      end
+
+      it 'does nothing when unknown_types is empty' do
+        expect(Jekyll.logger).not_to receive(:warn)
+        fetcher.send(:log_unknown_content_types, [])
+      end
+
+      it 'does nothing when unknown_types is nil' do
+        expect(Jekyll.logger).not_to receive(:warn)
+        fetcher.send(:log_unknown_content_types, nil)
+      end
+    end
+  end
 end
