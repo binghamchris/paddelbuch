@@ -493,6 +493,163 @@ RSpec.describe Jekyll::ContentfulFetcher do
     end
   end
 
+  # ─── upsert_rows ────────────────────────────────────────────────────
+
+  describe '#upsert_rows' do
+    it 'replaces an existing row matching slug + locale' do
+      yaml_data = {
+        'spots' => [
+          { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez Alt' },
+          { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez Old' }
+        ]
+      }
+      new_rows = [{ 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez Neu' }]
+
+      fetcher.send(:upsert_rows, yaml_data, 'spots', new_rows)
+
+      de_row = yaml_data['spots'].find { |r| r['slug'] == 'spiez' && r['locale'] == 'de' }
+      expect(de_row['name']).to eq('Spiez Neu')
+    end
+
+    it 'appends a new row when slug + locale does not match' do
+      yaml_data = {
+        'spots' => [
+          { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' }
+        ]
+      }
+      new_rows = [{ 'slug' => 'thun', 'locale' => 'de', 'name' => 'Thun' }]
+
+      fetcher.send(:upsert_rows, yaml_data, 'spots', new_rows)
+
+      expect(yaml_data['spots'].size).to eq(2)
+      expect(yaml_data['spots'].last['slug']).to eq('thun')
+    end
+
+    it 'handles upsert of both locales for the same slug' do
+      yaml_data = {
+        'spots' => [
+          { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez DE Alt' },
+          { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez EN Old' }
+        ]
+      }
+      new_rows = [
+        { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez DE Neu' },
+        { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez EN New' }
+      ]
+
+      fetcher.send(:upsert_rows, yaml_data, 'spots', new_rows)
+
+      expect(yaml_data['spots'].size).to eq(2)
+      de_row = yaml_data['spots'].find { |r| r['slug'] == 'spiez' && r['locale'] == 'de' }
+      en_row = yaml_data['spots'].find { |r| r['slug'] == 'spiez' && r['locale'] == 'en' }
+      expect(de_row['name']).to eq('Spiez DE Neu')
+      expect(en_row['name']).to eq('Spiez EN New')
+    end
+
+    it 'leaves non-matching rows unchanged' do
+      yaml_data = {
+        'spots' => [
+          { 'slug' => 'thun', 'locale' => 'de', 'name' => 'Thun' },
+          { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez Alt' }
+        ]
+      }
+      new_rows = [{ 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez Neu' }]
+
+      fetcher.send(:upsert_rows, yaml_data, 'spots', new_rows)
+
+      thun_row = yaml_data['spots'].find { |r| r['slug'] == 'thun' }
+      expect(thun_row['name']).to eq('Thun')
+    end
+
+    it 'initializes the filename key when it does not exist' do
+      yaml_data = {}
+      new_rows = [{ 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' }]
+
+      fetcher.send(:upsert_rows, yaml_data, 'spots', new_rows)
+
+      expect(yaml_data['spots']).to eq(new_rows)
+    end
+
+    it 'handles empty new_rows without modifying existing data' do
+      yaml_data = {
+        'spots' => [{ 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' }]
+      }
+
+      fetcher.send(:upsert_rows, yaml_data, 'spots', [])
+
+      expect(yaml_data['spots'].size).to eq(1)
+    end
+  end
+
+  # ─── remove_rows ──────────────────────────────────────────────────
+
+  describe '#remove_rows' do
+    it 'removes all rows matching the slug (both locales)' do
+      yaml_data = {
+        'spots' => [
+          { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez DE' },
+          { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez EN' },
+          { 'slug' => 'thun', 'locale' => 'de', 'name' => 'Thun DE' }
+        ]
+      }
+
+      fetcher.send(:remove_rows, yaml_data, 'spots', 'spiez')
+
+      expect(yaml_data['spots'].size).to eq(1)
+      expect(yaml_data['spots'].first['slug']).to eq('thun')
+    end
+
+    it 'leaves other slugs unchanged' do
+      yaml_data = {
+        'spots' => [
+          { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' },
+          { 'slug' => 'thun', 'locale' => 'de', 'name' => 'Thun' },
+          { 'slug' => 'bern', 'locale' => 'de', 'name' => 'Bern' }
+        ]
+      }
+
+      fetcher.send(:remove_rows, yaml_data, 'spots', 'thun')
+
+      slugs = yaml_data['spots'].map { |r| r['slug'] }
+      expect(slugs).to eq(%w[spiez bern])
+    end
+
+    it 'does nothing when slug is not found' do
+      yaml_data = {
+        'spots' => [
+          { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' }
+        ]
+      }
+
+      fetcher.send(:remove_rows, yaml_data, 'spots', 'nonexistent')
+
+      expect(yaml_data['spots'].size).to eq(1)
+    end
+
+    it 'handles missing filename key gracefully' do
+      yaml_data = {}
+
+      expect { fetcher.send(:remove_rows, yaml_data, 'spots', 'spiez') }.not_to raise_error
+    end
+
+    it 'preserves row order of remaining entries' do
+      yaml_data = {
+        'spots' => [
+          { 'slug' => 'aare', 'locale' => 'de' },
+          { 'slug' => 'spiez', 'locale' => 'de' },
+          { 'slug' => 'thun', 'locale' => 'de' },
+          { 'slug' => 'spiez', 'locale' => 'en' },
+          { 'slug' => 'bern', 'locale' => 'de' }
+        ]
+      }
+
+      fetcher.send(:remove_rows, yaml_data, 'spots', 'spiez')
+
+      slugs = yaml_data['spots'].map { |r| r['slug'] }
+      expect(slugs).to eq(%w[aare thun bern])
+    end
+  end
+
   # ─── save_cache ────────────────────────────────────────────────────
 
   describe '#save_cache' do
