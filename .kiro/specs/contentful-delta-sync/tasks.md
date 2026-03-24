@@ -171,8 +171,8 @@ Implement delta merge for the Contentful sync pipeline. Instead of re-fetching a
 - [x] 6. Checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 7. Update documentation
-  - [~] 7.1 Update `docs/plugins.md` with delta sync documentation
+- [x] 7. Update documentation
+  - [x] 7.1 Update `docs/plugins.md` with delta sync documentation
     - Update the `ContentfulFetcher` section: add delta merge step to the sync strategy list (between "If changes" and "re-fetches all content")
     - Document the new delta merge flow: re-fetch individual entries, upsert/remove in YAML, fallback to full fetch on failure
     - Update the `SyncChecker` section: document extended `SyncResult` struct with `changed_entries`, `deleted_entries`, `unknown_content_types` fields
