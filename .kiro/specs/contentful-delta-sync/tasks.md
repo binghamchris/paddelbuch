@@ -12,13 +12,13 @@ Implement delta merge for the Contentful sync pipeline. Instead of re-fetching a
     - Initialize `@entry_id_index` to `{}` in the constructor
     - _Requirements: 7.1, 7.5_
 
-  - [-] 1.2 Implement `add_to_entry_id_index`, `remove_from_entry_id_index`, and `lookup_entry_id` methods
+  - [x] 1.2 Implement `add_to_entry_id_index`, `remove_from_entry_id_index`, and `lookup_entry_id` methods
     - `add_to_entry_id_index(entry_id, slug, content_type)` adds/updates an entry
     - `remove_from_entry_id_index(entry_id)` removes an entry
     - `lookup_entry_id(entry_id)` returns `{ 'slug' => ..., 'content_type' => ... }` or `nil`
     - _Requirements: 7.1, 7.3, 7.4_
 
-  - [~] 1.3 Update `save` and `load` to persist and restore `entry_id_index`
+  - [-] 1.3 Update `save` and `load` to persist and restore `entry_id_index`
     - Serialize `entry_id_index` as a top-level key in the cache YAML file
     - On load, restore `entry_id_index` from the YAML data (default to `{}` if missing for backward compatibility)
     - _Requirements: 7.1, 7.5_

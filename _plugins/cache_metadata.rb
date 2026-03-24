@@ -45,6 +45,18 @@ class CacheMetadata
     File.write(@cache_path, YAML.dump(data))
   end
 
+  def add_to_entry_id_index(entry_id, slug, content_type)
+    @entry_id_index[entry_id] = { 'slug' => slug, 'content_type' => content_type }
+  end
+
+  def remove_from_entry_id_index(entry_id)
+    @entry_id_index.delete(entry_id)
+  end
+
+  def lookup_entry_id(entry_id)
+    @entry_id_index[entry_id]
+  end
+
   def valid?
     !sync_token.nil? && !last_sync_at.nil? && !space_id.nil? && !environment.nil?
   end
