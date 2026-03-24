@@ -102,6 +102,19 @@ RSpec.describe Jekyll::ContentfulFetcher do
     allow(mock_client).to receive(:entries).and_return([])
   end
 
+  # Helper: build a mock sync item with proper sys structure for classify_delta_items
+  def build_mock_sync_item(type: 'Asset', content_type_id: nil, id: 'item1')
+    item = double("SyncItem-#{type}-#{id}")
+    sys_hash = { type: type, id: id }
+    if content_type_id
+      content_type_sys = double('ContentTypeSys')
+      allow(content_type_sys).to receive(:sys).and_return({ id: content_type_id })
+      sys_hash[:contentType] = content_type_sys
+    end
+    allow(item).to receive(:sys).and_return(sys_hash)
+    item
+  end
+
   # ─── contentful_configured? ───────────────────────────────────────────
 
   describe '#contentful_configured?' do
@@ -345,17 +358,49 @@ RSpec.describe Jekyll::ContentfulFetcher do
       fetcher.generate(site)
     end
 
-    it 'fetches content when sync reports changes' do
-      stub_incremental_sync(items: [double('Entry')], token: 'updated_token')
+    it 'fetches content when sync reports changes but no classifiable entries' do
+      stub_incremental_sync(items: [build_mock_sync_item(type: 'Asset', id: 'a1')], token: 'updated_token')
 
       expect(fetcher).to receive(:fetch_and_write_content).once
       fetcher.generate(site)
     end
 
-    it 'logs number of changed entries' do
-      stub_incremental_sync(items: [double('E1'), double('E2'), double('E3')], token: 'updated_token')
+    it 'logs number of changed entries with no classifiable entries' do
+      items = [
+        build_mock_sync_item(type: 'Asset', id: 'a1'),
+        build_mock_sync_item(type: 'Asset', id: 'a2'),
+        build_mock_sync_item(type: 'Asset', id: 'a3')
+      ]
+      stub_incremental_sync(items: items, token: 'updated_token')
 
-      expect(Jekyll.logger).to receive(:info).with('Contentful:', /3 changed entries/)
+      expect(Jekyll.logger).to receive(:info).with('Contentful:', /3 changed entries.*no classifiable entries/)
+      fetcher.generate(site)
+    end
+
+    it 'calls perform_delta_merge when classifiable changed entries exist' do
+      items = [build_mock_sync_item(type: 'Entry', content_type_id: 'spot', id: 'e1')]
+      stub_incremental_sync(items: items, token: 'updated_token')
+
+      expect(fetcher).to receive(:perform_delta_merge).once
+      expect(fetcher).not_to receive(:fetch_and_write_content)
+      fetcher.generate(site)
+    end
+
+    it 'calls perform_delta_merge when classifiable deleted entries exist' do
+      items = [build_mock_sync_item(type: 'DeletedEntry', content_type_id: 'spot', id: 'd1')]
+      stub_incremental_sync(items: items, token: 'updated_token')
+
+      expect(fetcher).to receive(:perform_delta_merge).once
+      expect(fetcher).not_to receive(:fetch_and_write_content)
+      fetcher.generate(site)
+    end
+
+    it 'passes CONTENT_TYPES.keys to check_for_changes' do
+      stub_incremental_sync(items: [], token: 'same_token')
+
+      expect(fetcher).to receive(:check_for_changes).with(
+        anything, anything, Jekyll::ContentfulFetcher::CONTENT_TYPES.keys
+      ).and_call_original
       fetcher.generate(site)
     end
 
@@ -705,9 +750,9 @@ RSpec.describe Jekyll::ContentfulFetcher do
       expect(cache.environment).to eq('master')
     end
 
-    it 'saves cache after successful incremental sync with changes' do
+    it 'saves cache after successful incremental sync with changes (fallback path)' do
       write_cache
-      stub_incremental_sync(items: [double('Entry')], token: 'incremental_token')
+      stub_incremental_sync(items: [build_mock_sync_item(type: 'Asset', id: 'a1')], token: 'incremental_token')
       stub_empty_fetches
 
       fetcher.generate(site)
