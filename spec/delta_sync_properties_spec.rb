@@ -119,6 +119,95 @@ RSpec.describe 'Delta Sync Properties' do
     end
   end
 
+  # Feature: contentful-delta-sync, Property 2: Upsert preserves data and updates correctly
+  # **Validates: Requirements 3.3, 3.4, 7.3**
+  describe 'Property 2: Upsert preserves data and updates correctly' do
+    let(:fetcher) { Jekyll::ContentfulFetcher.new }
+
+    SLUGS_POOL = %w[spiez thun bern aare limmat rhein zurich luzern brienz interlaken].freeze
+    LOCALES = %w[de en].freeze
+
+    def random_row(slug, locale, extra_key, extra_val)
+      { 'slug' => slug, 'locale' => locale, extra_key => extra_val }
+    end
+
+    it 'preserves data and updates correctly after upsert' do
+      property_of {
+        # Generate random existing rows (0..20 rows)
+        existing_count = range(0, 20)
+        existing_rows = []
+        existing_count.times do
+          slug = choose(*SLUGS_POOL)
+          locale = choose(*LOCALES)
+          name = sized(range(3, 10)) { string(:alpha) }
+          existing_rows << { 'slug' => slug, 'locale' => locale, 'name' => name }
+        end
+
+        # Generate random new rows to upsert (1..10 rows)
+        new_count = range(1, 10)
+        new_rows = []
+        new_count.times do
+          slug = choose(*SLUGS_POOL)
+          locale = choose(*LOCALES)
+          name = sized(range(3, 10)) { string(:alpha) }
+          new_rows << { 'slug' => slug, 'locale' => locale, 'name' => name }
+        end
+
+        [existing_rows, new_rows]
+      }.check(100) { |existing_rows, new_rows|
+        filename = 'spots'
+        # Deep-copy existing rows so we can compare originals later
+        original_rows = existing_rows.map(&:dup)
+        yaml_data = { filename => existing_rows.map(&:dup) }
+
+        fetcher.send(:upsert_rows, yaml_data, filename, new_rows)
+
+        result = yaml_data[filename]
+
+        # Property A: Every new row's slug+locale is present in the result
+        new_rows.each do |nr|
+          match = result.find { |r| r['slug'] == nr['slug'] && r['locale'] == nr['locale'] }
+          expect(match).not_to be_nil,
+            "Expected slug=#{nr['slug']} locale=#{nr['locale']} to be present in result"
+        end
+
+        # Property B: Upserted slug+locale pairs match the LAST new row exactly
+        # (if new_rows has duplicates for the same slug+locale, the last one wins)
+        effective_new = {}
+        new_rows.each do |nr|
+          key = [nr['slug'], nr['locale']]
+          effective_new[key] = nr
+        end
+
+        effective_new.each do |(slug, locale), expected_row|
+          match = result.find { |r| r['slug'] == slug && r['locale'] == locale }
+          expect(match).to eq(expected_row),
+            "Expected row for slug=#{slug} locale=#{locale} to equal #{expected_row}, got #{match}"
+        end
+
+        # Property C: All rows whose slug+locale did not match any new row remain unchanged
+        original_rows.each do |orig|
+          key = [orig['slug'], orig['locale']]
+          next if effective_new.key?(key)
+
+          # Find the row in result at the same position or by matching slug+locale
+          match = result.find { |r| r['slug'] == orig['slug'] && r['locale'] == orig['locale'] }
+          # The original row should still be present (though there may be duplicates in original)
+          expect(match).not_to be_nil,
+            "Expected original row slug=#{orig['slug']} locale=#{orig['locale']} to still be present"
+        end
+
+        # Property D: Total count = original count + genuinely new pairs (not already present)
+        original_keys = original_rows.map { |r| [r['slug'], r['locale']] }
+        genuinely_new = effective_new.keys.reject { |k| original_keys.include?(k) }
+        expected_count = original_rows.size + genuinely_new.size
+
+        expect(result.size).to eq(expected_count),
+          "Expected #{expected_count} rows (#{original_rows.size} original + #{genuinely_new.size} new), got #{result.size}"
+      }
+    end
+  end
+
   # Feature: contentful-delta-sync, Property 4: Entry ID Index round-trip through cache persistence
   # **Validates: Requirements 7.1, 7.5**
   describe 'Property 4: Entry ID Index round-trip through cache persistence' do
