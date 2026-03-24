@@ -12,6 +12,7 @@
 # Requirements: 15.1, 15.2, 15.3, 15.4, 15.5
 
 require 'json'
+require 'set'
 require_relative 'generator_cache'
 
 module Jekyll
@@ -104,6 +105,12 @@ module Jekyll
       @grid_rows = ((SWITZERLAND_BOUNDS[:north] - SWITZERLAND_BOUNDS[:south]) / TILE_SIZE[:lat]).ceil
       @locale_cache = {}
 
+      # Build set of non-navigable waterway slugs for obstacle filtering
+      @non_navigable_waterway_slugs = Set.new
+      (site.data['waterways'] || []).each do |w|
+        @non_navigable_waterway_slugs.add(w['slug']) if w['navigableByPaddlers'] == false
+      end
+
       Jekyll.logger.info "Tile Generator:", "Generating #{@grid_cols}x#{@grid_rows} tile grid"
 
       LAYERS.each do |layer_name, config|
@@ -124,6 +131,11 @@ module Jekyll
       
       if config[:exclude_rejected]
         data = data.reject { |item| item['rejected'] == true }
+      end
+
+      # Exclude obstacles linked to non-navigable waterways
+      if layer_name == 'obstacles'
+        data = data.reject { |item| @non_navigable_waterway_slugs.include?(item['waterway_slug']) }
       end
 
       # Initialize tile buckets

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'yaml'
+require 'set'
 
 # Jekyll plugin to generate collection documents from Contentful YAML data
 #
@@ -54,6 +55,14 @@ module Jekyll
       @waterway_lookup = build_waterway_lookup(site.data['waterways'], current_locale)
       @craft_type_lookup = build_craft_type_lookup(site.data, current_locale)
 
+      # Build set of non-navigable waterway slugs for obstacle filtering
+      @non_navigable_waterway_slugs = Set.new
+      if @waterway_lookup
+        @waterway_lookup.each do |slug, ww|
+          @non_navigable_waterway_slugs.add(slug) if ww['navigableByPaddlers'] == false
+        end
+      end
+
       COLLECTIONS.each do |collection_name, config|
         collection = site.collections[collection_name]
         next unless collection
@@ -68,6 +77,7 @@ module Jekyll
           slug = entry['slug']
           next unless slug && !slug.empty?
           next if collection_name == 'waterways' && entry['navigableByPaddlers'] == false
+          next if collection_name == 'obstacles' && @non_navigable_waterway_slugs.include?(entry['waterway_slug'])
 
           doc = create_document(site, collection, entry, slug, config[:page_name], current_locale)
           collection.docs << doc
