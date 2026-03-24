@@ -160,7 +160,7 @@ Implement delta merge for the Contentful sync pipeline. Instead of re-fetching a
     - Assert: every entry's sys.id maps to correct slug and content type, index size equals number of unique entry IDs
     - Minimum 100 iterations
 
-  - [~] 5.12 Write property test for content hash equivalence (Property 6)
+  - [x] 5.12 Write property test for content hash equivalence (Property 6)
     - **Property 6: Content hash is identical regardless of sync path**
     - **Validates: Requirements 5.1**
     - Test file: `spec/delta_sync_properties_spec.rb`
