@@ -692,8 +692,11 @@ RSpec.describe 'Contentful Sync Properties (continued)' do
       client = double('Contentful::Client')
       allow(client).to receive(:entries).and_return([])
 
+      mock_item = double('item')
+      allow(mock_item).to receive(:sys).and_return({ type: 'Asset', id: 'asset1' })
+
       sync_page = double('sync_page')
-      allow(sync_page).to receive(:items).and_return([double('item')])
+      allow(sync_page).to receive(:items).and_return([mock_item])
       allow(sync_page).to receive(:next_page?).and_return(false)
       allow(sync_page).to receive(:next_sync_url).and_return(
         "https://cdn.contentful.com/spaces/test/sync?sync_token=#{new_token}"
