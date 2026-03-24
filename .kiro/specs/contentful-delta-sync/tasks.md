@@ -6,7 +6,7 @@ Implement delta merge for the Contentful sync pipeline. Instead of re-fetching a
 
 ## Tasks
 
-- [ ] 1. Extend CacheMetadata with Entry ID Index support
+- [x] 1. Extend CacheMetadata with Entry ID Index support
   - [x] 1.1 Add `entry_id_index` field and accessor to `CacheMetadata`
     - Add `attr_accessor :entry_id_index` to the class
     - Initialize `@entry_id_index` to `{}` in the constructor
@@ -38,7 +38,7 @@ Implement delta merge for the Contentful sync pipeline. Instead of re-fetching a
     - Save via `CacheMetadata#save`, load via `CacheMetadata#load`, assert identical index
     - Minimum 100 iterations
 
-- [~] 2. Checkpoint - Ensure all tests pass
+- [-] 2. Checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 3. Extend SyncChecker to extract and classify delta items
