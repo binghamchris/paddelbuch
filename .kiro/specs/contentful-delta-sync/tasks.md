@@ -41,7 +41,7 @@ Implement delta merge for the Contentful sync pipeline. Instead of re-fetching a
 - [x] 2. Checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 3. Extend SyncChecker to extract and classify delta items
+- [x] 3. Extend SyncChecker to extract and classify delta items
   - [x] 3.1 Extend `SyncResult` struct with new fields
     - Add `changed_entries`, `deleted_entries`, `unknown_content_types` fields to the Struct
     - `changed_entries`: Hash `{ content_type_id => [entry, ...] }`
@@ -80,7 +80,7 @@ Implement delta merge for the Contentful sync pipeline. Instead of re-fetching a
     - Assert: all `Entry` items with known types land in `changed_entries`, all `DeletedEntry` items with known types land in `deleted_entries`, unknown types excluded, `items_count` equals total items, `has_changes` is true iff delta is non-empty
     - Minimum 100 iterations
 
-- [~] 4. Checkpoint - Ensure all tests pass
+- [-] 4. Checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 5. Implement ContentfulFetcher delta merge path
