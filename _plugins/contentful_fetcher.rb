@@ -84,7 +84,7 @@ module Jekyll
       end
 
       # Incremental sync check
-      result = check_for_changes(client, cache.sync_token)
+      result = check_for_changes(client, cache.sync_token, CONTENT_TYPES.keys)
 
       unless result.success?
         Jekyll.logger.warn 'Contentful:', "Sync API error: #{result.error&.message} -- falling back to full fetch"
@@ -100,9 +100,14 @@ module Jekyll
         return
       end
 
-      Jekyll.logger.info 'Contentful:', "Sync API detected #{result.items_count} changed entries -- fetching content"
-      fetch_and_write_content
-      compute_and_set_change_flag(cache, result.new_token, current_space_id, current_environment)
+      if result.changed_entries&.any? || result.deleted_entries&.any?
+        Jekyll.logger.info 'Contentful:', "Sync API detected #{result.items_count} changed entries -- performing delta merge"
+        perform_delta_merge(result, cache, current_space_id, current_environment)
+      else
+        Jekyll.logger.info 'Contentful:', "Sync API detected #{result.items_count} changed entries -- no classifiable entries, fetching all content"
+        fetch_and_write_content
+        compute_and_set_change_flag(cache, result.new_token, current_space_id, current_environment)
+      end
     end
 
     private
