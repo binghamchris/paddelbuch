@@ -83,7 +83,7 @@ Implement delta merge for the Contentful sync pipeline. Instead of re-fetching a
 - [x] 4. Checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 5. Implement ContentfulFetcher delta merge path
+- [x] 5. Implement ContentfulFetcher delta merge path
   - [x] 5.1 Implement `upsert_rows` and `remove_rows` helper methods
     - `upsert_rows(yaml_data, filename, new_rows)`: for each new row, find existing row matching `slug` + `locale` in `yaml_data[filename]`; replace if found, append if not
     - `remove_rows(yaml_data, filename, slug)`: remove all rows from `yaml_data[filename]` where `row['slug'] == slug`
