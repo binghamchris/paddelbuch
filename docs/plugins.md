@@ -58,7 +58,13 @@ Plugins run in priority order. Hooks run at specific lifecycle points.
 4. If environment mismatch: full fetch
 5. Otherwise: incremental sync check via Contentful Sync API
 6. If no changes: uses cached data, sets `contentful_data_changed = false`
-7. If changes: re-fetches all content, computes content hash
+7. If changes and delta items classifiable: attempts delta merge first
+   - Re-fetches each changed entry individually via `client.entry(id, locale: '*', include: 2)`
+   - Maps through `ContentfulMappers.flatten_entry` and upserts rows in YAML data files
+   - Looks up deleted entries in Entry ID Index and removes rows
+   - Falls back to full fetch if any step fails
+8. If changes but no classifiable delta items: full fetch
+9. Computes content hash and sets `contentful_data_changed` flag
 
 ---
 
@@ -333,10 +339,33 @@ Skipped entirely in production/CI environments.
 **File:** `sync_checker.rb`
 **Purpose:** Wraps the Contentful Sync API. Provides `check_for_changes` (incremental sync) and `initial_sync` (full sync) methods that return a `SyncResult` struct.
 
+**`SyncResult` struct fields:**
+- `success` — Boolean, whether the sync API call succeeded
+- `has_changes` — Boolean, whether the delta contains any items
+- `new_token` — String, new sync token for next incremental sync
+- `items_count` — Integer, total number of items in the delta
+- `error` — Exception or `nil`
+- `changed_entries` — Hash `{ content_type_id => [entry, ...] }` of entries to upsert
+- `deleted_entries` — Hash `{ content_type_id => [entry, ...] }` of entries to remove
+- `unknown_content_types` — Array of content type IDs found in delta but not in `CONTENT_TYPES`
+
+**`check_for_changes` method:**
+- Signature: `check_for_changes(client, sync_token, known_content_types = nil)`
+- When `known_content_types` is provided, classifies delta items by `sys.type` (`Entry` → changed, `DeletedEntry` → deleted, `Asset`/`DeletedAsset` → ignored) and groups by content type ID
+- Entries with unknown content type IDs are excluded and collected in `unknown_content_types`
+- When `known_content_types` is `nil`, maintains backward-compatible behavior
+
 ### CacheMetadata
 
 **File:** `cache_metadata.rb`
-**Purpose:** Persists sync state between builds. Stores sync token, timestamp, space/environment IDs, and a SHA-256 content hash in `_data/.contentful_sync_cache.yml`.
+**Purpose:** Persists sync state between builds. Stores sync token, timestamp, space/environment IDs, a SHA-256 content hash, and the Entry ID Index in `_data/.contentful_sync_cache.yml`.
+
+**`entry_id_index` field:** Persistent mapping of Contentful `sys.id` → `{ slug, content_type }` used to locate entries in YAML data files for deletion (deleted entries from Contentful contain only `sys` metadata, no `fields` or `slug`).
+
+**Index methods:**
+- `add_to_entry_id_index(entry_id, slug, content_type)` — adds or updates an entry in the index
+- `remove_from_entry_id_index(entry_id)` — removes an entry from the index
+- `lookup_entry_id(entry_id)` — returns `{ 'slug' => ..., 'content_type' => ... }` or `nil`
 
 ### GeneratorCache
 

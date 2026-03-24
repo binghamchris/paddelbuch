@@ -147,4 +147,154 @@ RSpec.describe CacheMetadata do
       expect(loaded.content_hash).to eq('abc123def456')
     end
   end
+
+  # --- Entry ID Index tests (Task 1.4) ---
+  # Validates: Requirements 7.1, 7.5
+
+  describe 'load/save round-trip with entry_id_index' do
+    it 'persists and restores entry_id_index' do
+      cache.sync_token   = 'tok'
+      cache.last_sync_at = '2025-01-15T10:30:00+00:00'
+      cache.space_id     = 'sp'
+      cache.environment  = 'master'
+      cache.add_to_entry_id_index('abc123', 'spiez-beach', 'spot')
+      cache.add_to_entry_id_index('def456', 'aare', 'waterway')
+      cache.save
+
+      loaded = CacheMetadata.new(tmpdir)
+      expect(loaded.load).to be true
+      expect(loaded.entry_id_index).to eq(
+        'abc123' => { 'slug' => 'spiez-beach', 'content_type' => 'spot' },
+        'def456' => { 'slug' => 'aare', 'content_type' => 'waterway' }
+      )
+    end
+
+    it 'persists an empty entry_id_index' do
+      cache.sync_token   = 'tok'
+      cache.last_sync_at = 'now'
+      cache.space_id     = 'sp'
+      cache.environment  = 'master'
+      cache.save
+
+      loaded = CacheMetadata.new(tmpdir)
+      expect(loaded.load).to be true
+      expect(loaded.entry_id_index).to eq({})
+    end
+  end
+
+  describe '#add_to_entry_id_index' do
+    it 'adds a new entry to the index' do
+      cache.add_to_entry_id_index('entry1', 'my-slug', 'spot')
+
+      expect(cache.entry_id_index).to eq(
+        'entry1' => { 'slug' => 'my-slug', 'content_type' => 'spot' }
+      )
+    end
+
+    it 'overwrites an existing entry with the same ID' do
+      cache.add_to_entry_id_index('entry1', 'old-slug', 'spot')
+      cache.add_to_entry_id_index('entry1', 'new-slug', 'waterway')
+
+      expect(cache.entry_id_index['entry1']).to eq(
+        'slug' => 'new-slug', 'content_type' => 'waterway'
+      )
+    end
+
+    it 'supports multiple distinct entries' do
+      cache.add_to_entry_id_index('e1', 'slug-a', 'spot')
+      cache.add_to_entry_id_index('e2', 'slug-b', 'waterway')
+      cache.add_to_entry_id_index('e3', 'slug-c', 'obstacle')
+
+      expect(cache.entry_id_index.size).to eq(3)
+    end
+  end
+
+  describe '#remove_from_entry_id_index' do
+    it 'removes an existing entry from the index' do
+      cache.add_to_entry_id_index('entry1', 'my-slug', 'spot')
+      cache.remove_from_entry_id_index('entry1')
+
+      expect(cache.entry_id_index).to eq({})
+    end
+
+    it 'does nothing when removing a non-existent entry' do
+      cache.add_to_entry_id_index('entry1', 'my-slug', 'spot')
+      cache.remove_from_entry_id_index('nonexistent')
+
+      expect(cache.entry_id_index.size).to eq(1)
+      expect(cache.entry_id_index['entry1']).not_to be_nil
+    end
+
+    it 'only removes the targeted entry, leaving others intact' do
+      cache.add_to_entry_id_index('e1', 'slug-a', 'spot')
+      cache.add_to_entry_id_index('e2', 'slug-b', 'waterway')
+      cache.remove_from_entry_id_index('e1')
+
+      expect(cache.entry_id_index).to eq(
+        'e2' => { 'slug' => 'slug-b', 'content_type' => 'waterway' }
+      )
+    end
+  end
+
+  describe '#lookup_entry_id' do
+    it 'returns the slug and content_type for an existing entry' do
+      cache.add_to_entry_id_index('entry1', 'spiez-beach', 'spot')
+
+      result = cache.lookup_entry_id('entry1')
+      expect(result).to eq('slug' => 'spiez-beach', 'content_type' => 'spot')
+    end
+
+    it 'returns nil for a non-existent entry' do
+      expect(cache.lookup_entry_id('nonexistent')).to be_nil
+    end
+
+    it 'reflects updates after add_to_entry_id_index overwrites' do
+      cache.add_to_entry_id_index('entry1', 'old-slug', 'spot')
+      cache.add_to_entry_id_index('entry1', 'new-slug', 'waterway')
+
+      expect(cache.lookup_entry_id('entry1')).to eq(
+        'slug' => 'new-slug', 'content_type' => 'waterway'
+      )
+    end
+
+    it 'returns nil after the entry is removed' do
+      cache.add_to_entry_id_index('entry1', 'my-slug', 'spot')
+      cache.remove_from_entry_id_index('entry1')
+
+      expect(cache.lookup_entry_id('entry1')).to be_nil
+    end
+  end
+
+  describe 'backward compatibility: loading cache without entry_id_index' do
+    it 'defaults entry_id_index to {} when key is missing from YAML' do
+      data = {
+        'sync_token'   => 'tok',
+        'last_sync_at' => '2025-01-15T10:30:00+00:00',
+        'space_id'     => 'sp',
+        'environment'  => 'master',
+        'content_hash' => 'hash123'
+      }
+      File.write(cache_path, YAML.dump(data))
+
+      loaded = CacheMetadata.new(tmpdir)
+      expect(loaded.load).to be true
+      expect(loaded.entry_id_index).to eq({})
+      expect(loaded.sync_token).to eq('tok')
+    end
+
+    it 'defaults entry_id_index to {} when key is explicitly nil in YAML' do
+      data = {
+        'sync_token'    => 'tok',
+        'last_sync_at'  => 'now',
+        'space_id'      => 'sp',
+        'environment'   => 'master',
+        'entry_id_index' => nil
+      }
+      File.write(cache_path, YAML.dump(data))
+
+      loaded = CacheMetadata.new(tmpdir)
+      expect(loaded.load).to be true
+      expect(loaded.entry_id_index).to eq({})
+    end
+  end
 end

@@ -102,6 +102,19 @@ RSpec.describe Jekyll::ContentfulFetcher do
     allow(mock_client).to receive(:entries).and_return([])
   end
 
+  # Helper: build a mock sync item with proper sys structure for classify_delta_items
+  def build_mock_sync_item(type: 'Asset', content_type_id: nil, id: 'item1')
+    item = double("SyncItem-#{type}-#{id}")
+    sys_hash = { type: type, id: id }
+    if content_type_id
+      content_type_sys = double('ContentTypeSys')
+      allow(content_type_sys).to receive(:sys).and_return({ id: content_type_id })
+      sys_hash[:content_type] = content_type_sys
+    end
+    allow(item).to receive(:sys).and_return(sys_hash)
+    item
+  end
+
   # ─── contentful_configured? ───────────────────────────────────────────
 
   describe '#contentful_configured?' do
@@ -345,17 +358,49 @@ RSpec.describe Jekyll::ContentfulFetcher do
       fetcher.generate(site)
     end
 
-    it 'fetches content when sync reports changes' do
-      stub_incremental_sync(items: [double('Entry')], token: 'updated_token')
+    it 'fetches content when sync reports changes but no classifiable entries' do
+      stub_incremental_sync(items: [build_mock_sync_item(type: 'Asset', id: 'a1')], token: 'updated_token')
 
       expect(fetcher).to receive(:fetch_and_write_content).once
       fetcher.generate(site)
     end
 
-    it 'logs number of changed entries' do
-      stub_incremental_sync(items: [double('E1'), double('E2'), double('E3')], token: 'updated_token')
+    it 'logs number of changed entries with no classifiable entries' do
+      items = [
+        build_mock_sync_item(type: 'Asset', id: 'a1'),
+        build_mock_sync_item(type: 'Asset', id: 'a2'),
+        build_mock_sync_item(type: 'Asset', id: 'a3')
+      ]
+      stub_incremental_sync(items: items, token: 'updated_token')
 
-      expect(Jekyll.logger).to receive(:info).with('Contentful:', /3 changed entries/)
+      expect(Jekyll.logger).to receive(:info).with('Contentful:', /3 changed entries.*no classifiable entries/)
+      fetcher.generate(site)
+    end
+
+    it 'calls perform_delta_merge when classifiable changed entries exist' do
+      items = [build_mock_sync_item(type: 'Entry', content_type_id: 'spot', id: 'e1')]
+      stub_incremental_sync(items: items, token: 'updated_token')
+
+      expect(fetcher).to receive(:perform_delta_merge).once
+      expect(fetcher).not_to receive(:fetch_and_write_content)
+      fetcher.generate(site)
+    end
+
+    it 'calls perform_delta_merge when classifiable deleted entries exist' do
+      items = [build_mock_sync_item(type: 'DeletedEntry', content_type_id: 'spot', id: 'd1')]
+      stub_incremental_sync(items: items, token: 'updated_token')
+
+      expect(fetcher).to receive(:perform_delta_merge).once
+      expect(fetcher).not_to receive(:fetch_and_write_content)
+      fetcher.generate(site)
+    end
+
+    it 'passes CONTENT_TYPES.keys and entry_id_index to check_for_changes' do
+      stub_incremental_sync(items: [], token: 'same_token')
+
+      expect(fetcher).to receive(:check_for_changes).with(
+        anything, anything, Jekyll::ContentfulFetcher::CONTENT_TYPES.keys, kind_of(Hash)
+      ).and_call_original
       fetcher.generate(site)
     end
 
@@ -493,6 +538,163 @@ RSpec.describe Jekyll::ContentfulFetcher do
     end
   end
 
+  # ─── upsert_rows ────────────────────────────────────────────────────
+
+  describe '#upsert_rows' do
+    it 'replaces an existing row matching slug + locale' do
+      yaml_data = {
+        'spots' => [
+          { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez Alt' },
+          { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez Old' }
+        ]
+      }
+      new_rows = [{ 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez Neu' }]
+
+      fetcher.send(:upsert_rows, yaml_data, 'spots', new_rows)
+
+      de_row = yaml_data['spots'].find { |r| r['slug'] == 'spiez' && r['locale'] == 'de' }
+      expect(de_row['name']).to eq('Spiez Neu')
+    end
+
+    it 'appends a new row when slug + locale does not match' do
+      yaml_data = {
+        'spots' => [
+          { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' }
+        ]
+      }
+      new_rows = [{ 'slug' => 'thun', 'locale' => 'de', 'name' => 'Thun' }]
+
+      fetcher.send(:upsert_rows, yaml_data, 'spots', new_rows)
+
+      expect(yaml_data['spots'].size).to eq(2)
+      expect(yaml_data['spots'].last['slug']).to eq('thun')
+    end
+
+    it 'handles upsert of both locales for the same slug' do
+      yaml_data = {
+        'spots' => [
+          { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez DE Alt' },
+          { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez EN Old' }
+        ]
+      }
+      new_rows = [
+        { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez DE Neu' },
+        { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez EN New' }
+      ]
+
+      fetcher.send(:upsert_rows, yaml_data, 'spots', new_rows)
+
+      expect(yaml_data['spots'].size).to eq(2)
+      de_row = yaml_data['spots'].find { |r| r['slug'] == 'spiez' && r['locale'] == 'de' }
+      en_row = yaml_data['spots'].find { |r| r['slug'] == 'spiez' && r['locale'] == 'en' }
+      expect(de_row['name']).to eq('Spiez DE Neu')
+      expect(en_row['name']).to eq('Spiez EN New')
+    end
+
+    it 'leaves non-matching rows unchanged' do
+      yaml_data = {
+        'spots' => [
+          { 'slug' => 'thun', 'locale' => 'de', 'name' => 'Thun' },
+          { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez Alt' }
+        ]
+      }
+      new_rows = [{ 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez Neu' }]
+
+      fetcher.send(:upsert_rows, yaml_data, 'spots', new_rows)
+
+      thun_row = yaml_data['spots'].find { |r| r['slug'] == 'thun' }
+      expect(thun_row['name']).to eq('Thun')
+    end
+
+    it 'initializes the filename key when it does not exist' do
+      yaml_data = {}
+      new_rows = [{ 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' }]
+
+      fetcher.send(:upsert_rows, yaml_data, 'spots', new_rows)
+
+      expect(yaml_data['spots']).to eq(new_rows)
+    end
+
+    it 'handles empty new_rows without modifying existing data' do
+      yaml_data = {
+        'spots' => [{ 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' }]
+      }
+
+      fetcher.send(:upsert_rows, yaml_data, 'spots', [])
+
+      expect(yaml_data['spots'].size).to eq(1)
+    end
+  end
+
+  # ─── remove_rows ──────────────────────────────────────────────────
+
+  describe '#remove_rows' do
+    it 'removes all rows matching the slug (both locales)' do
+      yaml_data = {
+        'spots' => [
+          { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez DE' },
+          { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez EN' },
+          { 'slug' => 'thun', 'locale' => 'de', 'name' => 'Thun DE' }
+        ]
+      }
+
+      fetcher.send(:remove_rows, yaml_data, 'spots', 'spiez')
+
+      expect(yaml_data['spots'].size).to eq(1)
+      expect(yaml_data['spots'].first['slug']).to eq('thun')
+    end
+
+    it 'leaves other slugs unchanged' do
+      yaml_data = {
+        'spots' => [
+          { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' },
+          { 'slug' => 'thun', 'locale' => 'de', 'name' => 'Thun' },
+          { 'slug' => 'bern', 'locale' => 'de', 'name' => 'Bern' }
+        ]
+      }
+
+      fetcher.send(:remove_rows, yaml_data, 'spots', 'thun')
+
+      slugs = yaml_data['spots'].map { |r| r['slug'] }
+      expect(slugs).to eq(%w[spiez bern])
+    end
+
+    it 'does nothing when slug is not found' do
+      yaml_data = {
+        'spots' => [
+          { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' }
+        ]
+      }
+
+      fetcher.send(:remove_rows, yaml_data, 'spots', 'nonexistent')
+
+      expect(yaml_data['spots'].size).to eq(1)
+    end
+
+    it 'handles missing filename key gracefully' do
+      yaml_data = {}
+
+      expect { fetcher.send(:remove_rows, yaml_data, 'spots', 'spiez') }.not_to raise_error
+    end
+
+    it 'preserves row order of remaining entries' do
+      yaml_data = {
+        'spots' => [
+          { 'slug' => 'aare', 'locale' => 'de' },
+          { 'slug' => 'spiez', 'locale' => 'de' },
+          { 'slug' => 'thun', 'locale' => 'de' },
+          { 'slug' => 'spiez', 'locale' => 'en' },
+          { 'slug' => 'bern', 'locale' => 'de' }
+        ]
+      }
+
+      fetcher.send(:remove_rows, yaml_data, 'spots', 'spiez')
+
+      slugs = yaml_data['spots'].map { |r| r['slug'] }
+      expect(slugs).to eq(%w[aare thun bern])
+    end
+  end
+
   # ─── save_cache ────────────────────────────────────────────────────
 
   describe '#save_cache' do
@@ -548,9 +750,9 @@ RSpec.describe Jekyll::ContentfulFetcher do
       expect(cache.environment).to eq('master')
     end
 
-    it 'saves cache after successful incremental sync with changes' do
+    it 'saves cache after successful incremental sync with changes (fallback path)' do
       write_cache
-      stub_incremental_sync(items: [double('Entry')], token: 'incremental_token')
+      stub_incremental_sync(items: [build_mock_sync_item(type: 'Asset', id: 'a1')], token: 'incremental_token')
       stub_empty_fetches
 
       fetcher.generate(site)
@@ -593,6 +795,745 @@ RSpec.describe Jekyll::ContentfulFetcher do
       cache = CacheMetadata.new(data_dir)
       cache.load
       expect(cache.environment).to eq('staging')
+    end
+  end
+
+  # ─── load_all_yaml_files ───────────────────────────────────────────
+
+  describe '#load_all_yaml_files' do
+    before do
+      set_credentials
+      fetcher.instance_variable_set(:@site, site)
+      fetcher.instance_variable_set(:@data_dir, data_dir)
+      FileUtils.mkdir_p(data_dir)
+    end
+
+    it 'returns a hash with all 13 content type filenames as keys' do
+      # Create empty YAML files for all content types
+      Jekyll::ContentfulFetcher::CONTENT_TYPES.each_value do |config|
+        filepath = File.join(data_dir, "#{config[:filename]}.yml")
+        FileUtils.mkdir_p(File.dirname(filepath))
+        File.write(filepath, YAML.dump([]))
+      end
+
+      result = fetcher.send(:load_all_yaml_files)
+
+      expect(result.keys.sort).to eq(Jekyll::ContentfulFetcher::CONTENT_TYPES.values.map { |c| c[:filename] }.sort)
+    end
+
+    it 'reads YAML data from existing files' do
+      spots_data = [{ 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' }]
+      filepath = File.join(data_dir, 'spots.yml')
+      File.write(filepath, YAML.dump(spots_data))
+
+      # Create empty files for remaining content types
+      Jekyll::ContentfulFetcher::CONTENT_TYPES.each_value do |config|
+        next if config[:filename] == 'spots'
+
+        fp = File.join(data_dir, "#{config[:filename]}.yml")
+        FileUtils.mkdir_p(File.dirname(fp))
+        File.write(fp, YAML.dump([]))
+      end
+
+      result = fetcher.send(:load_all_yaml_files)
+
+      expect(result['spots']).to eq(spots_data)
+    end
+
+    it 'returns empty array for missing files' do
+      result = fetcher.send(:load_all_yaml_files)
+
+      result.each_value do |rows|
+        expect(rows).to eq([])
+      end
+    end
+
+    it 'reads nested path files correctly' do
+      types_data = [{ 'slug' => 'launch', 'locale' => 'de', 'name' => 'Einstieg' }]
+      filepath = File.join(data_dir, 'types', 'spot_types.yml')
+      FileUtils.mkdir_p(File.dirname(filepath))
+      File.write(filepath, YAML.dump(types_data))
+
+      result = fetcher.send(:load_all_yaml_files)
+
+      expect(result['types/spot_types']).to eq(types_data)
+    end
+
+    it 'handles nil YAML content gracefully' do
+      filepath = File.join(data_dir, 'spots.yml')
+      File.write(filepath, "---\n")
+
+      result = fetcher.send(:load_all_yaml_files)
+
+      expect(result['spots']).to eq([])
+    end
+  end
+
+  # ─── load_all_yaml_into_site_data ──────────────────────────────────
+
+  describe '#load_all_yaml_into_site_data' do
+    before do
+      set_credentials
+      fetcher.instance_variable_set(:@site, site)
+      fetcher.instance_variable_set(:@data_dir, data_dir)
+      FileUtils.mkdir_p(data_dir)
+    end
+
+    it 'populates site.data with flat keys for top-level filenames' do
+      spots_data = [{ 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' }]
+      File.write(File.join(data_dir, 'spots.yml'), YAML.dump(spots_data))
+
+      fetcher.send(:load_all_yaml_into_site_data)
+
+      expect(site_data['spots']).to eq(spots_data)
+    end
+
+    it 'populates site.data with nested keys for paths containing /' do
+      types_data = [{ 'slug' => 'launch', 'locale' => 'de', 'name' => 'Einstieg' }]
+      filepath = File.join(data_dir, 'types', 'spot_types.yml')
+      FileUtils.mkdir_p(File.dirname(filepath))
+      File.write(filepath, YAML.dump(types_data))
+
+      fetcher.send(:load_all_yaml_into_site_data)
+
+      expect(site_data['types']).to be_a(Hash)
+      expect(site_data['types']['spot_types']).to eq(types_data)
+    end
+
+    it 'preserves existing nested site.data entries when loading multiple types' do
+      obstacle_types_data = [{ 'slug' => 'dam', 'locale' => 'de' }]
+      spot_types_data = [{ 'slug' => 'launch', 'locale' => 'de' }]
+
+      FileUtils.mkdir_p(File.join(data_dir, 'types'))
+      File.write(File.join(data_dir, 'types', 'obstacle_types.yml'), YAML.dump(obstacle_types_data))
+      File.write(File.join(data_dir, 'types', 'spot_types.yml'), YAML.dump(spot_types_data))
+
+      fetcher.send(:load_all_yaml_into_site_data)
+
+      expect(site_data['types']['obstacle_types']).to eq(obstacle_types_data)
+      expect(site_data['types']['spot_types']).to eq(spot_types_data)
+    end
+
+    it 'sets empty array for missing files' do
+      fetcher.send(:load_all_yaml_into_site_data)
+
+      expect(site_data['spots']).to eq([])
+    end
+
+    it 'uses same key structure as write_yaml' do
+      spots_data = [{ 'slug' => 'spiez', 'locale' => 'de' }]
+      types_data = [{ 'slug' => 'launch', 'locale' => 'de' }]
+
+      # Write via write_yaml
+      fetcher.send(:write_yaml, 'spots', spots_data)
+      fetcher.send(:write_yaml, 'types/spot_types', types_data)
+
+      # Clear site.data and reload via load_all_yaml_into_site_data
+      site_data.clear
+      fetcher.send(:load_all_yaml_into_site_data)
+
+      expect(site_data['spots']).to eq(spots_data)
+      expect(site_data['types']['spot_types']).to eq(types_data)
+    end
+  end
+
+  # ─── build_entry_id_index ────────────────────────────────────────────
+
+  describe '#build_entry_id_index' do
+    # Helper: build a mock entry with sys[:id] and fields_with_locales
+    def mock_entry(id:, slug: nil)
+      entry = double("Entry-#{id}")
+      allow(entry).to receive(:sys).and_return({ id: id })
+      fields = slug ? { slug: { en: slug } } : {}
+      allow(entry).to receive(:fields_with_locales).and_return(fields)
+      entry
+    end
+
+    it 'builds an index mapping sys.id to slug and content_type' do
+      entries_by_type = {
+        'spot' => [mock_entry(id: 'abc123', slug: 'spiez-beach')],
+        'waterway' => [mock_entry(id: 'def456', slug: 'aare')]
+      }
+
+      index = fetcher.send(:build_entry_id_index, entries_by_type)
+
+      expect(index['abc123']).to eq({ 'slug' => 'spiez-beach', 'content_type' => 'spot' })
+      expect(index['def456']).to eq({ 'slug' => 'aare', 'content_type' => 'waterway' })
+    end
+
+    it 'handles multiple entries per content type' do
+      entries_by_type = {
+        'spot' => [
+          mock_entry(id: 'e1', slug: 'spiez'),
+          mock_entry(id: 'e2', slug: 'thun'),
+          mock_entry(id: 'e3', slug: 'bern')
+        ]
+      }
+
+      index = fetcher.send(:build_entry_id_index, entries_by_type)
+
+      expect(index.size).to eq(3)
+      expect(index['e1']).to eq({ 'slug' => 'spiez', 'content_type' => 'spot' })
+      expect(index['e2']).to eq({ 'slug' => 'thun', 'content_type' => 'spot' })
+      expect(index['e3']).to eq({ 'slug' => 'bern', 'content_type' => 'spot' })
+    end
+
+    it 'falls back to sys.id as slug when entry has no slug field' do
+      entries_by_type = {
+        'spot' => [mock_entry(id: 'no-slug-entry')]
+      }
+
+      index = fetcher.send(:build_entry_id_index, entries_by_type)
+
+      expect(index['no-slug-entry']['slug']).to eq('no-slug-entry')
+    end
+
+    it 'returns an empty hash when entries_by_type is empty' do
+      index = fetcher.send(:build_entry_id_index, {})
+
+      expect(index).to eq({})
+    end
+
+    it 'handles entries across all content types' do
+      entries_by_type = {
+        'spot' => [mock_entry(id: 's1', slug: 'spot-a')],
+        'waterway' => [mock_entry(id: 'w1', slug: 'waterway-a')],
+        'obstacle' => [mock_entry(id: 'o1', slug: 'obstacle-a')]
+      }
+
+      index = fetcher.send(:build_entry_id_index, entries_by_type)
+
+      expect(index.size).to eq(3)
+      expect(index['s1']['content_type']).to eq('spot')
+      expect(index['w1']['content_type']).to eq('waterway')
+      expect(index['o1']['content_type']).to eq('obstacle')
+    end
+
+    it 'last entry wins when duplicate sys.id appears across content types' do
+      entries_by_type = {
+        'spot' => [mock_entry(id: 'dup1', slug: 'first-slug')],
+        'waterway' => [mock_entry(id: 'dup1', slug: 'second-slug')]
+      }
+
+      index = fetcher.send(:build_entry_id_index, entries_by_type)
+
+      expect(index.size).to eq(1)
+      expect(index['dup1']['slug']).to eq('second-slug')
+    end
+  end
+
+  # ─── logging helpers ─────────────────────────────────────────────────
+
+  describe 'logging helpers' do
+    before do
+      set_credentials
+      fetcher.instance_variable_set(:@site, site)
+      fetcher.instance_variable_set(:@data_dir, data_dir)
+    end
+
+    describe '#log_delta_summary' do
+      it 'logs total changed and deleted entry counts' do
+        result = double('SyncResult')
+        allow(result).to receive(:changed_entries).and_return(
+          'spot' => [double, double],
+          'waterway' => [double]
+        )
+        allow(result).to receive(:deleted_entries).and_return(
+          'obstacle' => [double]
+        )
+
+        expect(Jekyll.logger).to receive(:info).with('Contentful:', 'Delta merge: 3 changed, 1 deleted entries')
+        fetcher.send(:log_delta_summary, result)
+      end
+
+      it 'logs zero counts when no changes or deletions' do
+        result = double('SyncResult')
+        allow(result).to receive(:changed_entries).and_return({})
+        allow(result).to receive(:deleted_entries).and_return({})
+
+        expect(Jekyll.logger).to receive(:info).with('Contentful:', 'Delta merge: 0 changed, 0 deleted entries')
+        fetcher.send(:log_delta_summary, result)
+      end
+    end
+
+    describe '#log_upsert' do
+      it 'logs "Updated" when is_update is true' do
+        expect(Jekyll.logger).to receive(:info).with('Contentful:', "Updated spot entry 'spiez-beach'")
+        fetcher.send(:log_upsert, 'spiez-beach', 'spot', true)
+      end
+
+      it 'logs "Inserted" when is_update is false' do
+        expect(Jekyll.logger).to receive(:info).with('Contentful:', "Inserted waterway entry 'aare'")
+        fetcher.send(:log_upsert, 'aare', 'waterway', false)
+      end
+    end
+
+    describe '#log_deletion' do
+      it 'logs the slug and content type' do
+        expect(Jekyll.logger).to receive(:info).with('Contentful:', "Deleted obstacle entry 'dam-weir'")
+        fetcher.send(:log_deletion, 'dam-weir', 'obstacle')
+      end
+    end
+
+    describe '#log_unknown_content_types' do
+      it 'logs a warning for each unknown content type' do
+        expect(Jekyll.logger).to receive(:warn).with('Contentful:', "Unknown content type in sync delta: 'blogPost' -- no mapper configured, skipping")
+        expect(Jekyll.logger).to receive(:warn).with('Contentful:', "Unknown content type in sync delta: 'faqEntry' -- no mapper configured, skipping")
+        fetcher.send(:log_unknown_content_types, %w[blogPost faqEntry])
+      end
+
+      it 'does nothing when unknown_types is empty' do
+        expect(Jekyll.logger).not_to receive(:warn)
+        fetcher.send(:log_unknown_content_types, [])
+      end
+
+      it 'does nothing when unknown_types is nil' do
+        expect(Jekyll.logger).not_to receive(:warn)
+        fetcher.send(:log_unknown_content_types, nil)
+      end
+    end
+  end
+
+  # ─── perform_delta_merge ─────────────────────────────────────────────
+
+  describe '#perform_delta_merge' do
+    let(:cache) { CacheMetadata.new(data_dir) }
+
+    # Helper: build a delta entry mock (from sync API)
+    def build_delta_entry(id:)
+      entry = double("DeltaEntry-#{id}")
+      allow(entry).to receive(:sys).and_return({ id: id })
+      entry
+    end
+
+    # Helper: build a re-fetched entry mock (from client.entry)
+    def build_refetched_entry(id:, slug:)
+      entry = double("ReFetched-#{id}")
+      allow(entry).to receive(:sys).and_return({ id: id, created_at: Time.now, updated_at: Time.now })
+      allow(entry).to receive(:fields_with_locales).and_return({ slug: { en: slug } })
+      entry
+    end
+
+    # Helper: build a SyncResult for delta merge
+    def build_sync_result(changed: {}, deleted: {}, unknown: [], token: 'new_delta_token')
+      SyncChecker::SyncResult.new(
+        success: true,
+        has_changes: true,
+        new_token: token,
+        items_count: changed.values.flatten.size + deleted.values.flatten.size,
+        changed_entries: changed,
+        deleted_entries: deleted,
+        unknown_content_types: unknown
+      )
+    end
+
+    before do
+      set_credentials
+      stub_client
+      fetcher.instance_variable_set(:@site, site)
+      fetcher.instance_variable_set(:@data_dir, data_dir)
+      FileUtils.mkdir_p(data_dir)
+      FileUtils.mkdir_p(File.join(data_dir, 'types'))
+      allow(Jekyll.logger).to receive(:info)
+      allow(Jekyll.logger).to receive(:warn)
+
+      # Pre-populate all YAML files with empty arrays so load_all_yaml_files works
+      Jekyll::ContentfulFetcher::CONTENT_TYPES.each_value do |config|
+        filepath = File.join(data_dir, "#{config[:filename]}.yml")
+        FileUtils.mkdir_p(File.dirname(filepath))
+        File.write(filepath, YAML.dump([]))
+      end
+    end
+
+    # ─── upsert operations ───────────────────────────────────────────
+
+    it 'upserts changed entries into the correct YAML file' do
+      # Pre-populate spots with existing data
+      existing_spots = [
+        { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez Alt' },
+        { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez Old' }
+      ]
+      File.write(File.join(data_dir, 'spots.yml'), YAML.dump(existing_spots))
+
+      delta_entry = build_delta_entry(id: 'abc123')
+      refetched = build_refetched_entry(id: 'abc123', slug: 'spiez')
+
+      allow(mock_client).to receive(:entry).and_return(refetched)
+      allow(ContentfulMappers).to receive(:flatten_entry).and_return([
+        { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez Neu' },
+        { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez New' }
+      ])
+
+      result = build_sync_result(changed: { 'spot' => [delta_entry] })
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+
+      written = YAML.safe_load(File.read(File.join(data_dir, 'spots.yml')))
+      de_row = written.find { |r| r['slug'] == 'spiez' && r['locale'] == 'de' }
+      en_row = written.find { |r| r['slug'] == 'spiez' && r['locale'] == 'en' }
+      expect(de_row['name']).to eq('Spiez Neu')
+      expect(en_row['name']).to eq('Spiez New')
+    end
+
+    it 'inserts new entries when slug does not exist in YAML file' do
+      delta_entry = build_delta_entry(id: 'new1')
+      refetched = build_refetched_entry(id: 'new1', slug: 'thun')
+
+      allow(mock_client).to receive(:entry).and_return(refetched)
+      allow(ContentfulMappers).to receive(:flatten_entry).and_return([
+        { 'slug' => 'thun', 'locale' => 'de', 'name' => 'Thun DE' },
+        { 'slug' => 'thun', 'locale' => 'en', 'name' => 'Thun EN' }
+      ])
+
+      result = build_sync_result(changed: { 'spot' => [delta_entry] })
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+
+      written = YAML.safe_load(File.read(File.join(data_dir, 'spots.yml')))
+      expect(written.size).to eq(2)
+      expect(written.any? { |r| r['slug'] == 'thun' && r['locale'] == 'de' }).to be true
+    end
+
+    # ─── delete operations ───────────────────────────────────────────
+
+    it 'removes deleted entries from the correct YAML file' do
+      existing_spots = [
+        { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez DE' },
+        { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez EN' },
+        { 'slug' => 'thun', 'locale' => 'de', 'name' => 'Thun DE' }
+      ]
+      File.write(File.join(data_dir, 'spots.yml'), YAML.dump(existing_spots))
+
+      # Populate the entry ID index so deletion can resolve the slug
+      cache.add_to_entry_id_index('del1', 'spiez', 'spot')
+
+      deleted_entry = build_delta_entry(id: 'del1')
+      result = build_sync_result(deleted: { 'spot' => [deleted_entry] })
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+
+      written = YAML.safe_load(File.read(File.join(data_dir, 'spots.yml')))
+      expect(written.size).to eq(1)
+      expect(written.first['slug']).to eq('thun')
+    end
+
+    it 'removes deleted entry from the Entry ID Index' do
+      existing_spots = [
+        { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' }
+      ]
+      File.write(File.join(data_dir, 'spots.yml'), YAML.dump(existing_spots))
+
+      cache.add_to_entry_id_index('del1', 'spiez', 'spot')
+
+      deleted_entry = build_delta_entry(id: 'del1')
+      result = build_sync_result(deleted: { 'spot' => [deleted_entry] })
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+
+      expect(cache.lookup_entry_id('del1')).to be_nil
+    end
+
+    # ─── mixed upsert and delete ─────────────────────────────────────
+
+    it 'handles both upserts and deletes in a single delta merge' do
+      existing_spots = [
+        { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez Alt' },
+        { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez Old' },
+        { 'slug' => 'bern', 'locale' => 'de', 'name' => 'Bern DE' },
+        { 'slug' => 'bern', 'locale' => 'en', 'name' => 'Bern EN' }
+      ]
+      File.write(File.join(data_dir, 'spots.yml'), YAML.dump(existing_spots))
+
+      cache.add_to_entry_id_index('del_bern', 'bern', 'spot')
+
+      # Upsert spiez
+      changed_entry = build_delta_entry(id: 'abc123')
+      refetched = build_refetched_entry(id: 'abc123', slug: 'spiez')
+      allow(mock_client).to receive(:entry).and_return(refetched)
+      allow(ContentfulMappers).to receive(:flatten_entry).and_return([
+        { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez Neu' },
+        { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez New' }
+      ])
+
+      # Delete bern
+      deleted_entry = build_delta_entry(id: 'del_bern')
+
+      result = build_sync_result(
+        changed: { 'spot' => [changed_entry] },
+        deleted: { 'spot' => [deleted_entry] }
+      )
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+
+      written = YAML.safe_load(File.read(File.join(data_dir, 'spots.yml')))
+      slugs = written.map { |r| r['slug'] }.uniq
+      expect(slugs).to contain_exactly('spiez')
+      de_row = written.find { |r| r['slug'] == 'spiez' && r['locale'] == 'de' }
+      expect(de_row['name']).to eq('Spiez Neu')
+    end
+
+    # ─── YAML files written and site.data updated ────────────────────
+
+    it 'writes modified YAML files to disk' do
+      delta_entry = build_delta_entry(id: 'e1')
+      refetched = build_refetched_entry(id: 'e1', slug: 'aare')
+      allow(mock_client).to receive(:entry).and_return(refetched)
+      allow(ContentfulMappers).to receive(:flatten_entry).and_return([
+        { 'slug' => 'aare', 'locale' => 'de', 'name' => 'Aare DE' },
+        { 'slug' => 'aare', 'locale' => 'en', 'name' => 'Aare EN' }
+      ])
+
+      result = build_sync_result(changed: { 'waterway' => [delta_entry] })
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+
+      filepath = File.join(data_dir, 'waterways.yml')
+      expect(File.exist?(filepath)).to be true
+      written = YAML.safe_load(File.read(filepath))
+      expect(written.any? { |r| r['slug'] == 'aare' }).to be true
+    end
+
+    it 'updates site.data after delta merge' do
+      delta_entry = build_delta_entry(id: 'e1')
+      refetched = build_refetched_entry(id: 'e1', slug: 'spiez')
+      allow(mock_client).to receive(:entry).and_return(refetched)
+      allow(ContentfulMappers).to receive(:flatten_entry).and_return([
+        { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez DE' },
+        { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez EN' }
+      ])
+
+      result = build_sync_result(changed: { 'spot' => [delta_entry] })
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+
+      expect(site_data['spots']).to be_an(Array)
+      expect(site_data['spots'].any? { |r| r['slug'] == 'spiez' }).to be true
+    end
+
+    it 'updates Entry ID Index for upserted entries' do
+      delta_entry = build_delta_entry(id: 'new_e1')
+      refetched = build_refetched_entry(id: 'new_e1', slug: 'new-spot')
+      allow(mock_client).to receive(:entry).and_return(refetched)
+      allow(ContentfulMappers).to receive(:flatten_entry).and_return([
+        { 'slug' => 'new-spot', 'locale' => 'de', 'name' => 'New Spot' },
+        { 'slug' => 'new-spot', 'locale' => 'en', 'name' => 'New Spot' }
+      ])
+
+      result = build_sync_result(changed: { 'spot' => [delta_entry] })
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+
+      index_entry = cache.lookup_entry_id('new_e1')
+      expect(index_entry).to eq({ 'slug' => 'new-spot', 'content_type' => 'spot' })
+    end
+
+    # ─── client.entry called with correct params ─────────────────────
+
+    it 'calls client.entry with locale: "*" and include: 2' do
+      delta_entry = build_delta_entry(id: 'e1')
+      refetched = build_refetched_entry(id: 'e1', slug: 'spiez')
+      allow(ContentfulMappers).to receive(:flatten_entry).and_return([
+        { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' },
+        { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez' }
+      ])
+
+      expect(mock_client).to receive(:entry).with('e1', locale: '*', include: 2).and_return(refetched)
+
+      result = build_sync_result(changed: { 'spot' => [delta_entry] })
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+    end
+
+    it 'calls client.entry once per changed entry' do
+      delta1 = build_delta_entry(id: 'e1')
+      delta2 = build_delta_entry(id: 'e2')
+      refetched1 = build_refetched_entry(id: 'e1', slug: 'spiez')
+      refetched2 = build_refetched_entry(id: 'e2', slug: 'thun')
+
+      allow(ContentfulMappers).to receive(:flatten_entry).and_return([
+        { 'slug' => 'test', 'locale' => 'de', 'name' => 'Test' },
+        { 'slug' => 'test', 'locale' => 'en', 'name' => 'Test' }
+      ])
+
+      expect(mock_client).to receive(:entry).with('e1', locale: '*', include: 2).and_return(refetched1)
+      expect(mock_client).to receive(:entry).with('e2', locale: '*', include: 2).and_return(refetched2)
+
+      result = build_sync_result(changed: { 'spot' => [delta1, delta2] })
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+    end
+
+    # ─── map_type mapper receives content_type_id ────────────────────
+
+    it 'passes content_type_id as extra argument for map_type mapper' do
+      delta_entry = build_delta_entry(id: 'type1')
+      refetched = build_refetched_entry(id: 'type1', slug: 'launch-point')
+
+      allow(mock_client).to receive(:entry).and_return(refetched)
+
+      expect(ContentfulMappers).to receive(:flatten_entry)
+        .with(refetched, :map_type, 'spotType')
+        .and_return([
+          { 'slug' => 'launch-point', 'locale' => 'de', 'name_de' => 'Einstieg' },
+          { 'slug' => 'launch-point', 'locale' => 'en', 'name_en' => 'Launch Point' }
+        ])
+
+      result = build_sync_result(changed: { 'spotType' => [delta_entry] })
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+    end
+
+    it 'does not pass content_type_id for non-map_type mappers' do
+      delta_entry = build_delta_entry(id: 'spot1')
+      refetched = build_refetched_entry(id: 'spot1', slug: 'spiez')
+
+      allow(mock_client).to receive(:entry).and_return(refetched)
+
+      expect(ContentfulMappers).to receive(:flatten_entry)
+        .with(refetched, :map_spot)
+        .and_return([
+          { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' },
+          { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez' }
+        ])
+
+      result = build_sync_result(changed: { 'spot' => [delta_entry] })
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+    end
+
+    # ─── fallback to full fetch ──────────────────────────────────────
+
+    it 'falls back to full fetch when client.entry raises an error' do
+      delta_entry = build_delta_entry(id: 'fail1')
+      allow(mock_client).to receive(:entry).and_raise(StandardError.new('API timeout'))
+
+      expect(fetcher).to receive(:perform_full_sync_and_cache).with(cache, 'test_space', 'master')
+      expect(Jekyll.logger).to receive(:warn).with('Contentful:', /Delta merge failed.*API timeout.*falling back/)
+
+      result = build_sync_result(changed: { 'spot' => [delta_entry] })
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+    end
+
+    it 'falls back to full fetch when deleted entry is missing from index' do
+      existing_spots = [{ 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' }]
+      File.write(File.join(data_dir, 'spots.yml'), YAML.dump(existing_spots))
+
+      # Do NOT add entry to index -- this should trigger fallback
+      deleted_entry = build_delta_entry(id: 'missing_index_entry')
+
+      expect(fetcher).to receive(:perform_full_sync_and_cache).with(cache, 'test_space', 'master')
+      expect(Jekyll.logger).to receive(:warn).with('Contentful:', /Delta merge failed.*not found in index.*falling back/)
+
+      result = build_sync_result(deleted: { 'spot' => [deleted_entry] })
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+    end
+
+    it 'falls back to full fetch when ContentfulMappers.flatten_entry raises' do
+      delta_entry = build_delta_entry(id: 'map_fail')
+      refetched = build_refetched_entry(id: 'map_fail', slug: 'bad-entry')
+      allow(mock_client).to receive(:entry).and_return(refetched)
+      allow(ContentfulMappers).to receive(:flatten_entry).and_raise(NoMethodError.new('undefined method'))
+
+      expect(fetcher).to receive(:perform_full_sync_and_cache).with(cache, 'test_space', 'master')
+      expect(Jekyll.logger).to receive(:warn).with('Contentful:', /Delta merge failed.*undefined method.*falling back/)
+
+      result = build_sync_result(changed: { 'spot' => [delta_entry] })
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+    end
+
+    # ─── logging during delta merge ──────────────────────────────────
+
+    it 'logs delta summary with changed and deleted counts' do
+      delta_entry = build_delta_entry(id: 'e1')
+      refetched = build_refetched_entry(id: 'e1', slug: 'spiez')
+      allow(mock_client).to receive(:entry).and_return(refetched)
+      allow(ContentfulMappers).to receive(:flatten_entry).and_return([
+        { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' },
+        { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez' }
+      ])
+
+      expect(Jekyll.logger).to receive(:info).with('Contentful:', 'Delta merge: 1 changed, 0 deleted entries')
+      allow(Jekyll.logger).to receive(:info)
+
+      result = build_sync_result(changed: { 'spot' => [delta_entry] })
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+    end
+
+    it 'logs upsert operation for each changed entry' do
+      existing_spots = [{ 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez Alt' }]
+      File.write(File.join(data_dir, 'spots.yml'), YAML.dump(existing_spots))
+
+      delta_entry = build_delta_entry(id: 'e1')
+      refetched = build_refetched_entry(id: 'e1', slug: 'spiez')
+      allow(mock_client).to receive(:entry).and_return(refetched)
+      allow(ContentfulMappers).to receive(:flatten_entry).and_return([
+        { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez Neu' },
+        { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez New' }
+      ])
+
+      expect(Jekyll.logger).to receive(:info).with('Contentful:', "Updated spot entry 'spiez'")
+      allow(Jekyll.logger).to receive(:info)
+
+      result = build_sync_result(changed: { 'spot' => [delta_entry] })
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+    end
+
+    it 'logs insert operation for new entries' do
+      delta_entry = build_delta_entry(id: 'e1')
+      refetched = build_refetched_entry(id: 'e1', slug: 'new-spot')
+      allow(mock_client).to receive(:entry).and_return(refetched)
+      allow(ContentfulMappers).to receive(:flatten_entry).and_return([
+        { 'slug' => 'new-spot', 'locale' => 'de', 'name' => 'New Spot' },
+        { 'slug' => 'new-spot', 'locale' => 'en', 'name' => 'New Spot' }
+      ])
+
+      expect(Jekyll.logger).to receive(:info).with('Contentful:', "Inserted spot entry 'new-spot'")
+      allow(Jekyll.logger).to receive(:info)
+
+      result = build_sync_result(changed: { 'spot' => [delta_entry] })
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+    end
+
+    it 'logs deletion operation for each deleted entry' do
+      existing_spots = [{ 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' }]
+      File.write(File.join(data_dir, 'spots.yml'), YAML.dump(existing_spots))
+      cache.add_to_entry_id_index('del1', 'spiez', 'spot')
+
+      deleted_entry = build_delta_entry(id: 'del1')
+
+      expect(Jekyll.logger).to receive(:info).with('Contentful:', "Deleted spot entry 'spiez'")
+      allow(Jekyll.logger).to receive(:info)
+
+      result = build_sync_result(deleted: { 'spot' => [deleted_entry] })
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+    end
+
+    it 'logs warnings for unknown content types' do
+      expect(Jekyll.logger).to receive(:warn).with('Contentful:', "Unknown content type in sync delta: 'blogPost' -- no mapper configured, skipping")
+      allow(Jekyll.logger).to receive(:info)
+
+      result = build_sync_result(unknown: ['blogPost'])
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+    end
+
+    it 'logs fallback reason when delta merge fails' do
+      delta_entry = build_delta_entry(id: 'fail1')
+      allow(mock_client).to receive(:entry).and_raise(RuntimeError.new('connection reset'))
+
+      expect(Jekyll.logger).to receive(:warn).with('Contentful:', /Delta merge failed.*connection reset.*falling back to full fetch/)
+      expect(fetcher).to receive(:perform_full_sync_and_cache)
+
+      result = build_sync_result(changed: { 'spot' => [delta_entry] })
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+    end
+
+    # ─── cache persistence ───────────────────────────────────────────
+
+    it 'saves cache with new sync token after successful delta merge' do
+      delta_entry = build_delta_entry(id: 'e1')
+      refetched = build_refetched_entry(id: 'e1', slug: 'spiez')
+      allow(mock_client).to receive(:entry).and_return(refetched)
+      allow(ContentfulMappers).to receive(:flatten_entry).and_return([
+        { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' },
+        { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez' }
+      ])
+
+      result = build_sync_result(changed: { 'spot' => [delta_entry] }, token: 'delta_token_123')
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+
+      reloaded = CacheMetadata.new(data_dir)
+      reloaded.load
+      expect(reloaded.sync_token).to eq('delta_token_123')
+      expect(reloaded.space_id).to eq('test_space')
+      expect(reloaded.environment).to eq('master')
     end
   end
 end
