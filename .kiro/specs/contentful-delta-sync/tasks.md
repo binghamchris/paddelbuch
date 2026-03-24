@@ -30,7 +30,7 @@ Implement delta merge for the Contentful sync pipeline. Instead of re-fetching a
     - Test backward compatibility: loading a cache file without `entry_id_index` defaults to `{}`
     - _Requirements: 7.1, 7.5_
 
-  - [~] 1.5 Write property test for Entry ID Index round-trip (Property 4)
+  - [x] 1.5 Write property test for Entry ID Index round-trip (Property 4)
     - **Property 4: Entry ID Index round-trip through cache persistence**
     - **Validates: Requirements 7.1, 7.5**
     - Test file: `spec/delta_sync_properties_spec.rb`
