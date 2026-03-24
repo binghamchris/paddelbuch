@@ -179,7 +179,7 @@ Implement delta merge for the Contentful sync pipeline. Instead of re-fetching a
     - Update the `CacheMetadata` section: document new `entry_id_index` field and `add_to_entry_id_index`, `remove_from_entry_id_index`, `lookup_entry_id` methods
     - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5, 9.6_
 
-- [~] 8. Final checkpoint - Ensure all tests pass
+- [x] 8. Final checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Notes
