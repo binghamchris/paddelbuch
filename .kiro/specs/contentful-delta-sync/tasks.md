@@ -94,7 +94,7 @@ Implement delta merge for the Contentful sync pipeline. Instead of re-fetching a
     - `load_all_yaml_into_site_data`: read all YAML files from disk and populate `site.data` using the same key structure as `write_yaml`
     - _Requirements: 6.1, 6.2_
 
-  - [~] 5.3 Implement `build_entry_id_index` method
+  - [x] 5.3 Implement `build_entry_id_index` method
     - During full fetch, iterate all fetched entries and build the index mapping `sys.id → { slug, content_type }`
     - Use `ContentfulMappers.extract_slug` to get the slug
     - _Requirements: 7.2_

@@ -218,6 +218,17 @@ module Jekyll
       yaml_data[filename].reject! { |row| row['slug'] == slug }
     end
 
+    def build_entry_id_index(entries_by_type)
+      index = {}
+      entries_by_type.each do |content_type_id, entries|
+        entries.each do |entry|
+          slug = ContentfulMappers.extract_slug(entry.fields_with_locales, entry)
+          index[entry.sys[:id]] = { 'slug' => slug, 'content_type' => content_type_id }
+        end
+      end
+      index
+    end
+
     def load_all_yaml_files
       yaml_data = {}
       CONTENT_TYPES.each_value do |config|
