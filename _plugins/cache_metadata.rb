@@ -26,6 +26,7 @@ class CacheMetadata
     @space_id    = data['space_id']
     @environment = data['environment']
     @content_hash = data['content_hash']
+    @entry_id_index = data['entry_id_index'] || {}
     true
   rescue Psych::SyntaxError
     false
@@ -39,7 +40,8 @@ class CacheMetadata
       'last_sync_at' => @last_sync_at,
       'space_id'     => @space_id,
       'environment'  => @environment,
-      'content_hash' => @content_hash
+      'content_hash' => @content_hash,
+      'entry_id_index' => @entry_id_index
     }
 
     File.write(@cache_path, YAML.dump(data))
