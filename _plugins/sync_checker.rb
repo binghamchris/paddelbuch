@@ -13,13 +13,13 @@ module SyncChecker
     end
   end
 
-  def check_for_changes(client, sync_token, known_content_types = nil)
+  def check_for_changes(client, sync_token, known_content_types = nil, entry_id_index = {})
     sync = client.sync(sync_token: sync_token)
     items, last_page = collect_all_pages(sync)
     new_token = extract_sync_token(last_page)
 
     if known_content_types
-      changed, deleted, unknown = classify_delta_items(items, known_content_types)
+      changed, deleted, unknown = classify_delta_items(items, known_content_types, entry_id_index)
       SyncResult.new(
         success: true,
         has_changes: !items.empty?,
@@ -57,7 +57,7 @@ module SyncChecker
 
   private
 
-  def classify_delta_items(items, known_content_types)
+  def classify_delta_items(items, known_content_types, entry_id_index = {})
     changed = {}
     deleted = {}
     unknown = []
@@ -68,9 +68,18 @@ module SyncChecker
       case type
       when 'Entry', 'DeletedEntry'
         content_type_obj = item.sys[:content_type]
-        next if content_type_obj.nil?
+        content_type_id = content_type_obj&.sys&.dig(:id)
 
-        content_type_id = content_type_obj.sys[:id]
+        # DeletedEntry items from the Sync API do not carry sys.contentType.
+        # Fall back to the entry_id_index to resolve the content type.
+        if content_type_id.nil? && type == 'DeletedEntry'
+          entry_id = item.sys[:id]
+          index_entry = entry_id_index[entry_id] if entry_id
+          content_type_id = index_entry['content_type'] if index_entry
+        end
+
+        next if content_type_id.nil?
+
         target = type == 'Entry' ? changed : deleted
 
         if known_content_types.include?(content_type_id)
