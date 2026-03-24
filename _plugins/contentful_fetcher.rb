@@ -218,6 +218,40 @@ module Jekyll
       yaml_data[filename].reject! { |row| row['slug'] == slug }
     end
 
+    def load_all_yaml_files
+      yaml_data = {}
+      CONTENT_TYPES.each_value do |config|
+        filepath = File.join(@data_dir, "#{config[:filename]}.yml")
+        yaml_data[config[:filename]] = if File.exist?(filepath)
+                                         YAML.safe_load(File.read(filepath)) || []
+                                       else
+                                         []
+                                       end
+      end
+      yaml_data
+    end
+
+    def load_all_yaml_into_site_data
+      CONTENT_TYPES.each_value do |config|
+        filepath = File.join(@data_dir, "#{config[:filename]}.yml")
+        data = if File.exist?(filepath)
+                 YAML.safe_load(File.read(filepath)) || []
+               else
+                 []
+               end
+
+        keys = config[:filename].split('/')
+        if keys.length == 1
+          @site.data[keys[0]] = data
+        else
+          parent = keys[0]
+          child  = keys[1]
+          @site.data[parent] ||= {}
+          @site.data[parent][child] = data
+        end
+      end
+    end
+
     def save_cache(cache, sync_token, space_id, environment, content_hash = nil)
       cache.sync_token   = sync_token
       cache.last_sync_at = Time.now.iso8601
