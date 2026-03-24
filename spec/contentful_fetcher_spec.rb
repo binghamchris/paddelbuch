@@ -395,11 +395,11 @@ RSpec.describe Jekyll::ContentfulFetcher do
       fetcher.generate(site)
     end
 
-    it 'passes CONTENT_TYPES.keys to check_for_changes' do
+    it 'passes CONTENT_TYPES.keys and entry_id_index to check_for_changes' do
       stub_incremental_sync(items: [], token: 'same_token')
 
       expect(fetcher).to receive(:check_for_changes).with(
-        anything, anything, Jekyll::ContentfulFetcher::CONTENT_TYPES.keys
+        anything, anything, Jekyll::ContentfulFetcher::CONTENT_TYPES.keys, kind_of(Hash)
       ).and_call_original
       fetcher.generate(site)
     end

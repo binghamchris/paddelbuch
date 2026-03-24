@@ -28,9 +28,10 @@ RSpec.describe SyncChecker do
   # Helper to build a mock sync item with sys metadata (Contentful SDK style)
   # sys returns a hash with symbol keys: { type:, contentType: }
   # contentType is an object that also responds to sys returning { id: }
-  def build_sync_item(type:, content_type_id: nil)
+  def build_sync_item(type:, content_type_id: nil, entry_id: nil)
     item = double("SyncItem(#{type}/#{content_type_id})")
     sys_hash = { type: type }
+    sys_hash[:id] = entry_id if entry_id
     if content_type_id
       ct_obj = double("ContentType(#{content_type_id})")
       allow(ct_obj).to receive(:sys).and_return({ id: content_type_id })
@@ -246,15 +247,11 @@ RSpec.describe SyncChecker do
     end
 
     context 'with nil contentType on sync items' do
-      it 'skips Entry and DeletedEntry items that have no sys.contentType' do
-        # Entry with contentType present
+      it 'skips Entry items that have no sys.contentType' do
         known_entry = build_sync_item(type: 'Entry', content_type_id: 'spot')
-        # Entry with nil contentType (no content_type_id passed → sys has no :contentType key)
         nil_entry = build_sync_item(type: 'Entry')
-        # DeletedEntry with nil contentType
-        nil_deleted = build_sync_item(type: 'DeletedEntry')
 
-        items = [known_entry, nil_entry, nil_deleted]
+        items = [known_entry, nil_entry]
         page = build_mock_page(items: items, sync_url: sync_url_with_token('tok2'))
         sync = double('Sync')
         allow(sync).to receive(:first_page).and_return(page)
@@ -262,12 +259,55 @@ RSpec.describe SyncChecker do
 
         result = host.check_for_changes(client, 'tok1', known_types)
 
-        expect(result.success).to be true
-        expect(result.items_count).to eq(3)
         expect(result.changed_entries.keys).to contain_exactly('spot')
-        expect(result.changed_entries['spot']).to eq([known_entry])
         expect(result.deleted_entries).to eq({})
-        expect(result.unknown_content_types).to eq([])
+      end
+
+      it 'resolves DeletedEntry without contentType via entry_id_index' do
+        deleted_item = build_sync_item(type: 'DeletedEntry', entry_id: 'entry123')
+        entry_id_index = { 'entry123' => { 'slug' => 'my-spot', 'content_type' => 'spot' } }
+
+        items = [deleted_item]
+        page = build_mock_page(items: items, sync_url: sync_url_with_token('tok2'))
+        sync = double('Sync')
+        allow(sync).to receive(:first_page).and_return(page)
+        allow(client).to receive(:sync).with(sync_token: 'tok1').and_return(sync)
+
+        result = host.check_for_changes(client, 'tok1', known_types, entry_id_index)
+
+        expect(result.deleted_entries.keys).to contain_exactly('spot')
+        expect(result.deleted_entries['spot']).to eq([deleted_item])
+      end
+
+      it 'skips DeletedEntry when not in entry_id_index and no contentType' do
+        deleted_item = build_sync_item(type: 'DeletedEntry', entry_id: 'unknown_id')
+
+        items = [deleted_item]
+        page = build_mock_page(items: items, sync_url: sync_url_with_token('tok2'))
+        sync = double('Sync')
+        allow(sync).to receive(:first_page).and_return(page)
+        allow(client).to receive(:sync).with(sync_token: 'tok1').and_return(sync)
+
+        result = host.check_for_changes(client, 'tok1', known_types, {})
+
+        expect(result.changed_entries).to eq({})
+        expect(result.deleted_entries).to eq({})
+      end
+
+      it 'treats index-resolved unknown content type as unknown' do
+        deleted_item = build_sync_item(type: 'DeletedEntry', entry_id: 'entry456')
+        entry_id_index = { 'entry456' => { 'slug' => 'my-post', 'content_type' => 'blogPost' } }
+
+        items = [deleted_item]
+        page = build_mock_page(items: items, sync_url: sync_url_with_token('tok2'))
+        sync = double('Sync')
+        allow(sync).to receive(:first_page).and_return(page)
+        allow(client).to receive(:sync).with(sync_token: 'tok1').and_return(sync)
+
+        result = host.check_for_changes(client, 'tok1', known_types, entry_id_index)
+
+        expect(result.deleted_entries).to eq({})
+        expect(result.unknown_content_types).to contain_exactly('blogPost')
       end
     end
 

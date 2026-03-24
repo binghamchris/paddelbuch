@@ -84,7 +84,7 @@ module Jekyll
       end
 
       # Incremental sync check
-      result = check_for_changes(client, cache.sync_token, CONTENT_TYPES.keys)
+      result = check_for_changes(client, cache.sync_token, CONTENT_TYPES.keys, cache.entry_id_index)
 
       unless result.success?
         Jekyll.logger.warn 'Contentful:', "Sync API error: #{result.error&.message} -- falling back to full fetch"
