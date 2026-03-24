@@ -1093,4 +1093,447 @@ RSpec.describe Jekyll::ContentfulFetcher do
       end
     end
   end
+
+  # ─── perform_delta_merge ─────────────────────────────────────────────
+
+  describe '#perform_delta_merge' do
+    let(:cache) { CacheMetadata.new(data_dir) }
+
+    # Helper: build a delta entry mock (from sync API)
+    def build_delta_entry(id:)
+      entry = double("DeltaEntry-#{id}")
+      allow(entry).to receive(:sys).and_return({ id: id })
+      entry
+    end
+
+    # Helper: build a re-fetched entry mock (from client.entry)
+    def build_refetched_entry(id:, slug:)
+      entry = double("ReFetched-#{id}")
+      allow(entry).to receive(:sys).and_return({ id: id, created_at: Time.now, updated_at: Time.now })
+      allow(entry).to receive(:fields_with_locales).and_return({ slug: { en: slug } })
+      entry
+    end
+
+    # Helper: build a SyncResult for delta merge
+    def build_sync_result(changed: {}, deleted: {}, unknown: [], token: 'new_delta_token')
+      SyncChecker::SyncResult.new(
+        success: true,
+        has_changes: true,
+        new_token: token,
+        items_count: changed.values.flatten.size + deleted.values.flatten.size,
+        changed_entries: changed,
+        deleted_entries: deleted,
+        unknown_content_types: unknown
+      )
+    end
+
+    before do
+      set_credentials
+      stub_client
+      fetcher.instance_variable_set(:@site, site)
+      fetcher.instance_variable_set(:@data_dir, data_dir)
+      FileUtils.mkdir_p(data_dir)
+      FileUtils.mkdir_p(File.join(data_dir, 'types'))
+      allow(Jekyll.logger).to receive(:info)
+      allow(Jekyll.logger).to receive(:warn)
+
+      # Pre-populate all YAML files with empty arrays so load_all_yaml_files works
+      Jekyll::ContentfulFetcher::CONTENT_TYPES.each_value do |config|
+        filepath = File.join(data_dir, "#{config[:filename]}.yml")
+        FileUtils.mkdir_p(File.dirname(filepath))
+        File.write(filepath, YAML.dump([]))
+      end
+    end
+
+    # ─── upsert operations ───────────────────────────────────────────
+
+    it 'upserts changed entries into the correct YAML file' do
+      # Pre-populate spots with existing data
+      existing_spots = [
+        { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez Alt' },
+        { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez Old' }
+      ]
+      File.write(File.join(data_dir, 'spots.yml'), YAML.dump(existing_spots))
+
+      delta_entry = build_delta_entry(id: 'abc123')
+      refetched = build_refetched_entry(id: 'abc123', slug: 'spiez')
+
+      allow(mock_client).to receive(:entry).and_return(refetched)
+      allow(ContentfulMappers).to receive(:flatten_entry).and_return([
+        { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez Neu' },
+        { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez New' }
+      ])
+
+      result = build_sync_result(changed: { 'spot' => [delta_entry] })
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+
+      written = YAML.safe_load(File.read(File.join(data_dir, 'spots.yml')))
+      de_row = written.find { |r| r['slug'] == 'spiez' && r['locale'] == 'de' }
+      en_row = written.find { |r| r['slug'] == 'spiez' && r['locale'] == 'en' }
+      expect(de_row['name']).to eq('Spiez Neu')
+      expect(en_row['name']).to eq('Spiez New')
+    end
+
+    it 'inserts new entries when slug does not exist in YAML file' do
+      delta_entry = build_delta_entry(id: 'new1')
+      refetched = build_refetched_entry(id: 'new1', slug: 'thun')
+
+      allow(mock_client).to receive(:entry).and_return(refetched)
+      allow(ContentfulMappers).to receive(:flatten_entry).and_return([
+        { 'slug' => 'thun', 'locale' => 'de', 'name' => 'Thun DE' },
+        { 'slug' => 'thun', 'locale' => 'en', 'name' => 'Thun EN' }
+      ])
+
+      result = build_sync_result(changed: { 'spot' => [delta_entry] })
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+
+      written = YAML.safe_load(File.read(File.join(data_dir, 'spots.yml')))
+      expect(written.size).to eq(2)
+      expect(written.any? { |r| r['slug'] == 'thun' && r['locale'] == 'de' }).to be true
+    end
+
+    # ─── delete operations ───────────────────────────────────────────
+
+    it 'removes deleted entries from the correct YAML file' do
+      existing_spots = [
+        { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez DE' },
+        { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez EN' },
+        { 'slug' => 'thun', 'locale' => 'de', 'name' => 'Thun DE' }
+      ]
+      File.write(File.join(data_dir, 'spots.yml'), YAML.dump(existing_spots))
+
+      # Populate the entry ID index so deletion can resolve the slug
+      cache.add_to_entry_id_index('del1', 'spiez', 'spot')
+
+      deleted_entry = build_delta_entry(id: 'del1')
+      result = build_sync_result(deleted: { 'spot' => [deleted_entry] })
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+
+      written = YAML.safe_load(File.read(File.join(data_dir, 'spots.yml')))
+      expect(written.size).to eq(1)
+      expect(written.first['slug']).to eq('thun')
+    end
+
+    it 'removes deleted entry from the Entry ID Index' do
+      existing_spots = [
+        { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' }
+      ]
+      File.write(File.join(data_dir, 'spots.yml'), YAML.dump(existing_spots))
+
+      cache.add_to_entry_id_index('del1', 'spiez', 'spot')
+
+      deleted_entry = build_delta_entry(id: 'del1')
+      result = build_sync_result(deleted: { 'spot' => [deleted_entry] })
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+
+      expect(cache.lookup_entry_id('del1')).to be_nil
+    end
+
+    # ─── mixed upsert and delete ─────────────────────────────────────
+
+    it 'handles both upserts and deletes in a single delta merge' do
+      existing_spots = [
+        { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez Alt' },
+        { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez Old' },
+        { 'slug' => 'bern', 'locale' => 'de', 'name' => 'Bern DE' },
+        { 'slug' => 'bern', 'locale' => 'en', 'name' => 'Bern EN' }
+      ]
+      File.write(File.join(data_dir, 'spots.yml'), YAML.dump(existing_spots))
+
+      cache.add_to_entry_id_index('del_bern', 'bern', 'spot')
+
+      # Upsert spiez
+      changed_entry = build_delta_entry(id: 'abc123')
+      refetched = build_refetched_entry(id: 'abc123', slug: 'spiez')
+      allow(mock_client).to receive(:entry).and_return(refetched)
+      allow(ContentfulMappers).to receive(:flatten_entry).and_return([
+        { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez Neu' },
+        { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez New' }
+      ])
+
+      # Delete bern
+      deleted_entry = build_delta_entry(id: 'del_bern')
+
+      result = build_sync_result(
+        changed: { 'spot' => [changed_entry] },
+        deleted: { 'spot' => [deleted_entry] }
+      )
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+
+      written = YAML.safe_load(File.read(File.join(data_dir, 'spots.yml')))
+      slugs = written.map { |r| r['slug'] }.uniq
+      expect(slugs).to contain_exactly('spiez')
+      de_row = written.find { |r| r['slug'] == 'spiez' && r['locale'] == 'de' }
+      expect(de_row['name']).to eq('Spiez Neu')
+    end
+
+    # ─── YAML files written and site.data updated ────────────────────
+
+    it 'writes modified YAML files to disk' do
+      delta_entry = build_delta_entry(id: 'e1')
+      refetched = build_refetched_entry(id: 'e1', slug: 'aare')
+      allow(mock_client).to receive(:entry).and_return(refetched)
+      allow(ContentfulMappers).to receive(:flatten_entry).and_return([
+        { 'slug' => 'aare', 'locale' => 'de', 'name' => 'Aare DE' },
+        { 'slug' => 'aare', 'locale' => 'en', 'name' => 'Aare EN' }
+      ])
+
+      result = build_sync_result(changed: { 'waterway' => [delta_entry] })
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+
+      filepath = File.join(data_dir, 'waterways.yml')
+      expect(File.exist?(filepath)).to be true
+      written = YAML.safe_load(File.read(filepath))
+      expect(written.any? { |r| r['slug'] == 'aare' }).to be true
+    end
+
+    it 'updates site.data after delta merge' do
+      delta_entry = build_delta_entry(id: 'e1')
+      refetched = build_refetched_entry(id: 'e1', slug: 'spiez')
+      allow(mock_client).to receive(:entry).and_return(refetched)
+      allow(ContentfulMappers).to receive(:flatten_entry).and_return([
+        { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez DE' },
+        { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez EN' }
+      ])
+
+      result = build_sync_result(changed: { 'spot' => [delta_entry] })
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+
+      expect(site_data['spots']).to be_an(Array)
+      expect(site_data['spots'].any? { |r| r['slug'] == 'spiez' }).to be true
+    end
+
+    it 'updates Entry ID Index for upserted entries' do
+      delta_entry = build_delta_entry(id: 'new_e1')
+      refetched = build_refetched_entry(id: 'new_e1', slug: 'new-spot')
+      allow(mock_client).to receive(:entry).and_return(refetched)
+      allow(ContentfulMappers).to receive(:flatten_entry).and_return([
+        { 'slug' => 'new-spot', 'locale' => 'de', 'name' => 'New Spot' },
+        { 'slug' => 'new-spot', 'locale' => 'en', 'name' => 'New Spot' }
+      ])
+
+      result = build_sync_result(changed: { 'spot' => [delta_entry] })
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+
+      index_entry = cache.lookup_entry_id('new_e1')
+      expect(index_entry).to eq({ 'slug' => 'new-spot', 'content_type' => 'spot' })
+    end
+
+    # ─── client.entry called with correct params ─────────────────────
+
+    it 'calls client.entry with locale: "*" and include: 2' do
+      delta_entry = build_delta_entry(id: 'e1')
+      refetched = build_refetched_entry(id: 'e1', slug: 'spiez')
+      allow(ContentfulMappers).to receive(:flatten_entry).and_return([
+        { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' },
+        { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez' }
+      ])
+
+      expect(mock_client).to receive(:entry).with('e1', locale: '*', include: 2).and_return(refetched)
+
+      result = build_sync_result(changed: { 'spot' => [delta_entry] })
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+    end
+
+    it 'calls client.entry once per changed entry' do
+      delta1 = build_delta_entry(id: 'e1')
+      delta2 = build_delta_entry(id: 'e2')
+      refetched1 = build_refetched_entry(id: 'e1', slug: 'spiez')
+      refetched2 = build_refetched_entry(id: 'e2', slug: 'thun')
+
+      allow(ContentfulMappers).to receive(:flatten_entry).and_return([
+        { 'slug' => 'test', 'locale' => 'de', 'name' => 'Test' },
+        { 'slug' => 'test', 'locale' => 'en', 'name' => 'Test' }
+      ])
+
+      expect(mock_client).to receive(:entry).with('e1', locale: '*', include: 2).and_return(refetched1)
+      expect(mock_client).to receive(:entry).with('e2', locale: '*', include: 2).and_return(refetched2)
+
+      result = build_sync_result(changed: { 'spot' => [delta1, delta2] })
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+    end
+
+    # ─── map_type mapper receives content_type_id ────────────────────
+
+    it 'passes content_type_id as extra argument for map_type mapper' do
+      delta_entry = build_delta_entry(id: 'type1')
+      refetched = build_refetched_entry(id: 'type1', slug: 'launch-point')
+
+      allow(mock_client).to receive(:entry).and_return(refetched)
+
+      expect(ContentfulMappers).to receive(:flatten_entry)
+        .with(refetched, :map_type, 'spotType')
+        .and_return([
+          { 'slug' => 'launch-point', 'locale' => 'de', 'name_de' => 'Einstieg' },
+          { 'slug' => 'launch-point', 'locale' => 'en', 'name_en' => 'Launch Point' }
+        ])
+
+      result = build_sync_result(changed: { 'spotType' => [delta_entry] })
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+    end
+
+    it 'does not pass content_type_id for non-map_type mappers' do
+      delta_entry = build_delta_entry(id: 'spot1')
+      refetched = build_refetched_entry(id: 'spot1', slug: 'spiez')
+
+      allow(mock_client).to receive(:entry).and_return(refetched)
+
+      expect(ContentfulMappers).to receive(:flatten_entry)
+        .with(refetched, :map_spot)
+        .and_return([
+          { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' },
+          { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez' }
+        ])
+
+      result = build_sync_result(changed: { 'spot' => [delta_entry] })
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+    end
+
+    # ─── fallback to full fetch ──────────────────────────────────────
+
+    it 'falls back to full fetch when client.entry raises an error' do
+      delta_entry = build_delta_entry(id: 'fail1')
+      allow(mock_client).to receive(:entry).and_raise(StandardError.new('API timeout'))
+
+      expect(fetcher).to receive(:perform_full_sync_and_cache).with(cache, 'test_space', 'master')
+      expect(Jekyll.logger).to receive(:warn).with('Contentful:', /Delta merge failed.*API timeout.*falling back/)
+
+      result = build_sync_result(changed: { 'spot' => [delta_entry] })
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+    end
+
+    it 'falls back to full fetch when deleted entry is missing from index' do
+      existing_spots = [{ 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' }]
+      File.write(File.join(data_dir, 'spots.yml'), YAML.dump(existing_spots))
+
+      # Do NOT add entry to index -- this should trigger fallback
+      deleted_entry = build_delta_entry(id: 'missing_index_entry')
+
+      expect(fetcher).to receive(:perform_full_sync_and_cache).with(cache, 'test_space', 'master')
+      expect(Jekyll.logger).to receive(:warn).with('Contentful:', /Delta merge failed.*not found in index.*falling back/)
+
+      result = build_sync_result(deleted: { 'spot' => [deleted_entry] })
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+    end
+
+    it 'falls back to full fetch when ContentfulMappers.flatten_entry raises' do
+      delta_entry = build_delta_entry(id: 'map_fail')
+      refetched = build_refetched_entry(id: 'map_fail', slug: 'bad-entry')
+      allow(mock_client).to receive(:entry).and_return(refetched)
+      allow(ContentfulMappers).to receive(:flatten_entry).and_raise(NoMethodError.new('undefined method'))
+
+      expect(fetcher).to receive(:perform_full_sync_and_cache).with(cache, 'test_space', 'master')
+      expect(Jekyll.logger).to receive(:warn).with('Contentful:', /Delta merge failed.*undefined method.*falling back/)
+
+      result = build_sync_result(changed: { 'spot' => [delta_entry] })
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+    end
+
+    # ─── logging during delta merge ──────────────────────────────────
+
+    it 'logs delta summary with changed and deleted counts' do
+      delta_entry = build_delta_entry(id: 'e1')
+      refetched = build_refetched_entry(id: 'e1', slug: 'spiez')
+      allow(mock_client).to receive(:entry).and_return(refetched)
+      allow(ContentfulMappers).to receive(:flatten_entry).and_return([
+        { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' },
+        { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez' }
+      ])
+
+      expect(Jekyll.logger).to receive(:info).with('Contentful:', 'Delta merge: 1 changed, 0 deleted entries')
+      allow(Jekyll.logger).to receive(:info)
+
+      result = build_sync_result(changed: { 'spot' => [delta_entry] })
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+    end
+
+    it 'logs upsert operation for each changed entry' do
+      existing_spots = [{ 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez Alt' }]
+      File.write(File.join(data_dir, 'spots.yml'), YAML.dump(existing_spots))
+
+      delta_entry = build_delta_entry(id: 'e1')
+      refetched = build_refetched_entry(id: 'e1', slug: 'spiez')
+      allow(mock_client).to receive(:entry).and_return(refetched)
+      allow(ContentfulMappers).to receive(:flatten_entry).and_return([
+        { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez Neu' },
+        { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez New' }
+      ])
+
+      expect(Jekyll.logger).to receive(:info).with('Contentful:', "Updated spot entry 'spiez'")
+      allow(Jekyll.logger).to receive(:info)
+
+      result = build_sync_result(changed: { 'spot' => [delta_entry] })
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+    end
+
+    it 'logs insert operation for new entries' do
+      delta_entry = build_delta_entry(id: 'e1')
+      refetched = build_refetched_entry(id: 'e1', slug: 'new-spot')
+      allow(mock_client).to receive(:entry).and_return(refetched)
+      allow(ContentfulMappers).to receive(:flatten_entry).and_return([
+        { 'slug' => 'new-spot', 'locale' => 'de', 'name' => 'New Spot' },
+        { 'slug' => 'new-spot', 'locale' => 'en', 'name' => 'New Spot' }
+      ])
+
+      expect(Jekyll.logger).to receive(:info).with('Contentful:', "Inserted spot entry 'new-spot'")
+      allow(Jekyll.logger).to receive(:info)
+
+      result = build_sync_result(changed: { 'spot' => [delta_entry] })
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+    end
+
+    it 'logs deletion operation for each deleted entry' do
+      existing_spots = [{ 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' }]
+      File.write(File.join(data_dir, 'spots.yml'), YAML.dump(existing_spots))
+      cache.add_to_entry_id_index('del1', 'spiez', 'spot')
+
+      deleted_entry = build_delta_entry(id: 'del1')
+
+      expect(Jekyll.logger).to receive(:info).with('Contentful:', "Deleted spot entry 'spiez'")
+      allow(Jekyll.logger).to receive(:info)
+
+      result = build_sync_result(deleted: { 'spot' => [deleted_entry] })
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+    end
+
+    it 'logs warnings for unknown content types' do
+      expect(Jekyll.logger).to receive(:warn).with('Contentful:', "Unknown content type in sync delta: 'blogPost' -- no mapper configured, skipping")
+      allow(Jekyll.logger).to receive(:info)
+
+      result = build_sync_result(unknown: ['blogPost'])
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+    end
+
+    it 'logs fallback reason when delta merge fails' do
+      delta_entry = build_delta_entry(id: 'fail1')
+      allow(mock_client).to receive(:entry).and_raise(RuntimeError.new('connection reset'))
+
+      expect(Jekyll.logger).to receive(:warn).with('Contentful:', /Delta merge failed.*connection reset.*falling back to full fetch/)
+      expect(fetcher).to receive(:perform_full_sync_and_cache)
+
+      result = build_sync_result(changed: { 'spot' => [delta_entry] })
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+    end
+
+    # ─── cache persistence ───────────────────────────────────────────
+
+    it 'saves cache with new sync token after successful delta merge' do
+      delta_entry = build_delta_entry(id: 'e1')
+      refetched = build_refetched_entry(id: 'e1', slug: 'spiez')
+      allow(mock_client).to receive(:entry).and_return(refetched)
+      allow(ContentfulMappers).to receive(:flatten_entry).and_return([
+        { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' },
+        { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez' }
+      ])
+
+      result = build_sync_result(changed: { 'spot' => [delta_entry] }, token: 'delta_token_123')
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+
+      reloaded = CacheMetadata.new(data_dir)
+      reloaded.load
+      expect(reloaded.sync_token).to eq('delta_token_123')
+      expect(reloaded.space_id).to eq('test_space')
+      expect(reloaded.environment).to eq('master')
+    end
+  end
 end

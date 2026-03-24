@@ -124,7 +124,7 @@ Implement delta merge for the Contentful sync pipeline. Instead of re-fetching a
     - Store the index in `cache.entry_id_index` before saving
     - _Requirements: 7.2_
 
-  - [~] 5.8 Write unit tests for ContentfulFetcher delta merge
+  - [x] 5.8 Write unit tests for ContentfulFetcher delta merge
     - Test file: `spec/contentful_fetcher_spec.rb` (extend existing file)
     - Test `upsert_rows`: upsert existing entry (replace), insert new entry (append)
     - Test `remove_rows`: remove all locale rows for a slug, leave other slugs unchanged
