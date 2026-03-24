@@ -13,16 +13,30 @@ module SyncChecker
     end
   end
 
-  def check_for_changes(client, sync_token)
+  def check_for_changes(client, sync_token, known_content_types = nil)
     sync = client.sync(sync_token: sync_token)
     items, last_page = collect_all_pages(sync)
     new_token = extract_sync_token(last_page)
-    SyncResult.new(
-      success: true,
-      has_changes: !items.empty?,
-      new_token: new_token,
-      items_count: items.size
-    )
+
+    if known_content_types
+      changed, deleted, unknown = classify_delta_items(items, known_content_types)
+      SyncResult.new(
+        success: true,
+        has_changes: !items.empty?,
+        new_token: new_token,
+        items_count: items.size,
+        changed_entries: changed,
+        deleted_entries: deleted,
+        unknown_content_types: unknown
+      )
+    else
+      SyncResult.new(
+        success: true,
+        has_changes: !items.empty?,
+        new_token: new_token,
+        items_count: items.size
+      )
+    end
   rescue StandardError => e
     SyncResult.new(success: false, error: e)
   end
@@ -42,6 +56,36 @@ module SyncChecker
   end
 
   private
+
+  def classify_delta_items(items, known_content_types)
+    changed = {}
+    deleted = {}
+    unknown = []
+
+    items.each do |item|
+      type = item.sys[:type]
+
+      case type
+      when 'Entry'
+        content_type_id = item.sys[:contentType].sys[:id]
+        if known_content_types.include?(content_type_id)
+          (changed[content_type_id] ||= []) << item
+        else
+          unknown << content_type_id unless unknown.include?(content_type_id)
+        end
+      when 'DeletedEntry'
+        content_type_id = item.sys[:contentType].sys[:id]
+        if known_content_types.include?(content_type_id)
+          (deleted[content_type_id] ||= []) << item
+        else
+          unknown << content_type_id unless unknown.include?(content_type_id)
+        end
+      end
+      # 'Asset' and 'DeletedAsset' are ignored
+    end
+
+    [changed, deleted, unknown]
+  end
 
   def collect_all_pages(sync)
     page = sync.first_page
