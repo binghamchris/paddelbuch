@@ -66,17 +66,15 @@ module SyncChecker
       type = item.sys[:type]
 
       case type
-      when 'Entry'
-        content_type_id = item.sys[:contentType].sys[:id]
+      when 'Entry', 'DeletedEntry'
+        content_type_obj = item.sys[:contentType]
+        next if content_type_obj.nil?
+
+        content_type_id = content_type_obj.sys[:id]
+        target = type == 'Entry' ? changed : deleted
+
         if known_content_types.include?(content_type_id)
-          (changed[content_type_id] ||= []) << item
-        else
-          unknown << content_type_id unless unknown.include?(content_type_id)
-        end
-      when 'DeletedEntry'
-        content_type_id = item.sys[:contentType].sys[:id]
-        if known_content_types.include?(content_type_id)
-          (deleted[content_type_id] ||= []) << item
+          (target[content_type_id] ||= []) << item
         else
           unknown << content_type_id unless unknown.include?(content_type_id)
         end

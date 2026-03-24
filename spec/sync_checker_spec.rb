@@ -245,6 +245,32 @@ RSpec.describe SyncChecker do
       end
     end
 
+    context 'with nil contentType on sync items' do
+      it 'skips Entry and DeletedEntry items that have no sys.contentType' do
+        # Entry with contentType present
+        known_entry = build_sync_item(type: 'Entry', content_type_id: 'spot')
+        # Entry with nil contentType (no content_type_id passed → sys has no :contentType key)
+        nil_entry = build_sync_item(type: 'Entry')
+        # DeletedEntry with nil contentType
+        nil_deleted = build_sync_item(type: 'DeletedEntry')
+
+        items = [known_entry, nil_entry, nil_deleted]
+        page = build_mock_page(items: items, sync_url: sync_url_with_token('tok2'))
+        sync = double('Sync')
+        allow(sync).to receive(:first_page).and_return(page)
+        allow(client).to receive(:sync).with(sync_token: 'tok1').and_return(sync)
+
+        result = host.check_for_changes(client, 'tok1', known_types)
+
+        expect(result.success).to be true
+        expect(result.items_count).to eq(3)
+        expect(result.changed_entries.keys).to contain_exactly('spot')
+        expect(result.changed_entries['spot']).to eq([known_entry])
+        expect(result.deleted_entries).to eq({})
+        expect(result.unknown_content_types).to eq([])
+      end
+    end
+
     context 'backward compatibility' do
       it 'works without known_content_types (nil)' do
         items = [double('Entry1'), double('Entry2')]
