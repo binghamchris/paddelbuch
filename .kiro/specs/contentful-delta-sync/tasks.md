@@ -72,7 +72,7 @@ Implement delta merge for the Contentful sync pipeline. Instead of re-fetching a
     - Test `SyncResult` new fields are present and default correctly
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4_
 
-  - [~] 3.4 Write property test for delta item classification (Property 1)
+  - [x] 3.4 Write property test for delta item classification (Property 1)
     - **Property 1: Delta item classification and grouping**
     - **Validates: Requirements 1.1, 1.2, 1.3, 1.4, 1.5, 2.1, 2.2**
     - Test file: `spec/delta_sync_properties_spec.rb`
