@@ -100,6 +100,23 @@ python3 scripts/cut_rivers_at_lakes.py [OPTIONS]
 
 Dependencies: `pip3 install shapely requests python-dotenv`
 
+### `recalculate_river_lengths.py`
+
+Recalculates the `length` field for rivers from their GeoJSON geometry using geodesic distance (WGS84 ellipsoid). Only processes waterways where `navigableByPaddlers` is not `false`. Skips entries whose length already matches the calculated value.
+
+Uses server-side filtering (`fields.navigableByPaddlers[ne]=false`), field selection (`select=`), and JSON Patch (`PATCH`) to minimise API quota usage.
+
+```bash
+python3 scripts/recalculate_river_lengths.py [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--dry-run` | Preview changes without writing to Contentful |
+| `--slug SLUG` | Process only the river with the given slug |
+
+Dependencies: `pip3 install pyproj requests python-dotenv`
+
 ### `clip_geometry_to_switzerland.py`
 
 Standalone CLI tool to clip any GeoJSON file to the Swiss border. Not Contentful-specific — operates on local files.
