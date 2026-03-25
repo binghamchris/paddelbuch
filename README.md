@@ -111,6 +111,7 @@ paddelbuch/
 │   ├── copy-vendor-assets.js          # Copies vendor JS/CSS from node_modules
 │   ├── cut_rivers_at_lakes.py         # Cut river geometries at lake boundaries
 │   ├── download-google-fonts.js       # Downloads and self-hosts Google Fonts
+│   ├── recalculate_river_lengths.py   # Recalculate river lengths from geometry
 │   ├── generate_apple_touch_icon.py   # SVG → PNG icon generation
 │   ├── restore_geometry_from_full.rb  # Restores waterway geometry from full GeoJSON
 │   └── simplify_waterway_geometry.rb  # Simplifies waterway geometry in Contentful
