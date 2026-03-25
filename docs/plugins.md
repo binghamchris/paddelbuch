@@ -228,7 +228,7 @@ Plugins run in priority order. Hooks run at specific lifecycle points.
 - `assets/images/logo-favicon.svg`
 - `assets/images/apple-touch-icon.png`
 
-**Dependencies:** None. The PNG is pre-generated and checked into the repo. Regenerate with `python3 _scripts/generate_apple_touch_icon.py` if the SVG changes.
+**Dependencies:** None. The PNG is pre-generated and checked into the repo. Regenerate with `python3 scripts/generate_apple_touch_icon.py` if the SVG changes.
 
 ---
 
@@ -350,10 +350,11 @@ Skipped entirely in production/CI environments.
 - `unknown_content_types` — Array of content type IDs found in delta but not in `CONTENT_TYPES`
 
 **`check_for_changes` method:**
-- Signature: `check_for_changes(client, sync_token, known_content_types = nil)`
+- Signature: `check_for_changes(client, sync_token, known_content_types = nil, entry_id_index = {})`
 - When `known_content_types` is provided, classifies delta items by `sys.type` (`Entry` → changed, `DeletedEntry` → deleted, `Asset`/`DeletedAsset` → ignored) and groups by content type ID
+- `DeletedEntry` items from the Sync API do not carry `sys.contentType`. When the content type is missing, the method falls back to the `entry_id_index` to resolve the content type by entry ID. Entries that cannot be resolved are skipped.
 - Entries with unknown content type IDs are excluded and collected in `unknown_content_types`
-- When `known_content_types` is `nil`, maintains backward-compatible behavior
+- When `known_content_types` is `nil`, maintains backward-compatible behavior (no delta classification)
 
 ### CacheMetadata
 

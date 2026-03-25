@@ -84,11 +84,6 @@ paddelbuch/
 │   ├── sync_checker.rb        # Contentful Sync API integration
 │   ├── tile_generator.rb      # Spatial tile generation
 │   └── waterway_filters.rb    # Waterway-specific filters
-├── _scripts/             # Build helper scripts
-│   ├── generate_apple_touch_icon.py  # SVG → PNG icon generation
-│   ├── clip_geometry_to_switzerland.py  # Clip GeoJSON geometry to Swiss border
-│   ├── clip_waterways_to_switzerland.py # Clip waterway geometries to Swiss border
-│   └── cut_rivers_at_lakes.py        # Cut river geometries at lake boundaries
 ├── _sass/                # SCSS stylesheets
 ├── _spots/               # Spot collection (generated)
 ├── _waterways/           # Waterway collection (generated)
@@ -110,9 +105,13 @@ paddelbuch/
 ├── docs/                 # Project documentation
 ├── gewaesser/            # Waterway list pages
 ├── offene-daten/         # Open data/API pages
-├── scripts/              # Utility scripts
+├── scripts/              # Utility and build helper scripts
+│   ├── clip_geometry_to_switzerland.py  # Clip GeoJSON geometry to Swiss border
+│   ├── clip_waterways_to_switzerland.py # Clip waterway geometries to Swiss border
 │   ├── copy-vendor-assets.js          # Copies vendor JS/CSS from node_modules
+│   ├── cut_rivers_at_lakes.py         # Cut river geometries at lake boundaries
 │   ├── download-google-fonts.js       # Downloads and self-hosts Google Fonts
+│   ├── generate_apple_touch_icon.py   # SVG → PNG icon generation
 │   ├── restore_geometry_from_full.rb  # Restores waterway geometry from full GeoJSON
 │   └── simplify_waterway_geometry.rb  # Simplifies waterway geometry in Contentful
 ├── amplify.yml           # AWS Amplify build configuration
@@ -232,7 +231,7 @@ The PNG is checked into the repo so production builds on AWS Amplify don't need 
 
 ```bash
 # Requires: brew install librsvg
-python3 _scripts/generate_apple_touch_icon.py
+python3 scripts/generate_apple_touch_icon.py
 ```
 
 The script uses a SHA-256 checksum to skip regeneration when the SVG hasn't changed.
@@ -241,9 +240,9 @@ The script uses a SHA-256 checksum to skip regeneration when the SVG hasn't chan
 
 Content is managed in Contentful and synced to Jekyll data files during the build process. The sync pipeline consists of several custom plugins:
 
-1. **ContentfulFetcher** (`contentful_fetcher.rb`) — Orchestrates the data fetch from Contentful, using the Sync API for incremental updates when possible
-2. **SyncChecker** (`sync_checker.rb`) — Determines whether a full or incremental sync is needed by querying the Contentful Sync API
-3. **CacheMetadata** (`cache_metadata.rb`) — Persists sync state (tokens, timestamps) between builds to enable incremental syncing
+1. **ContentfulFetcher** (`contentful_fetcher.rb`) — Orchestrates the data fetch from Contentful. Uses the Sync API to detect changes, then either performs a targeted delta merge (upserting changed entries and removing deleted entries in the existing YAML files) or falls back to a full re-fetch. Delta merge avoids re-fetching all content when only a few entries have changed.
+2. **SyncChecker** (`sync_checker.rb`) — Queries the Contentful Sync API and classifies delta items into changed entries, deleted entries, and unknown content types
+3. **CacheMetadata** (`cache_metadata.rb`) — Persists sync state (tokens, timestamps, content hash, and the Entry ID Index) between builds to enable incremental syncing and delta merges
 4. **ContentfulMappers** (`contentful_mappers.rb`) — Transforms Contentful entries into Jekyll-compatible YAML data, including rich text rendering with support for tables, marks (bold, italic, underline, code), and embedded entries
 5. **CollectionGenerator** (`collection_generator.rb`) — Generates Jekyll collection pages from the synced data
 

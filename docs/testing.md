@@ -87,6 +87,7 @@ spec/
 ├── contentful_fetcher_spec.rb              ← ContentfulFetcher tests
 ├── contentful_mappers_spec.rb              ← ContentfulMappers tests
 ├── contentful_sync_properties_spec.rb      ← Sync API property tests
+├── delta_sync_properties_spec.rb           ← Delta sync merge property tests
 ├── data_compatibility_spec.rb              ← Data format compatibility tests
 ├── env_loader_spec.rb                      ← EnvLoader tests
 ├── integration_spec.rb                     ← Cross-plugin integration tests

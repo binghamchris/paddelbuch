@@ -93,8 +93,15 @@ The `ContentfulFetcher` uses the Contentful Sync API for incremental updates:
 1. On first build (or when cache is missing/invalid): performs a full sync, fetches all entries
 2. On subsequent builds: checks the Sync API with the stored token to detect changes
 3. If no changes: skips the fetch entirely, uses cached `_data/` files
-4. If changes detected: re-fetches all content and updates `_data/` files
-5. A SHA-256 content hash is computed over all YAML files to detect actual data changes
+4. If changes detected and delta items are classifiable: attempts a delta merge
+   - Re-fetches each changed entry individually via the Contentful API
+   - Maps through `ContentfulMappers.flatten_entry` and upserts rows in the existing YAML data files
+   - Looks up deleted entries in the Entry ID Index and removes rows from the corresponding YAML files
+   - Falls back to a full fetch if any step fails
+5. If changes detected but delta items are not classifiable: performs a full fetch
+6. A SHA-256 content hash is computed over all YAML files to detect actual data changes
+
+The **Entry ID Index** is a persistent mapping of Contentful `sys.id` → `{ slug, content_type }` stored in the sync cache file. It is built during full syncs and maintained incrementally during delta merges. The index is necessary because `DeletedEntry` items from the Contentful Sync API contain only `sys` metadata (no `fields` or `slug`), so the index provides the slug and content type needed to locate and remove the correct rows from the YAML data files.
 
 The `contentful_data_changed` flag propagates through the pipeline. When `false`, the `ApiGenerator` and `TileGenerator` can skip regeneration and serve from their own caches (`_data/.api_cache/` and `_data/.tile_cache/`).
 
