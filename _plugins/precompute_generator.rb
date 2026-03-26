@@ -48,7 +48,7 @@ module Jekyll
 
       # Top 10 rivers by length, then sorted alphabetically
       site.data['nav_top_rivers'] = waterways
-        .select { |w| w['locale'] == locale && w['paddlingEnvironmentType_slug'] == 'fluss' && w['showInMenu'] == true }
+        .select { |w| w['locale'] == locale && w['paddlingEnvironmentType_slug'] == 'fluss' && w['showInMenu'] == true && w['navigableByPaddlers'] != false }
         .sort_by { |w| -(w['length'] || 0) }
         .first(10)
         .sort_by { |w| w['name'].to_s.downcase }
