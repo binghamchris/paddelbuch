@@ -132,6 +132,25 @@ python3 scripts/clip_geometry_to_switzerland.py <input.geojson> [output.geojson]
 
 Dependencies: `pip3 install shapely requests`
 
+### `subtract_polygon_from_rivers.py`
+
+Subtracts a user-provided GeoJSON polygon from river geometries in Contentful. Useful for removing river sections that pass through a specific area (e.g. a new lake, restricted zone, or mapping correction). Accepts a bare Polygon/MultiPolygon, a Feature, or a FeatureCollection as input. Also recalculates the `length` field for affected rivers using geodesic distance (WGS84 ellipsoid), matching the approach used by `recalculate_river_lengths.py`.
+
+By default, uses locally cached build data (`_data/waterways.yml` and `_data/.contentful_sync_cache.yml`) to identify affected rivers and resolve entry IDs, so only rivers whose geometry actually intersects the polygon trigger CMA requests. Requires a prior Jekyll build to populate the cache. Use `--from-contentful` to bypass the cache and fetch all waterways directly from the CMA instead (higher API usage, but always up-to-date).
+
+```bash
+python3 scripts/subtract_polygon_from_rivers.py <polygon.geojson> [OPTIONS]
+```
+
+| Argument / Option | Description |
+|-------------------|-------------|
+| `polygon.geojson` | Path to a GeoJSON file containing the polygon to subtract (required) |
+| `--dry-run` | Preview changes without writing to Contentful |
+| `--slug SLUG` | Process only the river with the given slug |
+| `--from-contentful` | Fetch geometry from Contentful CMA instead of the local build cache |
+
+Dependencies: `pip3 install shapely pyproj requests python-dotenv pyyaml`
+
 ## Cache
 
 The `.cache/` subdirectory stores a downloaded copy of the Swiss border GeoJSON used by the clipping scripts. It is populated automatically on first run and can be safely deleted to force a re-download.
