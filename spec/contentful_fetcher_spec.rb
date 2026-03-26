@@ -1106,12 +1106,27 @@ RSpec.describe Jekyll::ContentfulFetcher do
       entry
     end
 
-    # Helper: build a re-fetched entry mock (from client.entry)
+    # Helper: build a re-fetched entry mock (from client.entry / client.entries)
     def build_refetched_entry(id:, slug:)
       entry = double("ReFetched-#{id}")
       allow(entry).to receive(:sys).and_return({ id: id, created_at: Time.now, updated_at: Time.now })
       allow(entry).to receive(:fields_with_locales).and_return({ slug: { en: slug } })
       entry
+    end
+
+    # Helper: build a mock entries response (from client.entries) that responds to .to_a
+    def build_entries_response(entries)
+      response = double('EntriesResponse')
+      allow(response).to receive(:to_a).and_return(entries)
+      response
+    end
+
+    # Helper: stub client.entries for a content type with given entry IDs
+    def stub_batch_entries(content_type_id, entry_ids, entries)
+      response = build_entries_response(entries)
+      allow(mock_client).to receive(:entries).with(
+        hash_including(content_type: content_type_id, 'sys.id[in]' => entry_ids.join(','))
+      ).and_return(response)
     end
 
     # Helper: build a SyncResult for delta merge
@@ -1158,7 +1173,7 @@ RSpec.describe Jekyll::ContentfulFetcher do
       delta_entry = build_delta_entry(id: 'abc123')
       refetched = build_refetched_entry(id: 'abc123', slug: 'spiez')
 
-      allow(mock_client).to receive(:entry).and_return(refetched)
+      stub_batch_entries('spot', ['abc123'], [refetched])
       allow(ContentfulMappers).to receive(:flatten_entry).and_return([
         { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez Neu' },
         { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez New' }
@@ -1178,7 +1193,7 @@ RSpec.describe Jekyll::ContentfulFetcher do
       delta_entry = build_delta_entry(id: 'new1')
       refetched = build_refetched_entry(id: 'new1', slug: 'thun')
 
-      allow(mock_client).to receive(:entry).and_return(refetched)
+      stub_batch_entries('spot', ['new1'], [refetched])
       allow(ContentfulMappers).to receive(:flatten_entry).and_return([
         { 'slug' => 'thun', 'locale' => 'de', 'name' => 'Thun DE' },
         { 'slug' => 'thun', 'locale' => 'en', 'name' => 'Thun EN' }
@@ -1245,7 +1260,7 @@ RSpec.describe Jekyll::ContentfulFetcher do
       # Upsert spiez
       changed_entry = build_delta_entry(id: 'abc123')
       refetched = build_refetched_entry(id: 'abc123', slug: 'spiez')
-      allow(mock_client).to receive(:entry).and_return(refetched)
+      stub_batch_entries('spot', ['abc123'], [refetched])
       allow(ContentfulMappers).to receive(:flatten_entry).and_return([
         { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez Neu' },
         { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez New' }
@@ -1272,7 +1287,7 @@ RSpec.describe Jekyll::ContentfulFetcher do
     it 'writes modified YAML files to disk' do
       delta_entry = build_delta_entry(id: 'e1')
       refetched = build_refetched_entry(id: 'e1', slug: 'aare')
-      allow(mock_client).to receive(:entry).and_return(refetched)
+      stub_batch_entries('waterway', ['e1'], [refetched])
       allow(ContentfulMappers).to receive(:flatten_entry).and_return([
         { 'slug' => 'aare', 'locale' => 'de', 'name' => 'Aare DE' },
         { 'slug' => 'aare', 'locale' => 'en', 'name' => 'Aare EN' }
@@ -1290,7 +1305,7 @@ RSpec.describe Jekyll::ContentfulFetcher do
     it 'updates site.data after delta merge' do
       delta_entry = build_delta_entry(id: 'e1')
       refetched = build_refetched_entry(id: 'e1', slug: 'spiez')
-      allow(mock_client).to receive(:entry).and_return(refetched)
+      stub_batch_entries('spot', ['e1'], [refetched])
       allow(ContentfulMappers).to receive(:flatten_entry).and_return([
         { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez DE' },
         { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez EN' }
@@ -1306,7 +1321,7 @@ RSpec.describe Jekyll::ContentfulFetcher do
     it 'updates Entry ID Index for upserted entries' do
       delta_entry = build_delta_entry(id: 'new_e1')
       refetched = build_refetched_entry(id: 'new_e1', slug: 'new-spot')
-      allow(mock_client).to receive(:entry).and_return(refetched)
+      stub_batch_entries('spot', ['new_e1'], [refetched])
       allow(ContentfulMappers).to receive(:flatten_entry).and_return([
         { 'slug' => 'new-spot', 'locale' => 'de', 'name' => 'New Spot' },
         { 'slug' => 'new-spot', 'locale' => 'en', 'name' => 'New Spot' }
@@ -1319,9 +1334,9 @@ RSpec.describe Jekyll::ContentfulFetcher do
       expect(index_entry).to eq({ 'slug' => 'new-spot', 'content_type' => 'spot' })
     end
 
-    # ─── client.entry called with correct params ─────────────────────
+    # ─── client.entries called with correct params ─────────────────────
 
-    it 'calls client.entry with locale: "*" and include: 2' do
+    it 'calls client.entries with sys.id[in], locale, include, and content_type parameters' do
       delta_entry = build_delta_entry(id: 'e1')
       refetched = build_refetched_entry(id: 'e1', slug: 'spiez')
       allow(ContentfulMappers).to receive(:flatten_entry).and_return([
@@ -1329,13 +1344,21 @@ RSpec.describe Jekyll::ContentfulFetcher do
         { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez' }
       ])
 
-      expect(mock_client).to receive(:entry).with('e1', locale: '*', include: 2).and_return(refetched)
+      entries_response = build_entries_response([refetched])
+      expect(mock_client).to receive(:entries).with(
+        hash_including(
+          content_type: 'spot',
+          'sys.id[in]' => 'e1',
+          locale: '*',
+          include: 2
+        )
+      ).and_return(entries_response)
 
       result = build_sync_result(changed: { 'spot' => [delta_entry] })
       fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
     end
 
-    it 'calls client.entry once per changed entry' do
+    it 'calls client.entries once per content type group instead of once per entry' do
       delta1 = build_delta_entry(id: 'e1')
       delta2 = build_delta_entry(id: 'e2')
       refetched1 = build_refetched_entry(id: 'e1', slug: 'spiez')
@@ -1346,8 +1369,11 @@ RSpec.describe Jekyll::ContentfulFetcher do
         { 'slug' => 'test', 'locale' => 'en', 'name' => 'Test' }
       ])
 
-      expect(mock_client).to receive(:entry).with('e1', locale: '*', include: 2).and_return(refetched1)
-      expect(mock_client).to receive(:entry).with('e2', locale: '*', include: 2).and_return(refetched2)
+      # Both entries are in the same content type group, so only one batch call
+      entries_response = build_entries_response([refetched1, refetched2])
+      expect(mock_client).to receive(:entries).with(
+        hash_including(content_type: 'spot', 'sys.id[in]' => 'e1,e2')
+      ).once.and_return(entries_response)
 
       result = build_sync_result(changed: { 'spot' => [delta1, delta2] })
       fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
@@ -1359,7 +1385,7 @@ RSpec.describe Jekyll::ContentfulFetcher do
       delta_entry = build_delta_entry(id: 'type1')
       refetched = build_refetched_entry(id: 'type1', slug: 'launch-point')
 
-      allow(mock_client).to receive(:entry).and_return(refetched)
+      stub_batch_entries('spotType', ['type1'], [refetched])
 
       expect(ContentfulMappers).to receive(:flatten_entry)
         .with(refetched, :map_type, 'spotType')
@@ -1376,7 +1402,7 @@ RSpec.describe Jekyll::ContentfulFetcher do
       delta_entry = build_delta_entry(id: 'spot1')
       refetched = build_refetched_entry(id: 'spot1', slug: 'spiez')
 
-      allow(mock_client).to receive(:entry).and_return(refetched)
+      stub_batch_entries('spot', ['spot1'], [refetched])
 
       expect(ContentfulMappers).to receive(:flatten_entry)
         .with(refetched, :map_spot)
@@ -1391,15 +1417,53 @@ RSpec.describe Jekyll::ContentfulFetcher do
 
     # ─── fallback to full fetch ──────────────────────────────────────
 
-    it 'falls back to full fetch when client.entry raises an error' do
+    it 'falls back to individual client.entry when batch client.entries fails' do
       delta_entry = build_delta_entry(id: 'fail1')
-      allow(mock_client).to receive(:entry).and_raise(StandardError.new('API timeout'))
+      refetched = build_refetched_entry(id: 'fail1', slug: 'recovered-spot')
 
-      expect(fetcher).to receive(:perform_full_sync_and_cache).with(cache, 'test_space', 'master')
-      expect(Jekyll.logger).to receive(:warn).with('Contentful:', /Delta merge failed.*API timeout.*falling back/)
+      # Batch client.entries fails
+      allow(mock_client).to receive(:entries).with(
+        hash_including(content_type: 'spot')
+      ).and_raise(StandardError.new('API timeout'))
+
+      # Individual client.entry fallback succeeds
+      allow(mock_client).to receive(:entry).with('fail1', locale: '*', include: 2).and_return(refetched)
+      allow(ContentfulMappers).to receive(:flatten_entry).and_return([
+        { 'slug' => 'recovered-spot', 'locale' => 'de', 'name' => 'Recovered' },
+        { 'slug' => 'recovered-spot', 'locale' => 'en', 'name' => 'Recovered' }
+      ])
+
+      expect(Jekyll.logger).to receive(:warn).with('Contentful:', /Batch fetch failed for content type 'spot'.*API timeout.*falling back to individual/)
+      allow(Jekyll.logger).to receive(:info)
+      allow(Jekyll.logger).to receive(:warn)
 
       result = build_sync_result(changed: { 'spot' => [delta_entry] })
       fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+
+      # Entry was still upserted via individual fallback
+      written = YAML.safe_load(File.read(File.join(data_dir, 'spots.yml')))
+      expect(written.any? { |r| r['slug'] == 'recovered-spot' }).to be true
+    end
+
+    it 'falls back to full fetch when both batch and individual fetches fail' do
+      delta_entry = build_delta_entry(id: 'fail1')
+
+      # Batch client.entries fails
+      allow(mock_client).to receive(:entries).with(
+        hash_including(content_type: 'spot')
+      ).and_raise(StandardError.new('API timeout'))
+
+      # Individual client.entry fallback also fails
+      allow(mock_client).to receive(:entry).with('fail1', locale: '*', include: 2).and_raise(StandardError.new('still broken'))
+
+      expect(Jekyll.logger).to receive(:warn).with('Contentful:', /Batch fetch failed for content type 'spot'.*API timeout.*falling back to individual/)
+      expect(Jekyll.logger).to receive(:warn).with('Contentful:', /Individual fetch failed for entry 'fail1'.*still broken.*skipping/)
+      allow(Jekyll.logger).to receive(:info)
+      allow(Jekyll.logger).to receive(:warn)
+
+      result = build_sync_result(changed: { 'spot' => [delta_entry] })
+      # Should not raise — entries are skipped, merge continues
+      expect { fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master') }.not_to raise_error
     end
 
     it 'falls back to full fetch when deleted entry is missing from index' do
@@ -1419,7 +1483,7 @@ RSpec.describe Jekyll::ContentfulFetcher do
     it 'falls back to full fetch when ContentfulMappers.flatten_entry raises' do
       delta_entry = build_delta_entry(id: 'map_fail')
       refetched = build_refetched_entry(id: 'map_fail', slug: 'bad-entry')
-      allow(mock_client).to receive(:entry).and_return(refetched)
+      stub_batch_entries('spot', ['map_fail'], [refetched])
       allow(ContentfulMappers).to receive(:flatten_entry).and_raise(NoMethodError.new('undefined method'))
 
       expect(fetcher).to receive(:perform_full_sync_and_cache).with(cache, 'test_space', 'master')
@@ -1434,7 +1498,7 @@ RSpec.describe Jekyll::ContentfulFetcher do
     it 'logs delta summary with changed and deleted counts' do
       delta_entry = build_delta_entry(id: 'e1')
       refetched = build_refetched_entry(id: 'e1', slug: 'spiez')
-      allow(mock_client).to receive(:entry).and_return(refetched)
+      stub_batch_entries('spot', ['e1'], [refetched])
       allow(ContentfulMappers).to receive(:flatten_entry).and_return([
         { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' },
         { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez' }
@@ -1453,7 +1517,7 @@ RSpec.describe Jekyll::ContentfulFetcher do
 
       delta_entry = build_delta_entry(id: 'e1')
       refetched = build_refetched_entry(id: 'e1', slug: 'spiez')
-      allow(mock_client).to receive(:entry).and_return(refetched)
+      stub_batch_entries('spot', ['e1'], [refetched])
       allow(ContentfulMappers).to receive(:flatten_entry).and_return([
         { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez Neu' },
         { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez New' }
@@ -1469,7 +1533,7 @@ RSpec.describe Jekyll::ContentfulFetcher do
     it 'logs insert operation for new entries' do
       delta_entry = build_delta_entry(id: 'e1')
       refetched = build_refetched_entry(id: 'e1', slug: 'new-spot')
-      allow(mock_client).to receive(:entry).and_return(refetched)
+      stub_batch_entries('spot', ['e1'], [refetched])
       allow(ContentfulMappers).to receive(:flatten_entry).and_return([
         { 'slug' => 'new-spot', 'locale' => 'de', 'name' => 'New Spot' },
         { 'slug' => 'new-spot', 'locale' => 'en', 'name' => 'New Spot' }
@@ -1506,10 +1570,68 @@ RSpec.describe Jekyll::ContentfulFetcher do
 
     it 'logs fallback reason when delta merge fails' do
       delta_entry = build_delta_entry(id: 'fail1')
+      # Make batch_fetcher raise an unexpected error that propagates
+      allow(fetcher).to receive(:fetch_changed_entries_batched).and_raise(RuntimeError.new('connection reset'))
       allow(mock_client).to receive(:entry).and_raise(RuntimeError.new('connection reset'))
 
-      expect(Jekyll.logger).to receive(:warn).with('Contentful:', /Delta merge failed.*connection reset.*falling back to full fetch/)
-      expect(fetcher).to receive(:perform_full_sync_and_cache)
+      expect(Jekyll.logger).to receive(:warn).with('Contentful:', /Batch fetch failed.*connection reset/)
+      expect(Jekyll.logger).to receive(:warn).with('Contentful:', /Individual fetch failed/)
+      expect(Jekyll.logger).to receive(:warn).with('Contentful:', /Delta merge failed.*connection reset.*falling back to full fetch/).at_most(:once)
+      allow(Jekyll.logger).to receive(:warn)
+      allow(Jekyll.logger).to receive(:info)
+      allow(fetcher).to receive(:perform_full_sync_and_cache)
+
+      result = build_sync_result(changed: { 'spot' => [delta_entry] })
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+    end
+
+    # ─── batch-level logging ─────────────────────────────────────────
+
+    it 'logs batch group size and sub-batch count before fetching' do
+      delta1 = build_delta_entry(id: 'e1')
+      delta2 = build_delta_entry(id: 'e2')
+      refetched1 = build_refetched_entry(id: 'e1', slug: 'spiez')
+      refetched2 = build_refetched_entry(id: 'e2', slug: 'thun')
+      stub_batch_entries('spot', %w[e1 e2], [refetched1, refetched2])
+      allow(ContentfulMappers).to receive(:flatten_entry).and_return([
+        { 'slug' => 'test', 'locale' => 'de', 'name' => 'Test' },
+        { 'slug' => 'test', 'locale' => 'en', 'name' => 'Test' }
+      ])
+
+      expect(Jekyll.logger).to receive(:info).with('Contentful:', 'Batch fetching 2 spot entries in 1 API call(s)')
+      allow(Jekyll.logger).to receive(:info)
+
+      result = build_sync_result(changed: { 'spot' => [delta1, delta2] })
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+    end
+
+    it 'logs batch fetched count after fetching a content type group' do
+      delta_entry = build_delta_entry(id: 'e1')
+      refetched = build_refetched_entry(id: 'e1', slug: 'spiez')
+      stub_batch_entries('spot', ['e1'], [refetched])
+      allow(ContentfulMappers).to receive(:flatten_entry).and_return([
+        { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' },
+        { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez' }
+      ])
+
+      expect(Jekyll.logger).to receive(:info).with('Contentful:', 'Batch fetched 1 spot entries')
+      allow(Jekyll.logger).to receive(:info)
+
+      result = build_sync_result(changed: { 'spot' => [delta_entry] })
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+    end
+
+    it 'logs batch fetch summary after all groups are fetched' do
+      delta_entry = build_delta_entry(id: 'e1')
+      refetched = build_refetched_entry(id: 'e1', slug: 'spiez')
+      stub_batch_entries('spot', ['e1'], [refetched])
+      allow(ContentfulMappers).to receive(:flatten_entry).and_return([
+        { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' },
+        { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez' }
+      ])
+
+      expect(Jekyll.logger).to receive(:info).with('Contentful:', /Batch fetch complete: 1 entries in 1 API call\(s\) \(would have been 1 without batching\)/)
+      allow(Jekyll.logger).to receive(:info)
 
       result = build_sync_result(changed: { 'spot' => [delta_entry] })
       fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
@@ -1520,7 +1642,7 @@ RSpec.describe Jekyll::ContentfulFetcher do
     it 'saves cache with new sync token after successful delta merge' do
       delta_entry = build_delta_entry(id: 'e1')
       refetched = build_refetched_entry(id: 'e1', slug: 'spiez')
-      allow(mock_client).to receive(:entry).and_return(refetched)
+      stub_batch_entries('spot', ['e1'], [refetched])
       allow(ContentfulMappers).to receive(:flatten_entry).and_return([
         { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' },
         { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez' }
