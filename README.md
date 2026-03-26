@@ -70,6 +70,7 @@ paddelbuch/
 │   └── notice.html       # Event notice detail pages
 ├── _plugins/             # Jekyll plugins
 │   ├── api_generator.rb       # JSON API generation
+│   ├── batch_fetcher.rb       # Batched entry fetching for delta sync
 │   ├── cache_metadata.rb      # Sync state persistence
 │   ├── collection_generator.rb # Collection page generation
 │   ├── contentful_fetcher.rb  # Contentful data fetching
@@ -241,11 +242,12 @@ The script uses a SHA-256 checksum to skip regeneration when the SVG hasn't chan
 
 Content is managed in Contentful and synced to Jekyll data files during the build process. The sync pipeline consists of several custom plugins:
 
-1. **ContentfulFetcher** (`contentful_fetcher.rb`) — Orchestrates the data fetch from Contentful. Uses the Sync API to detect changes, then either performs a targeted delta merge (upserting changed entries and removing deleted entries in the existing YAML files) or falls back to a full re-fetch. Delta merge avoids re-fetching all content when only a few entries have changed.
+1. **ContentfulFetcher** (`contentful_fetcher.rb`) — Orchestrates the data fetch from Contentful. Uses the Sync API to detect changes, then either performs a targeted delta merge (upserting changed entries and removing deleted entries in the existing YAML files) or falls back to a full re-fetch. Delta merge uses batched `client.entries()` calls with `sys.id[in]` filtering to fetch changed entries grouped by content type, reducing HTTP requests from O(N) per-entry to O(C) per-content-type.
 2. **SyncChecker** (`sync_checker.rb`) — Queries the Contentful Sync API and classifies delta items into changed entries, deleted entries, and unknown content types
-3. **CacheMetadata** (`cache_metadata.rb`) — Persists sync state (tokens, timestamps, content hash, and the Entry ID Index) between builds to enable incremental syncing and delta merges
-4. **ContentfulMappers** (`contentful_mappers.rb`) — Transforms Contentful entries into Jekyll-compatible YAML data, including rich text rendering with support for tables, marks (bold, italic, underline, code), and embedded entries
-5. **CollectionGenerator** (`collection_generator.rb`) — Generates Jekyll collection pages from the synced data
+3. **BatchFetcher** (`batch_fetcher.rb`) — Fetches changed entries in batches during delta sync, grouping IDs by content type and handling sub-batching, pagination, and fallback to individual fetches on failure
+4. **CacheMetadata** (`cache_metadata.rb`) — Persists sync state (tokens, timestamps, content hash, and the Entry ID Index) between builds to enable incremental syncing and delta merges
+5. **ContentfulMappers** (`contentful_mappers.rb`) — Transforms Contentful entries into Jekyll-compatible YAML data, including rich text rendering with support for tables, marks (bold, italic, underline, code), and embedded entries
+6. **CollectionGenerator** (`collection_generator.rb`) — Generates Jekyll collection pages from the synced data
 
 Content types mapped from Contentful include spots, waterways, obstacles, protected areas, event notices, static pages, and various dimension/lookup types.
 
