@@ -8,6 +8,7 @@
 
 module BatchFetcher
   ID_BATCH_SIZE = 300
+  PAGE_SIZE = 1000
 
   # Fetches all changed entries in batches, grouped by content type.
   # Returns a Hash: { content_type_id => [Contentful::Entry, ...] }
