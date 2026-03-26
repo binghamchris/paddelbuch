@@ -49,7 +49,7 @@ Plugins run in priority order. Hooks run at specific lifecycle points.
 - `_data/.contentful_sync_cache.yml` (sync state)
 - `site.config['contentful_data_changed']` (boolean flag for downstream plugins)
 
-**Dependencies:** `SyncChecker`, `CacheMetadata`, `ContentfulMappers`
+**Dependencies:** `SyncChecker`, `CacheMetadata`, `ContentfulMappers`, `BatchFetcher`
 
 **Sync strategy:**
 1. If `skip_contentful_fetch` is true: skips entirely (parallel build mode)
@@ -59,7 +59,8 @@ Plugins run in priority order. Hooks run at specific lifecycle points.
 5. Otherwise: incremental sync check via Contentful Sync API
 6. If no changes: uses cached data, sets `contentful_data_changed = false`
 7. If changes and delta items classifiable: attempts delta merge first
-   - Re-fetches each changed entry individually via `client.entry(id, locale: '*', include: 2)`
+   - Groups changed entry IDs by content type and fetches them in batches via `BatchFetcher.fetch_changed_entries_batched`, using `client.entries()` with `sys.id[in]` filtering — reducing HTTP requests from O(N) per-entry to O(C) per-content-type
+   - Falls back to individual `client.entry()` calls per entry if a batch request fails
    - Maps through `ContentfulMappers.flatten_entry` and upserts rows in YAML data files
    - Looks up deleted entries in Entry ID Index and removes rows
    - Falls back to full fetch if any step fails
@@ -228,7 +229,7 @@ Plugins run in priority order. Hooks run at specific lifecycle points.
 - `assets/images/logo-favicon.svg`
 - `assets/images/apple-touch-icon.png`
 
-**Dependencies:** None. The PNG is pre-generated and checked into the repo. Regenerate with `python3 _scripts/generate_apple_touch_icon.py` if the SVG changes.
+**Dependencies:** None. The PNG is pre-generated and checked into the repo. Regenerate with `python3 scripts/generate_apple_touch_icon.py` if the SVG changes.
 
 ---
 
@@ -350,10 +351,25 @@ Skipped entirely in production/CI environments.
 - `unknown_content_types` — Array of content type IDs found in delta but not in `CONTENT_TYPES`
 
 **`check_for_changes` method:**
-- Signature: `check_for_changes(client, sync_token, known_content_types = nil)`
+- Signature: `check_for_changes(client, sync_token, known_content_types = nil, entry_id_index = {})`
 - When `known_content_types` is provided, classifies delta items by `sys.type` (`Entry` → changed, `DeletedEntry` → deleted, `Asset`/`DeletedAsset` → ignored) and groups by content type ID
+- `DeletedEntry` items from the Sync API do not carry `sys.contentType`. When the content type is missing, the method falls back to the `entry_id_index` to resolve the content type by entry ID. Entries that cannot be resolved are skipped.
 - Entries with unknown content type IDs are excluded and collected in `unknown_content_types`
-- When `known_content_types` is `nil`, maintains backward-compatible behavior
+- When `known_content_types` is `nil`, maintains backward-compatible behavior (no delta classification)
+
+### BatchFetcher
+
+**File:** `batch_fetcher.rb`
+**Purpose:** Provides batch-optimized entry fetching for delta sync using `sys.id[in]` filtering. Groups changed entry IDs by content type and fetches them in batched `client.entries()` calls, reducing HTTP requests from O(N) per-entry to O(C) per-content-type. Falls back to individual `client.entry()` calls on failure.
+
+**Public method:**
+- `fetch_changed_entries_batched(client, changed_entries)` — Returns `{ content_type_id => [Contentful::Entry, ...] }`
+
+**Constants:**
+- `ID_BATCH_SIZE = 300` — Max entry IDs per `sys.id[in]` filter (derived from CDA URI length limit of ~7600 chars)
+- `PAGE_SIZE = 1000` — CDA max entries per response; triggers pagination when reached
+
+**Private methods:** `fetch_content_type_batch`, `fetch_sub_batch`, `fetch_entries_individually`
 
 ### CacheMetadata
 
