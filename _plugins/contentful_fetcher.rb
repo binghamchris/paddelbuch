@@ -165,12 +165,22 @@ module Jekyll
       yaml_data = load_all_yaml_files
       modified_files = Set.new
 
-      # Phase 2: Re-fetch and upsert changed entries
-      result.changed_entries.each do |content_type_id, entries|
+      # Phase 2: Batch fetch and upsert changed entries
+      begin
+        batched_results = fetch_changed_entries_batched(client, result.changed_entries)
+      rescue StandardError => e
+        Jekyll.logger.warn 'Contentful:', "Batch fetch failed: #{e.message} -- falling back to individual fetches"
+        batched_results = {}
+        result.changed_entries.each do |content_type_id, sync_items|
+          entry_ids = sync_items.map { |item| item.sys[:id] }
+          batched_results[content_type_id] = fetch_entries_individually(client, entry_ids)
+        end
+      end
+
+      batched_results.each do |content_type_id, fetched_entries|
         config = CONTENT_TYPES[content_type_id]
-        entries.each do |delta_entry|
-          entry_id = delta_entry.sys[:id]
-          re_fetched = client.entry(entry_id, locale: '*', include: 2)
+        fetched_entries.each do |re_fetched|
+          entry_id = re_fetched.sys[:id]
           extra_args = config[:mapper] == :map_type ? [content_type_id] : []
           new_rows = ContentfulMappers.flatten_entry(re_fetched, config[:mapper], *extra_args)
 
