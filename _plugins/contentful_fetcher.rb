@@ -6,12 +6,14 @@ require 'set'
 require 'contentful'
 
 require_relative 'sync_checker'
+require_relative 'batch_fetcher'
 require_relative 'cache_metadata'
 require_relative 'contentful_mappers'
 
 module Jekyll
   class ContentfulFetcher < Generator
     include SyncChecker
+    include BatchFetcher
 
     safe true
     priority :highest
