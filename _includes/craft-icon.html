@@ -1,0 +1,35 @@
+<!--
+  Craft Icon Include
+
+  Renders the appropriate paddle craft type SVG icon based on slug.
+
+  Parameters:
+  - include.slug: The paddle craft type slug (e.g., 'seekajak', 'kanadier', 'stand-up-paddle-board')
+  - include.size: Icon size in pixels (default: 18)
+
+  Requirements: 3.6
+-->
+
+{% assign craft_size = include.size | default: 18 %}
+
+{% case include.slug %}
+  {% when 'seekajak' %}
+    {% assign craft_icon = 'kayak' %}
+  {% when 'kanadier' %}
+    {% assign craft_icon = 'canoe' %}
+  {% when 'stand-up-paddle-board' %}
+    {% assign craft_icon = 'sup' %}
+  {% else %}
+    {% assign craft_icon = nil %}
+{% endcase %}
+
+{% if craft_icon %}
+  {% assign craft_icon_path = '/assets/images/icons/' | append: craft_icon | append: '-dark.svg' %}
+  <img src="{{ craft_icon_path | relative_url }}"
+       alt=""
+       aria-hidden="true"
+       height="{{ craft_size }}"
+       width="{{ craft_size }}"
+       class="craft-icon"
+       loading="lazy" />
+{% endif %}

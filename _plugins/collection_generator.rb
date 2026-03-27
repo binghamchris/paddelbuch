@@ -195,9 +195,10 @@ module Jekyll
         doc.data['spot_type_name'] = @type_lookup&.dig('spot_types', slug) || slug
       end
 
-      # Paddle craft type names (resolved array)
+      # Paddle craft type names and slugs (resolved arrays)
       craft_slugs = entry['paddleCraftTypes'] || []
       doc.data['paddle_craft_type_names'] = craft_slugs.map { |cs| @craft_type_lookup&.[](cs) || cs }
+      doc.data['paddle_craft_type_slugs'] = craft_slugs
 
       # Icon name and alt text
       icon = resolve_spot_icon(slug, is_rejected, locale)
