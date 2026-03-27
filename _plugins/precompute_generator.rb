@@ -75,6 +75,16 @@ module Jekyll
       craft_options = craft_types.map { |ct| { slug: ct['slug'], label: ct[name_key] || ct['name_de'] } }
 
       # Spot type dimension options (hardcoded slugs, translated labels)
+      # icon: relative path to the light SVG icon in assets/images/icons/
+      # colorClass: CSS modifier suffix for .filter-icon-circle--<colorClass>
+      spot_type_meta = {
+        'einstieg-ausstieg' => { icon: '/assets/images/icons/entryexit-light.svg', colorClass: 'startingspot' },
+        'nur-einstieg'      => { icon: '/assets/images/icons/entry-light.svg',     colorClass: 'startingspot' },
+        'nur-ausstieg'      => { icon: '/assets/images/icons/exit-light.svg',      colorClass: 'otherspot' },
+        'rasthalte'         => { icon: '/assets/images/icons/rest-light.svg',      colorClass: 'otherspot' },
+        'notauswasserungsstelle' => { icon: '/assets/images/icons/emergency-light.svg', colorClass: 'otherspot' }
+      }
+
       spot_type_options = if locale == 'en'
         [
           { slug: 'einstieg-ausstieg', label: 'Entry & Exit Spots' },
@@ -91,6 +101,15 @@ module Jekyll
           { slug: 'rasthalte', label: 'Rasthalte' },
           { slug: 'notauswasserungsstelle', label: 'Notauswasserungsstelle' }
         ]
+      end
+
+      # Merge icon and colorClass metadata into each spot type option
+      spot_type_options.each do |opt|
+        meta = spot_type_meta[opt[:slug]]
+        next unless meta
+
+        opt[:icon] = meta[:icon]
+        opt[:colorClass] = meta[:colorClass]
       end
 
       layer_labels = if locale == 'en'

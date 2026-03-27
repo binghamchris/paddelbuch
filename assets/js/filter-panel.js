@@ -67,6 +67,19 @@
             })(dim.key, opt.slug));
 
             label.appendChild(checkbox);
+
+            // Add colored circle with icon for spot type options
+            if (opt.icon && opt.colorClass) {
+              var circle = document.createElement('span');
+              circle.className = 'filter-icon-circle filter-icon-circle--' + opt.colorClass;
+              var icon = document.createElement('img');
+              icon.src = opt.icon;
+              icon.alt = '';
+              icon.className = 'filter-icon-circle-img';
+              circle.appendChild(icon);
+              label.appendChild(circle);
+            }
+
             label.appendChild(document.createTextNode(opt.label));
             fieldset.appendChild(label);
           }
