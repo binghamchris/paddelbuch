@@ -1,6 +1,6 @@
 ---
 inclusion: auto
-description: Use whenever you're working with Ruby.
+description: Describes how to run Ruby commands. Use whenever you're working with Ruby or need to run the Ruby at the command line.
 ---
 
 # Ruby Version Management
