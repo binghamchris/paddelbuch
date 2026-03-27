@@ -125,6 +125,12 @@
             layerIcon.className = 'filter-icon-circle-img';
             layerCircle.appendChild(layerIcon);
             layerLabel.appendChild(layerCircle);
+          } else if (toggle.icon && toggle.iconOnly) {
+            var standaloneIcon = document.createElement('img');
+            standaloneIcon.src = toggle.icon;
+            standaloneIcon.alt = '';
+            standaloneIcon.className = 'filter-icon-standalone';
+            layerLabel.appendChild(standaloneIcon);
           }
 
           layerLabel.appendChild(document.createTextNode(toggle.label));

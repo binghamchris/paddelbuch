@@ -113,8 +113,8 @@
     var layerToggles = [
       { key: 'noEntry', label: layerLabels.noEntry, layerGroup: layerGroups.noEntry, defaultChecked: false, icon: '/assets/images/icons/noentry-light.svg', colorClass: 'noentry' },
       { key: 'eventNotices', label: layerLabels.eventNotices, layerGroup: layerGroups.eventNotices, defaultChecked: true, icon: '/assets/images/icons/eventnotice-light.svg', colorClass: 'eventnotice' },
-      { key: 'obstacles', label: layerLabels.obstacles, layerGroup: layerGroups.obstacles, defaultChecked: true },
-      { key: 'protectedAreas', label: layerLabels.protectedAreas, layerGroup: layerGroups.protectedAreas, defaultChecked: true }
+      { key: 'obstacles', label: layerLabels.obstacles, layerGroup: layerGroups.obstacles, defaultChecked: true, icon: '/assets/images/icons/obstacle-light.svg', iconOnly: true },
+      { key: 'protectedAreas', label: layerLabels.protectedAreas, layerGroup: layerGroups.protectedAreas, defaultChecked: true, icon: '/assets/images/icons/protectedarea-light.svg', iconOnly: true }
     ];
 
     // Initialize filter engine and panel

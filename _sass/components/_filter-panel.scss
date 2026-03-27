@@ -154,3 +154,12 @@
   height: 1em;
   display: block;
 }
+
+.filter-icon-standalone {
+  display: inline-block;
+  width: 1.4em;
+  height: 1.4em;
+  margin-right: 0.4em;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
