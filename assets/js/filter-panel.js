@@ -114,6 +114,19 @@
           })(toggle));
 
           layerLabel.appendChild(layerCheckbox);
+
+          // Add colored circle with icon for layer toggles that have icon metadata
+          if (toggle.icon && toggle.colorClass) {
+            var layerCircle = document.createElement('span');
+            layerCircle.className = 'filter-icon-circle filter-icon-circle--' + toggle.colorClass;
+            var layerIcon = document.createElement('img');
+            layerIcon.src = toggle.icon;
+            layerIcon.alt = '';
+            layerIcon.className = 'filter-icon-circle-img';
+            layerCircle.appendChild(layerIcon);
+            layerLabel.appendChild(layerCircle);
+          }
+
           layerLabel.appendChild(document.createTextNode(toggle.label));
           content.appendChild(layerLabel);
         }

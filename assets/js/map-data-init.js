@@ -111,7 +111,7 @@
 
     // Build layer toggle configuration for non-spot layers
     var layerToggles = [
-      { key: 'noEntry', label: layerLabels.noEntry, layerGroup: layerGroups.noEntry, defaultChecked: false },
+      { key: 'noEntry', label: layerLabels.noEntry, layerGroup: layerGroups.noEntry, defaultChecked: false, icon: '/assets/images/icons/noentry-light.svg', colorClass: 'noentry' },
       { key: 'eventNotices', label: layerLabels.eventNotices, layerGroup: layerGroups.eventNotices, defaultChecked: true },
       { key: 'obstacles', label: layerLabels.obstacles, layerGroup: layerGroups.obstacles, defaultChecked: true },
       { key: 'protectedAreas', label: layerLabels.protectedAreas, layerGroup: layerGroups.protectedAreas, defaultChecked: true }

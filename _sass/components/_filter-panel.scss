@@ -137,6 +137,14 @@
 
   &--startingspot { background-color: $startingspots-purple; }
   &--otherspot    { background-color: $othersport-pink; }
+  &--noentry {
+    background-color: $danger-red;
+
+    .filter-icon-circle-img {
+      width: auto;
+      height: auto;
+    }
+  }
 }
 
 .filter-icon-circle-img {
