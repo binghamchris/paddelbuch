@@ -24,6 +24,16 @@
       height: 60vh;
     }
   }
+  @media screen and (min-width: 1186px) {
+    .craft-type-title {
+      padding-right: 2em;
+    }
+  }
+  @media screen and (max-width: 580px) {
+    .craft-type-title {
+      padding-right: 3em;
+    }
+  }
 
   .spot-description {
     padding-right: 1.5em;
