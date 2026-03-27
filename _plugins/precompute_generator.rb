@@ -74,6 +74,21 @@ module Jekyll
         .select { |t| t['locale'] == locale }
       craft_options = craft_types.map { |ct| { slug: ct['slug'], label: ct[name_key] || ct['name_de'] } }
 
+      # Paddle craft type icon metadata (standalone icons, no colored circle)
+      craft_type_meta = {
+        'seekajak'              => { icon: '/assets/images/icons/kayak-dark.svg', iconOnly: true },
+        'kanadier'              => { icon: '/assets/images/icons/canoe-dark.svg', iconOnly: true },
+        'stand-up-paddle-board' => { icon: '/assets/images/icons/sup-dark.svg',   iconOnly: true }
+      }
+
+      craft_options.each do |opt|
+        meta = craft_type_meta[opt[:slug]]
+        next unless meta
+
+        opt[:icon] = meta[:icon]
+        opt[:iconOnly] = meta[:iconOnly]
+      end
+
       # Spot type dimension options (hardcoded slugs, translated labels)
       # icon: relative path to the light SVG icon in assets/images/icons/
       # colorClass: CSS modifier suffix for .filter-icon-circle--<colorClass>
