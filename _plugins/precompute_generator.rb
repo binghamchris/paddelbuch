@@ -74,7 +74,32 @@ module Jekyll
         .select { |t| t['locale'] == locale }
       craft_options = craft_types.map { |ct| { slug: ct['slug'], label: ct[name_key] || ct['name_de'] } }
 
+      # Paddle craft type icon metadata (standalone icons, no colored circle)
+      craft_type_meta = {
+        'seekajak'              => { icon: '/assets/images/icons/kayak-dark.svg', iconOnly: true },
+        'kanadier'              => { icon: '/assets/images/icons/canoe-dark.svg', iconOnly: true },
+        'stand-up-paddle-board' => { icon: '/assets/images/icons/sup-dark.svg',   iconOnly: true }
+      }
+
+      craft_options.each do |opt|
+        meta = craft_type_meta[opt[:slug]]
+        next unless meta
+
+        opt[:icon] = meta[:icon]
+        opt[:iconOnly] = meta[:iconOnly]
+      end
+
       # Spot type dimension options (hardcoded slugs, translated labels)
+      # icon: relative path to the light SVG icon in assets/images/icons/
+      # colorClass: CSS modifier suffix for .filter-icon-circle--<colorClass>
+      spot_type_meta = {
+        'einstieg-ausstieg' => { icon: '/assets/images/icons/entryexit-light.svg', colorClass: 'startingspot' },
+        'nur-einstieg'      => { icon: '/assets/images/icons/entry-light.svg',     colorClass: 'startingspot' },
+        'nur-ausstieg'      => { icon: '/assets/images/icons/exit-light.svg',      colorClass: 'otherspot' },
+        'rasthalte'         => { icon: '/assets/images/icons/rest-light.svg',      colorClass: 'otherspot' },
+        'notauswasserungsstelle' => { icon: '/assets/images/icons/emergency-light.svg', colorClass: 'otherspot' }
+      }
+
       spot_type_options = if locale == 'en'
         [
           { slug: 'einstieg-ausstieg', label: 'Entry & Exit Spots' },
@@ -91,6 +116,15 @@ module Jekyll
           { slug: 'rasthalte', label: 'Rasthalte' },
           { slug: 'notauswasserungsstelle', label: 'Notauswasserungsstelle' }
         ]
+      end
+
+      # Merge icon and colorClass metadata into each spot type option
+      spot_type_options.each do |opt|
+        meta = spot_type_meta[opt[:slug]]
+        next unless meta
+
+        opt[:icon] = meta[:icon]
+        opt[:colorClass] = meta[:colorClass]
       end
 
       layer_labels = if locale == 'en'

@@ -121,3 +121,45 @@
   border-top: 1px solid $secondary-blue;
   margin: 8px 0;
 }
+
+// Colored circle with spot type icon shown next to filter labels
+.filter-icon-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.8em;
+  height: 1.8em;
+  border-radius: 50%;
+  padding: 0.25em;
+  margin-right: 0.4em;
+  vertical-align: middle;
+  flex-shrink: 0;
+
+  &--startingspot { background-color: $startingspots-purple; }
+  &--otherspot    { background-color: $othersport-pink; }
+  &--noentry {
+    background-color: $danger-red;
+
+    .filter-icon-circle-img {
+      width: auto;
+      height: auto;
+    }
+  }
+
+  &--eventnotice  { background-color: $swisscanoe-blue; }
+}
+
+.filter-icon-circle-img {
+  width: 1em;
+  height: 1em;
+  display: block;
+}
+
+.filter-icon-standalone {
+  display: inline-block;
+  width: 1.4em;
+  height: 1.4em;
+  margin-right: 0.4em;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
