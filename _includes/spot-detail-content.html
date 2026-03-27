@@ -32,9 +32,11 @@
     <tr>
       <th>{% t labels.potentially_usable_by %}</th>
       <td colspan="2">
-        <ul class="mb-0 ps-3">
+        <ul class="craft-type-list mb-0">
           {% for craft_name in spot.paddle_craft_type_names %}
+            {% assign craft_slug = spot.paddle_craft_type_slugs[forloop.index0] %}
             <li>
+              {% include craft-icon.html slug=craft_slug %}
               {{ craft_name | escape }}
             </li>
           {% endfor %}

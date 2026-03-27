@@ -73,6 +73,25 @@
     padding-left: 1rem;
   }
 
+  .craft-type-list {
+    list-style: none;
+    padding-left: 0;
+    margin-left: -43px;
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+      padding: 0.15em 0;
+    }
+  }
+
+  .craft-icon {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+  }
+
   // Add colons after table header labels (matching Gatsby)
   .spot-details-table th::after {
     content: ":";
