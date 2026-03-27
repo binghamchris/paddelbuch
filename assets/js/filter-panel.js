@@ -78,6 +78,12 @@
               icon.className = 'filter-icon-circle-img';
               circle.appendChild(icon);
               label.appendChild(circle);
+            } else if (opt.icon && opt.iconOnly) {
+              var standaloneImg = document.createElement('img');
+              standaloneImg.src = opt.icon;
+              standaloneImg.alt = '';
+              standaloneImg.className = 'filter-icon-standalone';
+              label.appendChild(standaloneImg);
             }
 
             label.appendChild(document.createTextNode(opt.label));
