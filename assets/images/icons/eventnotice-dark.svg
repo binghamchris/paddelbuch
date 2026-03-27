@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 50 50">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #1b1e43;
+        font-family: Optima-Bold, Optima;
+        font-size: 42px;
+        font-weight: 700;
+      }
+    </style>
+  </defs>
+  <text class="cls-1" x="50%" y="50%" dominant-baseline="central" text-anchor="middle">i</text>
+</svg>
