@@ -67,6 +67,25 @@
             })(dim.key, opt.slug));
 
             label.appendChild(checkbox);
+
+            // Add colored circle with icon for spot type options
+            if (opt.icon && opt.colorClass) {
+              var circle = document.createElement('span');
+              circle.className = 'filter-icon-circle filter-icon-circle--' + opt.colorClass;
+              var icon = document.createElement('img');
+              icon.src = opt.icon;
+              icon.alt = '';
+              icon.className = 'filter-icon-circle-img';
+              circle.appendChild(icon);
+              label.appendChild(circle);
+            } else if (opt.icon && opt.iconOnly) {
+              var standaloneImg = document.createElement('img');
+              standaloneImg.src = opt.icon;
+              standaloneImg.alt = '';
+              standaloneImg.className = 'filter-icon-standalone';
+              label.appendChild(standaloneImg);
+            }
+
             label.appendChild(document.createTextNode(opt.label));
             fieldset.appendChild(label);
           }
@@ -101,6 +120,25 @@
           })(toggle));
 
           layerLabel.appendChild(layerCheckbox);
+
+          // Add colored circle with icon for layer toggles that have icon metadata
+          if (toggle.icon && toggle.colorClass) {
+            var layerCircle = document.createElement('span');
+            layerCircle.className = 'filter-icon-circle filter-icon-circle--' + toggle.colorClass;
+            var layerIcon = document.createElement('img');
+            layerIcon.src = toggle.icon;
+            layerIcon.alt = '';
+            layerIcon.className = 'filter-icon-circle-img';
+            layerCircle.appendChild(layerIcon);
+            layerLabel.appendChild(layerCircle);
+          } else if (toggle.icon && toggle.iconOnly) {
+            var standaloneIcon = document.createElement('img');
+            standaloneIcon.src = toggle.icon;
+            standaloneIcon.alt = '';
+            standaloneIcon.className = 'filter-icon-standalone';
+            layerLabel.appendChild(standaloneIcon);
+          }
+
           layerLabel.appendChild(document.createTextNode(toggle.label));
           content.appendChild(layerLabel);
         }
