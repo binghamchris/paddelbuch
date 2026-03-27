@@ -46,6 +46,15 @@
   };
 
   /**
+   * Slug-to-icon mapping for paddle craft type figures.
+   */
+  var PADDLE_CRAFT_ICONS = {
+    'seekajak': '/assets/images/icons/kayak-dark.svg',
+    'kanadier': '/assets/images/icons/canoe-dark.svg',
+    'stand-up-paddle-board': '/assets/images/icons/sup-dark.svg'
+  };
+
+  /**
    * Minimal HTML escaping for user-facing text.
    */
   function escapeHtml(str) {
@@ -170,19 +179,24 @@
   }
 
   /**
-   * Renders a summary figure (prominent number + label).
+   * Renders a summary figure (prominent number + label), with an optional icon
+   * displayed above the value.
    *
    * @param {number} value - The numeric value to display
    * @param {string} label - The label text below the number
    * @param {string} [modifier] - Optional BEM modifier slug (e.g. 'spots')
+   * @param {string} [iconSrc] - Optional icon image path to render above the value
    * @returns {string} HTML string
    */
-  function renderFigure(value, label, modifier) {
+  function renderFigure(value, label, modifier, iconSrc) {
     var cls = 'statistics-figure';
     if (modifier) {
       cls += ' statistics-figure--' + modifier;
     }
     var html = '<div class="' + cls + '">';
+    if (iconSrc) {
+      html += '<img class="statistics-figure-icon" src="' + escapeHtml(iconSrc) + '" alt="' + escapeHtml(label) + '" aria-hidden="true">';
+    }
     html += '<div class="statistics-figure-value">' + escapeHtml(String(value)) + '</div>';
     html += '<div class="statistics-figure-label">' + escapeHtml(label) + '</div>';
     html += '</div>';
@@ -295,15 +309,20 @@
    *
    * @param {string} title - Section heading text
    * @param {Array} items - Array of { name, count, slug } objects
+   * @param {Object} [options] - Optional settings
+   * @param {Object} [options.icons] - Map of slug to icon image path
    * @returns {string} HTML string for the figures section
    */
-  function renderFiguresSection(title, items) {
+  function renderFiguresSection(title, items, options) {
+    var opts = options || {};
+    var icons = opts.icons || null;
     var html = '<div class="statistics-section">';
     html += '<h3 class="statistics-section-title">' + escapeHtml(title) + '</h3>';
     html += '<div class="statistics-figures-grid">';
     for (var i = 0; i < items.length; i++) {
       var modifier = items[i].slug || undefined;
-      html += renderFigure(items[i].count, items[i].name, modifier);
+      var iconSrc = (icons && items[i].slug) ? icons[items[i].slug] : undefined;
+      html += renderFigure(items[i].count, items[i].name, modifier, iconSrc);
     }
     html += '</div>';
     html += '</div>';
@@ -404,7 +423,7 @@
 
       // --- Paddle craft types section ---
       var paddleCraftTypes = metrics.paddleCraftTypes || [];
-      html += renderFiguresSection(strings.paddle_craft_title, paddleCraftTypes);
+      html += renderFiguresSection(strings.paddle_craft_title, paddleCraftTypes, { icons: PADDLE_CRAFT_ICONS });
 
       // --- Data source types section ---
       var dataSourceTypes = metrics.dataSourceTypes || [];
