@@ -257,7 +257,7 @@ module Jekyll
 
       avg_lon = coords.sum { |c| c[0] } / coords.size.to_f
       avg_lat = coords.sum { |c| c[1] } / coords.size.to_f
-      { lat: avg_lat, lon: avg_lon }
+      { lat: avg_lat.round(6), lon: avg_lon.round(6) }
     rescue JSON::ParserError
       nil
     end
