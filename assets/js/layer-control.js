@@ -70,6 +70,25 @@
     }
 
     /**
+     * Binds a click handler that recenters the map on the marker.
+     * On the home page (where paddelbuchHomeTargetZoom is set), also zooms
+     * to that level unless the map is already at or above it.
+     *
+     * @param {L.Marker} marker - The Leaflet marker instance
+     */
+    function bindMarkerRecenter(marker) {
+      marker.on('click', function() {
+        var latlng = marker.getLatLng();
+        var homeZoom = window.paddelbuchHomeTargetZoom;
+        if (typeof homeZoom === 'number' && map.getZoom() < homeZoom) {
+          map.setView(latlng, homeZoom);
+        } else {
+          map.panTo(latlng);
+        }
+      });
+    }
+
+    /**
      * Creates a marker for a spot.
      * - Rejected spots: added to the noEntry LayerGroup (not registered in Marker Registry)
      * - Non-rejected spots: registered in PaddelbuchMarkerRegistry with metadata,
@@ -141,6 +160,9 @@
           marker.addTo(map);
         }
       }
+
+      // Recenter (and optionally zoom on home page) when marker is clicked
+      bindMarkerRecenter(marker);
     }
 
     /**
@@ -374,6 +396,9 @@
           console.warn('Failed to parse event notice affected area:', e);
         }
       }
+
+      // Recenter (and optionally zoom on home page) when marker is clicked
+      bindMarkerRecenter(marker);
     }
 
     // Add non-spot layers to map (spot markers are managed individually by Filter Engine)
