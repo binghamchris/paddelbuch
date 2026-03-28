@@ -36,9 +36,25 @@ python3 scripts/generate_apple_touch_icon.py
 
 No options. Requires `rsvg-convert` (`brew install librsvg`).
 
-## Contentful Geometry Scripts
+## Contentful Data Scripts
 
-These scripts modify waterway geometry data in Contentful via the Content Management API. They all read credentials from `.env.development` (`CONTENTFUL_SPACE_ID`, `CONTENTFUL_ENVIRONMENT`, `CONTENTFUL_MANAGEMENT_TOKEN`).
+These scripts modify Contentful data via the Content Management API. They all read credentials from `.env.development` (`CONTENTFUL_SPACE_ID`, `CONTENTFUL_ENVIRONMENT`, `CONTENTFUL_MANAGEMENT_TOKEN`).
+
+### `truncate_spot_location_precision.rb`
+
+Truncates spot location coordinates (lat/lon) to 6 decimal places (~0.11 m precision). Uses the local build cache (`_data/spots.yml` and `_data/.contentful_sync_cache.yml`) to identify affected spots and resolve entry IDs without any API calls, then batch-fetches only the entries that need updating from the CMA using `sys.id[in]` filtering (up to 1000 per request). Publishes all updated entries via a single bulk publish call. Requires a prior Jekyll build to populate the cache.
+
+```bash
+source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.9 && \
+  ruby scripts/truncate_spot_location_precision.rb [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--dry-run` | Preview changes without writing to Contentful |
+| `--slug SLUG` | Process only the spot with the given slug |
+
+### Geometry Scripts
 
 ### `simplify_waterway_geometry.rb`
 
