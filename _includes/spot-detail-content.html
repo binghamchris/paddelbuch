@@ -30,7 +30,7 @@
     <!-- Paddle Craft Types (first row, matching Gatsby order) -->
     {% if spot.paddle_craft_type_names and spot.paddle_craft_type_names.size > 0 %}
     <tr>
-      <th>{% t labels.potentially_usable_by %}</th>
+      <th class="craft-type-title">{% t labels.potentially_usable_by %}</th>
       <td colspan="2">
         <ul class="craft-type-list mb-0">
           {% for craft_name in spot.paddle_craft_type_names %}
