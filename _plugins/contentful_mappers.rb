@@ -310,7 +310,7 @@ module ContentfulMappers
       'isPortagePossible' => resolve_field(fields, :is_portage_possible, locale) || false,
       'obstacleType_slug' => extract_reference_slug(resolve_field(fields, :obstacle_type, locale)),
       'waterway_slug' => extract_reference_slug(resolve_field(fields, :waterway, locale)),
-      'spots' => extract_reference_slugs(resolve_field(fields, :spots, locale)),
+      'spots' => extract_reference_slugs(resolve_field(fields, :spot, locale)),
       'dataSourceType_slug' => extract_reference_slug(resolve_field(fields, :data_source_type, locale)),
       'dataLicenseType_slug' => extract_reference_slug(resolve_field(fields, :data_license_type, locale))
     }
