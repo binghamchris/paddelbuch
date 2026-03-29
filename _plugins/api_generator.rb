@@ -426,6 +426,7 @@ module Jekyll
       result['isPortagePossible'] = item['isPortagePossible']
       result['obstacleType'] = wrap_slug_ref(item['obstacleType_slug'])
       result['waterway'] = wrap_slug_ref(item['waterway_slug'])
+      result['spot'] = wrap_slug_refs(item['spots'])
       result['dataSourceType'] = wrap_slug_ref(item['dataSourceType_slug'])
       result['dataLicenseType'] = wrap_slug_ref(item['dataLicenseType_slug'])
       result
