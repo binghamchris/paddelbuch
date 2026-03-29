@@ -541,28 +541,28 @@ RSpec.describe Jekyll::ContentfulFetcher do
   # ─── upsert_rows ────────────────────────────────────────────────────
 
   describe '#upsert_rows' do
-    it 'replaces an existing row matching slug + locale' do
+    it 'replaces an existing row matching entry_id + locale' do
       yaml_data = {
         'spots' => [
-          { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez Alt' },
-          { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez Old' }
+          { 'entry_id' => 'e1', 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez Alt' },
+          { 'entry_id' => 'e1', 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez Old' }
         ]
       }
-      new_rows = [{ 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez Neu' }]
+      new_rows = [{ 'entry_id' => 'e1', 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez Neu' }]
 
       fetcher.send(:upsert_rows, yaml_data, 'spots', new_rows)
 
-      de_row = yaml_data['spots'].find { |r| r['slug'] == 'spiez' && r['locale'] == 'de' }
+      de_row = yaml_data['spots'].find { |r| r['entry_id'] == 'e1' && r['locale'] == 'de' }
       expect(de_row['name']).to eq('Spiez Neu')
     end
 
-    it 'appends a new row when slug + locale does not match' do
+    it 'appends a new row when entry_id + locale does not match' do
       yaml_data = {
         'spots' => [
-          { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' }
+          { 'entry_id' => 'e1', 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' }
         ]
       }
-      new_rows = [{ 'slug' => 'thun', 'locale' => 'de', 'name' => 'Thun' }]
+      new_rows = [{ 'entry_id' => 'e2', 'slug' => 'thun', 'locale' => 'de', 'name' => 'Thun' }]
 
       fetcher.send(:upsert_rows, yaml_data, 'spots', new_rows)
 
@@ -570,23 +570,23 @@ RSpec.describe Jekyll::ContentfulFetcher do
       expect(yaml_data['spots'].last['slug']).to eq('thun')
     end
 
-    it 'handles upsert of both locales for the same slug' do
+    it 'handles upsert of both locales for the same entry_id' do
       yaml_data = {
         'spots' => [
-          { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez DE Alt' },
-          { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez EN Old' }
+          { 'entry_id' => 'e1', 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez DE Alt' },
+          { 'entry_id' => 'e1', 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez EN Old' }
         ]
       }
       new_rows = [
-        { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez DE Neu' },
-        { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez EN New' }
+        { 'entry_id' => 'e1', 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez DE Neu' },
+        { 'entry_id' => 'e1', 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez EN New' }
       ]
 
       fetcher.send(:upsert_rows, yaml_data, 'spots', new_rows)
 
       expect(yaml_data['spots'].size).to eq(2)
-      de_row = yaml_data['spots'].find { |r| r['slug'] == 'spiez' && r['locale'] == 'de' }
-      en_row = yaml_data['spots'].find { |r| r['slug'] == 'spiez' && r['locale'] == 'en' }
+      de_row = yaml_data['spots'].find { |r| r['entry_id'] == 'e1' && r['locale'] == 'de' }
+      en_row = yaml_data['spots'].find { |r| r['entry_id'] == 'e1' && r['locale'] == 'en' }
       expect(de_row['name']).to eq('Spiez DE Neu')
       expect(en_row['name']).to eq('Spiez EN New')
     end
@@ -594,21 +594,21 @@ RSpec.describe Jekyll::ContentfulFetcher do
     it 'leaves non-matching rows unchanged' do
       yaml_data = {
         'spots' => [
-          { 'slug' => 'thun', 'locale' => 'de', 'name' => 'Thun' },
-          { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez Alt' }
+          { 'entry_id' => 'e1', 'slug' => 'thun', 'locale' => 'de', 'name' => 'Thun' },
+          { 'entry_id' => 'e2', 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez Alt' }
         ]
       }
-      new_rows = [{ 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez Neu' }]
+      new_rows = [{ 'entry_id' => 'e2', 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez Neu' }]
 
       fetcher.send(:upsert_rows, yaml_data, 'spots', new_rows)
 
-      thun_row = yaml_data['spots'].find { |r| r['slug'] == 'thun' }
+      thun_row = yaml_data['spots'].find { |r| r['entry_id'] == 'e1' }
       expect(thun_row['name']).to eq('Thun')
     end
 
     it 'initializes the filename key when it does not exist' do
       yaml_data = {}
-      new_rows = [{ 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' }]
+      new_rows = [{ 'entry_id' => 'e1', 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' }]
 
       fetcher.send(:upsert_rows, yaml_data, 'spots', new_rows)
 
@@ -617,52 +617,76 @@ RSpec.describe Jekyll::ContentfulFetcher do
 
     it 'handles empty new_rows without modifying existing data' do
       yaml_data = {
-        'spots' => [{ 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' }]
+        'spots' => [{ 'entry_id' => 'e1', 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' }]
       }
 
       fetcher.send(:upsert_rows, yaml_data, 'spots', [])
 
       expect(yaml_data['spots'].size).to eq(1)
     end
+
+    it 'replaces row in-place when slug changes but entry_id stays the same' do
+      yaml_data = {
+        'spots' => [
+          { 'entry_id' => 'e1', 'slug' => 'old-slug', 'locale' => 'de', 'name' => 'Old' },
+          { 'entry_id' => 'e1', 'slug' => 'old-slug', 'locale' => 'en', 'name' => 'Old EN' },
+          { 'entry_id' => 'e2', 'slug' => 'other', 'locale' => 'de', 'name' => 'Other' }
+        ]
+      }
+      new_rows = [
+        { 'entry_id' => 'e1', 'slug' => 'new-slug', 'locale' => 'de', 'name' => 'New' },
+        { 'entry_id' => 'e1', 'slug' => 'new-slug', 'locale' => 'en', 'name' => 'New EN' }
+      ]
+
+      fetcher.send(:upsert_rows, yaml_data, 'spots', new_rows)
+
+      expect(yaml_data['spots'].size).to eq(3)
+      de_row = yaml_data['spots'].find { |r| r['entry_id'] == 'e1' && r['locale'] == 'de' }
+      expect(de_row['slug']).to eq('new-slug')
+      expect(de_row['name']).to eq('New')
+      # No old-slug rows remain
+      old_rows = yaml_data['spots'].select { |r| r['slug'] == 'old-slug' }
+      expect(old_rows).to be_empty
+    end
   end
 
   # ─── remove_rows ──────────────────────────────────────────────────
 
   describe '#remove_rows' do
-    it 'removes all rows matching the slug (both locales)' do
+    it 'removes all rows matching the entry_id (both locales)' do
       yaml_data = {
         'spots' => [
-          { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez DE' },
-          { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez EN' },
-          { 'slug' => 'thun', 'locale' => 'de', 'name' => 'Thun DE' }
+          { 'entry_id' => 'e1', 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez DE' },
+          { 'entry_id' => 'e1', 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez EN' },
+          { 'entry_id' => 'e2', 'slug' => 'thun', 'locale' => 'de', 'name' => 'Thun DE' }
         ]
       }
 
-      fetcher.send(:remove_rows, yaml_data, 'spots', 'spiez')
+      fetcher.send(:remove_rows, yaml_data, 'spots', 'e1')
 
       expect(yaml_data['spots'].size).to eq(1)
       expect(yaml_data['spots'].first['slug']).to eq('thun')
     end
 
-    it 'leaves other slugs unchanged' do
+    it 'leaves other entries unchanged' do
       yaml_data = {
         'spots' => [
-          { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' },
-          { 'slug' => 'thun', 'locale' => 'de', 'name' => 'Thun' },
-          { 'slug' => 'bern', 'locale' => 'de', 'name' => 'Bern' }
+          { 'entry_id' => 'e1', 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' },
+          { 'entry_id' => 'e2', 'slug' => 'thun', 'locale' => 'de', 'name' => 'Thun' },
+          { 'entry_id' => 'e3', 'slug' => 'bern', 'locale' => 'de', 'name' => 'Bern' }
         ]
       }
 
-      fetcher.send(:remove_rows, yaml_data, 'spots', 'thun')
+      fetcher.send(:remove_rows, yaml_data, 'spots', 'e2')
 
       slugs = yaml_data['spots'].map { |r| r['slug'] }
       expect(slugs).to eq(%w[spiez bern])
     end
 
-    it 'does nothing when slug is not found' do
+    it 'does nothing when entry_id is not found' do
       yaml_data = {
         'spots' => [
-          { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' }
+          { 'entry_id' => 'e1', 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' }
         ]
       }
 
@@ -674,21 +698,21 @@ RSpec.describe Jekyll::ContentfulFetcher do
     it 'handles missing filename key gracefully' do
       yaml_data = {}
 
-      expect { fetcher.send(:remove_rows, yaml_data, 'spots', 'spiez') }.not_to raise_error
+      expect { fetcher.send(:remove_rows, yaml_data, 'spots', 'e1') }.not_to raise_error
     end
 
     it 'preserves row order of remaining entries' do
       yaml_data = {
         'spots' => [
-          { 'slug' => 'aare', 'locale' => 'de' },
-          { 'slug' => 'spiez', 'locale' => 'de' },
-          { 'slug' => 'thun', 'locale' => 'de' },
-          { 'slug' => 'spiez', 'locale' => 'en' },
-          { 'slug' => 'bern', 'locale' => 'de' }
+          { 'entry_id' => 'e1', 'slug' => 'aare', 'locale' => 'de' },
+          { 'entry_id' => 'e2', 'slug' => 'spiez', 'locale' => 'de' },
+          { 'entry_id' => 'e3', 'slug' => 'thun', 'locale' => 'de' },
+          { 'entry_id' => 'e2', 'slug' => 'spiez', 'locale' => 'en' },
+          { 'entry_id' => 'e4', 'slug' => 'bern', 'locale' => 'de' }
         ]
       }
 
-      fetcher.send(:remove_rows, yaml_data, 'spots', 'spiez')
+      fetcher.send(:remove_rows, yaml_data, 'spots', 'e2')
 
       slugs = yaml_data['spots'].map { |r| r['slug'] }
       expect(slugs).to eq(%w[aare thun bern])
@@ -1165,8 +1189,8 @@ RSpec.describe Jekyll::ContentfulFetcher do
     it 'upserts changed entries into the correct YAML file' do
       # Pre-populate spots with existing data
       existing_spots = [
-        { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez Alt' },
-        { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez Old' }
+        { 'entry_id' => 'abc123', 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez Alt' },
+        { 'entry_id' => 'abc123', 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez Old' }
       ]
       File.write(File.join(data_dir, 'spots.yml'), YAML.dump(existing_spots))
 
@@ -1175,8 +1199,8 @@ RSpec.describe Jekyll::ContentfulFetcher do
 
       stub_batch_entries('spot', ['abc123'], [refetched])
       allow(ContentfulMappers).to receive(:flatten_entry).and_return([
-        { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez Neu' },
-        { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez New' }
+        { 'entry_id' => 'abc123', 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez Neu' },
+        { 'entry_id' => 'abc123', 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez New' }
       ])
 
       result = build_sync_result(changed: { 'spot' => [delta_entry] })
@@ -1195,8 +1219,8 @@ RSpec.describe Jekyll::ContentfulFetcher do
 
       stub_batch_entries('spot', ['new1'], [refetched])
       allow(ContentfulMappers).to receive(:flatten_entry).and_return([
-        { 'slug' => 'thun', 'locale' => 'de', 'name' => 'Thun DE' },
-        { 'slug' => 'thun', 'locale' => 'en', 'name' => 'Thun EN' }
+        { 'entry_id' => 'new1', 'slug' => 'thun', 'locale' => 'de', 'name' => 'Thun DE' },
+        { 'entry_id' => 'new1', 'slug' => 'thun', 'locale' => 'en', 'name' => 'Thun EN' }
       ])
 
       result = build_sync_result(changed: { 'spot' => [delta_entry] })
@@ -1211,9 +1235,9 @@ RSpec.describe Jekyll::ContentfulFetcher do
 
     it 'removes deleted entries from the correct YAML file' do
       existing_spots = [
-        { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez DE' },
-        { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez EN' },
-        { 'slug' => 'thun', 'locale' => 'de', 'name' => 'Thun DE' }
+        { 'entry_id' => 'del1', 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez DE' },
+        { 'entry_id' => 'del1', 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez EN' },
+        { 'entry_id' => 'e2', 'slug' => 'thun', 'locale' => 'de', 'name' => 'Thun DE' }
       ]
       File.write(File.join(data_dir, 'spots.yml'), YAML.dump(existing_spots))
 
@@ -1231,7 +1255,7 @@ RSpec.describe Jekyll::ContentfulFetcher do
 
     it 'removes deleted entry from the Entry ID Index' do
       existing_spots = [
-        { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' }
+        { 'entry_id' => 'del1', 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' }
       ]
       File.write(File.join(data_dir, 'spots.yml'), YAML.dump(existing_spots))
 
@@ -1248,10 +1272,10 @@ RSpec.describe Jekyll::ContentfulFetcher do
 
     it 'handles both upserts and deletes in a single delta merge' do
       existing_spots = [
-        { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez Alt' },
-        { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez Old' },
-        { 'slug' => 'bern', 'locale' => 'de', 'name' => 'Bern DE' },
-        { 'slug' => 'bern', 'locale' => 'en', 'name' => 'Bern EN' }
+        { 'entry_id' => 'abc123', 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez Alt' },
+        { 'entry_id' => 'abc123', 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez Old' },
+        { 'entry_id' => 'del_bern', 'slug' => 'bern', 'locale' => 'de', 'name' => 'Bern DE' },
+        { 'entry_id' => 'del_bern', 'slug' => 'bern', 'locale' => 'en', 'name' => 'Bern EN' }
       ]
       File.write(File.join(data_dir, 'spots.yml'), YAML.dump(existing_spots))
 
@@ -1262,8 +1286,8 @@ RSpec.describe Jekyll::ContentfulFetcher do
       refetched = build_refetched_entry(id: 'abc123', slug: 'spiez')
       stub_batch_entries('spot', ['abc123'], [refetched])
       allow(ContentfulMappers).to receive(:flatten_entry).and_return([
-        { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez Neu' },
-        { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez New' }
+        { 'entry_id' => 'abc123', 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez Neu' },
+        { 'entry_id' => 'abc123', 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez New' }
       ])
 
       # Delete bern
@@ -1289,8 +1313,8 @@ RSpec.describe Jekyll::ContentfulFetcher do
       refetched = build_refetched_entry(id: 'e1', slug: 'aare')
       stub_batch_entries('waterway', ['e1'], [refetched])
       allow(ContentfulMappers).to receive(:flatten_entry).and_return([
-        { 'slug' => 'aare', 'locale' => 'de', 'name' => 'Aare DE' },
-        { 'slug' => 'aare', 'locale' => 'en', 'name' => 'Aare EN' }
+        { 'entry_id' => 'e1', 'slug' => 'aare', 'locale' => 'de', 'name' => 'Aare DE' },
+        { 'entry_id' => 'e1', 'slug' => 'aare', 'locale' => 'en', 'name' => 'Aare EN' }
       ])
 
       result = build_sync_result(changed: { 'waterway' => [delta_entry] })
@@ -1307,8 +1331,8 @@ RSpec.describe Jekyll::ContentfulFetcher do
       refetched = build_refetched_entry(id: 'e1', slug: 'spiez')
       stub_batch_entries('spot', ['e1'], [refetched])
       allow(ContentfulMappers).to receive(:flatten_entry).and_return([
-        { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez DE' },
-        { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez EN' }
+        { 'entry_id' => 'e1', 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez DE' },
+        { 'entry_id' => 'e1', 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez EN' }
       ])
 
       result = build_sync_result(changed: { 'spot' => [delta_entry] })
@@ -1323,8 +1347,8 @@ RSpec.describe Jekyll::ContentfulFetcher do
       refetched = build_refetched_entry(id: 'new_e1', slug: 'new-spot')
       stub_batch_entries('spot', ['new_e1'], [refetched])
       allow(ContentfulMappers).to receive(:flatten_entry).and_return([
-        { 'slug' => 'new-spot', 'locale' => 'de', 'name' => 'New Spot' },
-        { 'slug' => 'new-spot', 'locale' => 'en', 'name' => 'New Spot' }
+        { 'entry_id' => 'new_e1', 'slug' => 'new-spot', 'locale' => 'de', 'name' => 'New Spot' },
+        { 'entry_id' => 'new_e1', 'slug' => 'new-spot', 'locale' => 'en', 'name' => 'New Spot' }
       ])
 
       result = build_sync_result(changed: { 'spot' => [delta_entry] })
@@ -1340,8 +1364,8 @@ RSpec.describe Jekyll::ContentfulFetcher do
       delta_entry = build_delta_entry(id: 'e1')
       refetched = build_refetched_entry(id: 'e1', slug: 'spiez')
       allow(ContentfulMappers).to receive(:flatten_entry).and_return([
-        { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' },
-        { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez' }
+        { 'entry_id' => 'e1', 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' },
+        { 'entry_id' => 'e1', 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez' }
       ])
 
       entries_response = build_entries_response([refetched])
@@ -1365,8 +1389,8 @@ RSpec.describe Jekyll::ContentfulFetcher do
       refetched2 = build_refetched_entry(id: 'e2', slug: 'thun')
 
       allow(ContentfulMappers).to receive(:flatten_entry).and_return([
-        { 'slug' => 'test', 'locale' => 'de', 'name' => 'Test' },
-        { 'slug' => 'test', 'locale' => 'en', 'name' => 'Test' }
+        { 'entry_id' => 'e1', 'slug' => 'test', 'locale' => 'de', 'name' => 'Test' },
+        { 'entry_id' => 'e1', 'slug' => 'test', 'locale' => 'en', 'name' => 'Test' }
       ])
 
       # Both entries are in the same content type group, so only one batch call
@@ -1390,8 +1414,8 @@ RSpec.describe Jekyll::ContentfulFetcher do
       expect(ContentfulMappers).to receive(:flatten_entry)
         .with(refetched, :map_type, 'spotType')
         .and_return([
-          { 'slug' => 'launch-point', 'locale' => 'de', 'name_de' => 'Einstieg' },
-          { 'slug' => 'launch-point', 'locale' => 'en', 'name_en' => 'Launch Point' }
+          { 'entry_id' => 'type1', 'slug' => 'launch-point', 'locale' => 'de', 'name_de' => 'Einstieg' },
+          { 'entry_id' => 'type1', 'slug' => 'launch-point', 'locale' => 'en', 'name_en' => 'Launch Point' }
         ])
 
       result = build_sync_result(changed: { 'spotType' => [delta_entry] })
@@ -1407,8 +1431,8 @@ RSpec.describe Jekyll::ContentfulFetcher do
       expect(ContentfulMappers).to receive(:flatten_entry)
         .with(refetched, :map_spot)
         .and_return([
-          { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' },
-          { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez' }
+          { 'entry_id' => 'spot1', 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' },
+          { 'entry_id' => 'spot1', 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez' }
         ])
 
       result = build_sync_result(changed: { 'spot' => [delta_entry] })
@@ -1429,8 +1453,8 @@ RSpec.describe Jekyll::ContentfulFetcher do
       # Individual client.entry fallback succeeds
       allow(mock_client).to receive(:entry).with('fail1', locale: '*', include: 2).and_return(refetched)
       allow(ContentfulMappers).to receive(:flatten_entry).and_return([
-        { 'slug' => 'recovered-spot', 'locale' => 'de', 'name' => 'Recovered' },
-        { 'slug' => 'recovered-spot', 'locale' => 'en', 'name' => 'Recovered' }
+        { 'entry_id' => 'fail1', 'slug' => 'recovered-spot', 'locale' => 'de', 'name' => 'Recovered' },
+        { 'entry_id' => 'fail1', 'slug' => 'recovered-spot', 'locale' => 'en', 'name' => 'Recovered' }
       ])
 
       expect(Jekyll.logger).to receive(:warn).with('Contentful:', /Batch fetch failed for content type 'spot'.*API timeout.*falling back to individual/)
@@ -1466,18 +1490,20 @@ RSpec.describe Jekyll::ContentfulFetcher do
       expect { fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master') }.not_to raise_error
     end
 
-    it 'falls back to full fetch when deleted entry is missing from index' do
-      existing_spots = [{ 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' }]
+    it 'still removes entry by entry_id when entry is missing from index' do
+      existing_spots = [
+        { 'entry_id' => 'missing_index_entry', 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' }
+      ]
       File.write(File.join(data_dir, 'spots.yml'), YAML.dump(existing_spots))
 
-      # Do NOT add entry to index -- this should trigger fallback
+      # Do NOT add entry to index -- should still work because remove_rows uses entry_id
       deleted_entry = build_delta_entry(id: 'missing_index_entry')
-
-      expect(fetcher).to receive(:perform_full_sync_and_cache).with(cache, 'test_space', 'master')
-      expect(Jekyll.logger).to receive(:warn).with('Contentful:', /Delta merge failed.*not found in index.*falling back/)
 
       result = build_sync_result(deleted: { 'spot' => [deleted_entry] })
       fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+
+      written = YAML.safe_load(File.read(File.join(data_dir, 'spots.yml')))
+      expect(written).to be_empty
     end
 
     it 'falls back to full fetch when ContentfulMappers.flatten_entry raises' do
@@ -1500,8 +1526,8 @@ RSpec.describe Jekyll::ContentfulFetcher do
       refetched = build_refetched_entry(id: 'e1', slug: 'spiez')
       stub_batch_entries('spot', ['e1'], [refetched])
       allow(ContentfulMappers).to receive(:flatten_entry).and_return([
-        { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' },
-        { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez' }
+        { 'entry_id' => 'e1', 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' },
+        { 'entry_id' => 'e1', 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez' }
       ])
 
       expect(Jekyll.logger).to receive(:info).with('Contentful:', 'Delta merge: 1 changed, 0 deleted entries')
@@ -1512,15 +1538,15 @@ RSpec.describe Jekyll::ContentfulFetcher do
     end
 
     it 'logs upsert operation for each changed entry' do
-      existing_spots = [{ 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez Alt' }]
+      existing_spots = [{ 'entry_id' => 'e1', 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez Alt' }]
       File.write(File.join(data_dir, 'spots.yml'), YAML.dump(existing_spots))
 
       delta_entry = build_delta_entry(id: 'e1')
       refetched = build_refetched_entry(id: 'e1', slug: 'spiez')
       stub_batch_entries('spot', ['e1'], [refetched])
       allow(ContentfulMappers).to receive(:flatten_entry).and_return([
-        { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez Neu' },
-        { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez New' }
+        { 'entry_id' => 'e1', 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez Neu' },
+        { 'entry_id' => 'e1', 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez New' }
       ])
 
       expect(Jekyll.logger).to receive(:info).with('Contentful:', "Updated spot entry 'spiez'")
@@ -1535,8 +1561,8 @@ RSpec.describe Jekyll::ContentfulFetcher do
       refetched = build_refetched_entry(id: 'e1', slug: 'new-spot')
       stub_batch_entries('spot', ['e1'], [refetched])
       allow(ContentfulMappers).to receive(:flatten_entry).and_return([
-        { 'slug' => 'new-spot', 'locale' => 'de', 'name' => 'New Spot' },
-        { 'slug' => 'new-spot', 'locale' => 'en', 'name' => 'New Spot' }
+        { 'entry_id' => 'e1', 'slug' => 'new-spot', 'locale' => 'de', 'name' => 'New Spot' },
+        { 'entry_id' => 'e1', 'slug' => 'new-spot', 'locale' => 'en', 'name' => 'New Spot' }
       ])
 
       expect(Jekyll.logger).to receive(:info).with('Contentful:', "Inserted spot entry 'new-spot'")
@@ -1547,7 +1573,7 @@ RSpec.describe Jekyll::ContentfulFetcher do
     end
 
     it 'logs deletion operation for each deleted entry' do
-      existing_spots = [{ 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' }]
+      existing_spots = [{ 'entry_id' => 'del1', 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' }]
       File.write(File.join(data_dir, 'spots.yml'), YAML.dump(existing_spots))
       cache.add_to_entry_id_index('del1', 'spiez', 'spot')
 
@@ -1594,8 +1620,8 @@ RSpec.describe Jekyll::ContentfulFetcher do
       refetched2 = build_refetched_entry(id: 'e2', slug: 'thun')
       stub_batch_entries('spot', %w[e1 e2], [refetched1, refetched2])
       allow(ContentfulMappers).to receive(:flatten_entry).and_return([
-        { 'slug' => 'test', 'locale' => 'de', 'name' => 'Test' },
-        { 'slug' => 'test', 'locale' => 'en', 'name' => 'Test' }
+        { 'entry_id' => 'e1', 'slug' => 'test', 'locale' => 'de', 'name' => 'Test' },
+        { 'entry_id' => 'e1', 'slug' => 'test', 'locale' => 'en', 'name' => 'Test' }
       ])
 
       expect(Jekyll.logger).to receive(:info).with('Contentful:', 'Batch fetching 2 spot entries in 1 API call(s)')
@@ -1610,8 +1636,8 @@ RSpec.describe Jekyll::ContentfulFetcher do
       refetched = build_refetched_entry(id: 'e1', slug: 'spiez')
       stub_batch_entries('spot', ['e1'], [refetched])
       allow(ContentfulMappers).to receive(:flatten_entry).and_return([
-        { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' },
-        { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez' }
+        { 'entry_id' => 'e1', 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' },
+        { 'entry_id' => 'e1', 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez' }
       ])
 
       expect(Jekyll.logger).to receive(:info).with('Contentful:', 'Batch fetched 1 spot entries')
@@ -1626,8 +1652,8 @@ RSpec.describe Jekyll::ContentfulFetcher do
       refetched = build_refetched_entry(id: 'e1', slug: 'spiez')
       stub_batch_entries('spot', ['e1'], [refetched])
       allow(ContentfulMappers).to receive(:flatten_entry).and_return([
-        { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' },
-        { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez' }
+        { 'entry_id' => 'e1', 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' },
+        { 'entry_id' => 'e1', 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez' }
       ])
 
       expect(Jekyll.logger).to receive(:info).with('Contentful:', /Batch fetch complete: 1 entries in 1 API call\(s\) \(would have been 1 without batching\)/)
@@ -1642,9 +1668,9 @@ RSpec.describe Jekyll::ContentfulFetcher do
     it 'removes old-slug rows and inserts new-slug rows when a slug changes' do
       # Pre-populate with old slug
       existing_obstacles = [
-        { 'slug' => 'old-slug', 'locale' => 'de', 'name' => 'Old DE' },
-        { 'slug' => 'old-slug', 'locale' => 'en', 'name' => 'Old EN' },
-        { 'slug' => 'other-entry', 'locale' => 'de', 'name' => 'Other DE' }
+        { 'entry_id' => 'rename1', 'slug' => 'old-slug', 'locale' => 'de', 'name' => 'Old DE' },
+        { 'entry_id' => 'rename1', 'slug' => 'old-slug', 'locale' => 'en', 'name' => 'Old EN' },
+        { 'entry_id' => 'other1', 'slug' => 'other-entry', 'locale' => 'de', 'name' => 'Other DE' }
       ]
       File.write(File.join(data_dir, 'obstacles.yml'), YAML.dump(existing_obstacles))
 
@@ -1655,8 +1681,8 @@ RSpec.describe Jekyll::ContentfulFetcher do
       refetched = build_refetched_entry(id: 'rename1', slug: 'new-slug')
       stub_batch_entries('obstacle', ['rename1'], [refetched])
       allow(ContentfulMappers).to receive(:flatten_entry).and_return([
-        { 'slug' => 'new-slug', 'locale' => 'de', 'name' => 'New DE' },
-        { 'slug' => 'new-slug', 'locale' => 'en', 'name' => 'New EN' }
+        { 'entry_id' => 'rename1', 'slug' => 'new-slug', 'locale' => 'de', 'name' => 'New DE' },
+        { 'entry_id' => 'rename1', 'slug' => 'new-slug', 'locale' => 'en', 'name' => 'New EN' }
       ])
 
       result = build_sync_result(changed: { 'obstacle' => [delta_entry] })
@@ -1681,8 +1707,8 @@ RSpec.describe Jekyll::ContentfulFetcher do
 
     it 'updates the entry_id_index with the new slug after a rename' do
       existing_spots = [
-        { 'slug' => 'old-name', 'locale' => 'de', 'name' => 'Old' },
-        { 'slug' => 'old-name', 'locale' => 'en', 'name' => 'Old' }
+        { 'entry_id' => 'rename2', 'slug' => 'old-name', 'locale' => 'de', 'name' => 'Old' },
+        { 'entry_id' => 'rename2', 'slug' => 'old-name', 'locale' => 'en', 'name' => 'Old' }
       ]
       File.write(File.join(data_dir, 'spots.yml'), YAML.dump(existing_spots))
 
@@ -1692,8 +1718,8 @@ RSpec.describe Jekyll::ContentfulFetcher do
       refetched = build_refetched_entry(id: 'rename2', slug: 'new-name')
       stub_batch_entries('spot', ['rename2'], [refetched])
       allow(ContentfulMappers).to receive(:flatten_entry).and_return([
-        { 'slug' => 'new-name', 'locale' => 'de', 'name' => 'New' },
-        { 'slug' => 'new-name', 'locale' => 'en', 'name' => 'New' }
+        { 'entry_id' => 'rename2', 'slug' => 'new-name', 'locale' => 'de', 'name' => 'New' },
+        { 'entry_id' => 'rename2', 'slug' => 'new-name', 'locale' => 'en', 'name' => 'New' }
       ])
 
       result = build_sync_result(changed: { 'spot' => [delta_entry] })
@@ -1703,9 +1729,9 @@ RSpec.describe Jekyll::ContentfulFetcher do
       expect(index_entry['slug']).to eq('new-name')
     end
 
-    it 'logs the slug rename' do
+    it 'handles slug rename implicitly via entry_id matching without special logging' do
       existing_spots = [
-        { 'slug' => 'before', 'locale' => 'de', 'name' => 'Before' }
+        { 'entry_id' => 'rename3', 'slug' => 'before', 'locale' => 'de', 'name' => 'Before' }
       ]
       File.write(File.join(data_dir, 'spots.yml'), YAML.dump(existing_spots))
 
@@ -1715,21 +1741,26 @@ RSpec.describe Jekyll::ContentfulFetcher do
       refetched = build_refetched_entry(id: 'rename3', slug: 'after')
       stub_batch_entries('spot', ['rename3'], [refetched])
       allow(ContentfulMappers).to receive(:flatten_entry).and_return([
-        { 'slug' => 'after', 'locale' => 'de', 'name' => 'After' },
-        { 'slug' => 'after', 'locale' => 'en', 'name' => 'After' }
+        { 'entry_id' => 'rename3', 'slug' => 'after', 'locale' => 'de', 'name' => 'After' },
+        { 'entry_id' => 'rename3', 'slug' => 'after', 'locale' => 'en', 'name' => 'After' }
       ])
 
-      expect(Jekyll.logger).to receive(:info).with('Contentful:', "Slug renamed for spot entry 'rename3': 'before' -> 'after'")
+      # Should log as a normal update, not a special rename
+      expect(Jekyll.logger).to receive(:info).with('Contentful:', "Updated spot entry 'after'")
       allow(Jekyll.logger).to receive(:info)
 
       result = build_sync_result(changed: { 'spot' => [delta_entry] })
       fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+
+      written = YAML.safe_load(File.read(File.join(data_dir, 'spots.yml')))
+      expect(written.none? { |r| r['slug'] == 'before' }).to be true
+      expect(written.any? { |r| r['slug'] == 'after' }).to be true
     end
 
     it 'does not remove rows when slug has not changed (no false positive)' do
       existing_spots = [
-        { 'slug' => 'same-slug', 'locale' => 'de', 'name' => 'Old Name' },
-        { 'slug' => 'same-slug', 'locale' => 'en', 'name' => 'Old Name EN' }
+        { 'entry_id' => 'no_rename', 'slug' => 'same-slug', 'locale' => 'de', 'name' => 'Old Name' },
+        { 'entry_id' => 'no_rename', 'slug' => 'same-slug', 'locale' => 'en', 'name' => 'Old Name EN' }
       ]
       File.write(File.join(data_dir, 'spots.yml'), YAML.dump(existing_spots))
 
@@ -1739,8 +1770,8 @@ RSpec.describe Jekyll::ContentfulFetcher do
       refetched = build_refetched_entry(id: 'no_rename', slug: 'same-slug')
       stub_batch_entries('spot', ['no_rename'], [refetched])
       allow(ContentfulMappers).to receive(:flatten_entry).and_return([
-        { 'slug' => 'same-slug', 'locale' => 'de', 'name' => 'Updated Name' },
-        { 'slug' => 'same-slug', 'locale' => 'en', 'name' => 'Updated Name EN' }
+        { 'entry_id' => 'no_rename', 'slug' => 'same-slug', 'locale' => 'de', 'name' => 'Updated Name' },
+        { 'entry_id' => 'no_rename', 'slug' => 'same-slug', 'locale' => 'en', 'name' => 'Updated Name EN' }
       ])
 
       result = build_sync_result(changed: { 'spot' => [delta_entry] })
@@ -1757,8 +1788,8 @@ RSpec.describe Jekyll::ContentfulFetcher do
       refetched = build_refetched_entry(id: 'brand_new', slug: 'fresh-entry')
       stub_batch_entries('spot', ['brand_new'], [refetched])
       allow(ContentfulMappers).to receive(:flatten_entry).and_return([
-        { 'slug' => 'fresh-entry', 'locale' => 'de', 'name' => 'Fresh DE' },
-        { 'slug' => 'fresh-entry', 'locale' => 'en', 'name' => 'Fresh EN' }
+        { 'entry_id' => 'brand_new', 'slug' => 'fresh-entry', 'locale' => 'de', 'name' => 'Fresh DE' },
+        { 'entry_id' => 'brand_new', 'slug' => 'fresh-entry', 'locale' => 'en', 'name' => 'Fresh EN' }
       ])
 
       result = build_sync_result(changed: { 'spot' => [delta_entry] })
@@ -1776,8 +1807,8 @@ RSpec.describe Jekyll::ContentfulFetcher do
       refetched = build_refetched_entry(id: 'e1', slug: 'spiez')
       stub_batch_entries('spot', ['e1'], [refetched])
       allow(ContentfulMappers).to receive(:flatten_entry).and_return([
-        { 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' },
-        { 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez' }
+        { 'entry_id' => 'e1', 'slug' => 'spiez', 'locale' => 'de', 'name' => 'Spiez' },
+        { 'entry_id' => 'e1', 'slug' => 'spiez', 'locale' => 'en', 'name' => 'Spiez' }
       ])
 
       result = build_sync_result(changed: { 'spot' => [delta_entry] }, token: 'delta_token_123')

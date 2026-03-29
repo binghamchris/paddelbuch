@@ -186,16 +186,8 @@ module Jekyll
 
           slug = new_rows.first['slug']
 
-          # Detect slug rename: if the entry_id_index has a different slug for
-          # this entry, remove the old-slug rows before upserting the new ones.
-          old_index = cache.lookup_entry_id(entry_id)
-          if old_index && old_index['slug'] != slug
-            Jekyll.logger.info 'Contentful:', "Slug renamed for #{content_type_id} entry '#{entry_id}': '#{old_index['slug']}' -> '#{slug}'"
-            remove_rows(yaml_data, config[:filename], old_index['slug'])
-          end
-
-          # Determine if this is an update or insert
-          existing = yaml_data[config[:filename]]&.any? { |r| r['slug'] == slug }
+          # Determine if this is an update or insert (by entry_id, not slug)
+          existing = yaml_data[config[:filename]]&.any? { |r| r['entry_id'] == entry_id }
           upsert_rows(yaml_data, config[:filename], new_rows)
           modified_files << config[:filename]
 
@@ -212,10 +204,9 @@ module Jekyll
         entries.each do |deleted_entry|
           entry_id = deleted_entry.sys[:id]
           index_entry = cache.lookup_entry_id(entry_id)
-          raise "Entry ID #{entry_id} not found in index -- cannot resolve slug for deletion" unless index_entry
+          slug = index_entry ? index_entry['slug'] : entry_id
 
-          slug = index_entry['slug']
-          remove_rows(yaml_data, config[:filename], slug)
+          remove_rows(yaml_data, config[:filename], entry_id)
           modified_files << config[:filename]
 
           cache.remove_from_entry_id_index(entry_id)
@@ -299,7 +290,7 @@ module Jekyll
       rows = yaml_data[filename]
 
       new_rows.each do |new_row|
-        idx = rows.index { |r| r['slug'] == new_row['slug'] && r['locale'] == new_row['locale'] }
+        idx = rows.index { |r| r['entry_id'] == new_row['entry_id'] && r['locale'] == new_row['locale'] }
         if idx
           rows[idx] = new_row
         else
@@ -308,10 +299,10 @@ module Jekyll
       end
     end
 
-    def remove_rows(yaml_data, filename, slug)
+    def remove_rows(yaml_data, filename, entry_id)
       return unless yaml_data[filename]
 
-      yaml_data[filename].reject! { |row| row['slug'] == slug }
+      yaml_data[filename].reject! { |row| row['entry_id'] == entry_id }
     end
 
     def build_entry_id_index(entries_by_type)

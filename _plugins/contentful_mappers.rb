@@ -234,6 +234,7 @@ module ContentfulMappers
 
     LOCALES.map do |locale|
       base = {
+        'entry_id' => sys[:id],
         'locale' => locale,
         'createdAt' => format_timestamp(sys[:created_at]),
         'updatedAt' => format_timestamp(sys[:updated_at]),
