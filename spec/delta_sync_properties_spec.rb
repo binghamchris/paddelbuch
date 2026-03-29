@@ -370,6 +370,75 @@ RSpec.describe 'Delta Sync Properties' do
     end
   end
 
+  # Feature: contentful-delta-sync, Property 7: Slug rename removes old rows and inserts new rows
+  # **Validates: Slug rename during delta merge must not create duplicates**
+  describe 'Property 7: Slug rename removes old rows and inserts new rows without duplicates' do
+    let(:fetcher) { Jekyll::ContentfulFetcher.new }
+
+    RENAME_SLUGS_POOL = %w[spiez thun bern aare limmat rhein zurich luzern brienz interlaken].freeze
+    RENAME_LOCALES = %w[de en].freeze
+
+    it 'after a slug rename, only the new slug exists and no old-slug rows remain' do
+      property_of {
+        # Generate random existing rows (2..15 rows)
+        existing_count = range(2, 15)
+        existing_rows = []
+        existing_count.times do
+          slug = choose(*RENAME_SLUGS_POOL)
+          locale = choose(*RENAME_LOCALES)
+          name = sized(range(3, 10)) { string(:alpha) }
+          existing_rows << { 'slug' => slug, 'locale' => locale, 'name' => name }
+        end
+
+        # Pick a slug that exists in the data to be the "old" slug
+        old_slug = existing_rows.sample['slug']
+
+        # Generate a new slug that is different from the old one
+        new_slug = sized(range(5, 15)) { string(:alpha) }.downcase
+        new_slug = "renamed-#{new_slug}" # ensure it differs from pool slugs
+
+        [existing_rows, old_slug, new_slug]
+      }.check(100) { |existing_rows, old_slug, new_slug|
+        filename = 'spots'
+        original_rows = existing_rows.map(&:dup)
+        yaml_data = { filename => existing_rows.map(&:dup) }
+
+        # Step 1: Remove old slug rows (simulating the rename detection)
+        fetcher.send(:remove_rows, yaml_data, filename, old_slug)
+
+        # Step 2: Upsert new slug rows (both locales)
+        new_rows = RENAME_LOCALES.map do |locale|
+          { 'slug' => new_slug, 'locale' => locale, 'name' => "Renamed #{locale}" }
+        end
+        fetcher.send(:upsert_rows, yaml_data, filename, new_rows)
+
+        result = yaml_data[filename]
+
+        # Property A: No rows with the old slug remain
+        old_remaining = result.select { |r| r['slug'] == old_slug }
+        expect(old_remaining).to be_empty,
+          "Expected no rows with old slug='#{old_slug}' but found #{old_remaining.size}"
+
+        # Property B: New slug rows are present (one per locale)
+        new_slug_rows = result.select { |r| r['slug'] == new_slug }
+        expect(new_slug_rows.size).to eq(RENAME_LOCALES.size),
+          "Expected #{RENAME_LOCALES.size} rows with new slug='#{new_slug}', got #{new_slug_rows.size}"
+
+        # Property C: All other rows (not old slug, not new slug) are preserved
+        non_old_originals = original_rows.reject { |r| r['slug'] == old_slug }
+        non_old_non_new_result = result.reject { |r| r['slug'] == new_slug }
+        expect(non_old_non_new_result).to eq(non_old_originals),
+          "Expected non-renamed rows to be preserved in order"
+
+        # Property D: Total count = (original - old slug rows) + new slug rows
+        old_slug_count = original_rows.count { |r| r['slug'] == old_slug }
+        expected_count = original_rows.size - old_slug_count + RENAME_LOCALES.size
+        expect(result.size).to eq(expected_count),
+          "Expected #{expected_count} rows, got #{result.size}"
+      }
+    end
+  end
+
   # Feature: contentful-delta-sync, Property 6: Content hash equivalence
   # **Validates: Requirements 5.1**
   describe 'Property 6: Content hash is identical regardless of sync path' do

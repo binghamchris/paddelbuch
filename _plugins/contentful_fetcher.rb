@@ -184,8 +184,17 @@ module Jekyll
           extra_args = config[:mapper] == :map_type ? [content_type_id] : []
           new_rows = ContentfulMappers.flatten_entry(re_fetched, config[:mapper], *extra_args)
 
-          # Determine if this is an update or insert
           slug = new_rows.first['slug']
+
+          # Detect slug rename: if the entry_id_index has a different slug for
+          # this entry, remove the old-slug rows before upserting the new ones.
+          old_index = cache.lookup_entry_id(entry_id)
+          if old_index && old_index['slug'] != slug
+            Jekyll.logger.info 'Contentful:', "Slug renamed for #{content_type_id} entry '#{entry_id}': '#{old_index['slug']}' -> '#{slug}'"
+            remove_rows(yaml_data, config[:filename], old_index['slug'])
+          end
+
+          # Determine if this is an update or insert
           existing = yaml_data[config[:filename]]&.any? { |r| r['slug'] == slug }
           upsert_rows(yaml_data, config[:filename], new_rows)
           modified_files << config[:filename]
