@@ -42,11 +42,10 @@ module Jekyll
       # Pre-build spot lookup hash for obstacle resolution (avoids O(n²) search)
       spots_data = site.data['spots']
       @locale_spots_by_slug = {}
-      @locale_spots_list = []
       if spots_data.is_a?(Array)
-        @locale_spots_list = spots_data.select { |s| s['locale'] == current_locale }
-        @locale_spots_list.each do |s|
-          @locale_spots_by_slug[s['slug']] = s if s['slug']
+        spots_data.each do |s|
+          next unless s['locale'] == current_locale && s['slug']
+          @locale_spots_by_slug[s['slug']] = s
         end
       end
 
@@ -143,38 +142,23 @@ module Jekyll
       doc
     end
 
-    # Resolve exit and re-entry spots for an obstacle.
-    # First checks the obstacle's own spots array, then falls back to
-    # finding spots whose slug starts with the obstacle slug.
+    # Resolve exit and re-entry spots for an obstacle from its spots array.
+    # Identifies exit/re-entry spots by their spotType_slug.
     # Uses pre-built @locale_spots_by_slug hash for O(1) lookups.
     def resolve_obstacle_spots(doc, entry, site, locale)
       return if @locale_spots_by_slug.nil? || @locale_spots_by_slug.empty?
 
-      obstacle_slug = entry['slug']
       linked_slugs = entry['spots'] || []
+      return if linked_slugs.empty?
 
-      # Try to find spots from the obstacle's spots array first
       exit_spot = nil
       reentry_spot = nil
 
-      if linked_slugs.any?
-        linked_slugs.each do |spot_slug|
-          spot = @locale_spots_by_slug[spot_slug]
-          next unless spot
-          exit_spot ||= spot if %w[nur-ausstieg einstieg-ausstieg].include?(spot['spotType_slug'])
-          reentry_spot ||= spot if %w[nur-einstieg einstieg-ausstieg].include?(spot['spotType_slug'])
-        end
-      end
-
-      # Fallback: find spots whose slug starts with the obstacle slug
-      unless exit_spot && reentry_spot
-        prefix = "#{obstacle_slug}-"
-        @locale_spots_list.each do |spot|
-          next unless spot['slug']&.start_with?(prefix)
-          exit_spot ||= spot if %w[nur-ausstieg einstieg-ausstieg].include?(spot['spotType_slug'])
-          reentry_spot ||= spot if %w[nur-einstieg einstieg-ausstieg].include?(spot['spotType_slug'])
-          break if exit_spot && reentry_spot
-        end
+      linked_slugs.each do |spot_slug|
+        spot = @locale_spots_by_slug[spot_slug]
+        next unless spot
+        exit_spot ||= spot if spot['spotType_slug'] == 'nur-ausstieg'
+        reentry_spot ||= spot if spot['spotType_slug'] == 'nur-einstieg'
       end
 
       doc.data['exitSpot_slug'] = exit_spot['slug'] if exit_spot

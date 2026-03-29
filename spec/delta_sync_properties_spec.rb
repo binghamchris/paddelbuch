@@ -127,6 +127,8 @@ RSpec.describe 'Delta Sync Properties' do
     SLUGS_POOL = %w[spiez thun bern aare limmat rhein zurich luzern brienz interlaken].freeze
     LOCALES = %w[de en].freeze
 
+    ENTRY_IDS_POOL = %w[e1 e2 e3 e4 e5 e6 e7 e8 e9 e10].freeze
+
     def random_row(slug, locale, extra_key, extra_val)
       { 'slug' => slug, 'locale' => locale, extra_key => extra_val }
     end
@@ -137,20 +139,22 @@ RSpec.describe 'Delta Sync Properties' do
         existing_count = range(0, 20)
         existing_rows = []
         existing_count.times do
+          entry_id = choose(*ENTRY_IDS_POOL)
           slug = choose(*SLUGS_POOL)
           locale = choose(*LOCALES)
           name = sized(range(3, 10)) { string(:alpha) }
-          existing_rows << { 'slug' => slug, 'locale' => locale, 'name' => name }
+          existing_rows << { 'entry_id' => entry_id, 'slug' => slug, 'locale' => locale, 'name' => name }
         end
 
         # Generate random new rows to upsert (1..10 rows)
         new_count = range(1, 10)
         new_rows = []
         new_count.times do
+          entry_id = choose(*ENTRY_IDS_POOL)
           slug = choose(*SLUGS_POOL)
           locale = choose(*LOCALES)
           name = sized(range(3, 10)) { string(:alpha) }
-          new_rows << { 'slug' => slug, 'locale' => locale, 'name' => name }
+          new_rows << { 'entry_id' => entry_id, 'slug' => slug, 'locale' => locale, 'name' => name }
         end
 
         [existing_rows, new_rows]
@@ -164,41 +168,39 @@ RSpec.describe 'Delta Sync Properties' do
 
         result = yaml_data[filename]
 
-        # Property A: Every new row's slug+locale is present in the result
+        # Property A: Every new row's entry_id+locale is present in the result
         new_rows.each do |nr|
-          match = result.find { |r| r['slug'] == nr['slug'] && r['locale'] == nr['locale'] }
+          match = result.find { |r| r['entry_id'] == nr['entry_id'] && r['locale'] == nr['locale'] }
           expect(match).not_to be_nil,
-            "Expected slug=#{nr['slug']} locale=#{nr['locale']} to be present in result"
+            "Expected entry_id=#{nr['entry_id']} locale=#{nr['locale']} to be present in result"
         end
 
-        # Property B: Upserted slug+locale pairs match the LAST new row exactly
-        # (if new_rows has duplicates for the same slug+locale, the last one wins)
+        # Property B: Upserted entry_id+locale pairs match the LAST new row exactly
+        # (if new_rows has duplicates for the same entry_id+locale, the last one wins)
         effective_new = {}
         new_rows.each do |nr|
-          key = [nr['slug'], nr['locale']]
+          key = [nr['entry_id'], nr['locale']]
           effective_new[key] = nr
         end
 
-        effective_new.each do |(slug, locale), expected_row|
-          match = result.find { |r| r['slug'] == slug && r['locale'] == locale }
+        effective_new.each do |(entry_id, locale), expected_row|
+          match = result.find { |r| r['entry_id'] == entry_id && r['locale'] == locale }
           expect(match).to eq(expected_row),
-            "Expected row for slug=#{slug} locale=#{locale} to equal #{expected_row}, got #{match}"
+            "Expected row for entry_id=#{entry_id} locale=#{locale} to equal #{expected_row}, got #{match}"
         end
 
-        # Property C: All rows whose slug+locale did not match any new row remain unchanged
+        # Property C: All rows whose entry_id+locale did not match any new row remain unchanged
         original_rows.each do |orig|
-          key = [orig['slug'], orig['locale']]
+          key = [orig['entry_id'], orig['locale']]
           next if effective_new.key?(key)
 
-          # Find the row in result at the same position or by matching slug+locale
-          match = result.find { |r| r['slug'] == orig['slug'] && r['locale'] == orig['locale'] }
-          # The original row should still be present (though there may be duplicates in original)
+          match = result.find { |r| r['entry_id'] == orig['entry_id'] && r['locale'] == orig['locale'] }
           expect(match).not_to be_nil,
-            "Expected original row slug=#{orig['slug']} locale=#{orig['locale']} to still be present"
+            "Expected original row entry_id=#{orig['entry_id']} locale=#{orig['locale']} to still be present"
         end
 
         # Property D: Total count = original count + genuinely new pairs (not already present)
-        original_keys = original_rows.map { |r| [r['slug'], r['locale']] }
+        original_keys = original_rows.map { |r| [r['entry_id'], r['locale']] }
         genuinely_new = effective_new.keys.reject { |k| original_keys.include?(k) }
         expected_count = original_rows.size + genuinely_new.size
 
@@ -208,51 +210,53 @@ RSpec.describe 'Delta Sync Properties' do
     end
   end
 
-  # Feature: contentful-delta-sync, Property 3: Deletion removes exactly the target slug rows
+  # Feature: contentful-delta-sync, Property 3: Deletion removes exactly the target entry_id rows
   # **Validates: Requirements 3.6, 3.7, 7.4**
-  describe 'Property 3: Deletion removes exactly the target slug rows' do
+  describe 'Property 3: Deletion removes exactly the target entry_id rows' do
     let(:fetcher) { Jekyll::ContentfulFetcher.new }
 
+    DELETE_ENTRY_IDS_POOL = %w[e1 e2 e3 e4 e5 e6 e7 e8 e9 e10].freeze
     DELETE_SLUGS_POOL = %w[spiez thun bern aare limmat rhein zurich luzern brienz interlaken].freeze
     DELETE_LOCALES = %w[de en].freeze
 
-    it 'removes exactly the target slug rows and preserves all others in order' do
+    it 'removes exactly the target entry_id rows and preserves all others in order' do
       property_of {
         # Generate random existing rows (2..25 rows) — ensure at least one row exists
         existing_count = range(2, 25)
         existing_rows = []
         existing_count.times do
+          entry_id = choose(*DELETE_ENTRY_IDS_POOL)
           slug = choose(*DELETE_SLUGS_POOL)
           locale = choose(*DELETE_LOCALES)
           name = sized(range(3, 10)) { string(:alpha) }
-          existing_rows << { 'slug' => slug, 'locale' => locale, 'name' => name }
+          existing_rows << { 'entry_id' => entry_id, 'slug' => slug, 'locale' => locale, 'name' => name }
         end
 
-        # Pick a slug that is guaranteed to be present in the array
-        target_slug = existing_rows.sample['slug']
+        # Pick an entry_id that is guaranteed to be present in the array
+        target_entry_id = existing_rows.sample['entry_id']
 
-        [existing_rows, target_slug]
-      }.check(100) { |existing_rows, target_slug|
+        [existing_rows, target_entry_id]
+      }.check(100) { |existing_rows, target_entry_id|
         filename = 'spots'
         # Deep-copy so we can compare originals
         original_rows = existing_rows.map(&:dup)
         yaml_data = { filename => existing_rows.map(&:dup) }
 
-        # Count how many rows match the target slug before deletion
-        matching_count = original_rows.count { |r| r['slug'] == target_slug }
-        non_matching_rows = original_rows.reject { |r| r['slug'] == target_slug }
+        # Count how many rows match the target entry_id before deletion
+        matching_count = original_rows.count { |r| r['entry_id'] == target_entry_id }
+        non_matching_rows = original_rows.reject { |r| r['entry_id'] == target_entry_id }
 
-        fetcher.send(:remove_rows, yaml_data, filename, target_slug)
+        fetcher.send(:remove_rows, yaml_data, filename, target_entry_id)
 
         result = yaml_data[filename]
 
-        # Property A: No rows with the deleted slug remain
-        remaining_with_slug = result.select { |r| r['slug'] == target_slug }
-        expect(remaining_with_slug).to be_empty,
-          "Expected no rows with slug='#{target_slug}' but found #{remaining_with_slug.size}"
+        # Property A: No rows with the deleted entry_id remain
+        remaining_with_id = result.select { |r| r['entry_id'] == target_entry_id }
+        expect(remaining_with_id).to be_empty,
+          "Expected no rows with entry_id='#{target_entry_id}' but found #{remaining_with_id.size}"
 
-        # Property B: All rows with a different slug remain unchanged and in the same order
-        remaining_other = result.reject { |r| r['slug'] == target_slug }
+        # Property B: All rows with a different entry_id remain unchanged and in the same order
+        remaining_other = result.reject { |r| r['entry_id'] == target_entry_id }
         expect(remaining_other).to eq(non_matching_rows),
           "Expected non-matching rows to be preserved in order"
 
@@ -366,6 +370,81 @@ RSpec.describe 'Delta Sync Properties' do
         # Property B: Index size equals the number of unique entry IDs
         expect(index.size).to eq(expected.size),
           "Expected index size=#{expected.size}, got #{index.size}"
+      }
+    end
+  end
+
+  # Feature: contentful-delta-sync, Property 7: Slug rename via entry_id matching produces no duplicates
+  # **Validates: Slug rename during delta merge must not create duplicates**
+  describe 'Property 7: Slug rename via entry_id matching produces no duplicates' do
+    let(:fetcher) { Jekyll::ContentfulFetcher.new }
+
+    RENAME_ENTRY_IDS_POOL = %w[e1 e2 e3 e4 e5 e6 e7 e8].freeze
+    RENAME_SLUGS_POOL = %w[spiez thun bern aare limmat rhein zurich luzern brienz interlaken].freeze
+    RENAME_LOCALES = %w[de en].freeze
+
+    it 'after a slug rename via entry_id upsert, only the new slug exists for that entry_id' do
+      property_of {
+        # Generate random existing rows (2..15 rows) with entry_ids
+        # Ensure no duplicate entry_id+locale pairs (which mirrors real data)
+        existing_count = range(2, 15)
+        existing_rows = []
+        used_keys = {}
+        existing_count.times do
+          entry_id = choose(*RENAME_ENTRY_IDS_POOL)
+          slug = choose(*RENAME_SLUGS_POOL)
+          locale = choose(*RENAME_LOCALES)
+          key = [entry_id, locale]
+          next if used_keys[key]
+
+          used_keys[key] = true
+          name = sized(range(3, 10)) { string(:alpha) }
+          existing_rows << { 'entry_id' => entry_id, 'slug' => slug, 'locale' => locale, 'name' => name }
+        end
+
+        # Ensure we have at least 2 rows
+        guard existing_rows.size >= 2
+
+        # Pick an entry_id that exists in the data to be the "renamed" entry
+        target_entry_id = existing_rows.sample['entry_id']
+
+        # Generate a new slug that is different from any existing slug for this entry
+        new_slug = "renamed-#{sized(range(5, 10)) { string(:alpha) }.downcase}"
+
+        [existing_rows, target_entry_id, new_slug]
+      }.check(100) { |existing_rows, target_entry_id, new_slug|
+        filename = 'spots'
+        original_rows = existing_rows.map(&:dup)
+        yaml_data = { filename => existing_rows.map(&:dup) }
+
+        # Upsert new rows with the same entry_id but a new slug (both locales)
+        new_rows = RENAME_LOCALES.map do |locale|
+          { 'entry_id' => target_entry_id, 'slug' => new_slug, 'locale' => locale, 'name' => "Renamed #{locale}" }
+        end
+        fetcher.send(:upsert_rows, yaml_data, filename, new_rows)
+
+        result = yaml_data[filename]
+
+        # Property A: All rows for the target entry_id now have the new slug
+        target_rows = result.select { |r| r['entry_id'] == target_entry_id }
+        target_rows.each do |row|
+          expect(row['slug']).to eq(new_slug),
+            "Expected entry_id='#{target_entry_id}' to have slug='#{new_slug}', got '#{row['slug']}'"
+        end
+
+        # Property B: No duplicate entry_id+locale pairs exist
+        keys = result.map { |r| [r['entry_id'], r['locale']] }
+        # After upsert, each entry_id+locale should appear at most once
+        # (unless the original data had duplicates for non-target entries)
+        target_keys = keys.select { |k| k[0] == target_entry_id }
+        expect(target_keys.uniq.size).to eq(target_keys.size),
+          "Expected no duplicate entry_id+locale for target entry"
+
+        # Property C: Other entries are preserved
+        non_target_originals = original_rows.reject { |r| r['entry_id'] == target_entry_id }
+        non_target_result = result.reject { |r| r['entry_id'] == target_entry_id }
+        expect(non_target_result).to eq(non_target_originals),
+          "Expected non-target rows to be preserved in order"
       }
     end
   end
