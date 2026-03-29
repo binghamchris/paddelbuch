@@ -1637,6 +1637,138 @@ RSpec.describe Jekyll::ContentfulFetcher do
       fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
     end
 
+    # ─── slug rename handling ────────────────────────────────────────
+
+    it 'removes old-slug rows and inserts new-slug rows when a slug changes' do
+      # Pre-populate with old slug
+      existing_obstacles = [
+        { 'slug' => 'old-slug', 'locale' => 'de', 'name' => 'Old DE' },
+        { 'slug' => 'old-slug', 'locale' => 'en', 'name' => 'Old EN' },
+        { 'slug' => 'other-entry', 'locale' => 'de', 'name' => 'Other DE' }
+      ]
+      File.write(File.join(data_dir, 'obstacles.yml'), YAML.dump(existing_obstacles))
+
+      # Entry ID index knows the old slug
+      cache.add_to_entry_id_index('rename1', 'old-slug', 'obstacle')
+
+      delta_entry = build_delta_entry(id: 'rename1')
+      refetched = build_refetched_entry(id: 'rename1', slug: 'new-slug')
+      stub_batch_entries('obstacle', ['rename1'], [refetched])
+      allow(ContentfulMappers).to receive(:flatten_entry).and_return([
+        { 'slug' => 'new-slug', 'locale' => 'de', 'name' => 'New DE' },
+        { 'slug' => 'new-slug', 'locale' => 'en', 'name' => 'New EN' }
+      ])
+
+      result = build_sync_result(changed: { 'obstacle' => [delta_entry] })
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+
+      written = YAML.safe_load(File.read(File.join(data_dir, 'obstacles.yml')))
+
+      # Old slug rows should be gone
+      old_rows = written.select { |r| r['slug'] == 'old-slug' }
+      expect(old_rows).to be_empty
+
+      # New slug rows should be present
+      new_de = written.find { |r| r['slug'] == 'new-slug' && r['locale'] == 'de' }
+      new_en = written.find { |r| r['slug'] == 'new-slug' && r['locale'] == 'en' }
+      expect(new_de['name']).to eq('New DE')
+      expect(new_en['name']).to eq('New EN')
+
+      # Unrelated entry should be untouched
+      other = written.find { |r| r['slug'] == 'other-entry' }
+      expect(other['name']).to eq('Other DE')
+    end
+
+    it 'updates the entry_id_index with the new slug after a rename' do
+      existing_spots = [
+        { 'slug' => 'old-name', 'locale' => 'de', 'name' => 'Old' },
+        { 'slug' => 'old-name', 'locale' => 'en', 'name' => 'Old' }
+      ]
+      File.write(File.join(data_dir, 'spots.yml'), YAML.dump(existing_spots))
+
+      cache.add_to_entry_id_index('rename2', 'old-name', 'spot')
+
+      delta_entry = build_delta_entry(id: 'rename2')
+      refetched = build_refetched_entry(id: 'rename2', slug: 'new-name')
+      stub_batch_entries('spot', ['rename2'], [refetched])
+      allow(ContentfulMappers).to receive(:flatten_entry).and_return([
+        { 'slug' => 'new-name', 'locale' => 'de', 'name' => 'New' },
+        { 'slug' => 'new-name', 'locale' => 'en', 'name' => 'New' }
+      ])
+
+      result = build_sync_result(changed: { 'spot' => [delta_entry] })
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+
+      index_entry = cache.lookup_entry_id('rename2')
+      expect(index_entry['slug']).to eq('new-name')
+    end
+
+    it 'logs the slug rename' do
+      existing_spots = [
+        { 'slug' => 'before', 'locale' => 'de', 'name' => 'Before' }
+      ]
+      File.write(File.join(data_dir, 'spots.yml'), YAML.dump(existing_spots))
+
+      cache.add_to_entry_id_index('rename3', 'before', 'spot')
+
+      delta_entry = build_delta_entry(id: 'rename3')
+      refetched = build_refetched_entry(id: 'rename3', slug: 'after')
+      stub_batch_entries('spot', ['rename3'], [refetched])
+      allow(ContentfulMappers).to receive(:flatten_entry).and_return([
+        { 'slug' => 'after', 'locale' => 'de', 'name' => 'After' },
+        { 'slug' => 'after', 'locale' => 'en', 'name' => 'After' }
+      ])
+
+      expect(Jekyll.logger).to receive(:info).with('Contentful:', "Slug renamed for spot entry 'rename3': 'before' -> 'after'")
+      allow(Jekyll.logger).to receive(:info)
+
+      result = build_sync_result(changed: { 'spot' => [delta_entry] })
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+    end
+
+    it 'does not remove rows when slug has not changed (no false positive)' do
+      existing_spots = [
+        { 'slug' => 'same-slug', 'locale' => 'de', 'name' => 'Old Name' },
+        { 'slug' => 'same-slug', 'locale' => 'en', 'name' => 'Old Name EN' }
+      ]
+      File.write(File.join(data_dir, 'spots.yml'), YAML.dump(existing_spots))
+
+      cache.add_to_entry_id_index('no_rename', 'same-slug', 'spot')
+
+      delta_entry = build_delta_entry(id: 'no_rename')
+      refetched = build_refetched_entry(id: 'no_rename', slug: 'same-slug')
+      stub_batch_entries('spot', ['no_rename'], [refetched])
+      allow(ContentfulMappers).to receive(:flatten_entry).and_return([
+        { 'slug' => 'same-slug', 'locale' => 'de', 'name' => 'Updated Name' },
+        { 'slug' => 'same-slug', 'locale' => 'en', 'name' => 'Updated Name EN' }
+      ])
+
+      result = build_sync_result(changed: { 'spot' => [delta_entry] })
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+
+      written = YAML.safe_load(File.read(File.join(data_dir, 'spots.yml')))
+      expect(written.size).to eq(2)
+      de_row = written.find { |r| r['locale'] == 'de' }
+      expect(de_row['name']).to eq('Updated Name')
+    end
+
+    it 'handles slug rename for a brand-new entry not yet in the index' do
+      delta_entry = build_delta_entry(id: 'brand_new')
+      refetched = build_refetched_entry(id: 'brand_new', slug: 'fresh-entry')
+      stub_batch_entries('spot', ['brand_new'], [refetched])
+      allow(ContentfulMappers).to receive(:flatten_entry).and_return([
+        { 'slug' => 'fresh-entry', 'locale' => 'de', 'name' => 'Fresh DE' },
+        { 'slug' => 'fresh-entry', 'locale' => 'en', 'name' => 'Fresh EN' }
+      ])
+
+      result = build_sync_result(changed: { 'spot' => [delta_entry] })
+      fetcher.send(:perform_delta_merge, result, cache, 'test_space', 'master')
+
+      written = YAML.safe_load(File.read(File.join(data_dir, 'spots.yml')))
+      expect(written.size).to eq(2)
+      expect(written.all? { |r| r['slug'] == 'fresh-entry' }).to be true
+    end
+
     # ─── cache persistence ───────────────────────────────────────────
 
     it 'saves cache with new sync token after successful delta merge' do
