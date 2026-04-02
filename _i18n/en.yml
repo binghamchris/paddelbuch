@@ -107,7 +107,9 @@ event_notices:
 waterways:
   title: "Waterways"
   lakes: "Lakes"
+  lakes_description: "All lakes in Switzerland for paddling, sorted alphabetically"
   rivers: "Rivers"
+  rivers_description: "All rivers in Switzerland for paddling, sorted alphabetically"
 
 # API page
 api:
