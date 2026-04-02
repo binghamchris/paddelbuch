@@ -65,7 +65,8 @@ var metricsArb = fc.record({
   obstacles: fc.record({
     total: fc.nat({ max: 10000 }),
     withPortageRoute: fc.nat({ max: 5000 }),
-    withoutPortageRoute: fc.nat({ max: 5000 })
+    withoutPortageRoute: fc.nat({ max: 5000 }),
+    unknownPortage: fc.nat({ max: 5000 })
   }),
   protectedAreas: fc.record({
     total: fc.nat({ max: 10000 }),
@@ -138,6 +139,7 @@ describe('Legend BEM-modifier classes and entry counts (Property 5)', function (
       spotTypeNoEntry: '#7f8c8d',
       obstacleWithPortage: '#07753f',
       obstacleWithoutPortage: '#c40200',
+      obstacleUnknown: '#ffb200',
       paTypeNaturschutzgebiet: '#1a5276',
       paTypeFahrverbotzone: '#d4ac0d',
       paTypeSchilfgebiet: '#117a65',
@@ -238,15 +240,15 @@ describe('Legend BEM-modifier classes and entry counts (Property 5)', function (
         var obstaclesLegend = legends[1];
         var obstaclesItems = obstaclesLegend.querySelectorAll('.statistics-legend-item');
 
-        if (obstaclesItems.length !== 2) {
+        if (obstaclesItems.length !== 3) {
           throw new Error(
-            'Obstacles legend: expected 2 items but found ' + obstaclesItems.length
+            'Obstacles legend: expected 3 items but found ' + obstaclesItems.length
           );
         }
 
-        // Verify obstacle swatches contain both with-portage and without-portage (order depends on counts)
+        // Verify obstacle swatches contain with-portage, without-portage, and unknown (order depends on counts)
         var obstacleSlugsFound = [];
-        for (var oi = 0; oi < 2; oi++) {
+        for (var oi = 0; oi < 3; oi++) {
           var obsSwatch = obstaclesItems[oi].querySelector('.statistics-legend-swatch');
           if (!obsSwatch) {
             throw new Error('Obstacles legend item ' + oi + ' is missing a .statistics-legend-swatch element');
@@ -255,13 +257,17 @@ describe('Legend BEM-modifier classes and entry counts (Property 5)', function (
             obstacleSlugsFound.push('with-portage');
           } else if (obsSwatch.classList.contains('statistics-legend-swatch--without-portage')) {
             obstacleSlugsFound.push('without-portage');
+          } else if (obsSwatch.classList.contains('statistics-legend-swatch--unknown')) {
+            obstacleSlugsFound.push('unknown');
           } else {
             throw new Error(
               'Obstacles legend item ' + oi + ': unexpected swatch classes "' + obsSwatch.className + '"'
             );
           }
         }
-        if (obstacleSlugsFound.indexOf('with-portage') === -1 || obstacleSlugsFound.indexOf('without-portage') === -1) {
+        if (obstacleSlugsFound.indexOf('with-portage') === -1 ||
+            obstacleSlugsFound.indexOf('without-portage') === -1 ||
+            obstacleSlugsFound.indexOf('unknown') === -1) {
           throw new Error('Obstacles legend: missing expected swatch classes, found: ' + obstacleSlugsFound.join(', '));
         }
 
