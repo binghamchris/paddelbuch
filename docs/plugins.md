@@ -85,6 +85,8 @@ Plugins run in priority order. Hooks run at specific lifecycle points.
 - Waterways: active event notices
 - Notices: resolved waterway objects
 
+**Exclusions:** Whitewater waterways (`paddlingEnvironmentType_slug == 'wildwasser'`) and non-navigable waterways (`navigableByPaddlers == false`) are excluded from page generation. Obstacles linked to these waterways are also excluded.
+
 **Dependencies:** `ContentfulFetcher` (must run first to populate `site.data`)
 
 ---
@@ -158,6 +160,8 @@ Plugins run in priority order. Hooks run at specific lifecycle points.
 
 **Layers:** `spots`, `notices`, `obstacles`, `protected`
 
+**Exclusions:** Obstacles linked to whitewater waterways (`paddlingEnvironmentType_slug == 'wildwasser'`) or non-navigable waterways (`navigableByPaddlers == false`) are excluded from obstacle tiles.
+
 **Caching:** Uses `_data/.tile_cache/` to skip regeneration when `contentful_data_changed` is `false`.
 
 **Dependencies:** `ContentfulFetcher` (data), `GeneratorCache` (caching mixin)
@@ -196,6 +200,8 @@ Plugins run in priority order. Hooks run at specific lifecycle points.
 - `site.data['dashboard_statistics_metrics']` — Localised statistics counts per section
 - `site.data['dashboard_spot_freshness_map_data']` — Per-spot freshness data with coordinates for map rendering
 - `site.data['dashboard_obstacle_portage_map_data']` — Per-obstacle portage route data with coordinates for map rendering
+
+**Exclusions:** Obstacles linked to whitewater waterways (`paddlingEnvironmentType_slug == 'wildwasser'`) or non-navigable waterways (`navigableByPaddlers == false`) are excluded from statistics and portage map data.
 
 **Caching:** Uses the same compute-once-cache-across-locales pattern as `DashboardMetricsGenerator`.
 
