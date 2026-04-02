@@ -53,7 +53,8 @@ var PA_GRADIENT_COLORS = [
 
 var OBSTACLE_COLOR_MAP = {
   'with-portage': 'obstacleWithPortage',
-  'without-portage': 'obstacleWithoutPortage'
+  'without-portage': 'obstacleWithoutPortage',
+  'unknown': 'obstacleUnknown'
 };
 
 // --- Mock PaddelbuchColors values ---
@@ -77,7 +78,8 @@ var MOCK_COLORS = {
   chartGradientPa9: '#606589',
   // Obstacle colours (slug-based)
   obstacleWithPortage: '#07753f',
-  obstacleWithoutPortage: '#c40200'
+  obstacleWithoutPortage: '#c40200',
+  obstacleUnknown: '#ffb200'
 };
 
 // --- Arbitraries ---
@@ -98,7 +100,8 @@ var metricsArb = fc.record({
   obstacles: fc.record({
     total: fc.nat({ max: 10000 }),
     withPortageRoute: fc.nat({ max: 5000 }),
-    withoutPortageRoute: fc.nat({ max: 5000 })
+    withoutPortageRoute: fc.nat({ max: 5000 }),
+    unknownPortage: fc.nat({ max: 5000 })
   }),
   protectedAreas: fc.record({
     total: fc.nat({ max: 10000 }),
@@ -246,20 +249,22 @@ describe('Chart.js dataset colour and label correctness (Property 2)', function 
         var obstaclesChart = window._chartInstances[1];
         var obstaclesDatasets = obstaclesChart.config.data.datasets;
 
-        // Obstacles always have exactly 2 datasets: with-portage and without-portage
+        // Obstacles always have exactly 3 datasets: with-portage, without-portage, and unknown
         // After sorting by count descending, order depends on data
-        if (obstaclesDatasets.length !== 2) {
+        if (obstaclesDatasets.length !== 3) {
           throw new Error(
-            'Obstacles chart: expected 2 datasets but found ' + obstaclesDatasets.length
+            'Obstacles chart: expected 3 datasets but found ' + obstaclesDatasets.length
           );
         }
 
-        var expectedWithLabel = 'Mit Portage-Route';
-        var expectedWithoutLabel = 'Ohne Portage-Route';
+        var expectedWithLabel = 'Portage-Route verfügbar';
+        var expectedWithoutLabel = 'Keine Portage-Route verfügbar';
+        var expectedUnknownLabel = 'Unbekannt';
         var expectedWithPortageColor = MOCK_COLORS[OBSTACLE_COLOR_MAP['with-portage']];
         var expectedWithoutPortageColor = MOCK_COLORS[OBSTACLE_COLOR_MAP['without-portage']];
+        var expectedUnknownColor = MOCK_COLORS[OBSTACLE_COLOR_MAP['unknown']];
 
-        for (var oi = 0; oi < 2; oi++) {
+        for (var oi = 0; oi < 3; oi++) {
           var od = obstaclesDatasets[oi];
           if (od.label === expectedWithLabel) {
             if (od.backgroundColor !== expectedWithPortageColor) {
@@ -273,6 +278,13 @@ describe('Chart.js dataset colour and label correctness (Property 2)', function 
               throw new Error(
                 'Obstacles without-portage: expected backgroundColor "' +
                 expectedWithoutPortageColor + '" but got "' + od.backgroundColor + '"'
+              );
+            }
+          } else if (od.label === expectedUnknownLabel) {
+            if (od.backgroundColor !== expectedUnknownColor) {
+              throw new Error(
+                'Obstacles unknown: expected backgroundColor "' +
+                expectedUnknownColor + '" but got "' + od.backgroundColor + '"'
               );
             }
           } else {
