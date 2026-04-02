@@ -54,11 +54,13 @@ module Jekyll
       @waterway_lookup = build_waterway_lookup(site.data['waterways'], current_locale)
       @craft_type_lookup = build_craft_type_lookup(site.data, current_locale)
 
-      # Build set of non-navigable waterway slugs for obstacle filtering
-      @non_navigable_waterway_slugs = Set.new
+      # Build set of excluded waterway slugs for obstacle filtering
+      # (non-navigable waterways + whitewater waterways)
+      @excluded_waterway_slugs = Set.new
       if @waterway_lookup
         @waterway_lookup.each do |slug, ww|
-          @non_navigable_waterway_slugs.add(slug) if ww['navigableByPaddlers'] == false
+          @excluded_waterway_slugs.add(slug) if ww['navigableByPaddlers'] == false
+          @excluded_waterway_slugs.add(slug) if ww['paddlingEnvironmentType_slug'] == 'wildwasser'
         end
       end
 
@@ -76,7 +78,8 @@ module Jekyll
           slug = entry['slug']
           next unless slug && !slug.empty?
           next if collection_name == 'waterways' && entry['navigableByPaddlers'] == false
-          next if collection_name == 'obstacles' && @non_navigable_waterway_slugs.include?(entry['waterway_slug'])
+          next if collection_name == 'waterways' && entry['paddlingEnvironmentType_slug'] == 'wildwasser'
+          next if collection_name == 'obstacles' && @excluded_waterway_slugs.include?(entry['waterway_slug'])
 
           doc = create_document(site, collection, entry, slug, config[:page_name], current_locale)
           collection.docs << doc

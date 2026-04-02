@@ -105,10 +105,12 @@ module Jekyll
       @grid_rows = ((SWITZERLAND_BOUNDS[:north] - SWITZERLAND_BOUNDS[:south]) / TILE_SIZE[:lat]).ceil
       @locale_cache = {}
 
-      # Build set of non-navigable waterway slugs for obstacle filtering
-      @non_navigable_waterway_slugs = Set.new
+      # Build set of excluded waterway slugs for obstacle filtering
+      # (non-navigable waterways + whitewater waterways)
+      @excluded_waterway_slugs = Set.new
       (site.data['waterways'] || []).each do |w|
-        @non_navigable_waterway_slugs.add(w['slug']) if w['navigableByPaddlers'] == false
+        @excluded_waterway_slugs.add(w['slug']) if w['navigableByPaddlers'] == false
+        @excluded_waterway_slugs.add(w['slug']) if w['paddlingEnvironmentType_slug'] == 'wildwasser'
       end
 
       Jekyll.logger.info "Tile Generator:", "Generating #{@grid_cols}x#{@grid_rows} tile grid"
@@ -133,9 +135,9 @@ module Jekyll
         data = data.reject { |item| item['rejected'] == true }
       end
 
-      # Exclude obstacles linked to non-navigable waterways
+      # Exclude obstacles linked to non-navigable or whitewater waterways
       if layer_name == 'obstacles'
-        data = data.reject { |item| @non_navigable_waterway_slugs.include?(item['waterway_slug']) }
+        data = data.reject { |item| @excluded_waterway_slugs.include?(item['waterway_slug']) }
       end
 
       # Initialize tile buckets
