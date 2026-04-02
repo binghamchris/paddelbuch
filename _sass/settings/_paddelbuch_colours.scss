@@ -31,6 +31,7 @@ $text-muted: $secondary-blue;
 // Statistics Dashboard - Obstacle Colours (matches coverage dashboard: green-1 / danger-red)
 $obstacle-with-portage: #07753f; // = $green-1
 $obstacle-without-portage: #c40200; // = $danger-red
+$obstacle-unknown: #ffb200; // = $warning-yellow
 
 // Statistics Dashboard - Chart Colour Palettes (ordered by sort position)
 // Uses existing site colours for maximum distinction between categories.

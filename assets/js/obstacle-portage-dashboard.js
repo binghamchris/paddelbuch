@@ -3,12 +3,12 @@
  *
  * Renders per-obstacle portage route data as a horizontal stacked bar chart
  * and shaped, colour-coded Leaflet markers. Each obstacle is plotted on the
- * shared map with a shape and colour indicating whether it has a portage
- * route. A shared legend explains both chart and map symbols.
+ * shared map with a shape and colour indicating its portage status based on
+ * the isPortagePossible field:
  *
- * Marker shapes follow the Spot Freshness dashboard conventions:
- *   - With portage route:    green circle  (same as "fresh")
- *   - Without portage route: red square    (same as "stale")
+ *   - isPortagePossible = true:  green circle  (same as Spot Freshness "fresh")
+ *   - isPortagePossible = false: red square    (same as Spot Freshness "stale")
+ *   - isPortagePossible = null:  yellow triangle (same as Spot Freshness "aging")
  *
  * All metric computation is done at Jekyll build time by
  * statistics_metrics_generator.rb - this module only renders pre-computed data.
@@ -28,13 +28,13 @@
    */
   var PORTAGE_COLOR_MAP = {
     'withPortage': 'green1',
-    'withoutPortage': 'dangerRed'
+    'withoutPortage': 'dangerRed',
+    'unknown': 'warningYellow'
   };
 
   /**
    * SVG shape templates for map markers, keyed by portage category.
-   * With portage = green circle (identical to Spot Freshness "fresh").
-   * Without portage = red square (identical to Spot Freshness "stale").
+   * Shapes match the Spot Freshness dashboard conventions.
    */
   var SHAPES = {
     withPortage: function(color) {
@@ -44,6 +44,10 @@
     withoutPortage: function(color) {
       return '<svg width="14" height="14" viewBox="0 0 14 14">' +
         '<rect x="1" y="1" width="12" height="12" fill="' + color + '" stroke="#fff" stroke-width="1"/></svg>';
+    },
+    unknown: function(color) {
+      return '<svg width="14" height="14" viewBox="0 0 14 14">' +
+        '<polygon points="7,1 13,13 1,13" fill="' + color + '" stroke="#fff" stroke-width="1"/></svg>';
     }
   };
 
@@ -123,7 +127,7 @@
 
           var text = Math.round(pct) + '%';
           ctx.save();
-          ctx.fillStyle = '#fff';
+          ctx.fillStyle = segments[d].colorKey === 'warningYellow' ? '#000' : '#fff';
           ctx.font = '400 ' + fontSize + 'px ' +
             (window.getComputedStyle(chart.canvas).fontFamily || 'Quicksand, Helvetica, Arial, sans-serif');
           ctx.textAlign = 'center';
@@ -185,8 +189,9 @@
     var defaults = {
       name: 'Hindernis-Portage-Routen',
       description: 'Welche Hindernisse eine dokumentierte Portage-Route haben und welche nicht.',
-      with_portage: 'Mit Portage-Route',
-      without_portage: 'Ohne Portage-Route',
+      with_portage: 'Portage-Route verfügbar',
+      without_portage: 'Keine Portage-Route verfügbar',
+      unknown: 'Unbekannt',
       more_details: 'Weitere Details'
     };
 
@@ -269,6 +274,7 @@
 
       var withCount = 0;
       var withoutCount = 0;
+      var unknownCount = 0;
 
       if (map && L && L.layerGroup && L.marker && L.divIcon) {
         markerLayerGroup = L.layerGroup();
@@ -280,15 +286,17 @@
             continue;
           }
 
-          var category = obstacle.hasPortageRoute ? 'withPortage' : 'withoutPortage';
+          var category = obstacle.portageCategory || 'unknown';
           var colorKey = PORTAGE_COLOR_MAP[category];
           var markerColor = getColor(colorKey);
           var svgHtml = SHAPES[category](markerColor);
 
-          if (obstacle.hasPortageRoute) {
+          if (category === 'withPortage') {
             withCount++;
-          } else {
+          } else if (category === 'withoutPortage') {
             withoutCount++;
+          } else {
+            unknownCount++;
           }
 
           var icon = L.divIcon({
@@ -298,9 +306,10 @@
             iconAnchor: [7, 7]
           });
 
+          var zOffset = category === 'withoutPortage' ? 2000 : (category === 'unknown' ? 1000 : 0);
           var marker = L.marker([obstacle.lat, obstacle.lon], {
             icon: icon,
-            zIndexOffset: obstacle.hasPortageRoute ? 1000 : 0
+            zIndexOffset: zOffset
           });
           marker.bindPopup(buildPopupHtml(obstacle, strings));
           markerLayerGroup.addLayer(marker);
@@ -310,39 +319,43 @@
       } else {
         // Count without map
         for (var k = 0; k < obstacleData.length; k++) {
-          if (obstacleData[k].hasPortageRoute) {
+          var cat = obstacleData[k].portageCategory || 'unknown';
+          if (cat === 'withPortage') {
             withCount++;
-          } else {
+          } else if (cat === 'withoutPortage') {
             withoutCount++;
+          } else {
+            unknownCount++;
           }
         }
       }
 
-      // --- Legend + chart ---
+      // --- Legend + chart (sorted by count descending, matching statistics dashboard) ---
       var segments = [
-        { name: strings.without_portage, count: withoutCount, colorKey: PORTAGE_COLOR_MAP['withoutPortage'] },
-        { name: strings.with_portage, count: withCount, colorKey: PORTAGE_COLOR_MAP['withPortage'] }
+        { name: strings.without_portage, count: withoutCount, colorKey: PORTAGE_COLOR_MAP['withoutPortage'], catKey: 'withoutPortage' },
+        { name: strings.unknown, count: unknownCount, colorKey: PORTAGE_COLOR_MAP['unknown'], catKey: 'unknown' },
+        { name: strings.with_portage, count: withCount, colorKey: PORTAGE_COLOR_MAP['withPortage'], catKey: 'withPortage' }
       ];
+      segments.sort(function(a, b) { return b.count - a.count; });
 
       var legendEl = document.getElementById('dashboard-legend');
       if (legendEl) {
         var legendHtml = '';
         legendHtml += '<div class="dashboard-legend-items">';
 
-        var categories = [
-          { key: 'withoutPortage', label: strings.without_portage },
-          { key: 'withPortage', label: strings.with_portage }
-        ];
+        var categories = segments.map(function(seg) {
+          return { key: seg.catKey, label: seg.name };
+        });
 
         for (var i = 0; i < categories.length; i++) {
-          var cat = categories[i];
-          var catColorKey = PORTAGE_COLOR_MAP[cat.key];
+          var legendCat = categories[i];
+          var catColorKey = PORTAGE_COLOR_MAP[legendCat.key];
           var catColor = getColor(catColorKey);
-          var shapeSvg = SHAPES[cat.key](catColor);
+          var shapeSvg = SHAPES[legendCat.key](catColor);
 
           legendHtml += '<div class="dashboard-legend-item">';
           legendHtml += '<span class="dashboard-legend-shape">' + shapeSvg + '</span>';
-          legendHtml += '<span>' + escapeHtml(cat.label) + '</span>';
+          legendHtml += '<span>' + escapeHtml(legendCat.label) + '</span>';
           legendHtml += '</div>';
         }
 

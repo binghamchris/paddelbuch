@@ -187,8 +187,9 @@ dashboards:
     paddle_craft_title: "Verfügbare Einstiegsorte nach Paddelboot-Typ"
     data_source_title: "Einträge nach Datenquelle"
     data_license_title: "Einträge nach Datenlizenz"
-    with_portage: "Mit Portage-Route"
-    without_portage: "Ohne Portage-Route"
+    with_portage: "Portage-Route verfügbar"
+    without_portage: "Keine Portage-Route verfügbar"
+    unknown_portage: "Unbekannt"
     no_entry: "Kein Zutritt"
 
   coverage:
@@ -211,6 +212,7 @@ dashboards:
   obstacle_portage:
     name: "Hindernis-Portage-Routen"
     description: "Welche Hindernisse eine dokumentierte Portage-Route haben und welche nicht."
-    with_portage: "Mit Portage-Route"
-    without_portage: "Ohne Portage-Route"
+    with_portage: "Portage-Route verfügbar"
+    without_portage: "Keine Portage-Route verfügbar"
+    unknown: "Unbekannt"
     more_details: "Weitere Details"

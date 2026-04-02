@@ -42,7 +42,8 @@
    */
   var OBSTACLE_COLOR_MAP = {
     'with-portage': 'obstacleWithPortage',
-    'without-portage': 'obstacleWithoutPortage'
+    'without-portage': 'obstacleWithoutPortage',
+    'unknown': 'obstacleUnknown'
   };
 
   /**
@@ -80,8 +81,9 @@
       paddle_craft_title: 'Verfügbare Einstiegsorte nach Paddelboot-Typ',
       data_source_title: 'Einträge nach Datenquelle',
       data_license_title: 'Einträge nach Datenlizenz',
-      with_portage: 'Mit Portage-Route',
-      without_portage: 'Ohne Portage-Route',
+      with_portage: 'Portage-Route verfügbar',
+      without_portage: 'Keine Portage-Route verfügbar',
+      unknown_portage: 'Unbekannt',
       no_entry: 'Kein Zutritt'
     };
 
@@ -347,14 +349,15 @@
   /**
    * Builds obstacle segments from metrics data.
    *
-   * @param {Object} obstacles - { total, withPortageRoute, withoutPortageRoute }
+   * @param {Object} obstacles - { total, withPortageRoute, withoutPortageRoute, unknownPortage }
    * @param {Object} strings - Localised string map
    * @returns {Array} Segments with colorKey and slug added
    */
   function buildObstacleSegments(obstacles, strings) {
     return [
       { name: strings.with_portage, count: obstacles.withPortageRoute || 0, color: getColor(OBSTACLE_COLOR_MAP['with-portage']), slug: 'with-portage' },
-      { name: strings.without_portage, count: obstacles.withoutPortageRoute || 0, color: getColor(OBSTACLE_COLOR_MAP['without-portage']), slug: 'without-portage' }
+      { name: strings.without_portage, count: obstacles.withoutPortageRoute || 0, color: getColor(OBSTACLE_COLOR_MAP['without-portage']), slug: 'without-portage' },
+      { name: strings.unknown_portage, count: obstacles.unknownPortage || 0, color: getColor(OBSTACLE_COLOR_MAP['unknown']), slug: 'unknown' }
     ];
   }
 
