@@ -1,0 +1,28 @@
+{% comment %}
+  Resolve localised page title and description from i18n keys.
+  Pages set title_key / description_key in front matter; this include
+  maps them to literal {% t %} calls so the plugin can resolve them.
+  Falls back to page.title / page.description for pages without keys.
+{% endcomment %}
+
+{% comment %}-- Resolve title --{% endcomment %}
+{% if page.title_key == 'waterways.lakes' %}
+  {% capture _resolved_title %}{% t waterways.lakes %}{% endcapture %}
+{% elsif page.title_key == 'waterways.rivers' %}
+  {% capture _resolved_title %}{% t waterways.rivers %}{% endcapture %}
+{% elsif page.title %}
+  {% assign _resolved_title = page.title %}
+{% else %}
+  {% assign _resolved_title = nil %}
+{% endif %}
+
+{% comment %}-- Resolve description --{% endcomment %}
+{% if page.description_key == 'waterways.lakes_description' %}
+  {% capture _resolved_description %}{% t waterways.lakes_description %}{% endcapture %}
+{% elsif page.description_key == 'waterways.rivers_description' %}
+  {% capture _resolved_description %}{% t waterways.rivers_description %}{% endcapture %}
+{% elsif page.description %}
+  {% assign _resolved_description = page.description %}
+{% else %}
+  {% assign _resolved_description = nil %}
+{% endif %}
