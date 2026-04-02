@@ -187,8 +187,9 @@ dashboards:
     paddle_craft_title: "Available Spots by Paddle Craft Type"
     data_source_title: "Entries by Data Source"
     data_license_title: "Entries by Data License"
-    with_portage: "With Portage Route"
-    without_portage: "Without Portage Route"
+    with_portage: "Portage Route Available"
+    without_portage: "No Portage Route Available"
+    unknown_portage: "Unknown"
     no_entry: "No Entry"
 
   coverage:
@@ -211,6 +212,7 @@ dashboards:
   obstacle_portage:
     name: "Obstacle Portage Routes"
     description: "Which obstacles have a documented portage route and which do not."
-    with_portage: "With Portage Route"
-    without_portage: "Without Portage Route"
+    with_portage: "Portage Route Available"
+    without_portage: "No Portage Route Available"
+    unknown: "Unknown"
     more_details: "More details"

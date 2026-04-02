@@ -95,14 +95,15 @@ RSpec.describe Jekyll::StatisticsMetricsGenerator do
   # Feature: statistics-dashboard, Property 3: Obstacle portage partitioning
   # **Validates: Requirements 3.3, 3.4**
   describe '#compute_obstacle_metrics (Property 3)' do
-    it 'partitions obstacles into exactly two segments and counts sum to total' do
+    it 'partitions obstacles into exactly three segments and counts sum to total' do
       property_of {
         num_obstacles = range(1, 40)
         obstacles = (1..num_obstacles).map do |i|
-          has_portage = range(0, 1) == 1
+          portage_possible = choose(true, false, nil)
           {
             'slug' => "obstacle-#{i}",
-            'portageRoute' => has_portage ? "route-#{i}" : nil
+            'isPortagePossible' => portage_possible,
+            'portageRoute' => portage_possible ? "route-#{i}" : nil
           }
         end
         obstacles
@@ -112,16 +113,19 @@ RSpec.describe Jekyll::StatisticsMetricsGenerator do
         total = result['total']
         with_portage = result['withPortageRoute']
         without_portage = result['withoutPortageRoute']
+        unknown_portage = result['unknownPortage']
 
-        # Two segments must sum to total
-        expect(with_portage + without_portage).to eq(total)
+        # Three segments must sum to total
+        expect(with_portage + without_portage + unknown_portage).to eq(total)
         expect(total).to eq(obstacles.size)
 
         # Verify individual counts
-        expected_with = obstacles.count { |o| !o['portageRoute'].nil? }
-        expected_without = obstacles.count { |o| o['portageRoute'].nil? }
+        expected_with = obstacles.count { |o| o['isPortagePossible'] == true }
+        expected_without = obstacles.count { |o| o['isPortagePossible'] == false }
+        expected_unknown = obstacles.count { |o| o['isPortagePossible'].nil? }
         expect(with_portage).to eq(expected_with)
         expect(without_portage).to eq(expected_without)
+        expect(unknown_portage).to eq(expected_unknown)
       }
     end
   end
@@ -361,7 +365,7 @@ RSpec.describe Jekyll::StatisticsMetricsGenerator do
         # We'll test with paddle_craft_types as a representative
         cached_metrics = {
           'spots' => { 'total' => 0, 'byType' => [] },
-          'obstacles' => { 'total' => 0, 'withPortageRoute' => 0, 'withoutPortageRoute' => 0 },
+          'obstacles' => { 'total' => 0, 'withPortageRoute' => 0, 'withoutPortageRoute' => 0, 'unknownPortage' => 0 },
           'protectedAreas' => { 'total' => 0, 'byType' => [] },
           'paddleCraftTypes' => type_defs.map { |td| { 'slug' => td['slug'], 'name' => td['slug'], 'count' => 0 } },
           'dataSourceTypes' => [],

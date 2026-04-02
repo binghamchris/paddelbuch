@@ -187,6 +187,7 @@
 // Legend swatch BEM modifiers - Obstacle types
 .statistics-legend-swatch--with-portage    { background-color: $obstacle-with-portage; }
 .statistics-legend-swatch--without-portage { background-color: $obstacle-without-portage; }
+.statistics-legend-swatch--unknown         { background-color: $obstacle-unknown; }
 
 // Legend swatch BEM modifiers - Spot freshness buckets
 .statistics-legend-swatch--fresh   { background-color: $green-1; }

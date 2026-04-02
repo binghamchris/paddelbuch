@@ -95,7 +95,7 @@ module Jekyll
 
       Jekyll.logger.info 'StatisticsMetrics:', 'Computing obstacle metrics...'
       obstacle_metrics = compute_obstacle_metrics(obstacles)
-      Jekyll.logger.info 'StatisticsMetrics:', "Obstacle metrics complete: #{obstacle_metrics['total']} total (#{obstacle_metrics['withPortageRoute']} with portage, #{obstacle_metrics['withoutPortageRoute']} without)"
+      Jekyll.logger.info 'StatisticsMetrics:', "Obstacle metrics complete: #{obstacle_metrics['total']} total (#{obstacle_metrics['withPortageRoute']} with portage, #{obstacle_metrics['withoutPortageRoute']} without, #{obstacle_metrics['unknownPortage']} unknown)"
 
       Jekyll.logger.info 'StatisticsMetrics:', 'Computing protected area metrics...'
       pa_metrics = compute_protected_area_metrics(protected_areas, protected_area_types)
@@ -167,23 +167,27 @@ module Jekyll
       { 'total' => spots.size, 'byType' => type_entries }
     end
 
-    # Obstacles: total + with/without portage route.
+    # Obstacles: total + with/without/unknown portage route.
     def compute_obstacle_metrics(obstacles)
       with_portage = 0
       without_portage = 0
+      unknown_portage = 0
 
       obstacles.each do |obstacle|
-        if obstacle['portageRoute'].nil?
+        if obstacle['isPortagePossible'] == true
+          with_portage += 1
+        elsif obstacle['isPortagePossible'] == false
           without_portage += 1
         else
-          with_portage += 1
+          unknown_portage += 1
         end
       end
 
       {
         'total' => obstacles.size,
         'withPortageRoute' => with_portage,
-        'withoutPortageRoute' => without_portage
+        'withoutPortageRoute' => without_portage,
+        'unknownPortage' => unknown_portage
       }
     end
 
@@ -288,8 +292,10 @@ module Jekyll
     end
 
     # Per-obstacle portage map data: returns an array of
-    # { slug, name, lat, lon, hasPortageRoute } for each obstacle with
+    # { slug, name, lat, lon, portageCategory } for each obstacle with
     # valid geometry. The lat/lon is the centroid of the geometry.
+    # portageCategory is 'withPortage', 'withoutPortage', or 'unknown'
+    # based on the isPortagePossible field.
     def compute_obstacle_portage_map_data(obstacles)
       obstacles.filter_map do |obstacle|
         geometry_json = obstacle['geometry']
@@ -304,12 +310,20 @@ module Jekyll
         centroid = geometry_centroid(geometry)
         next if centroid.nil?
 
+        category = if obstacle['isPortagePossible'] == true
+                     'withPortage'
+                   elsif obstacle['isPortagePossible'] == false
+                     'withoutPortage'
+                   else
+                     'unknown'
+                   end
+
         {
           'slug' => obstacle['slug'],
           'name' => 'placeholder',
           'lat' => centroid[1],
           'lon' => centroid[0],
-          'hasPortageRoute' => !obstacle['portageRoute'].nil?
+          'portageCategory' => category
         }
       end
     end

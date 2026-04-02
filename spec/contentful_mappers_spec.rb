@@ -492,7 +492,7 @@ RSpec.describe ContentfulMappers do
 
       expect(result['slug']).to eq('test-id-123')
       expect(result['isPortageNecessary']).to be false
-      expect(result['isPortagePossible']).to be false
+      expect(result['isPortagePossible']).to be_nil
       expect(result['spots']).to eq([])
     end
   end
