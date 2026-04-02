@@ -307,7 +307,7 @@ module ContentfulMappers
       'portageDescription' => extract_rich_text_html(portage_desc_field),
       '_raw_portageDescription' => serialize_raw_rich_text(portage_desc_field),
       'isPortageNecessary' => resolve_field(fields, :is_portage_necessary, locale) || false,
-      'isPortagePossible' => resolve_field(fields, :is_portage_possible, locale) || false,
+      'isPortagePossible' => resolve_field(fields, :is_portage_possible, locale),
       'obstacleType_slug' => extract_reference_slug(resolve_field(fields, :obstacle_type, locale)),
       'waterway_slug' => extract_reference_slug(resolve_field(fields, :waterway, locale)),
       'spots' => extract_reference_slugs(resolve_field(fields, :spot, locale)),

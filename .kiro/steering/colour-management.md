@@ -1,6 +1,6 @@
 ---
 inclusion: auto
-description: Describes how colour information for the site is managed. Use whenever styling needs to be designed.
+description: Describes how colour information for the site is managed. Use whenever styling needs to be designed or colours need ton be defined or used.
 ---
 
 The file `_sass/settings/_paddelbuch_colours.scss` MUST remain the single source of truth for ALL colour information across the entire site.
