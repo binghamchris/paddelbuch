@@ -72,7 +72,7 @@
 
 ## Task 8: Write fix checking tests (PBT)
 
-- [~] 8.1 Write property-based test for beacon dispatch correctness (Property 1)
+- [x] 8.1 Write property-based test for beacon dispatch correctness (Property 1)
   - [PBT: Property 1] Create `_tests/property/tinylytics-beacon.property.test.js` with `@jest-environment jsdom`
   - Use fast-check to generate random event name strings and event value strings
   - Assert: beacon element is created with correct `data-tinylytics-event` and `data-tinylytics-event-value`
@@ -81,24 +81,24 @@
   - Assert: beacon element is removed from DOM after dispatch
   - Assert: with falsy eventName, no element is created
   - Minimum 100 iterations
-- [~] 8.2 Write property-based test for beacon CSS class compliance (Property 2)
+- [x] 8.2 Write property-based test for beacon CSS class compliance (Property 2)
   - [PBT: Property 2] In the same test file, verify beacon element has class `tinylytics-beacon` and no `style` attribute
   - Minimum 100 iterations
 
 ## Task 9: Write preservation checking tests (PBT)
 
-- [~] 9.1 Write property-based test for popup HTML no longer containing `marker.click` (Property 3)
+- [x] 9.1 Write property-based test for popup HTML no longer containing `marker.click` (Property 3)
   - [PBT: Property 3] In `_tests/property/tinylytics-beacon.property.test.js` or a new file
   - Generate random entity objects (spot, rejected spot, obstacle, event notice)
   - Assert: popup HTML from each generator does NOT contain `data-tinylytics-event="marker.click"`
   - Minimum 100 iterations
-- [~] 9.2 Write property-based test for `popup.navigate` and `popup.details` preservation (Property 4)
+- [x] 9.2 Write property-based test for `popup.navigate` and `popup.details` preservation (Property 4)
   - [PBT: Property 4] Generate random spot objects with slug and location
   - Assert: popup HTML still contains `data-tinylytics-event="popup.navigate"` with correct slug
   - Assert: popup HTML still contains `data-tinylytics-event="popup.details"` with correct slug
   - For obstacle and event notice: assert `popup.details` still present
   - Minimum 100 iterations
-- [~] 9.3 Write property-based test for popup structural content preservation (Property 5)
+- [x] 9.3 Write property-based test for popup structural content preservation (Property 5)
   - [PBT: Property 5] Generate random entity objects
   - Assert: popup HTML still contains `popup-title` class and `<h1>` title element
   - Assert: popup HTML still contains more-details button structure when slug is present
