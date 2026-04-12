@@ -11,7 +11,7 @@
     "download-fonts": "node scripts/download-google-fonts.js",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:property": "jest --testPathPattern=property"
+    "test:property": "jest --testPathPatterns=property"
   },
   "keywords": [
     "Swiss Canoe",
