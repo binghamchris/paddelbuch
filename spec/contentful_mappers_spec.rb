@@ -465,7 +465,7 @@ RSpec.describe ContentfulMappers do
         is_portage_possible: true,
         obstacle_type: build_reference('weir'),
         waterway: build_reference('aare'),
-        spots: [build_reference('spot-1'), build_reference('spot-2')],
+        spot: [build_reference('spot-1'), build_reference('spot-2')],
         data_source_type: build_reference('community'),
         data_license_type: build_reference('cc-by-sa')
       )
