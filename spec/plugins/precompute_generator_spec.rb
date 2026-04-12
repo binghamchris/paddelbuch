@@ -241,19 +241,29 @@ RSpec.describe 'PrecomputeGenerator properties' do
 
           expected_spot_options = if data[:locale] == 'en'
             [
-              { 'slug' => 'einstieg-ausstieg', 'label' => 'Entry & Exit Spots' },
-              { 'slug' => 'nur-einstieg', 'label' => 'Entry Only Spots' },
-              { 'slug' => 'nur-ausstieg', 'label' => 'Exit Only Spots' },
-              { 'slug' => 'rasthalte', 'label' => 'Rest Spots' },
-              { 'slug' => 'notauswasserungsstelle', 'label' => 'Emergency Exit Spots' }
+              { 'slug' => 'einstieg-ausstieg', 'label' => 'Entry & Exit Spots',
+                'icon' => '/assets/images/icons/entryexit-light.svg', 'colorClass' => 'startingspot' },
+              { 'slug' => 'nur-einstieg', 'label' => 'Entry Only Spots',
+                'icon' => '/assets/images/icons/entry-light.svg', 'colorClass' => 'startingspot' },
+              { 'slug' => 'nur-ausstieg', 'label' => 'Exit Only Spots',
+                'icon' => '/assets/images/icons/exit-light.svg', 'colorClass' => 'otherspot' },
+              { 'slug' => 'rasthalte', 'label' => 'Rest Spots',
+                'icon' => '/assets/images/icons/rest-light.svg', 'colorClass' => 'otherspot' },
+              { 'slug' => 'notauswasserungsstelle', 'label' => 'Emergency Exit Spots',
+                'icon' => '/assets/images/icons/emergency-light.svg', 'colorClass' => 'otherspot' }
             ]
           else
             [
-              { 'slug' => 'einstieg-ausstieg', 'label' => 'Ein-/Ausstiegsorte' },
-              { 'slug' => 'nur-einstieg', 'label' => 'Einstiegsorte' },
-              { 'slug' => 'nur-ausstieg', 'label' => 'Ausstiegsorte' },
-              { 'slug' => 'rasthalte', 'label' => 'Rasthalte' },
-              { 'slug' => 'notauswasserungsstelle', 'label' => 'Notauswasserungsstelle' }
+              { 'slug' => 'einstieg-ausstieg', 'label' => 'Ein-/Ausstiegsorte',
+                'icon' => '/assets/images/icons/entryexit-light.svg', 'colorClass' => 'startingspot' },
+              { 'slug' => 'nur-einstieg', 'label' => 'Einstiegsorte',
+                'icon' => '/assets/images/icons/entry-light.svg', 'colorClass' => 'startingspot' },
+              { 'slug' => 'nur-ausstieg', 'label' => 'Ausstiegsorte',
+                'icon' => '/assets/images/icons/exit-light.svg', 'colorClass' => 'otherspot' },
+              { 'slug' => 'rasthalte', 'label' => 'Rasthalte',
+                'icon' => '/assets/images/icons/rest-light.svg', 'colorClass' => 'otherspot' },
+              { 'slug' => 'notauswasserungsstelle', 'label' => 'Notauswasserungsstelle',
+                'icon' => '/assets/images/icons/emergency-light.svg', 'colorClass' => 'otherspot' }
             ]
           end
 

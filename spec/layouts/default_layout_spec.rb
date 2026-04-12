@@ -21,9 +21,15 @@ RSpec.describe 'Default Layout SEO Meta Tags' do
   end
 
   # Render the SEO template snippet with the given site and page variables.
+  # Pre-sets _resolved_title and _resolved_description from page variables to
+  # replicate the effect of the resolve-meta.html include, which cannot run
+  # inside a bare Liquid::Template.parse context.
   def render_seo(site_vars, page_vars)
     template = Liquid::Template.parse(SEO_TEMPLATE)
-    template.render('site' => site_vars, 'page' => page_vars)
+    assigns = { 'site' => site_vars, 'page' => page_vars }
+    assigns['_resolved_title'] = page_vars['title'] if page_vars['title']
+    assigns['_resolved_description'] = page_vars['description'] if page_vars['description']
+    template.render(assigns)
   end
 
   # --- Random generators ---
