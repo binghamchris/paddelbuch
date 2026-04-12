@@ -69,8 +69,8 @@
     var localePrefix = (locale && locale !== 'de') ? '/' + locale : '';
     var escapedSlug = notice.slug ? PaddelbuchHtmlUtils.escapeHtml(notice.slug) : '';
     
-    // Outer wrapper with marker.click event tracking
-    var html = '<div data-tinylytics-event="marker.click" data-tinylytics-event-value="' + escapedSlug + '">';
+    // Outer wrapper (marker.click tracking moved to beacon dispatch in layer-control.js)
+    var html = '<div>';
     
     // Title (Requirement 7.3)
     html += '<span class="popup-title"><h1>' + PaddelbuchHtmlUtils.escapeHtml(notice.name || '') + '</h1></span>';
