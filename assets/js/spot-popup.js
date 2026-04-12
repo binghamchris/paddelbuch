@@ -144,8 +144,8 @@
         spotTypeLabel = spotTypeNames[spotTypeSlug][locale] || spotTypeNames[spotTypeSlug]['de'] || spotTypeSlug;
       }
 
-      // Outer wrapper with marker.click event tracking
-      html.push('<div data-tinylytics-event="marker.click" data-tinylytics-event-value="' + escapedSlug + '">');
+      // Outer wrapper (marker.click tracking moved to beacon dispatch in layer-control.js)
+      html.push('<div>');
 
       // Header: icon + category label (matches Gatsby .popup-icon-div)
       html.push('<div class="popup-icon-div">');
@@ -204,8 +204,8 @@
     var iconAlt = (locale === 'en') ? 'No entry spot icon' : 'Kein Zutritt Symbol';
     var escapedSlug = spot.slug ? PaddelbuchHtmlUtils.escapeHtml(spot.slug) : '';
 
-    // Outer wrapper with marker.click event tracking
-    html.push('<div data-tinylytics-event="marker.click" data-tinylytics-event-value="' + escapedSlug + '">');
+    // Outer wrapper (marker.click tracking moved to beacon dispatch in layer-control.js)
+    html.push('<div>');
 
     // Header: icon + category label (matches .popup-icon-div from Gatsby)
     html.push('<div class="popup-icon-div">');

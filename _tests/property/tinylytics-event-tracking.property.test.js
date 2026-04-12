@@ -145,32 +145,31 @@ describe('Feature: tinylytics-event-tracking, Property 1: Spot popup event track
   afterEach(teardownPopupGlobals);
 
   /**
-   * **Validates: Requirements 2.1, 3.1, 4.1**
+   * **Validates: Requirements 2.7, 1.5, 3.1, 3.2**
    *
    * For any valid spot with slug, location, and name the HTML returned by
-   * generateSpotPopupContent SHALL contain marker.click, popup.navigate,
-   * and popup.details with the correct slug values.
+   * generateSpotPopupContent SHALL NOT contain marker.click on any element
+   * (Property 3 from bugfix design), but SHALL still contain popup.navigate
+   * and popup.details with the correct slug values (Property 4 from bugfix design).
    */
-  test('output contains marker.click, popup.navigate, and popup.details with correct slug', () => {
+  test('output does NOT contain marker.click, but preserves popup.navigate and popup.details', () => {
     fc.assert(
       fc.property(spotArb, localeArb, (spot, locale) => {
         const html = global.PaddelbuchSpotPopup.generateSpotPopupContent(spot, locale);
         const attrs = extractEventAttributes(html);
         const escapedSlug = global.PaddelbuchHtmlUtils.escapeHtml(spot.slug);
 
-        // marker.click on wrapper div
+        // marker.click must NOT be present on popup HTML (Property 3)
         const markerClick = attrs.find(a => a.event === 'marker.click');
-        expect(markerClick).toBeDefined();
-        expect(markerClick.value).toBe(escapedSlug);
-        expect(markerClick.tag).toBe('div');
+        expect(markerClick).toBeUndefined();
 
-        // popup.navigate on button (spot has location)
+        // popup.navigate on button (spot has location) — preserved (Property 4)
         const popupNav = attrs.find(a => a.event === 'popup.navigate');
         expect(popupNav).toBeDefined();
         expect(popupNav.value).toBe(escapedSlug);
         expect(popupNav.tag).toBe('button');
 
-        // popup.details on button (spot has slug)
+        // popup.details on button (spot has slug) — preserved (Property 4)
         const popupDetails = attrs.find(a => a.event === 'popup.details');
         expect(popupDetails).toBeDefined();
         expect(popupDetails.value).toBe(escapedSlug);
@@ -193,26 +192,25 @@ describe('Feature: tinylytics-event-tracking, Property 2: Rejected spot popup ev
   afterEach(teardownPopupGlobals);
 
   /**
-   * **Validates: Requirements 2.2, 4.2**
+   * **Validates: Requirements 2.7, 1.5, 3.2**
    *
    * For any valid rejected spot with slug and name the HTML returned by
-   * generateRejectedSpotPopupContent SHALL contain marker.click and
-   * popup.details with the correct slug values.
+   * generateRejectedSpotPopupContent SHALL NOT contain marker.click on any
+   * element (Property 3 from bugfix design), but SHALL still contain
+   * popup.details with the correct slug values (Property 4 from bugfix design).
    */
-  test('output contains marker.click and popup.details with correct slug', () => {
+  test('output does NOT contain marker.click, but preserves popup.details', () => {
     fc.assert(
       fc.property(rejectedSpotArb, localeArb, (spot, locale) => {
         const html = global.PaddelbuchSpotPopup.generateRejectedSpotPopupContent(spot, locale);
         const attrs = extractEventAttributes(html);
         const escapedSlug = global.PaddelbuchHtmlUtils.escapeHtml(spot.slug);
 
-        // marker.click on wrapper div
+        // marker.click must NOT be present on popup HTML (Property 3)
         const markerClick = attrs.find(a => a.event === 'marker.click');
-        expect(markerClick).toBeDefined();
-        expect(markerClick.value).toBe(escapedSlug);
-        expect(markerClick.tag).toBe('div');
+        expect(markerClick).toBeUndefined();
 
-        // popup.details on button
+        // popup.details on button — preserved (Property 4)
         const popupDetails = attrs.find(a => a.event === 'popup.details');
         expect(popupDetails).toBeDefined();
         expect(popupDetails.value).toBe(escapedSlug);
@@ -239,26 +237,25 @@ describe('Feature: tinylytics-event-tracking, Property 3: Obstacle popup event t
   afterEach(teardownPopupGlobals);
 
   /**
-   * **Validates: Requirements 2.3, 4.3**
+   * **Validates: Requirements 2.7, 1.5, 3.2**
    *
    * For any valid obstacle with slug and name the HTML returned by
-   * generateObstaclePopupContent SHALL contain marker.click and
-   * popup.details with the correct slug values.
+   * generateObstaclePopupContent SHALL NOT contain marker.click on any
+   * element (Property 3 from bugfix design), but SHALL still contain
+   * popup.details with the correct slug values (Property 4 from bugfix design).
    */
-  test('output contains marker.click and popup.details with correct slug', () => {
+  test('output does NOT contain marker.click, but preserves popup.details', () => {
     fc.assert(
       fc.property(obstacleArb, localeArb, (obstacle, locale) => {
         const html = global.PaddelbuchObstaclePopup.generateObstaclePopupContent(obstacle, locale);
         const attrs = extractEventAttributes(html);
         const escapedSlug = global.PaddelbuchHtmlUtils.escapeHtml(obstacle.slug);
 
-        // marker.click on wrapper div
+        // marker.click must NOT be present on popup HTML (Property 3)
         const markerClick = attrs.find(a => a.event === 'marker.click');
-        expect(markerClick).toBeDefined();
-        expect(markerClick.value).toBe(escapedSlug);
-        expect(markerClick.tag).toBe('div');
+        expect(markerClick).toBeUndefined();
 
-        // popup.details on button
+        // popup.details on button — preserved (Property 4)
         const popupDetails = attrs.find(a => a.event === 'popup.details');
         expect(popupDetails).toBeDefined();
         expect(popupDetails.value).toBe(escapedSlug);
@@ -281,26 +278,25 @@ describe('Feature: tinylytics-event-tracking, Property 4: Event notice popup eve
   afterEach(teardownPopupGlobals);
 
   /**
-   * **Validates: Requirements 2.4, 4.4**
+   * **Validates: Requirements 2.7, 1.5, 3.2**
    *
    * For any valid event notice with slug and name the HTML returned by
-   * generateEventNoticePopupContent SHALL contain marker.click and
-   * popup.details with the correct slug values.
+   * generateEventNoticePopupContent SHALL NOT contain marker.click on any
+   * element (Property 3 from bugfix design), but SHALL still contain
+   * popup.details with the correct slug values (Property 4 from bugfix design).
    */
-  test('output contains marker.click and popup.details with correct slug', () => {
+  test('output does NOT contain marker.click, but preserves popup.details', () => {
     fc.assert(
       fc.property(eventNoticeArb, localeArb, (notice, locale) => {
         const html = global.PaddelbuchEventNoticePopup.generateEventNoticePopupContent(notice, locale);
         const attrs = extractEventAttributes(html);
         const escapedSlug = global.PaddelbuchHtmlUtils.escapeHtml(notice.slug);
 
-        // marker.click on wrapper div
+        // marker.click must NOT be present on popup HTML (Property 3)
         const markerClick = attrs.find(a => a.event === 'marker.click');
-        expect(markerClick).toBeDefined();
-        expect(markerClick.value).toBe(escapedSlug);
-        expect(markerClick.tag).toBe('div');
+        expect(markerClick).toBeUndefined();
 
-        // popup.details on button
+        // popup.details on button — preserved (Property 4)
         const popupDetails = attrs.find(a => a.event === 'popup.details');
         expect(popupDetails).toBeDefined();
         expect(popupDetails.value).toBe(escapedSlug);

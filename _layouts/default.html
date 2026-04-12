@@ -70,6 +70,9 @@
   <!-- Leaflet Locate Control JS -->
   <script src="{{ '/assets/js/vendor/L.Control.Locate.min.js' | relative_url }}"></script>
   
+  <!-- Tinylytics beacon (must load before page scripts that use it) -->
+  <script src="{{ '/assets/js/tinylytics-beacon.js' | relative_url }}" defer></script>
+
   <!-- Page-specific scripts -->
   {% if page.scripts %}
     {% for script in page.scripts %}
