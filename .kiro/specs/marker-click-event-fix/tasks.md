@@ -106,7 +106,7 @@
 
 ## Task 10: Write unit tests for beacon module and layer-control integration
 
-- [~] 10.1 Write unit tests for `PaddelbuchTinylyticsBeacon` module
+- [x] 10.1 Write unit tests for `PaddelbuchTinylyticsBeacon` module
   - Create `_tests/unit/tinylytics-beacon.test.js` with `@jest-environment jsdom`
   - Test: `dispatch('marker.click', 'test-slug')` creates and removes beacon element
   - Test: beacon element has class `tinylytics-beacon` and no `style` attribute
@@ -115,7 +115,7 @@
   - Test: `dispatch('', 'value')` is a no-op (no element created)
   - Test: `dispatch('marker.click', '')` creates element with empty value attribute
   - Test: `dispatch('marker.click', null)` creates element with appropriate value handling
-- [~] 10.2 Write integration tests for layer-control.js beacon dispatch calls
+- [x] 10.2 Write integration tests for layer-control.js beacon dispatch calls
   - In `_tests/unit/tinylytics-beacon.test.js` or a separate file
   - Mock `PaddelbuchTinylyticsBeacon.dispatch` and verify it is called with correct arguments when marker click handlers fire
   - Test spot marker click → `dispatch('marker.click', spotSlug)` called
