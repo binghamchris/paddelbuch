@@ -38,7 +38,7 @@ pageName: spot-details
           {% assign lat = spot.location.lat | default: spot.location.latitude %}
           {% assign lon = spot.location.lon | default: spot.location.lng | default: spot.location.longitude %}
           {% if lat and lon %}
-            {% include navigate-btn.html lat=lat lon=lon size="md" %}
+            {% include navigate-btn.html lat=lat lon=lon size="md" spot_slug=spot.slug %}
           {% endif %}
         {% endif %}
       {% endunless %}

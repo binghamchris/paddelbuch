@@ -40,7 +40,7 @@
 
 <!-- More Details Button (Requirement 7.3) -->
 {% if notice.slug %}
-<button class="popup-btn popup-btn-right">
+<button class="popup-btn popup-btn-right" data-tinylytics-event="popup.details" data-tinylytics-event-value="{{ notice.slug }}">
   <a class="popup-btn-right" hreflang="{{ current_locale }}"
      href="{{ locale_prefix }}/gewaesserereignisse/{{ notice.slug }}/">
     {% if current_locale == 'en' %}More details{% else %}Weitere Details{% endif %}
