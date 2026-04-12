@@ -5,7 +5,7 @@
  * element with the appropriate data attributes, firing a synthetic click
  * event on it, and removing it from the DOM.
  *
- * This is necessary because Tinylytics is purely attribute-based — it listens
+ * This is necessary because Tinylytics is purely attribute-based - it listens
  * for DOM click events on elements carrying `data-tinylytics-event`. When a
  * Leaflet marker or GeoJSON layer is clicked, the click lands on Leaflet's
  * internal DOM elements, never reaching popup content. This module bridges

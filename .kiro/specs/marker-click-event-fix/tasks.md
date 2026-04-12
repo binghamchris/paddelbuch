@@ -125,6 +125,6 @@
 
 ## Task 11: Run full test suite
 
-- [~] 11.1 Run `npm test` (JS unit tests) and verify all tests pass
-- [~] 11.2 Run `npm run test:property` (JS property tests) and verify all tests pass
-- [~] 11.3 Fix any test failures introduced by the changes
+- [x] 11.1 Run `npm test` (JS unit tests) and verify all tests pass
+- [x] 11.2 Run `npm run test:property` (JS property tests) and verify all tests pass
+- [x] 11.3 Fix any test failures introduced by the changes
