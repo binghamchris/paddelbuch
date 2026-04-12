@@ -305,7 +305,7 @@ describe('Fallback popup HTML in layer-control.js (Task 10.4)', () => {
     delete window.L;
   });
 
-  test('spot fallback popup has marker.click event on wrapper (Req 2.6)', () => {
+  test('spot fallback popup does NOT have marker.click event on wrapper (Req 2.6)', () => {
     setupLayerControlEnv('de');
     loadLayerControl();
 
@@ -316,8 +316,7 @@ describe('Fallback popup HTML in layer-control.js (Task 10.4)', () => {
       spotType_slug: 'einstieg-ausstieg'
     });
 
-    expect(capturedPopupContent).toContain('data-tinylytics-event="marker.click"');
-    expect(capturedPopupContent).toContain('data-tinylytics-event-value="test-spot"');
+    expect(capturedPopupContent).not.toContain('data-tinylytics-event="marker.click"');
   });
 
   test('spot fallback popup has popup.navigate event on navigate link (Req 3.2)', () => {
@@ -349,7 +348,7 @@ describe('Fallback popup HTML in layer-control.js (Task 10.4)', () => {
     expect(capturedPopupContent).toContain('data-tinylytics-event="popup.details"');
   });
 
-  test('obstacle fallback popup has marker.click event on wrapper (Req 2.6)', () => {
+  test('obstacle fallback popup does NOT have marker.click event on wrapper (Req 2.6)', () => {
     setupLayerControlEnv('de');
     loadLayerControl();
 
@@ -359,8 +358,7 @@ describe('Fallback popup HTML in layer-control.js (Task 10.4)', () => {
       geometry: JSON.stringify({ type: 'Point', coordinates: [8.0, 47.0] })
     });
 
-    expect(capturedPopupContent).toContain('data-tinylytics-event="marker.click"');
-    expect(capturedPopupContent).toContain('data-tinylytics-event-value="test-obstacle"');
+    expect(capturedPopupContent).not.toContain('data-tinylytics-event="marker.click"');
   });
 
   test('obstacle fallback popup has popup.details event on details button (Req 4.5)', () => {
@@ -377,7 +375,7 @@ describe('Fallback popup HTML in layer-control.js (Task 10.4)', () => {
     expect(capturedPopupContent).toContain('data-tinylytics-event-value="test-obstacle"');
   });
 
-  test('event notice fallback popup has marker.click event on wrapper (Req 2.6)', () => {
+  test('event notice fallback popup does NOT have marker.click event on wrapper (Req 2.6)', () => {
     setupLayerControlEnv('de');
     loadLayerControl();
 
@@ -388,8 +386,7 @@ describe('Fallback popup HTML in layer-control.js (Task 10.4)', () => {
       endDate: '2099-12-31'
     });
 
-    expect(capturedPopupContent).toContain('data-tinylytics-event="marker.click"');
-    expect(capturedPopupContent).toContain('data-tinylytics-event-value="test-notice"');
+    expect(capturedPopupContent).not.toContain('data-tinylytics-event="marker.click"');
   });
 
   test('event notice fallback popup has popup.details event on details button (Req 4.5)', () => {
@@ -430,15 +427,14 @@ describe('Spot popup edge cases (Task 10.5)', () => {
       expect(html).not.toContain('popup-btn-right');
     });
 
-    test('marker.click wrapper has empty value attribute', () => {
+    test('marker.click wrapper is NOT present on popup (no slug)', () => {
       var html = PaddelbuchSpotPopup.generateSpotPopupContent({
         name: 'No Slug Spot',
         location: { lat: 47.0, lon: 8.0 },
         spotType_slug: 'einstieg-ausstieg'
       }, 'de');
 
-      expect(html).toContain('data-tinylytics-event="marker.click"');
-      expect(html).toContain('data-tinylytics-event-value=""');
+      expect(html).not.toContain('data-tinylytics-event="marker.click"');
     });
 
     test('navigate button still renders when location is present', () => {
@@ -489,7 +485,7 @@ describe('Spot popup edge cases (Task 10.5)', () => {
       expect(html).not.toContain('popup.details');
     });
 
-    test('marker.click wrapper has empty value for empty slug', () => {
+    test('marker.click wrapper is NOT present on popup (empty slug)', () => {
       var html = PaddelbuchSpotPopup.generateSpotPopupContent({
         name: 'Empty Slug Spot',
         slug: '',
@@ -497,8 +493,7 @@ describe('Spot popup edge cases (Task 10.5)', () => {
         spotType_slug: 'einstieg-ausstieg'
       }, 'de');
 
-      expect(html).toContain('data-tinylytics-event="marker.click"');
-      expect(html).toContain('data-tinylytics-event-value=""');
+      expect(html).not.toContain('data-tinylytics-event="marker.click"');
     });
 
     test('navigate button value is empty for empty slug', () => {
