@@ -136,12 +136,16 @@
       var isRejected = spot.rejected === true || spot.rejected === 'true';
       var spotTypeSlug = spot.spotType_slug || spot.spotTypeSlug || spot.spot_type_slug;
       var iconPath = getIconPath(spotTypeSlug, isRejected, 'light');
+      var escapedSlug = spot.slug ? PaddelbuchHtmlUtils.escapeHtml(spot.slug) : '';
 
       // Look up translated spot type category label
       var spotTypeLabel = spotTypeSlug;
       if (spotTypeSlug && Object.prototype.hasOwnProperty.call(spotTypeNames, spotTypeSlug)) {
         spotTypeLabel = spotTypeNames[spotTypeSlug][locale] || spotTypeNames[spotTypeSlug]['de'] || spotTypeSlug;
       }
+
+      // Outer wrapper with marker.click event tracking
+      html.push('<div data-tinylytics-event="marker.click" data-tinylytics-event-value="' + escapedSlug + '">');
 
       // Header: icon + category label (matches Gatsby .popup-icon-div)
       html.push('<div class="popup-icon-div">');
@@ -166,18 +170,19 @@
       var lat = spot.location ? (spot.location.lat || spot.location.latitude) : null;
       var lon = spot.location ? (spot.location.lon || spot.location.lng || spot.location.longitude) : null;
       if (lat !== null && lon !== null) {
-        html.push('<button type="button" class="popup-btn">');
+        html.push('<button type="button" class="popup-btn" data-tinylytics-event="popup.navigate" data-tinylytics-event-value="' + escapedSlug + '">');
         html.push('<a href="https://www.google.com/maps/dir/?api=1&destination=' + lat + ',' + lon + '" ');
         html.push('target="_blank" rel="noopener noreferrer">' + labels.navigate + '</a></button>');
       }
 
       // More details button (matches Gatsby structure: button.popup-btn-right > a)
       if (spot.slug) {
-        html.push('<button class="popup-btn popup-btn-right">');
+        html.push('<button class="popup-btn popup-btn-right" data-tinylytics-event="popup.details" data-tinylytics-event-value="' + escapedSlug + '">');
         html.push('<a href="' + localePrefix + '/einstiegsorte/' + PaddelbuchHtmlUtils.escapeHtml(spot.slug) + '/">');
         html.push(labels.moreDetails + '</a></button>');
       }
 
+      html.push('</div>');
       return html.join('');
     }
 
@@ -197,7 +202,11 @@
     var iconPath = getIconPath(null, true, 'light');
     var noEntryLabel = (locale === 'en') ? 'No Entry Spot' : 'Kein Zutritt Ort';
     var iconAlt = (locale === 'en') ? 'No entry spot icon' : 'Kein Zutritt Symbol';
-    
+    var escapedSlug = spot.slug ? PaddelbuchHtmlUtils.escapeHtml(spot.slug) : '';
+
+    // Outer wrapper with marker.click event tracking
+    html.push('<div data-tinylytics-event="marker.click" data-tinylytics-event-value="' + escapedSlug + '">');
+
     // Header: icon + category label (matches .popup-icon-div from Gatsby)
     html.push('<div class="popup-icon-div">');
     html.push('<span class="popup-icon">');
@@ -218,11 +227,12 @@
     
     // More details button (matches regular spot popup: button.popup-btn-right > a)
     if (spot.slug) {
-      html.push('<button class="popup-btn popup-btn-right">');
+      html.push('<button class="popup-btn popup-btn-right" data-tinylytics-event="popup.details" data-tinylytics-event-value="' + escapedSlug + '">');
       html.push('<a href="' + localePrefix + '/einstiegsorte/' + PaddelbuchHtmlUtils.escapeHtml(spot.slug) + '/">');
       html.push(labels.moreDetails + '</a></button>');
     }
-    
+
+    html.push('</div>');
     return html.join('');
   }
 
