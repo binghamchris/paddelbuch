@@ -64,8 +64,8 @@
     var localePrefix = (locale && locale !== 'de') ? '/' + locale : '';
     var escapedSlug = obstacle.slug ? PaddelbuchHtmlUtils.escapeHtml(obstacle.slug) : '';
 
-    // Outer wrapper with marker.click event tracking
-    var html = '<div data-tinylytics-event="marker.click" data-tinylytics-event-value="' + escapedSlug + '">';
+    // Outer wrapper (marker.click tracking moved to beacon dispatch in layer-control.js)
+    var html = '<div>';
 
     // Obstacle name -- matches Gatsby's .popup-title > h1 structure
     html += '<span class="popup-title"><h1>' + PaddelbuchHtmlUtils.escapeHtml(obstacle.name || 'Obstacle') + '</h1></span>';

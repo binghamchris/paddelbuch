@@ -38,7 +38,7 @@
   - In `generateSpotPopupContent`: change outer wrapper from `<div data-tinylytics-event="marker.click" data-tinylytics-event-value="...">` to plain `<div>`
   - In `generateRejectedSpotPopupContent`: same change — remove `marker.click` attributes from outer wrapper div
   - Keep all `popup.navigate` and `popup.details` attributes unchanged
-- [~] 5.2 Update `assets/js/obstacle-popup.js`
+- [x] 5.2 Update `assets/js/obstacle-popup.js`
   - In `generateObstaclePopupContent`: change outer wrapper from `<div data-tinylytics-event="marker.click" data-tinylytics-event-value="...">` to plain `<div>`
   - Keep `popup.details` attributes unchanged
 - [~] 5.3 Update `assets/js/event-notice-popup.js`
