@@ -122,7 +122,7 @@
                   <span class="nav-link">{{ lang | upcase }}</span>
                 </a>
                 {% else %}
-                <a class="dropdown-item" href="{% if lang == 'de' %}{{ page.url }}{% else %}/{{ lang }}{{ page.url }}{% endif %}" hreflang="{{ lang }}">
+                <a class="dropdown-item" href="{% if lang == 'de' %}{{ page.url }}{% else %}/{{ lang }}{{ page.url }}{% endif %}" hreflang="{{ lang }}" data-tinylytics-event="language.switch" data-tinylytics-event-value="{{ lang }}">
                   <span class="nav-link">{{ lang | upcase }}</span>
                 </a>
                 {% endif %}
