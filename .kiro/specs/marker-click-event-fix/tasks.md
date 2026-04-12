@@ -47,13 +47,13 @@
 
 ## Task 6: Modify `layer-control.js` — add beacon dispatch and clean up fallbacks
 
-- [~] 6.1 Add beacon dispatch calls in marker/layer click handlers
+- [x] 6.1 Add beacon dispatch calls in marker/layer click handlers
   - In `addSpotMarker`: add `PaddelbuchTinylyticsBeacon.dispatch('marker.click', spot.slug || '')` inside the existing `bindMarkerRecenter` click handler or a new click handler on the marker
   - In `addObstacleLayer`: add a click handler on `obstacleLayer` that calls `PaddelbuchTinylyticsBeacon.dispatch('marker.click', obstacle.slug || '')`. Also add to portage route layer if present.
   - In `addProtectedAreaLayer`: add a click handler on `protectedAreaLayer` that calls `PaddelbuchTinylyticsBeacon.dispatch('marker.click', protectedArea.slug || protectedArea.name || '')`
   - In `addEventNoticeMarker`: add `PaddelbuchTinylyticsBeacon.dispatch('marker.click', notice.slug || '')` inside the existing `bindMarkerRecenter` click handler or a new click handler. Also add to `areaLayer` if present.
   - Guard: check `PaddelbuchTinylyticsBeacon` exists before calling dispatch (defensive)
-- [~] 6.2 Remove `marker.click` wrapper from fallback popup HTML strings
+- [-] 6.2 Remove `marker.click` wrapper from fallback popup HTML strings
   - In `addSpotMarker` fallback: change `<div data-tinylytics-event="marker.click" ...>` to plain `<div>`
   - In `addObstacleLayer` fallback: change `<div data-tinylytics-event="marker.click" ...>` to plain `<div>`
   - In `addProtectedAreaLayer`: change `<div class="protected-area-popup" data-tinylytics-event="marker.click" ...>` to `<div class="protected-area-popup">`
