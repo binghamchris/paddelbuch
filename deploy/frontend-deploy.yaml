@@ -84,8 +84,8 @@ Resources:
                 value: >-
                   default-src 'self'; img-src 'self' data:
                   raw.githubusercontent.com api.mapbox.com; style-src 'self';
-                  script-src 'self'; font-src 'self' data:;
-                  connect-src 'self' tiles.openfreemap.org;
+                  script-src 'self' https://tinylytics.app; font-src 'self' data:;
+                  connect-src 'self' tiles.openfreemap.org https://tinylytics.app;
                   worker-src 'self' blob:
               - key: Permissions-Policy
                 value: >-
