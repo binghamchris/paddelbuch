@@ -29,7 +29,7 @@
 
 ## Task 4: Add script tag for `tinylytics-beacon.js`
 
-- [~] 4.1 Add `<script src="/assets/js/tinylytics-beacon.js" defer></script>` to `_layouts/default.html`
+- [x] 4.1 Add `<script src="/assets/js/tinylytics-beacon.js" defer></script>` to `_layouts/default.html`
   - Must be loaded BEFORE `layer-control.js` in the script order so `PaddelbuchTinylyticsBeacon` is available when layer-control initialises
 
 ## Task 5: Remove `marker.click` wrapper div from popup generators
