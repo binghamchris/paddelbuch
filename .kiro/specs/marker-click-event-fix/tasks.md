@@ -61,11 +61,11 @@
 
 ## Task 7: Update existing tests that check for `marker.click` on popup HTML
 
-- [~] 7.1 Update `_tests/property/tinylytics-event-tracking.property.test.js`
+- [x] 7.1 Update `_tests/property/tinylytics-event-tracking.property.test.js`
   - Properties 1–4 currently assert `marker.click` exists on popup wrapper divs
   - Update these properties to assert `marker.click` does NOT exist on popup HTML (Property 3 from bugfix design)
   - Keep assertions for `popup.navigate` and `popup.details` unchanged (Property 4 from bugfix design)
-- [~] 7.2 Update `_tests/unit/tinylytics-event-tracking.test.js`
+- [-] 7.2 Update `_tests/unit/tinylytics-event-tracking.test.js`
   - Task 10.4 tests currently assert `marker.click` on fallback popup HTML — update to assert it is NOT present
   - Task 10.5 edge case tests currently assert `marker.click` on popup wrapper — update to assert it is NOT present
   - Keep assertions for `popup.navigate` and `popup.details` unchanged
