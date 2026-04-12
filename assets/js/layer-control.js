@@ -130,7 +130,7 @@
         } else {
           // Fallback to simple popup if module not loaded
           var escapedSpotSlug = spot.slug ? PaddelbuchHtmlUtils.escapeHtml(spot.slug) : '';
-          popupContent = '<div data-tinylytics-event="marker.click" data-tinylytics-event-value="' + escapedSpotSlug + '">';
+          popupContent = '<div>';
           popupContent += '<strong>' + PaddelbuchHtmlUtils.escapeHtml(spot.name) + '</strong>';
           if (spot.description) {
             var excerpt = spot.description.replace(/<[^>]*>/g, '').substring(0, 150);
@@ -174,6 +174,13 @@
 
       // Recenter (and optionally zoom on home page) when marker is clicked
       bindMarkerRecenter(marker);
+
+      // Dispatch marker.click beacon event when spot marker is clicked
+      marker.on('click', function() {
+        if (typeof PaddelbuchTinylyticsBeacon !== 'undefined') {
+          PaddelbuchTinylyticsBeacon.dispatch('marker.click', spot.slug || '');
+        }
+      });
     }
 
     /**
@@ -207,7 +214,7 @@
         } else {
           // Fallback popup content -- matches Gatsby structure
           var escapedObstacleSlug = obstacle.slug ? PaddelbuchHtmlUtils.escapeHtml(obstacle.slug) : '';
-          popupContent = '<div data-tinylytics-event="marker.click" data-tinylytics-event-value="' + escapedObstacleSlug + '">';
+          popupContent = '<div>';
           popupContent += '<span class="popup-title"><h1>' + PaddelbuchHtmlUtils.escapeHtml(obstacle.name || 'Obstacle') + '</h1></span>';
 
           // Portage possibility status (Requirement 5.3)
@@ -231,6 +238,14 @@
         }
 
         obstacleLayer.bindPopup(popupContent, { maxWidth: 350 });
+
+        // Dispatch marker.click beacon event when obstacle layer is clicked
+        obstacleLayer.on('click', function() {
+          if (typeof PaddelbuchTinylyticsBeacon !== 'undefined') {
+            PaddelbuchTinylyticsBeacon.dispatch('marker.click', obstacle.slug || '');
+          }
+        });
+
         obstacleLayer.addTo(layerGroups.obstacles);
         obstacleLayer.bringToFront();
 
@@ -250,6 +265,14 @@
 
             // Portage route shares the same popup as the obstacle
             portageLayer.bindPopup(popupContent, { maxWidth: 350 });
+
+            // Dispatch marker.click beacon event when portage route layer is clicked
+            portageLayer.on('click', function() {
+              if (typeof PaddelbuchTinylyticsBeacon !== 'undefined') {
+                PaddelbuchTinylyticsBeacon.dispatch('marker.click', obstacle.slug || '');
+              }
+            });
+
             portageLayer.addTo(layerGroups.obstacles);
             portageLayer.bringToFront();
           } catch (e) {
@@ -286,10 +309,7 @@
         var protectedAreaLayer = L.geoJSON(geoJson, { style: protectedAreaStyle });
 
         // Generate popup content (Requirement 6.2)
-        var escapedPaValue = protectedArea.slug
-          ? PaddelbuchHtmlUtils.escapeHtml(protectedArea.slug)
-          : PaddelbuchHtmlUtils.escapeHtml(protectedArea.name || '');
-        var popupContent = '<div class="protected-area-popup" data-tinylytics-event="marker.click" data-tinylytics-event-value="' + escapedPaValue + '">';
+        var popupContent = '<div class="protected-area-popup">';
         popupContent += '<span class="popup-title"><h1>' + PaddelbuchHtmlUtils.escapeHtml(protectedArea.name || (currentLocale === 'en' ? 'Protected Area' : 'Schutzgebiet')) + '</h1></span>';
 
         // Display protected area type if available
@@ -313,6 +333,14 @@
         popupContent += '</div>';
 
         protectedAreaLayer.bindPopup(popupContent, { maxWidth: 350 });
+
+        // Dispatch marker.click beacon event when protected area layer is clicked
+        protectedAreaLayer.on('click', function() {
+          if (typeof PaddelbuchTinylyticsBeacon !== 'undefined') {
+            PaddelbuchTinylyticsBeacon.dispatch('marker.click', protectedArea.slug || protectedArea.name || '');
+          }
+        });
+
         protectedAreaLayer.addTo(layerGroups.protectedAreas);
         protectedAreaLayer.bringToBack();
       } catch (e) {
@@ -376,7 +404,7 @@
         var localeStrs = currentLocale === 'en'
           ? { startDate: 'Approx. Start Date', endDate: 'Approx. End Date', moreDetails: 'More details' }
           : { startDate: 'Ungefähres Startdatum', endDate: 'Ungefähres Enddatum', moreDetails: 'Weitere Details' };
-        popupContent = '<div data-tinylytics-event="marker.click" data-tinylytics-event-value="' + escapedNoticeSlug + '">';
+        popupContent = '<div>';
         popupContent += '<span class="popup-title"><h1>' + PaddelbuchHtmlUtils.escapeHtml(notice.name || '') + '</h1></span>';
         popupContent += '<table class="popup-details-table popup-eventnotice-table"><tbody>';
         if (notice.startDate) {
@@ -395,6 +423,13 @@
       marker.bindPopup(popupContent, { maxWidth: 350 });
       marker.addTo(layerGroups.eventNotices);
 
+      // Dispatch marker.click beacon event when event notice marker is clicked
+      marker.on('click', function() {
+        if (typeof PaddelbuchTinylyticsBeacon !== 'undefined') {
+          PaddelbuchTinylyticsBeacon.dispatch('marker.click', notice.slug || '');
+        }
+      });
+
       // Property 14: Event Notice Dual Rendering
       // Also add affected area polygon if available (Requirement 7.2)
       // Both marker and area should show popup on click
@@ -411,6 +446,14 @@
           var areaLayer = L.geoJSON(geoJson, { style: areaStyle });
           // Both marker and area show the same popup content
           areaLayer.bindPopup(popupContent, { maxWidth: 350 });
+
+          // Dispatch marker.click beacon event when affected area layer is clicked
+          areaLayer.on('click', function() {
+            if (typeof PaddelbuchTinylyticsBeacon !== 'undefined') {
+              PaddelbuchTinylyticsBeacon.dispatch('marker.click', notice.slug || '');
+            }
+          });
+
           areaLayer.addTo(layerGroups.eventNotices);
         } catch (e) {
           console.warn('Failed to parse event notice affected area:', e);
