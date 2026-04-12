@@ -3,13 +3,12 @@
  */
 
 /**
- * Exploratory Bug Condition Tests — marker.click wrapper divs
+ * Exploratory Bug Condition Tests - marker.click wrapper divs
  *
- * These tests confirm the bug condition exists on UNFIXED code:
- * - All popup generators wrap content in a div with data-tinylytics-event="marker.click"
- * - No PaddelbuchTinylyticsBeacon module exists yet
- *
- * Passing = bug condition confirmed (the inert wrapper divs are present).
+ * These tests were originally written to confirm the bug condition on UNFIXED code.
+ * Now that the fix has been applied (Tasks 2-10), they verify the fix is in place:
+ * - All popup generators no longer wrap content in a div with data-tinylytics-event="marker.click"
+ * - PaddelbuchTinylyticsBeacon module now exists
  */
 
 // Load shared utility modules that popup generators depend on
@@ -21,40 +20,44 @@ require('../../assets/js/spot-popup.js');
 require('../../assets/js/obstacle-popup.js');
 require('../../assets/js/event-notice-popup.js');
 
-describe('Exploratory: popup generators produce marker.click wrapper divs', () => {
-  test('generateSpotPopupContent output contains data-tinylytics-event="marker.click" on wrapper div', () => {
+// Load beacon module
+require('../../assets/js/tinylytics-beacon.js');
+
+describe('Post-fix: popup generators no longer produce marker.click wrapper divs', () => {
+  test('generateSpotPopupContent output does NOT contain data-tinylytics-event="marker.click"', () => {
     const html = global.PaddelbuchSpotPopup.generateSpotPopupContent(
       { slug: 'test-spot', name: 'Test Spot', spotType_slug: 'einstieg-ausstieg' },
       'de'
     );
-    expect(html).toContain('data-tinylytics-event="marker.click"');
+    expect(html).not.toContain('data-tinylytics-event="marker.click"');
   });
 
-  test('generateRejectedSpotPopupContent output contains data-tinylytics-event="marker.click" on wrapper div', () => {
+  test('generateRejectedSpotPopupContent output does NOT contain data-tinylytics-event="marker.click"', () => {
     const html = global.PaddelbuchSpotPopup.generateRejectedSpotPopupContent(
       { slug: 'rejected-spot', name: 'Rejected Spot', rejected: true },
       'de'
     );
-    expect(html).toContain('data-tinylytics-event="marker.click"');
+    expect(html).not.toContain('data-tinylytics-event="marker.click"');
   });
 
-  test('generateObstaclePopupContent output contains data-tinylytics-event="marker.click" on wrapper div', () => {
+  test('generateObstaclePopupContent output does NOT contain data-tinylytics-event="marker.click"', () => {
     const html = global.PaddelbuchObstaclePopup.generateObstaclePopupContent(
       { slug: 'test-obstacle', name: 'Test Obstacle' },
       'de'
     );
-    expect(html).toContain('data-tinylytics-event="marker.click"');
+    expect(html).not.toContain('data-tinylytics-event="marker.click"');
   });
 
-  test('generateEventNoticePopupContent output contains data-tinylytics-event="marker.click" on wrapper div', () => {
+  test('generateEventNoticePopupContent output does NOT contain data-tinylytics-event="marker.click"', () => {
     const html = global.PaddelbuchEventNoticePopup.generateEventNoticePopupContent(
       { slug: 'test-notice', name: 'Test Notice', startDate: '2025-01-01', endDate: '2025-12-31' },
       'de'
     );
-    expect(html).toContain('data-tinylytics-event="marker.click"');
+    expect(html).not.toContain('data-tinylytics-event="marker.click"');
   });
 
-  test('PaddelbuchTinylyticsBeacon is undefined (no beacon module exists yet)', () => {
-    expect(global.PaddelbuchTinylyticsBeacon).toBeUndefined();
+  test('PaddelbuchTinylyticsBeacon is defined (beacon module now exists)', () => {
+    expect(global.PaddelbuchTinylyticsBeacon).toBeDefined();
+    expect(typeof global.PaddelbuchTinylyticsBeacon.dispatch).toBe('function');
   });
 });
