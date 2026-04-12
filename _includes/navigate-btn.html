@@ -7,10 +7,11 @@
   Parameters:
   - include.lat: Latitude coordinate (required)
   - include.lon: Longitude coordinate (required)
+  - include.spot_slug: Spot slug for event tracking (required)
   - include.class: Additional CSS classes to apply (optional)
   - include.size: Button size - 'sm', 'md', 'lg' (default: 'sm')
   
-  Requirements: 11.1
+  Requirements: 10.1, 11.1
 -->
 
 {% assign lat = include.lat %}
@@ -25,7 +26,9 @@
    rel="noopener noreferrer"
    class="btn btn-{{ btn_size }} navigate-btn {{ btn_class }}"
    title="{% t actions.navigate %}"
-   aria-label="{% t actions.navigate %}">
+   aria-label="{% t actions.navigate %}"
+   data-tinylytics-event="navigate.click"
+   data-tinylytics-event-value="{{ include.spot_slug }}">
   {% t actions.navigate %}
 </a>
 {% endif %}

@@ -129,16 +129,27 @@
           }
         } else {
           // Fallback to simple popup if module not loaded
-          popupContent = '<strong>' + spot.name + '</strong>';
+          var escapedSpotSlug = spot.slug ? PaddelbuchHtmlUtils.escapeHtml(spot.slug) : '';
+          popupContent = '<div data-tinylytics-event="marker.click" data-tinylytics-event-value="' + escapedSpotSlug + '">';
+          popupContent += '<strong>' + PaddelbuchHtmlUtils.escapeHtml(spot.name) + '</strong>';
           if (spot.description) {
             var excerpt = spot.description.replace(/<[^>]*>/g, '').substring(0, 150);
             if (spot.description.length > 150) excerpt += '...';
             popupContent += '<p>' + excerpt + '</p>';
           }
+          if (spot.location && (spot.location.lat || spot.location.latitude) && (spot.location.lon || spot.location.lng || spot.location.longitude)) {
+            var navLat = spot.location.lat || spot.location.latitude;
+            var navLon = spot.location.lon || spot.location.lng || spot.location.longitude;
+            popupContent += '<a href="https://www.google.com/maps/dir/?api=1&destination=' + navLat + ',' + navLon + '" ' +
+              'target="_blank" rel="noopener noreferrer" data-tinylytics-event="popup.navigate" data-tinylytics-event-value="' + escapedSpotSlug + '">' +
+              (currentLocale === 'en' ? 'Navigate To' : 'Navigieren zu') + '</a> ';
+          }
           if (spot.slug) {
-            popupContent += '<a href="' + localePrefix + '/einstiegsorte/' + spot.slug + '/">' +
+            popupContent += '<a href="' + localePrefix + '/einstiegsorte/' + PaddelbuchHtmlUtils.escapeHtml(spot.slug) + '/" ' +
+              'data-tinylytics-event="popup.details" data-tinylytics-event-value="' + escapedSpotSlug + '">' +
               (currentLocale === 'en' ? 'More details' : 'Weitere Details') + '</a>';
           }
+          popupContent += '</div>';
         }
         marker.bindPopup(popupContent, { maxWidth: 350 });
       }
@@ -195,7 +206,9 @@
           popupContent = window.PaddelbuchObstaclePopup.generateObstaclePopupContent(obstacle, currentLocale);
         } else {
           // Fallback popup content -- matches Gatsby structure
-          popupContent = '<span class="popup-title"><h1>' + (obstacle.name || 'Obstacle') + '</h1></span>';
+          var escapedObstacleSlug = obstacle.slug ? PaddelbuchHtmlUtils.escapeHtml(obstacle.slug) : '';
+          popupContent = '<div data-tinylytics-event="marker.click" data-tinylytics-event-value="' + escapedObstacleSlug + '">';
+          popupContent += '<span class="popup-title"><h1>' + PaddelbuchHtmlUtils.escapeHtml(obstacle.name || 'Obstacle') + '</h1></span>';
 
           // Portage possibility status (Requirement 5.3)
           var portageStatus;
@@ -210,10 +223,11 @@
           popupContent += '<td>' + portageStatus + '</td></tr></tbody></table>';
 
           if (obstacle.slug) {
-            popupContent += '<button class="popup-btn popup-btn-right obstacle-details-btn">';
-            popupContent += '<a class="popup-btn-right" href="' + localePrefix + '/hindernisse/' + obstacle.slug + '/">' +
+            popupContent += '<button class="popup-btn popup-btn-right obstacle-details-btn" data-tinylytics-event="popup.details" data-tinylytics-event-value="' + escapedObstacleSlug + '">';
+            popupContent += '<a class="popup-btn-right" href="' + localePrefix + '/hindernisse/' + PaddelbuchHtmlUtils.escapeHtml(obstacle.slug) + '/">' +
               (currentLocale === 'en' ? 'More details' : 'Weitere Details') + '</a></button>';
           }
+          popupContent += '</div>';
         }
 
         obstacleLayer.bindPopup(popupContent, { maxWidth: 350 });
@@ -272,8 +286,11 @@
         var protectedAreaLayer = L.geoJSON(geoJson, { style: protectedAreaStyle });
 
         // Generate popup content (Requirement 6.2)
-        var popupContent = '<div class="protected-area-popup">';
-        popupContent += '<span class="popup-title"><h1>' + (protectedArea.name || (currentLocale === 'en' ? 'Protected Area' : 'Schutzgebiet')) + '</h1></span>';
+        var escapedPaValue = protectedArea.slug
+          ? PaddelbuchHtmlUtils.escapeHtml(protectedArea.slug)
+          : PaddelbuchHtmlUtils.escapeHtml(protectedArea.name || '');
+        var popupContent = '<div class="protected-area-popup" data-tinylytics-event="marker.click" data-tinylytics-event-value="' + escapedPaValue + '">';
+        popupContent += '<span class="popup-title"><h1>' + PaddelbuchHtmlUtils.escapeHtml(protectedArea.name || (currentLocale === 'en' ? 'Protected Area' : 'Schutzgebiet')) + '</h1></span>';
 
         // Display protected area type if available
         // Resolve the translated type name from the slug using the lookup map
@@ -290,7 +307,7 @@
         }
 
         if (typeName) {
-          popupContent += '<p>' + typeName + '</p>';
+          popupContent += '<p>' + PaddelbuchHtmlUtils.escapeHtml(typeName) + '</p>';
         }
 
         popupContent += '</div>';
@@ -355,10 +372,12 @@
         popupContent = window.PaddelbuchEventNoticePopup.generateEventNoticePopupContent(notice, currentLocale);
       } else {
         // Fallback popup content if module not loaded
+        var escapedNoticeSlug = notice.slug ? PaddelbuchHtmlUtils.escapeHtml(notice.slug) : '';
         var localeStrs = currentLocale === 'en'
           ? { startDate: 'Approx. Start Date', endDate: 'Approx. End Date', moreDetails: 'More details' }
           : { startDate: 'Ungefähres Startdatum', endDate: 'Ungefähres Enddatum', moreDetails: 'Weitere Details' };
-        popupContent = '<span class="popup-title"><h1>' + (notice.name || '') + '</h1></span>';
+        popupContent = '<div data-tinylytics-event="marker.click" data-tinylytics-event-value="' + escapedNoticeSlug + '">';
+        popupContent += '<span class="popup-title"><h1>' + PaddelbuchHtmlUtils.escapeHtml(notice.name || '') + '</h1></span>';
         popupContent += '<table class="popup-details-table popup-eventnotice-table"><tbody>';
         if (notice.startDate) {
           popupContent += '<tr><th>' + localeStrs.startDate + ':</th><td>' + notice.startDate + '</td></tr>';
@@ -368,8 +387,9 @@
         }
         popupContent += '</tbody></table>';
         if (notice.slug) {
-          popupContent += '<button class="popup-btn popup-btn-right"><a class="popup-btn-right" hreflang="' + currentLocale + '" href="' + localePrefix + '/gewaesserereignisse/' + notice.slug + '/">' + localeStrs.moreDetails + '</a></button>';
+          popupContent += '<button class="popup-btn popup-btn-right" data-tinylytics-event="popup.details" data-tinylytics-event-value="' + escapedNoticeSlug + '"><a class="popup-btn-right" hreflang="' + currentLocale + '" href="' + localePrefix + '/gewaesserereignisse/' + PaddelbuchHtmlUtils.escapeHtml(notice.slug) + '/">' + localeStrs.moreDetails + '</a></button>';
         }
+        popupContent += '</div>';
       }
 
       marker.bindPopup(popupContent, { maxWidth: 350 });

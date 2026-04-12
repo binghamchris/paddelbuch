@@ -35,6 +35,7 @@
         toggleBtn.setAttribute('type', 'button');
         toggleBtn.setAttribute('aria-label', 'Toggle filter panel');
         toggleBtn.setAttribute('aria-expanded', 'false');
+        toggleBtn.setAttribute('data-tinylytics-event', 'filter.toggle');
 
         // Content area
         var content = L.DomUtil.create('div', 'filter-panel-content', container);
@@ -56,6 +57,8 @@
             checkbox.checked = true;
             checkbox.setAttribute('data-dimension', dim.key);
             checkbox.setAttribute('data-slug', opt.slug);
+            checkbox.setAttribute('data-tinylytics-event', 'filter.change');
+            checkbox.setAttribute('data-tinylytics-event-value', dim.key + ':' + opt.slug);
 
             checkbox.addEventListener('change', (function(dimKey, slug) {
               return function(e) {
@@ -108,6 +111,8 @@
           layerCheckbox.type = 'checkbox';
           layerCheckbox.checked = !!toggle.defaultChecked;
           layerCheckbox.setAttribute('data-layer', toggle.key);
+          layerCheckbox.setAttribute('data-tinylytics-event', 'layer.toggle');
+          layerCheckbox.setAttribute('data-tinylytics-event-value', toggle.key);
 
           layerCheckbox.addEventListener('change', (function(tgl) {
             return function(e) {
