@@ -13,7 +13,7 @@
 
 ## Task 2: Create `tinylytics-beacon.js` module
 
-- [~] 2.1 Create `assets/js/tinylytics-beacon.js` with IIFE-to-global pattern
+- [x] 2.1 Create `assets/js/tinylytics-beacon.js` with IIFE-to-global pattern
   - Expose `PaddelbuchTinylyticsBeacon.dispatch(eventName, eventValue)` globally
   - `dispatch()` creates a `<div>` with class `tinylytics-beacon`
   - Sets `data-tinylytics-event` to `eventName` and `data-tinylytics-event-value` to `eventValue`
