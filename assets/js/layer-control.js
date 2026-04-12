@@ -130,7 +130,7 @@
         } else {
           // Fallback to simple popup if module not loaded
           var escapedSpotSlug = spot.slug ? PaddelbuchHtmlUtils.escapeHtml(spot.slug) : '';
-          popupContent = '<div data-tinylytics-event="marker.click" data-tinylytics-event-value="' + escapedSpotSlug + '">';
+          popupContent = '<div>';
           popupContent += '<strong>' + PaddelbuchHtmlUtils.escapeHtml(spot.name) + '</strong>';
           if (spot.description) {
             var excerpt = spot.description.replace(/<[^>]*>/g, '').substring(0, 150);
@@ -214,7 +214,7 @@
         } else {
           // Fallback popup content -- matches Gatsby structure
           var escapedObstacleSlug = obstacle.slug ? PaddelbuchHtmlUtils.escapeHtml(obstacle.slug) : '';
-          popupContent = '<div data-tinylytics-event="marker.click" data-tinylytics-event-value="' + escapedObstacleSlug + '">';
+          popupContent = '<div>';
           popupContent += '<span class="popup-title"><h1>' + PaddelbuchHtmlUtils.escapeHtml(obstacle.name || 'Obstacle') + '</h1></span>';
 
           // Portage possibility status (Requirement 5.3)
@@ -309,10 +309,7 @@
         var protectedAreaLayer = L.geoJSON(geoJson, { style: protectedAreaStyle });
 
         // Generate popup content (Requirement 6.2)
-        var escapedPaValue = protectedArea.slug
-          ? PaddelbuchHtmlUtils.escapeHtml(protectedArea.slug)
-          : PaddelbuchHtmlUtils.escapeHtml(protectedArea.name || '');
-        var popupContent = '<div class="protected-area-popup" data-tinylytics-event="marker.click" data-tinylytics-event-value="' + escapedPaValue + '">';
+        var popupContent = '<div class="protected-area-popup">';
         popupContent += '<span class="popup-title"><h1>' + PaddelbuchHtmlUtils.escapeHtml(protectedArea.name || (currentLocale === 'en' ? 'Protected Area' : 'Schutzgebiet')) + '</h1></span>';
 
         // Display protected area type if available
@@ -407,7 +404,7 @@
         var localeStrs = currentLocale === 'en'
           ? { startDate: 'Approx. Start Date', endDate: 'Approx. End Date', moreDetails: 'More details' }
           : { startDate: 'Ungefähres Startdatum', endDate: 'Ungefähres Enddatum', moreDetails: 'Weitere Details' };
-        popupContent = '<div data-tinylytics-event="marker.click" data-tinylytics-event-value="' + escapedNoticeSlug + '">';
+        popupContent = '<div>';
         popupContent += '<span class="popup-title"><h1>' + PaddelbuchHtmlUtils.escapeHtml(notice.name || '') + '</h1></span>';
         popupContent += '<table class="popup-details-table popup-eventnotice-table"><tbody>';
         if (notice.startDate) {
