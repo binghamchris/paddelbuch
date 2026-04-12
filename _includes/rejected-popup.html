@@ -39,7 +39,7 @@
 <!-- More details button (matches regular spot popup: button.popup-btn-right > a) -->
 {% if spot.slug %}
 {% include locale-prefix.html %}
-<button class="popup-btn popup-btn-right">
+<button class="popup-btn popup-btn-right" data-tinylytics-event="popup.details" data-tinylytics-event-value="{{ spot.slug }}">
   <a href="{{ locale_prefix | append: '/einstiegsorte/' | append: spot.slug | append: '/' }}">{% t labels.more_details %}</a>
 </button>
 {% endif %}
