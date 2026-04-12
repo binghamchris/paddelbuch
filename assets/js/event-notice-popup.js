@@ -67,9 +67,13 @@
   function generateEventNoticePopupContent(notice, locale) {
     var localeStrings = strings[locale] || strings.de;
     var localePrefix = (locale && locale !== 'de') ? '/' + locale : '';
+    var escapedSlug = notice.slug ? PaddelbuchHtmlUtils.escapeHtml(notice.slug) : '';
+    
+    // Outer wrapper with marker.click event tracking
+    var html = '<div data-tinylytics-event="marker.click" data-tinylytics-event-value="' + escapedSlug + '">';
     
     // Title (Requirement 7.3)
-    var html = '<span class="popup-title"><h1>' + PaddelbuchHtmlUtils.escapeHtml(notice.name || '') + '</h1></span>';
+    html += '<span class="popup-title"><h1>' + PaddelbuchHtmlUtils.escapeHtml(notice.name || '') + '</h1></span>';
     
     // Dates in a table matching the original Gatsby layout (Requirement 7.3)
     html += '<table class="popup-details-table popup-eventnotice-table"><tbody>';
@@ -94,12 +98,13 @@
     
     // Link to event notice detail page (Requirement 7.3)
     if (notice.slug) {
-      html += '<button class="popup-btn popup-btn-right">';
+      html += '<button class="popup-btn popup-btn-right" data-tinylytics-event="popup.details" data-tinylytics-event-value="' + escapedSlug + '">';
       html += '<a class="popup-btn-right" hreflang="' + (locale || 'de') + '" href="' + localePrefix + '/gewaesserereignisse/' + encodeURIComponent(notice.slug) + '/">';
       html += localeStrings.moreDetails;
       html += '</a></button>';
     }
     
+    html += '</div>';
     return html;
   }
 

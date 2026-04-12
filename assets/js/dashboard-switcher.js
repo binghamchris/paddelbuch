@@ -155,6 +155,8 @@
       var btn = document.createElement('button');
       btn.className = 'dashboard-switcher-btn';
       btn.setAttribute('data-dashboard-id', dashboard.id);
+      btn.setAttribute('data-tinylytics-event', 'dashboard.switch');
+      btn.setAttribute('data-tinylytics-event-value', dashboard.id);
       btn.textContent = typeof dashboard.getName === 'function'
         ? dashboard.getName()
         : dashboard.id;

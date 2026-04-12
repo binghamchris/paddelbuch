@@ -61,6 +61,8 @@
                 data-copy-gps
                 data-lat="{{ lat }}"
                 data-lon="{{ lon }}"
+                data-tinylytics-event="clipboard.copy-gps"
+                data-tinylytics-event-value="{{ spot.slug }}"
                 title="{% t actions.copy_gps %}"
                 aria-label="{% t actions.copy_gps %}">
           {% t actions.copy %}
@@ -82,6 +84,8 @@
                 class="btn btn-sm clipboard-btn copy-btn" 
                 data-copy-address
                 data-address="{{ spot.approximateAddress | escape }}"
+                data-tinylytics-event="clipboard.copy-address"
+                data-tinylytics-event-value="{{ spot.slug }}"
                 title="{% t actions.copy_address %}"
                 aria-label="{% t actions.copy_address %}">
           {% t actions.copy %}

@@ -46,14 +46,14 @@
 {% assign lat = spot.location.lat | default: spot.location.latitude %}
 {% assign lon = spot.location.lon | default: spot.location.lng | default: spot.location.longitude %}
 {% if lat and lon %}
-<button type="button" class="popup-btn">
+<button type="button" class="popup-btn" data-tinylytics-event="popup.navigate" data-tinylytics-event-value="{{ spot.slug }}">
   <a href="https://www.google.com/maps/dir/?api=1&destination={{ lat }},{{ lon }}" target="_blank" rel="noopener noreferrer">{% t actions.navigate %}</a>
 </button>
 {% endif %}
 {% endif %}
 
 {% if spot.slug %}
-<button class="popup-btn popup-btn-right">
+<button class="popup-btn popup-btn-right" data-tinylytics-event="popup.details" data-tinylytics-event-value="{{ spot.slug }}">
   <a href="{{ locale_prefix | append: '/einstiegsorte/' | append: spot.slug | append: '/' }}">{% t labels.more_details %}</a>
 </button>
 {% endif %}
