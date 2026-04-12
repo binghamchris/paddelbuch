@@ -174,6 +174,13 @@
 
       // Recenter (and optionally zoom on home page) when marker is clicked
       bindMarkerRecenter(marker);
+
+      // Dispatch marker.click beacon event when spot marker is clicked
+      marker.on('click', function() {
+        if (typeof PaddelbuchTinylyticsBeacon !== 'undefined') {
+          PaddelbuchTinylyticsBeacon.dispatch('marker.click', spot.slug || '');
+        }
+      });
     }
 
     /**
@@ -231,6 +238,14 @@
         }
 
         obstacleLayer.bindPopup(popupContent, { maxWidth: 350 });
+
+        // Dispatch marker.click beacon event when obstacle layer is clicked
+        obstacleLayer.on('click', function() {
+          if (typeof PaddelbuchTinylyticsBeacon !== 'undefined') {
+            PaddelbuchTinylyticsBeacon.dispatch('marker.click', obstacle.slug || '');
+          }
+        });
+
         obstacleLayer.addTo(layerGroups.obstacles);
         obstacleLayer.bringToFront();
 
@@ -250,6 +265,14 @@
 
             // Portage route shares the same popup as the obstacle
             portageLayer.bindPopup(popupContent, { maxWidth: 350 });
+
+            // Dispatch marker.click beacon event when portage route layer is clicked
+            portageLayer.on('click', function() {
+              if (typeof PaddelbuchTinylyticsBeacon !== 'undefined') {
+                PaddelbuchTinylyticsBeacon.dispatch('marker.click', obstacle.slug || '');
+              }
+            });
+
             portageLayer.addTo(layerGroups.obstacles);
             portageLayer.bringToFront();
           } catch (e) {
@@ -313,6 +336,14 @@
         popupContent += '</div>';
 
         protectedAreaLayer.bindPopup(popupContent, { maxWidth: 350 });
+
+        // Dispatch marker.click beacon event when protected area layer is clicked
+        protectedAreaLayer.on('click', function() {
+          if (typeof PaddelbuchTinylyticsBeacon !== 'undefined') {
+            PaddelbuchTinylyticsBeacon.dispatch('marker.click', protectedArea.slug || protectedArea.name || '');
+          }
+        });
+
         protectedAreaLayer.addTo(layerGroups.protectedAreas);
         protectedAreaLayer.bringToBack();
       } catch (e) {
@@ -395,6 +426,13 @@
       marker.bindPopup(popupContent, { maxWidth: 350 });
       marker.addTo(layerGroups.eventNotices);
 
+      // Dispatch marker.click beacon event when event notice marker is clicked
+      marker.on('click', function() {
+        if (typeof PaddelbuchTinylyticsBeacon !== 'undefined') {
+          PaddelbuchTinylyticsBeacon.dispatch('marker.click', notice.slug || '');
+        }
+      });
+
       // Property 14: Event Notice Dual Rendering
       // Also add affected area polygon if available (Requirement 7.2)
       // Both marker and area should show popup on click
@@ -411,6 +449,14 @@
           var areaLayer = L.geoJSON(geoJson, { style: areaStyle });
           // Both marker and area show the same popup content
           areaLayer.bindPopup(popupContent, { maxWidth: 350 });
+
+          // Dispatch marker.click beacon event when affected area layer is clicked
+          areaLayer.on('click', function() {
+            if (typeof PaddelbuchTinylyticsBeacon !== 'undefined') {
+              PaddelbuchTinylyticsBeacon.dispatch('marker.click', notice.slug || '');
+            }
+          });
+
           areaLayer.addTo(layerGroups.eventNotices);
         } catch (e) {
           console.warn('Failed to parse event notice affected area:', e);
