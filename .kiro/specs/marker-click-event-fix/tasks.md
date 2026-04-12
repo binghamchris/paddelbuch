@@ -23,7 +23,7 @@
 
 ## Task 3: Add `.tinylytics-beacon` CSS class
 
-- [~] 3.1 Add `.tinylytics-beacon` rule to `_sass/util/_helpers.scss`
+- [x] 3.1 Add `.tinylytics-beacon` rule to `_sass/util/_helpers.scss`
   - Use the same visually-hidden pattern: `position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); padding: 0; border: 0; margin: -1px;`
   - This hides the beacon element without inline styles, complying with `style-src 'self'` CSP
 
