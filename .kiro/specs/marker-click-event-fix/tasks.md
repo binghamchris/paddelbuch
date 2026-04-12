@@ -34,7 +34,7 @@
 
 ## Task 5: Remove `marker.click` wrapper div from popup generators
 
-- [~] 5.1 Update `assets/js/spot-popup.js`
+- [x] 5.1 Update `assets/js/spot-popup.js`
   - In `generateSpotPopupContent`: change outer wrapper from `<div data-tinylytics-event="marker.click" data-tinylytics-event-value="...">` to plain `<div>`
   - In `generateRejectedSpotPopupContent`: same change — remove `marker.click` attributes from outer wrapper div
   - Keep all `popup.navigate` and `popup.details` attributes unchanged
