@@ -168,9 +168,9 @@ The site enforces a strict Content Security Policy (CSP) via the CloudFormation 
 default-src 'self';
 img-src 'self' data: raw.githubusercontent.com api.mapbox.com;
 style-src 'self';
-script-src 'self';
+script-src 'self' https://tinylytics.app;
 font-src 'self' data:;
-connect-src 'self' tiles.openfreemap.org;
+connect-src 'self' tiles.openfreemap.org https://tinylytics.app;
 worker-src 'self' blob:
 ```
 
@@ -178,10 +178,11 @@ worker-src 'self' blob:
 
 - No `'unsafe-inline'` for `script-src` or `style-src`. All JavaScript must be in `.js` files, all CSS in `.css`/`.scss` files. Inline `<script>` blocks and inline `style=""` attributes are blocked by the browser.
 - No `'unsafe-eval'`. No `eval()`, `new Function()`, or similar dynamic code execution.
-- No CDN dependencies. All vendor assets (Bootstrap, Leaflet, Chart.js, fonts) are self-hosted. The `copy-vendor-assets.js` and `download-google-fonts.js` scripts exist specifically to support this constraint.
-- Allowlisted external domains are limited to what the map layers require:
+- No CDN dependencies for vendor libraries. All vendor assets (Bootstrap, Leaflet, Chart.js, fonts) are self-hosted. The `copy-vendor-assets.js` and `download-google-fonts.js` scripts exist specifically to support this constraint.
+- Allowlisted external domains are limited to what the map layers and analytics require:
   - `raw.githubusercontent.com` and `api.mapbox.com` — image sources for map tiles and markers
   - `tiles.openfreemap.org` — vector tile data fetched by MapLibre GL
+  - `tinylytics.app` — lightweight analytics script and beacon endpoint
 - `worker-src 'self' blob:` — required by MapLibre GL JS, which spawns web workers from blob URLs for vector tile parsing.
 - `font-src 'self' data:` — allows self-hosted font files and data URIs (used by some icon fonts).
 
