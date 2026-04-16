@@ -1,0 +1,15 @@
+{
+  "enabled": true,
+  "name": "Run Tests on Task Completion",
+  "description": "Runs the full Ruby (RSpec) and JavaScript (Jest) test suites after a spec task completes, and resolves any failures before continuing.",
+  "version": "1",
+  "when": {
+    "type": "postTaskExecution"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Run the full test suite for this project. First run the Ruby tests with `bundle exec rspec`, then run the JavaScript tests with `npm test`. If any tests fail, analyze the failures, fix the underlying code, and re-run the failing suite until all tests pass. Do not proceed until both suites are green."
+  },
+  "workspaceFolderName": "paddelbuch",
+  "shortName": "run-tests-on-task"
+}
