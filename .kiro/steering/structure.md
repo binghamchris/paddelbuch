@@ -1,3 +1,8 @@
+---
+inclusion: auto
+description: Describes the structure of the paddelbuch project.
+---
+
 # Project Structure
 
 ## Top-Level Layout

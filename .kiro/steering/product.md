@@ -1,3 +1,8 @@
+---
+inclusion: auto
+description: Describes the purpose, audience, and key capabilities of the paddelbuch project.
+---
+
 # Product Overview
 
 Paddel Buch (paddelbuch.ch) is a bilingual (German/English) static website that displays Swiss paddle sports data on interactive maps. Content is managed in Contentful (headless CMS) and rendered as a Jekyll static site hosted on AWS Amplify.
