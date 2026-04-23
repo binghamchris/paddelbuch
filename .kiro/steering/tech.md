@@ -1,3 +1,8 @@
+---
+inclusion: auto
+description: Describes the ptechnology stack, dependencies, pipeline, and key related information for the paddelbuch project.
+---
+
 # Tech Stack & Build System
 
 ## Core Stack
