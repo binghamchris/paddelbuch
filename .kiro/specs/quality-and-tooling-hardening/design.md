@@ -17,39 +17,39 @@ The project context relevant to this design:
 ```mermaid
 graph TD
     subgraph "Tooling Layer (NEW)"
-        RC[.rubocop.yml] --> RT[rake lint]
-        EL[eslint.config.js] --> NL[npm run lint]
-        SL[.stylelintrc.json] --> NL
+        RC[".rubocop.yml"] --> RT["rake lint"]
+        EL["eslint.config.js"] --> NL["npm run lint"]
+        SL[".stylelintrc.json"] --> NL
     end
 
     subgraph "SCSS Layer"
-        APP[assets/css/application.scss] -->|@use| SET[_sass/settings/*]
-        APP -->|@use| UTIL[_sass/util/*]
-        APP -->|@use| COMP[_sass/components/*]
-        APP -->|@use| PAGES[_sass/pages/*]
-        APP -->|scoped import| BS[bootstrap]
+        APP["assets/css/application.scss"] -->|"@use"| SET["_sass/settings/*"]
+        APP -->|"@use"| UTIL["_sass/util/*"]
+        APP -->|"@use"| COMP["_sass/components/*"]
+        APP -->|"@use"| PAGES["_sass/pages/*"]
+        APP -->|"scoped import"| BS["bootstrap"]
     end
 
     subgraph "Geo Constants (single source)"
-        CFG[_config.yml: map bounds + tile size] --> TG[tile_generator.rb]
-        CFG --> GEN[NEW: geo_constants include/JSON]
-        GEN -->|build-time JSON| SU[spatial-utils.js]
+        CFG["_config.yml: map bounds + tile size"] --> TG["tile_generator.rb"]
+        CFG --> GEN["NEW: geo_constants include/JSON"]
+        GEN -->|"build-time JSON"| SU["spatial-utils.js"]
     end
 
     subgraph "JS Dedup + Tests"
-        LC[layer-control.js] -->|delegates to| PM[spot/obstacle/event-notice popup.js]
-        PM -->|Dual_Export| JT[Jest tests require real module]
-        SU -->|Dual_Export| JT
+        LC["layer-control.js"] -->|"delegates to"| PM["spot/obstacle/event-notice popup.js"]
+        PM -->|"Dual_Export"| JT["Jest tests require real module"]
+        SU -->|"Dual_Export"| JT
     end
 
     subgraph "i18n"
-        DE[_i18n/de.yml] --> KP[NEW: key-parity test]
-        EN[_i18n/en.yml] --> KP
+        DE["_i18n/de.yml"] --> KP["NEW: key-parity test"]
+        EN["_i18n/en.yml"] --> KP
     end
 
     subgraph "Docs"
-        CSPDOC[.kiro/steering/csp.md] -->|accurate CSP| TRUTH[deploy/frontend-deploy.yaml]
-        CDNTEST[layout-cdn-free test] -->|host allowlist| DEFLAYOUT[_layouts/default.html]
+        CSPDOC[".kiro/steering/csp.md"] -->|"accurate CSP"| TRUTH["deploy/frontend-deploy.yaml"]
+        CDNTEST["layout-cdn-free test"] -->|"host allowlist"| DEFLAYOUT["_layouts/default.html"]
     end
 ```
 
