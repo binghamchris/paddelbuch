@@ -1,6 +1,6 @@
 ---
 inclusion: auto
-description: Describes the purpose, audience, and key capabilities of the paddelbuch project.
+description: Describes the purpose, audience, and key capabilities of the paddelbuch project only. DO NOT use for other projects in the same workspace.
 ---
 
 # Product Overview
