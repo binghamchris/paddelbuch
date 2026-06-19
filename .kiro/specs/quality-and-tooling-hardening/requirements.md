@@ -72,6 +72,7 @@ The following review findings are **explicitly out of scope** (per project-owner
 3. WHEN first-party partials reference shared variables (colours, fonts, dimensions), THE referencing files SHALL bring those members into scope via `@use` (with an explicit or namespaced reference) rather than relying on global `@import` scope.
 4. THE Bootstrap stylesheet SHALL be brought in such that only the required Bootstrap layers/components are compiled, rather than importing the entire framework, PROVIDED the resulting compiled CSS for components actually used remains equivalent (Requirement 0).
 5. WHEN the SCSS_Module_System migration is complete, THE compiled `application.css` SHALL be equivalent in its effective rules to the pre-migration output.
+6. WHERE third-party SCSS (e.g. the Bootstrap vendor partials resolved from `node_modules`) emits `@import` deprecation warnings, THE Build_System SHALL permit those warnings and SHALL NOT fail the build on their account; the no-deprecation-warning rule (2.2) SHALL be enforced only for first-party SCSS_Source.
 
 ### Requirement 3: Centralise Shared Geographic and Tile Constants
 
@@ -94,7 +95,7 @@ The following review findings are **explicitly out of scope** (per project-owner
 
 1. THE Layer_Control_Module SHALL NOT contain inline reimplementations of spot, obstacle, or event-notice popup HTML that duplicate the corresponding Popup_Module logic.
 2. WHEN the Layer_Control_Module needs popup content, THE Layer_Control_Module SHALL obtain it from the corresponding Popup_Module.
-3. WHEN a required Popup_Module is unavailable at runtime, THE Layer_Control_Module SHALL degrade gracefully (e.g. bind no popup or a minimal escaped title) WITHOUT reintroducing a full duplicate popup implementation.
+3. WHEN one or more required Popup_Module is unavailable at runtime (i.e. degradation applies whenever ANY required module is absent, not only when all are absent), THE Layer_Control_Module SHALL degrade gracefully for the affected feature type (e.g. bind no popup or a minimal escaped title) WITHOUT reintroducing a full duplicate popup implementation.
 4. WHEN the duplication is removed, THE popup content rendered for spots, obstacles, and event notices under normal operation (all modules loaded) SHALL be identical to the pre-change baseline (Requirement 0).
 5. THE Layer_Control_Module SHALL NOT interpolate unescaped notice date strings into popup HTML.
 
@@ -118,7 +119,7 @@ The following review findings are **explicitly out of scope** (per project-owner
 
 1. WHERE a JS_Source module is exercised by a Mirror_Test, THE module SHALL be given a Dual_Export and the test SHALL be updated to `require()` and assert against the real module rather than an inline copy.
 2. THE Dual_Export SHALL NOT change browser behaviour — the module SHALL continue to attach its public API to the global object when loaded via a `<script>` tag.
-3. THE Jest configuration SHALL define a `coverageThreshold` that establishes a minimum coverage floor based on the current measured coverage.
+3. THE Jest configuration SHALL define a `coverageThreshold` that establishes a minimum coverage floor; THE threshold MAY be set to any positive value rather than being required to match the current measured coverage exactly, PROVIDED the configured value is at or below the current measured coverage so that an otherwise-passing build is not forced to fail.
 4. WHEN coverage falls below the configured threshold, THE `npm test -- --coverage` run SHALL exit with a non-zero status.
 5. THE empty `_tests/integration/` directory SHALL either contain at least one real integration test OR be removed, so that the test structure does not advertise an unimplemented suite.
 6. WHEN the Mirror_Tests are converted, THE converted tests SHALL pass against the real modules with assertions equivalent to (or stronger than) the previous inline-copy assertions.
@@ -132,7 +133,7 @@ The following review findings are **explicitly out of scope** (per project-owner
 1. THE CSP_Steering_Doc SHALL accurately describe the deployed Content Security Policy, including that `script-src` and `connect-src` permit `https://tinylytics.app`, and SHALL NOT claim `script-src` is `'self'`-only or that there are no runtime external script hosts.
 2. THE `_config.yml` `exclude` list SHALL NOT contain the non-existent `_scripts/` entry (the real directory is `scripts/`, which SHALL remain excluded).
 3. THE comments in `_plugins/locale_filter.rb` and `assets/js/date-utils.js` SHALL accurately describe the intentional site-wide `DD MMM YYYY` date format and SHALL NOT describe the superseded `DD.MM.YYYY` / `DD/MM/YYYY` behaviour as the current behaviour.
-4. WHERE `assets/js/date-utils.js` exposes a `numeric` date format that no user-facing display path uses, THE feature SHALL either document it as a non-display utility or align it with the site-wide standard, WITHOUT changing any rendered date on the site (Requirement 0).
+4. WHEN it is confirmed that no user-facing display path uses the `numeric` date format in `assets/js/date-utils.js`, THE feature SHALL remove the `numeric` date format (and its locale-specific `DD.MM.YYYY` / `DD/MM/YYYY` output) entirely, AND any existing tests that assert the `numeric` format SHALL be updated accordingly; THIS removal SHALL NOT change any rendered date on the site (Requirement 0).
 5. THE i18n steering documentation SHALL describe the intentional site-wide `DD MMM YYYY` date format rather than locale-specific numeric formats.
 6. THE CDN_Free_Test SHALL detect any first-party `<script src>`/`<link href>` pointing at an arbitrary external host (not just a fixed banned-domain list), so that an unintended external reference would fail the test; the existing, intentional `https://tinylytics.app` analytics reference SHALL be handled via an explicit allowlist within the test rather than by oversight.
 7. WHEN a path or behaviour referenced by a code comment is corrected elsewhere in this feature, THE corresponding comment SHALL be updated in the same change.
@@ -146,7 +147,7 @@ The following review findings are **explicitly out of scope** (per project-owner
 1. THE `package.json` SHALL NOT contain the stale `_id` field, SHALL declare a supported Node version via an `engines` field, and SHALL use a consistent dependency-version pinning strategy.
 2. THE first-party JS_Source SHALL NOT emit diagnostic `console.log` statements in the production runtime path; genuine warnings/errors MAY remain via `console.warn` / `console.error`.
 3. THE `assets/js/color-vars.js` module SHALL follow the documented module pattern (`'use strict'` and the standard IIFE wrapper) and SHALL guard its `JSON.parse` against malformed input.
-4. WHERE map code rejects coordinates using falsy checks (`!lat || !lon`), THE checks SHALL be corrected so that a legitimate `0` coordinate is not treated as missing.
+4. WHERE map code validates coordinates, THE checks SHALL implement comprehensive validation in which a coordinate is treated as valid only when it is a finite number — rejecting `null`, `undefined`, `NaN`, and `Infinity` — while treating a legitimate `0` value as present; AND coordinates outside the Switzerland bounds SHALL be detected. WHEN rejecting an out-of-bounds coordinate would remove a marker that currently renders, THIS requirement SHALL defer to Requirement 0 (the coordinate SHALL be retained, optionally logged, rather than dropped).
 5. THE utility scripts under `scripts/` SHALL use a `CONTENTFUL_ENVIRONMENT` default consistent with the rest of the project (`master`).
 6. THE `_plugins/sitemap_generator.rb` output MAY include `<lastmod>` and bilingual `hreflang` alternate links to improve SEO; IF added, THE generated sitemap SHALL remain valid per the sitemaps.org schema.
 7. WHEN polish changes are applied, THE user-facing behaviour SHALL remain unchanged (Requirement 0).

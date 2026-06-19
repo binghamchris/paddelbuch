@@ -24,8 +24,8 @@ Tasks marked `*` are optional / best-effort and may be deferred without blocking
     - _Requirements: 7.3, 7.4_
   - [ ] 1.4 Update the i18n steering doc's "Date Formatting" section to the `DD MMM YYYY` standard
     - _Requirements: 7.5_
-  - [ ] 1.5 Audit `assets/js/date-utils.js` `numeric` format usage
-    - Grep all call sites; confirm no user-facing display path uses `numeric`. Annotate it as a non-display utility. Leave behaviour (and the existing `best-practices-cleanup` Property 7 test) intact.
+  - [ ] 1.5 Remove the unused `numeric` date format from `assets/js/date-utils.js`
+    - Grep all call sites to confirm no user-facing display path uses `numeric`; then remove the `numeric` (DD.MM.YYYY / DD/MM/YYYY) format path. Update the existing `best-practices-cleanup` Property 7 test in `_tests/date-utils.test.js` that asserts the `numeric` format. No rendered date on the site changes (Requirement 0).
     - _Requirements: 7.4_
 
 - [ ] 2. Miscellaneous low-risk polish
@@ -38,12 +38,12 @@ Tasks marked `*` are optional / best-effort and may be deferred without blocking
   - [ ] 2.3 Standardise `assets/js/color-vars.js`
     - Wrap in `(function(global){ 'use strict'; … })(window)`; guard `JSON.parse` with `try/catch` that warns and leaves `window.PaddelbuchColors` unset on failure.
     - _Requirements: 8.3_
-  - [ ] 2.4 Fix falsy coordinate checks
-    - Replace `if (!lat || !lon)` style checks in `layer-control.js` (and any other first-party module) with explicit `null`/`undefined`/`NaN` checks so `0` is valid.
+  - [ ] 2.4 Implement comprehensive coordinate validation
+    - Replace `if (!lat || !lon)` style checks in `layer-control.js` (and any other first-party module) with validation that accepts only finite numbers (rejecting `null`/`undefined`/`NaN`/`Infinity`), treats `0` as present, and detects out-of-bounds coordinates. Per Requirement 0, do not drop markers that currently render — retain/log out-of-bounds coordinates rather than removing them.
     - _Requirements: 8.4_
-  - [ ] 2.5 Write property test for coordinate-zero validity (Property 9)
-    - **Property 9: Coordinate zero validity**
-    - fast-check + Jest in `_tests/property/coordinate-validity.property.test.js`; a `0` lat or lon (other valid) is treated as present.
+  - [ ] 2.5 Write property test for coordinate validity (Property 9)
+    - **Property 9: Coordinate validity**
+    - fast-check + Jest in `_tests/property/coordinate-validity.property.test.js`; a `0` lat or lon (other valid) is treated as present, while `null`/`undefined`/`NaN`/`Infinity` are rejected.
     - **Validates: Requirements 8.4**
   - [ ] 2.6 Align `CONTENTFUL_ENVIRONMENT` default to `master` in `scripts/*.rb`
     - _Requirements: 8.5_

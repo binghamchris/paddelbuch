@@ -165,7 +165,7 @@ Either add one genuine integration test under `_tests/integration/` (e.g. a data
 - **`.kiro/steering/csp.md`**: update the rules to state that `script-src` and `connect-src` include `https://tinylytics.app` (analytics), reconciling the doc with `deploy/frontend-deploy.yaml`. Remove the absolute "self only / no runtime external script" wording.
 - **`_config.yml`**: remove the stale `_scripts/` exclude entry; keep `scripts/`.
 - **Comments**: correct the date-format header comments in `_plugins/locale_filter.rb` and `assets/js/date-utils.js` to describe the intentional `DD MMM YYYY` standard; drop the misleading "Property 19 / DD.MM.YYYY / DD/MM/YYYY" descriptions of *current* behaviour.
-- **`assets/js/date-utils.js` `numeric` format**: confirm via grep that no display path uses the `numeric` (DD.MM.YYYY/DD/MM/YYYY) output; if unused for display, annotate it as a non-display utility (or align with the standard). No rendered date changes (Requirement 0). NOTE: the completed `best-practices-cleanup` Property 7 asserts `numeric → DD.MM.YYYY`; if `numeric` is altered, that test must be updated in lockstep — preferred approach is to leave `numeric` behaviour intact and only correct comments to avoid touching a passing property test.
+- **`assets/js/date-utils.js` `numeric` format**: confirm via grep that no display path uses the `numeric` (DD.MM.YYYY/DD/MM/YYYY) output, then remove the `numeric` format entirely. No rendered date changes (Requirement 0). NOTE: the completed `best-practices-cleanup` Property 7 asserts `numeric → DD.MM.YYYY`; removing `numeric` requires updating that test in lockstep.
 - **i18n steering doc**: update its "Date Formatting" section to the `DD MMM YYYY` standard.
 - **`layout-cdn-free.property.test.js`**: broaden detection to flag any `http(s)://` or `//` host in first-party `href`/`src` (including `.js?query` URLs), with an explicit allowlist containing `tinylytics.app` so the intentional analytics reference passes while any *new* external reference fails.
 
@@ -227,8 +227,8 @@ Generated from the single `_config.yml` source on each build; not committed.
 *For any* first-party `href`/`src` value in `_layouts/default.html`, the CDN_Free_Test shall pass if and only if the host is local (relative/`/assets/`) or appears in the explicit external allowlist (`tinylytics.app`); any other external host shall cause the test to fail.
 **Validates: Requirements 7.6**
 
-### Property 9: Coordinate zero validity
-*For any* marker whose latitude or longitude is exactly `0` (with the other a valid number), the corrected coordinate-validity check shall treat the coordinate as present (not missing).
+### Property 9: Coordinate validity
+*For any* marker coordinate, the validity check shall treat a finite number (including exactly `0`) as present and shall reject `null`, `undefined`, `NaN`, and `Infinity`.
 **Validates: Requirements 8.4**
 
 ## Error Handling
@@ -262,7 +262,7 @@ Generated from the single `_config.yml` source on each build; not committed.
 | P6: Dual export round-trip | Unit | Jest | `_tests/unit/dual-export.test.js` |
 | P7: Coverage threshold | Unit/CI | Jest config assertion | `_tests/unit/jest-config.test.js` |
 | P8: CDN-free w/ allowlist | Property | fast-check | `_tests/property/layout-cdn-free.property.test.js` (extended) |
-| P9: Coordinate zero validity | Property | fast-check | `_tests/property/coordinate-validity.property.test.js` |
+| P9: Coordinate validity | Property | fast-check | `_tests/property/coordinate-validity.property.test.js` |
 
 ### Regression safety
 - Capture a pre-change baseline of `_site/` (or at least `application.css` and representative rendered pages) and diff after each requirement to enforce Requirement 0.
