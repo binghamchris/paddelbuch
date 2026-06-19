@@ -1,6 +1,6 @@
 ---
 inclusion: auto
-description: Describes the structure of the paddelbuch project.
+description: Describes the structure of the paddelbuch project only. DO NOT use for other projects in the same workspace.
 ---
 
 # Project Structure
