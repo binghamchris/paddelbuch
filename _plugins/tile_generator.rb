@@ -101,8 +101,14 @@ module Jekyll
       @cache_dir = cache_dir
       clear_cache(cache_dir)
 
-      @grid_cols = ((SWITZERLAND_BOUNDS[:east] - SWITZERLAND_BOUNDS[:west]) / TILE_SIZE[:lon]).ceil
-      @grid_rows = ((SWITZERLAND_BOUNDS[:north] - SWITZERLAND_BOUNDS[:south]) / TILE_SIZE[:lat]).ceil
+      # Resolve the authoritative Geo_Constants from site config (single source of
+      # truth in _config.yml: map.bounds + map.tile_size). The frozen constants below
+      # remain only as a defensive fallback (Requirements 3.1, 3.2, 3.5).
+      @bounds = resolve_bounds(site)
+      @tile_size = resolve_tile_size(site)
+
+      @grid_cols = ((@bounds[:east] - @bounds[:west]) / @tile_size[:lon]).ceil
+      @grid_rows = ((@bounds[:north] - @bounds[:south]) / @tile_size[:lat]).ceil
       @locale_cache = {}
 
       # Build set of excluded waterway slugs for obstacle filtering
@@ -127,6 +133,32 @@ module Jekyll
     end
 
     private
+
+    # Resolve the Switzerland bounds from site config (map.bounds), falling back to the
+    # frozen SWITZERLAND_BOUNDS constant when the config block is absent (Req 3.2, 3.5).
+    def resolve_bounds(site)
+      cfg = site.config.dig('map', 'bounds')
+      return SWITZERLAND_BOUNDS unless cfg.is_a?(Hash)
+
+      {
+        north: (cfg['north'] || SWITZERLAND_BOUNDS[:north]).to_f,
+        south: (cfg['south'] || SWITZERLAND_BOUNDS[:south]).to_f,
+        east: (cfg['east'] || SWITZERLAND_BOUNDS[:east]).to_f,
+        west: (cfg['west'] || SWITZERLAND_BOUNDS[:west]).to_f
+      }
+    end
+
+    # Resolve the tile-size steps from site config (map.tile_size), falling back to the
+    # frozen TILE_SIZE constant when the config block is absent (Req 3.2, 3.5).
+    def resolve_tile_size(site)
+      cfg = site.config.dig('map', 'tile_size')
+      return TILE_SIZE unless cfg.is_a?(Hash)
+
+      {
+        lat: (cfg['lat'] || TILE_SIZE[:lat]).to_f,
+        lon: (cfg['lon'] || TILE_SIZE[:lon]).to_f
+      }
+    end
 
     def generate_layer_tiles(layer_name, config, locale)
       data = get_data_for_locale(@site.data, config[:data_key], locale, @locale_cache)
@@ -218,8 +250,8 @@ module Jekyll
       lat = location['lat'].to_f
       lon = location['lon'].to_f
       return nil unless point_in_bounds?(lat, lon)
-      x = ((lon - SWITZERLAND_BOUNDS[:west]) / TILE_SIZE[:lon]).floor
-      y = ((SWITZERLAND_BOUNDS[:north] - lat) / TILE_SIZE[:lat]).floor
+      x = ((lon - @bounds[:west]) / @tile_size[:lon]).floor
+      y = ((@bounds[:north] - lat) / @tile_size[:lat]).floor
       x = [[x, 0].max, @grid_cols - 1].min
       y = [[y, 0].max, @grid_rows - 1].min
       [x, y]
@@ -233,8 +265,8 @@ module Jekyll
       return nil unless centroid
       lat, lon = centroid
       return nil unless point_in_bounds?(lat, lon)
-      x = ((lon - SWITZERLAND_BOUNDS[:west]) / TILE_SIZE[:lon]).floor
-      y = ((SWITZERLAND_BOUNDS[:north] - lat) / TILE_SIZE[:lat]).floor
+      x = ((lon - @bounds[:west]) / @tile_size[:lon]).floor
+      y = ((@bounds[:north] - lat) / @tile_size[:lat]).floor
       x = [[x, 0].max, @grid_cols - 1].min
       y = [[y, 0].max, @grid_rows - 1].min
       [x, y]
@@ -287,16 +319,16 @@ module Jekyll
     end
 
     def point_in_bounds?(lat, lon)
-      lat >= SWITZERLAND_BOUNDS[:south] && lat <= SWITZERLAND_BOUNDS[:north] &&
-        lon >= SWITZERLAND_BOUNDS[:west] && lon <= SWITZERLAND_BOUNDS[:east]
+      lat >= @bounds[:south] && lat <= @bounds[:north] &&
+        lon >= @bounds[:west] && lon <= @bounds[:east]
     end
 
     def get_tile_bounds(x, y)
       {
-        'north' => SWITZERLAND_BOUNDS[:north] - (y * TILE_SIZE[:lat]),
-        'south' => SWITZERLAND_BOUNDS[:north] - ((y + 1) * TILE_SIZE[:lat]),
-        'east' => SWITZERLAND_BOUNDS[:west] + ((x + 1) * TILE_SIZE[:lon]),
-        'west' => SWITZERLAND_BOUNDS[:west] + (x * TILE_SIZE[:lon])
+        'north' => @bounds[:north] - (y * @tile_size[:lat]),
+        'south' => @bounds[:north] - ((y + 1) * @tile_size[:lat]),
+        'east' => @bounds[:west] + ((x + 1) * @tile_size[:lon]),
+        'west' => @bounds[:west] + (x * @tile_size[:lon])
       }
     end
 
@@ -310,10 +342,10 @@ module Jekyll
         'layer' => layer_name,
         'gridSize' => { 'cols' => @grid_cols, 'rows' => @grid_rows },
         'bounds' => {
-          'north' => SWITZERLAND_BOUNDS[:north], 'south' => SWITZERLAND_BOUNDS[:south],
-          'east' => SWITZERLAND_BOUNDS[:east], 'west' => SWITZERLAND_BOUNDS[:west]
+          'north' => @bounds[:north], 'south' => @bounds[:south],
+          'east' => @bounds[:east], 'west' => @bounds[:west]
         },
-        'tileSize' => { 'lat' => TILE_SIZE[:lat], 'lon' => TILE_SIZE[:lon] },
+        'tileSize' => { 'lat' => @tile_size[:lat], 'lon' => @tile_size[:lon] },
         'tiles' => tile_entries.sort_by { |t| [t['x'], t['y']] }
       }
     end

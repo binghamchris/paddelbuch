@@ -319,7 +319,7 @@ describe('Fallback popup HTML in layer-control.js (Task 10.4)', () => {
     expect(capturedPopupContent).not.toContain('data-tinylytics-event="marker.click"');
   });
 
-  test('spot fallback popup has popup.navigate event on navigate link (Req 3.2)', () => {
+  test('spot fallback popup is a minimal escaped-title popup (no duplicated event links)', () => {
     setupLayerControlEnv('de');
     loadLayerControl();
 
@@ -330,11 +330,15 @@ describe('Fallback popup HTML in layer-control.js (Task 10.4)', () => {
       spotType_slug: 'einstieg-ausstieg'
     });
 
-    expect(capturedPopupContent).toContain('data-tinylytics-event="popup.navigate"');
-    expect(capturedPopupContent).toContain('data-tinylytics-event-value="test-spot"');
+    // quality-and-tooling-hardening Task 5 / Req 4.1-4.3: the layer-control fallback no
+    // longer reimplements the full popup; it binds an escaped-title-only popup. The real
+    // popup.navigate / popup.details events live in the popup modules (loaded in production).
+    expect(capturedPopupContent).toContain('Test Spot');
+    expect(capturedPopupContent).not.toContain('data-tinylytics-event="popup.navigate"');
+    expect(capturedPopupContent).not.toContain('data-tinylytics-event="popup.details"');
   });
 
-  test('spot fallback popup has popup.details event on details link (Req 4.5)', () => {
+  test('spot fallback popup contains only an escaped-title wrapper', () => {
     setupLayerControlEnv('de');
     loadLayerControl();
 
@@ -345,7 +349,7 @@ describe('Fallback popup HTML in layer-control.js (Task 10.4)', () => {
       spotType_slug: 'einstieg-ausstieg'
     });
 
-    expect(capturedPopupContent).toContain('data-tinylytics-event="popup.details"');
+    expect(capturedPopupContent).toBe('<div><span class="popup-title"><h1>Test Spot</h1></span></div>');
   });
 
   test('obstacle fallback popup does NOT have marker.click event on wrapper (Req 2.6)', () => {
@@ -361,7 +365,7 @@ describe('Fallback popup HTML in layer-control.js (Task 10.4)', () => {
     expect(capturedPopupContent).not.toContain('data-tinylytics-event="marker.click"');
   });
 
-  test('obstacle fallback popup has popup.details event on details button (Req 4.5)', () => {
+  test('obstacle fallback popup is a minimal escaped-title popup (no details button)', () => {
     setupLayerControlEnv('de');
     loadLayerControl();
 
@@ -371,8 +375,8 @@ describe('Fallback popup HTML in layer-control.js (Task 10.4)', () => {
       geometry: JSON.stringify({ type: 'Point', coordinates: [8.0, 47.0] })
     });
 
-    expect(capturedPopupContent).toContain('data-tinylytics-event="popup.details"');
-    expect(capturedPopupContent).toContain('data-tinylytics-event-value="test-obstacle"');
+    expect(capturedPopupContent).toBe('<div><span class="popup-title"><h1>Test Obstacle</h1></span></div>');
+    expect(capturedPopupContent).not.toContain('data-tinylytics-event="popup.details"');
   });
 
   test('event notice fallback popup does NOT have marker.click event on wrapper (Req 2.6)', () => {
@@ -389,7 +393,7 @@ describe('Fallback popup HTML in layer-control.js (Task 10.4)', () => {
     expect(capturedPopupContent).not.toContain('data-tinylytics-event="marker.click"');
   });
 
-  test('event notice fallback popup has popup.details event on details button (Req 4.5)', () => {
+  test('event notice fallback popup is a minimal escaped-title popup (no details button or dates)', () => {
     setupLayerControlEnv('de');
     loadLayerControl();
 
@@ -400,8 +404,8 @@ describe('Fallback popup HTML in layer-control.js (Task 10.4)', () => {
       endDate: '2099-12-31'
     });
 
-    expect(capturedPopupContent).toContain('data-tinylytics-event="popup.details"');
-    expect(capturedPopupContent).toContain('data-tinylytics-event-value="test-notice"');
+    expect(capturedPopupContent).toBe('<div><span class="popup-title"><h1>Test Notice</h1></span></div>');
+    expect(capturedPopupContent).not.toContain('data-tinylytics-event="popup.details"');
   });
 });
 

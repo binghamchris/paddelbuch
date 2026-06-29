@@ -1,3 +1,5 @@
+@use "../settings/settings" as *;
+
 .dashboard-switcher-buttons {
   display: flex;
   flex-wrap: wrap;

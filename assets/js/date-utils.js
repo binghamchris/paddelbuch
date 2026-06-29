@@ -1,16 +1,13 @@
 /**
  * Date Utilities Module
- * 
+ *
  * Provides locale-aware date formatting for the Paddel Buch application.
- * Supports German (de-CH) and English (en-GB) locales.
- * 
- * Requirements: 8.5
- * - Format dates as 'en-GB' for English locale (DD/MM/YYYY)
- * - Format dates as 'de-CH' for German locale (DD.MM.YYYY)
- * 
- * Property 19: Date Locale Formatting
- * For any date displayed in the application, the format shall match the current locale:
- * 'en-GB' format for English locale, 'de-CH' format for German locale.
+ * Supports German (de) and English (en) locales.
+ *
+ * Site-wide standard display format: DD MMM YYYY (e.g. "08 Mar 2026" / "08 Mär 2026").
+ * Both locales share the same numeric-day / abbreviated-month / year layout; only the
+ * month-name spelling is localised. (formatDateTime / formatLongDate additionally use
+ * the Intl API for time and long-form output.)
  */
 
 (function(global) {
@@ -62,33 +59,27 @@
   }
 
   /**
-   * Formats a date according to the specified locale and format
-   * 
-   * Property 19: Date Locale Formatting
-   * For any date displayed in the application, the format shall match the current locale.
-   * 
+   * Formats a date in the site-wide standard DD MMM YYYY format
+   * (e.g. "08 Mar 2026" / "08 Mär 2026").
+   *
+   * Only the abbreviated month name is localised; the day / month / year layout is
+   * identical across locales. The previous locale-specific numeric output
+   * (DD.MM.YYYY for de / DD/MM/YYYY for en) has been removed - it was not used by
+   * any display path on the site.
+   *
    * @param {string|Date|number} dateValue - The date to format
    * @param {string} locale - The locale ('de' or 'en')
-   * @param {string} [format='numeric'] - Format type: 'numeric' (DD.MM.YYYY / DD/MM/YYYY) or 'short' (DD MMM YYYY)
-   * @returns {string} Formatted date string
+   * @returns {string} Formatted date string (DD MMM YYYY)
    */
-  function formatDate(dateValue, locale, format) {
+  function formatDate(dateValue, locale) {
     var date = parseDate(dateValue);
     if (!date) return '';
-    
+
     var day = String(date.getDate()).padStart(2, '0');
     var year = date.getFullYear();
-    
-    if (format === 'short') {
-      var months = monthsAbbr[locale] || monthsAbbr.de;
-      var monthName = months[date.getMonth()];
-      return day + ' ' + monthName + ' ' + year;
-    }
-    
-    // Default: 'numeric' format
-    var config = localeConfig[locale] || localeConfig.de;
-    var month = String(date.getMonth() + 1).padStart(2, '0');
-    return day + config.separator + month + config.separator + year;
+    var months = monthsAbbr[locale] || monthsAbbr.de;
+    var monthName = months[date.getMonth()];
+    return day + ' ' + monthName + ' ' + year;
   }
 
   /**

@@ -30,7 +30,6 @@ exclude:
   - Rakefile
   - spec/
   - _tests/
-  - _scripts/
   - jest.config.js
   - deploy/
   - docs/
@@ -109,6 +108,12 @@ map:
     south: 45.8
     east: 10.5
     west: 5.9
+  # Authoritative tile-size steps (degrees) for spatial tiling. Single source of
+  # truth shared by tile_generator.rb (Ruby) and spatial-utils.js (browser, via the
+  # geo-constants JSON block). Approximately 10km x 10km tiles.
+  tile_size:
+    lat: 0.25
+    lon: 0.46
   default_zoom: 8
   min_zoom: 7
   max_zoom: 20

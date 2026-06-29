@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'date'
+
 # Jekyll plugin to generate XML sitemap files during the build process.
 #
 # Produces a sitemap-index.xml referencing one or more sitemap-N.xml
@@ -30,15 +32,15 @@ module Jekyll
         return
       end
 
-      urls = collect_urls(site)
+      entries = collect_url_entries(site)
 
-      sitemap_files = urls.each_slice(MAX_URLS_PER_SITEMAP).each_with_index.map do |chunk, index|
+      sitemap_files = entries.each_slice(MAX_URLS_PER_SITEMAP).each_with_index.map do |chunk, index|
         write_sub_sitemap(site, chunk, index)
       end
 
       write_sitemap_index(site, sitemap_files)
 
-      Jekyll.logger.info "SitemapGenerator:", "Generated sitemap with #{urls.size} URLs in #{sitemap_files.size} file(s)"
+      Jekyll.logger.info "SitemapGenerator:", "Generated sitemap with #{entries.size} URLs in #{sitemap_files.size} file(s)"
     rescue => e
       Jekyll.logger.error "SitemapGenerator:", "Error generating sitemap: #{e.message}"
       Jekyll.logger.debug "SitemapGenerator:", e.backtrace.join("\n")
@@ -66,6 +68,96 @@ module Jekyll
     def collect_urls(site)
       base_paths = collection_urls(site) + standalone_urls(site)
       bilingual_urls(site, base_paths).uniq
+    end
+
+    # --- Entry-based collection: adds optional <lastmod> and bilingual hreflang
+    #     alternate links to each <url> entry (Requirement 8.6). Each language
+    #     variant of a page becomes its own entry, and every entry lists the full
+    #     set of alternates (de, en, x-default), as recommended for hreflang. ---
+
+    def collect_url_entries(site)
+      base = collection_entries(site) + standalone_entries(site)
+      seen = {}
+      entries = []
+
+      base.each do |item|
+        lastmod = normalize_lastmod(item[:lastmod])
+        variants = language_variants(site, item[:path])
+        alternates = build_alternates(site, variants)
+
+        variants.each do |variant|
+          loc = variant[:href]
+          next if seen[loc]
+
+          seen[loc] = true
+          entries << { 'loc' => loc, 'lastmod' => lastmod, 'alternates' => alternates }
+        end
+      end
+
+      entries
+    end
+
+    # Collection documents paired with their updatedAt timestamp (source for <lastmod>).
+    def collection_entries(site)
+      COLLECTION_NAMES.flat_map do |name|
+        collection = site.collections[name]
+        next [] unless collection
+
+        collection.docs.map { |doc| { path: doc.url, lastmod: doc.data['updatedAt'] } }
+      end
+    end
+
+    # Standalone pages paired with their updatedAt timestamp, if present.
+    def standalone_entries(site)
+      site.pages.reject { |page| exclude_page?(page) }.map do |page|
+        { path: page.url, lastmod: page.data['updatedAt'] }
+      end
+    end
+
+    # Computes the per-language URL variants for a base path, mirroring the rule used
+    # by #bilingual_urls (default language at the root, others under /<lang>), unless
+    # the path is locale-excluded.
+    def language_variants(site, path)
+      languages = site.config['languages'] || ['de']
+      default_lang = site.config['default_lang'] || 'de'
+      excluded_dirs = Array(site.config['exclude_from_localizations'])
+
+      variants = [{ hreflang: default_lang, href: build_url(site, path) }]
+
+      unless excluded_dirs.any? { |dir| path.start_with?("/#{dir}/") || path == "/#{dir}" }
+        languages.each do |lang|
+          next if lang == default_lang
+
+          variants << { hreflang: lang, href: build_url(site, "/#{lang}#{path}") }
+        end
+      end
+
+      variants
+    end
+
+    # Builds the hreflang alternate list for a set of language variants and appends an
+    # x-default entry pointing at the default-language URL. Returns [] for single-variant
+    # (locale-excluded) paths so no alternates are emitted.
+    def build_alternates(site, variants)
+      return [] if variants.size <= 1
+
+      default_lang = site.config['default_lang'] || 'de'
+      alternates = variants.map { |v| { 'hreflang' => v[:hreflang], 'href' => v[:href] } }
+
+      default = variants.find { |v| v[:hreflang] == default_lang }
+      alternates << { 'hreflang' => 'x-default', 'href' => default[:href] } if default
+
+      alternates
+    end
+
+    # Normalises an updatedAt value to a W3C date (YYYY-MM-DD), which is valid for
+    # <lastmod> per the sitemaps.org schema. Returns nil for missing/unparseable input.
+    def normalize_lastmod(value)
+      return nil if value.nil? || value.to_s.strip.empty?
+
+      Date.parse(value.to_s).strftime('%Y-%m-%d')
+    rescue ArgumentError, TypeError
+      nil
     end
 
     def bilingual_urls(site, base_paths)
@@ -124,21 +216,30 @@ module Jekyll
       false
     end
 
-    def render_url_entry(url)
-      <<~XML
-        <url>
-          <loc>#{url}</loc>
-          <changefreq>daily</changefreq>
-          <priority>0.7</priority>
-        </url>
-      XML
+    def render_url_entry(url, lastmod = nil, alternates = nil)
+      entry = +"<url>\n"
+      entry << "  <loc>#{url}</loc>\n"
+      entry << "  <lastmod>#{lastmod}</lastmod>\n" if lastmod && !lastmod.to_s.empty?
+      Array(alternates).each do |alt|
+        entry << %(  <xhtml:link rel="alternate" hreflang="#{alt['hreflang']}" href="#{alt['href']}"/>\n)
+      end
+      entry << "  <changefreq>daily</changefreq>\n"
+      entry << "  <priority>0.7</priority>\n"
+      entry << "</url>\n"
+      entry
     end
 
     def render_sub_sitemap_xml(url_entries)
-      entries = url_entries.map { |url| render_url_entry(url) }.join
+      entries = url_entries.map do |entry|
+        if entry.is_a?(Hash)
+          render_url_entry(entry['loc'], entry['lastmod'], entry['alternates'])
+        else
+          render_url_entry(entry)
+        end
+      end.join
       <<~XML
         <?xml version="1.0" encoding="UTF-8"?>
-        <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+        <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
         #{entries.chomp}
         </urlset>
       XML

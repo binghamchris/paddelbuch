@@ -1,131 +1,28 @@
 /**
  * Unit Tests for Spatial Utilities Module
- * 
+ *
  * Tests coordinate validation and spatial calculations for the Paddel Buch application.
  * Requirements: 14.1, 14.2 - Viewport-based data loading
- * 
- * Note: These tests mirror the logic in assets/js/spatial-utils.js
- * The actual module uses an IIFE pattern for browser compatibility.
+ *
+ * Exercises the real shipping module (assets/js/spatial-utils.js) via require() (it has
+ * a Dual_Export), so these tests cannot drift from the implementation. In Node there is
+ * no #paddelbuch-geo-constants element, so the module uses its built-in default
+ * Switzerland bounds / tile size (which match _config.yml).
  */
 
-// Constants (mirrors spatial-utils.js)
-const SWITZERLAND_BOUNDS = {
-  north: 47.8,
-  south: 45.8,
-  east: 10.5,
-  west: 5.9
-};
-
-const TILE_SIZE = {
-  lat: 0.25,
-  lon: 0.46
-};
-
-const GRID_COLS = Math.ceil((SWITZERLAND_BOUNDS.east - SWITZERLAND_BOUNDS.west) / TILE_SIZE.lon);
-const GRID_ROWS = Math.ceil((SWITZERLAND_BOUNDS.north - SWITZERLAND_BOUNDS.south) / TILE_SIZE.lat);
-
-// Implementation functions (mirrors spatial-utils.js)
-function pointInSwitzerlandBounds(lat, lon) {
-  return lat >= SWITZERLAND_BOUNDS.south &&
-         lat <= SWITZERLAND_BOUNDS.north &&
-         lon >= SWITZERLAND_BOUNDS.west &&
-         lon <= SWITZERLAND_BOUNDS.east;
-}
-
-function pointInBounds(point, bounds) {
-  if (!point || typeof point.lat !== 'number' || typeof point.lon !== 'number') {
-    return false;
-  }
-  if (!bounds || typeof bounds.north !== 'number' || typeof bounds.south !== 'number' ||
-      typeof bounds.east !== 'number' || typeof bounds.west !== 'number') {
-    return false;
-  }
-  return point.lat >= bounds.south &&
-         point.lat <= bounds.north &&
-         point.lon >= bounds.west &&
-         point.lon <= bounds.east;
-}
-
-function boundsToTileCoords(bounds) {
-  if (!bounds || typeof bounds.north !== 'number' || typeof bounds.south !== 'number' ||
-      typeof bounds.east !== 'number' || typeof bounds.west !== 'number') {
-    return [];
-  }
-
-  const clampedBounds = {
-    north: Math.min(bounds.north, SWITZERLAND_BOUNDS.north),
-    south: Math.max(bounds.south, SWITZERLAND_BOUNDS.south),
-    east: Math.min(bounds.east, SWITZERLAND_BOUNDS.east),
-    west: Math.max(bounds.west, SWITZERLAND_BOUNDS.west)
-  };
-
-  if (clampedBounds.north < clampedBounds.south || clampedBounds.east < clampedBounds.west) {
-    return [];
-  }
-
-  let minX = Math.floor((clampedBounds.west - SWITZERLAND_BOUNDS.west) / TILE_SIZE.lon);
-  let maxX = Math.floor((clampedBounds.east - SWITZERLAND_BOUNDS.west) / TILE_SIZE.lon);
-  let minY = Math.floor((SWITZERLAND_BOUNDS.north - clampedBounds.north) / TILE_SIZE.lat);
-  let maxY = Math.floor((SWITZERLAND_BOUNDS.north - clampedBounds.south) / TILE_SIZE.lat);
-
-  minX = Math.max(0, Math.min(minX, GRID_COLS - 1));
-  maxX = Math.max(0, Math.min(maxX, GRID_COLS - 1));
-  minY = Math.max(0, Math.min(minY, GRID_ROWS - 1));
-  maxY = Math.max(0, Math.min(maxY, GRID_ROWS - 1));
-
-  const tiles = [];
-  for (let x = minX; x <= maxX; x++) {
-    for (let y = minY; y <= maxY; y++) {
-      tiles.push({ x, y });
-    }
-  }
-  return tiles;
-}
-
-function tileCoordsToBounds(x, y) {
-  if (typeof x !== 'number' || typeof y !== 'number' ||
-      x < 0 || x >= GRID_COLS || y < 0 || y >= GRID_ROWS) {
-    return null;
-  }
-  return {
-    north: SWITZERLAND_BOUNDS.north - (y * TILE_SIZE.lat),
-    south: SWITZERLAND_BOUNDS.north - ((y + 1) * TILE_SIZE.lat),
-    east: SWITZERLAND_BOUNDS.west + ((x + 1) * TILE_SIZE.lon),
-    west: SWITZERLAND_BOUNDS.west + (x * TILE_SIZE.lon)
-  };
-}
-
-function expandBounds(bounds, factor) {
-  if (!bounds || typeof bounds.north !== 'number' || typeof bounds.south !== 'number' ||
-      typeof bounds.east !== 'number' || typeof bounds.west !== 'number') {
-    return null;
-  }
-  factor = typeof factor === 'number' ? factor : 0.2;
-  const latRange = bounds.north - bounds.south;
-  const lonRange = bounds.east - bounds.west;
-  const latExpansion = latRange * factor;
-  const lonExpansion = lonRange * factor;
-  return {
-    north: bounds.north + latExpansion,
-    south: bounds.south - latExpansion,
-    east: bounds.east + lonExpansion,
-    west: bounds.west - lonExpansion
-  };
-}
-
-function boundsIntersect(bounds1, bounds2) {
-  if (!bounds1 || !bounds2) {
-    return false;
-  }
-  return !(bounds1.east < bounds2.west ||
-           bounds1.west > bounds2.east ||
-           bounds1.north < bounds2.south ||
-           bounds1.south > bounds2.north);
-}
-
-function getTileKey(layer, x, y, locale) {
-  return layer + '-' + x + '-' + y + '-' + locale;
-}
+const {
+  SWITZERLAND_BOUNDS,
+  TILE_SIZE,
+  GRID_COLS,
+  GRID_ROWS,
+  pointInSwitzerlandBounds,
+  pointInBounds,
+  boundsToTileCoords,
+  tileCoordsToBounds,
+  expandBounds,
+  boundsIntersect,
+  getTileKey
+} = require('../../assets/js/spatial-utils.js');
 
 describe('Spatial Utilities', () => {
   describe('Constants', () => {

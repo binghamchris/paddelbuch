@@ -2,18 +2,28 @@
 # Front matter required for Jekyll to process this file
 ---
 
-// Import Bootstrap from node_modules (resolved via load_paths)
-@import "bootstrap/scss/bootstrap";
+// Bootstrap from node_modules (resolved via load_paths). Loaded first so its
+// CSS is emitted before any first-party rules. Bootstrap's own internal
+// legacy import rules emit third-party deprecation warnings (permitted).
+//
+// Task 10.2 (scope Bootstrap to only used components) was evaluated and
+// deferred: the rendered site uses a broad cross-section of Bootstrap (grid,
+// containers, navbar, dropdowns, collapse, buttons, alerts, tables, and a wide
+// range of utility classes), so a scoped import would drop CSS for in-use
+// components and change the compiled output. Per Requirement 0 (zero compiled
+// diff for in-use components) the full framework import is retained.
+@use "bootstrap/scss/bootstrap";
 
-// Override: remove border-radius from all buttons
-.btn {
-  border-radius: 0;
-}
+// First-party settings (colours, fonts, dimensions) shared across all partials.
+@use "settings/settings" as *;
 
-@import "settings/settings";
-@import "util/util";
-@import "components/components";
-@import "pages/pages";
+// Bootstrap overrides emitted immediately after the framework (e.g. .btn).
+@use "bootstrap-overrides";
+
+// First-party partial groups, in cascade order.
+@use "util/util" as *;
+@use "components/components" as *;
+@use "pages/pages" as *;
 
 * {
   box-sizing: border-box;
@@ -69,7 +79,11 @@ main {
   margin-left: 1em;
 }
 
-h1 { 
+// Headings: first-party styles also apply to Bootstrap's .h1-.h6 utility classes.
+// Under @use, Bootstrap's `.hN { @extend hN }` no longer crosses module boundaries
+// into first-party rules, so the .hN aliases are listed explicitly to preserve
+// the previous compiled output (Requirement 0).
+h1, .h1 {
   font-family: $font-heading;
   font-size: 1.8em;
   color: $swisscanoe-blue;
@@ -78,7 +92,7 @@ h1 {
   font-weight: 400;
 }
 
-h2 {
+h2, .h2 {
   font-family: $font-heading;
   font-size: 1.5em;
   color: $swisscanoe-blue;
@@ -86,7 +100,7 @@ h2 {
   font-weight: 300;
 }
 
-h3 {
+h3, .h3 {
   font-family: $font-heading;
   font-size: 1.3em;
   color: $swisscanoe-blue;
