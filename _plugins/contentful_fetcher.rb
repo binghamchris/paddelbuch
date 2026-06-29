@@ -33,6 +33,7 @@ module Jekyll
       'protectedAreaType'       => { filename: 'types/protected_area_types',       mapper: :map_type },
       'dataSourceType'          => { filename: 'types/data_source_types',          mapper: :map_type },
       'dataLicenseType'         => { filename: 'types/data_license_types',         mapper: :map_type },
+      'spotTipType'             => { filename: 'types/spot_tip_types',             mapper: :map_type },
       'staticPage'              => { filename: 'static_pages',                     mapper: :map_static_page }
     }.freeze
 
@@ -236,7 +237,7 @@ module Jekyll
         begin
           entries = fetch_entries(content_type)
           entries_by_type[content_type] = entries
-          data = entries.flat_map { |entry| ContentfulMappers.flatten_entry(entry, config[:mapper]) }
+          data = entries.flat_map { |entry| ContentfulMappers.flatten_entry(entry, config[:mapper], content_type) }
           Jekyll.logger.info 'Contentful:', "Fetched #{entries.size} #{content_type} entries"
           write_yaml(config[:filename], data)
         rescue Contentful::Error => e

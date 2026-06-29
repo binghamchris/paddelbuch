@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="#dc3545" stroke="none">
+  <!-- Template: tip-modifier-{slug}.svg — 16×16 modifier icon for map markers -->
+  <!-- Copy this file and replace "example" with the tip type slug -->
+  <circle cx="8" cy="8" r="7" fill="#dc3545" opacity="0.9"/>
+  <text x="8" y="12" text-anchor="middle" fill="#fff" font-size="11" font-weight="bold">!</text>
+</svg>

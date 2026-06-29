@@ -299,14 +299,14 @@ RSpec.describe 'Data file output compatibility' do
   describe 'CONTENT_TYPES mapping completeness' do
     let(:content_types) { Jekyll::ContentfulFetcher::CONTENT_TYPES }
 
-    it 'maps exactly 13 content types' do
-      expect(content_types.size).to eq(13)
+    it 'maps exactly 14 content types' do
+      expect(content_types.size).to eq(14)
     end
 
     %w[
       spot waterway obstacle protectedArea waterwayEventNotice
       spotType obstacleType paddleCraftType paddlingEnvironmentType
-      protectedAreaType dataSourceType dataLicenseType staticPage
+      protectedAreaType dataSourceType dataLicenseType spotTipType staticPage
     ].each do |ct|
       it "includes '#{ct}' content type" do
         expect(content_types).to have_key(ct)
@@ -365,7 +365,7 @@ RSpec.describe 'Data file output compatibility' do
 
     it 'dimension table filenames match ApiGenerator DIMENSION_TABLES data_keys' do
       api_dim_keys = Jekyll::ApiGenerator::DIMENSION_TABLES.values.map { |c| c[:data_key] }
-      fetcher_dim_filenames = %w[spotType obstacleType paddleCraftType paddlingEnvironmentType protectedAreaType dataSourceType dataLicenseType].map { |ct| content_types[ct][:filename] }
+      fetcher_dim_filenames = %w[spotType obstacleType paddleCraftType paddlingEnvironmentType protectedAreaType dataSourceType dataLicenseType spotTipType].map { |ct| content_types[ct][:filename] }
       expect(fetcher_dim_filenames).to match_array(api_dim_keys)
     end
   end
