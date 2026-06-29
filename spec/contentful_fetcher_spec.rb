@@ -479,8 +479,8 @@ RSpec.describe Jekyll::ContentfulFetcher do
       allow(Jekyll.logger).to receive(:warn)
     end
 
-    it 'iterates all 13 content types' do
-      expect(Jekyll::ContentfulFetcher::CONTENT_TYPES.size).to eq(13)
+    it 'iterates all 14 content types' do
+      expect(Jekyll::ContentfulFetcher::CONTENT_TYPES.size).to eq(14)
 
       # Expect entries to be fetched for each content type
       Jekyll::ContentfulFetcher::CONTENT_TYPES.each_key do |ct|
@@ -500,8 +500,8 @@ RSpec.describe Jekyll::ContentfulFetcher do
       # Stub all fetches to return one entry
       allow(mock_client).to receive(:entries).and_return([mock_entry])
 
-      Jekyll::ContentfulFetcher::CONTENT_TYPES.each do |_ct, config|
-        expect(ContentfulMappers).to receive(:flatten_entry).with(mock_entry, config[:mapper]).and_return([{ 'slug' => 'test', 'locale' => 'de' }])
+      Jekyll::ContentfulFetcher::CONTENT_TYPES.each do |ct, config|
+        expect(ContentfulMappers).to receive(:flatten_entry).with(mock_entry, config[:mapper], ct).and_return([{ 'slug' => 'test', 'locale' => 'de' }])
       end
 
       fetcher.send(:fetch_and_write_content)
@@ -523,8 +523,8 @@ RSpec.describe Jekyll::ContentfulFetcher do
 
       fetcher.send(:fetch_and_write_content)
 
-      # Should have been called for all 13 content types
-      expect(call_count).to eq(13)
+      # Should have been called for all 14 content types
+      expect(call_count).to eq(14)
     end
 
     it 'logs entry count per content type' do
