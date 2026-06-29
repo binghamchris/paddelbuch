@@ -30,7 +30,7 @@ Paddle entry/exit points with GPS coordinates.
 | `paddle_craft_type` | References → paddleCraftType[] | Suitable craft types |
 | `event_notices` | References → waterwayEventNotice[] | Active event notices |
 | `obstacles` | References → obstacle[] | Nearby obstacles |
-| `spot_tips` | References → spotTipType[] | Advisory tip types for this spot |
+| `spot_tip_type` | References → spotTipType[] | Advisory tip types for this spot |
 | `data_source_type` | Reference → dataSourceType | Data provenance |
 | `data_license_type` | Reference → dataLicenseType | Licensing terms |
 
