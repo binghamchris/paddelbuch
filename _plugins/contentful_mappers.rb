@@ -269,7 +269,7 @@ module ContentfulMappers
       'obstacles' => extract_reference_slugs(resolve_field(fields, :obstacles, locale)),
       'dataSourceType_slug' => extract_reference_slug(resolve_field(fields, :data_source_type, locale)),
       'dataLicenseType_slug' => extract_reference_slug(resolve_field(fields, :data_license_type, locale)),
-      'spotTipType_slugs' => extract_reference_slugs(resolve_field(fields, :spot_tips, locale))
+      'spotTipType_slugs' => extract_reference_slugs(resolve_field(fields, :spot_tip, locale))
     }
   end
 

@@ -166,7 +166,7 @@ RSpec.describe 'spotTipType mapper properties' do
           obstacles: { de: [], en: [] },
           data_source_type: { de: nil, en: nil },
           data_license_type: { de: nil, en: nil },
-          spot_tips: { de: refs, en: refs }
+          spot_tip: { de: refs, en: refs }
         }
 
         entry = FakeEntry.new(sys: { id: 'test-spot' })
