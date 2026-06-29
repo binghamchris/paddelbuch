@@ -1,0 +1,23 @@
+{
+  "id": "FEAT-001",
+  "type": "fix",
+  "description": "Fix incorrect Contentful field name for spot tips reference on spot entries. The Contentful field API ID is 'spotTips' (which the Ruby SDK converts to :spot_tips), but the mapper code uses :spot_tip_type instead. This causes the field lookup to return nil, resulting in an empty spotTipType_slugs array for all spots.",
+  "status": "completed",
+  "steps": [
+    "In _plugins/contentful_mappers.rb, in the map_spot method, change resolve_field(fields, :spot_tip_type, locale) to resolve_field(fields, :spot_tips, locale) on the line that sets 'spotTipType_slugs'",
+    "In spec/plugins/spot_tip_type_mapper_spec.rb, in the 'Property 2: Spot Mapper Includes spotTipType_slugs' test, change the field key from spot_tip_type: to spot_tips: in the fields hash to match the actual Contentful field name",
+    "In docs/content-model.md, update the spot content type table row from 'spot_tip_type' to 'spot_tips' to match the actual Contentful API field ID (spotTips becomes spot_tips in snake_case)"
+  ],
+  "acceptance_criteria": [
+    "The map_spot method uses :spot_tips as the field name for resolving spot tip references",
+    "The Property 2 spec test uses spot_tips: as the field key and still passes",
+    "Running bundle exec rspec spec/plugins/spot_tip_type_mapper_spec.rb passes all tests",
+    "Running the full RSpec suite (bundle exec rspec) passes"
+  ],
+  "verification": [
+    "bundle exec rspec spec/plugins/spot_tip_type_mapper_spec.rb",
+    "bundle exec rspec"
+  ],
+  "blocked_reason": null,
+  "findings": "A previous task (task-fix-spot-tips-data) incorrectly changed :spot_tips to :spot_tip_type. This fix reverts that by using the correct field name :spot_tips which matches the Contentful API field ID 'spotTips' as documented in the spec."
+}

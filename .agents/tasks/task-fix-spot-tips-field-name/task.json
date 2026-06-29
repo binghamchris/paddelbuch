@@ -1,0 +1,7 @@
+{
+  "task_id": "task-fix-spot-tips-field-name",
+  "task_description": "Fix the spot tips data not appearing in API JSON output. The root cause is an incorrect Contentful field name in the map_spot method: it uses :spot_tip_type but the actual Contentful field API ID is spotTips (which becomes :spot_tips in Ruby). This causes all spot tip references to resolve as empty arrays.",
+  "status": "in_progress",
+  "feature_order": ["FEAT-001"],
+  "blocked_reason": null
+}
