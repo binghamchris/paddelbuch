@@ -1,0 +1,7 @@
+{
+  "task_id": "task-fix-spot-tips-data",
+  "task_description": "Fix spot tips data not appearing in built site API JSON output. The Contentful field name used in the spot mapper does not match the actual Contentful content model field ID, resulting in empty spotTipType_slugs arrays for all spots.",
+  "status": "in_progress",
+  "feature_order": ["FEAT-001"],
+  "blocked_reason": null
+}
