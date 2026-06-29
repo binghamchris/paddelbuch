@@ -2,7 +2,7 @@
   "id": "FEAT-001",
   "type": "fix",
   "description": "Fix the Contentful field name used to extract spot tip type references in the spot mapper. The code currently uses :spot_tips (expecting Contentful field ID 'spotTips'), but based on the established naming pattern in this project (where reference fields use the content type name - e.g., paddleCraftType, spotType, spot, waterway), the actual Contentful field ID is likely 'spotTipType' which snakifies to :spot_tip_type. This was confirmed by a prior bug fix (commit 72dc317) where the obstacle mapper's spots field was changed from :spots to :spot to match the actual Contentful field name. The fix changes :spot_tips to :spot_tip_type in the mapper and updates the corresponding test to use the correct field name.",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "1. In _plugins/contentful_mappers.rb, line 272, change resolve_field(fields, :spot_tips, locale) to resolve_field(fields, :spot_tip_type, locale). This is the spot mapper's field lookup for spotTipType references.",
     "2. In spec/plugins/spot_tip_type_mapper_spec.rb, update the Property 2 test ('Spot Mapper Includes spotTipType_slugs'). The test builds a fake fields hash with key :spot_tips - change this to :spot_tip_type to match the updated mapper code.",
@@ -22,5 +22,5 @@
     "Run `npm test` and confirm all tests pass"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "All 904 RSpec tests pass. JS tests cannot run in this environment due to network restrictions (Google Fonts download times out in globalSetup). The JS changes are unaffected since the fix is purely in Ruby plugin code."
 }
