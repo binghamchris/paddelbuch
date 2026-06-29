@@ -1,0 +1,14 @@
+{
+  "task_id": "task-fix-spot-tips-data",
+  "task_description": "Fix spot tips data not appearing in built site API JSON output. The Contentful field name used in the spot mapper does not match the actual Contentful content model field ID, resulting in empty spotTipType_slugs arrays for all spots.",
+  "status": "completed",
+  "feature_order": ["FEAT-001"],
+  "blocked_reason": null,
+  "verification": {
+    "build": "skipped",
+    "tests": "pass",
+    "test_quality": "pass",
+    "docker_build": "skipped",
+    "summary": "All 904 RSpec tests pass. JS tests could not run due to sandbox environment constraint (missing proxy-bootstrap.js / Google Fonts download in globalSetup). Fix is Ruby-only code change that does not affect JS behavior. Build requires Contentful credentials not available in sandbox."
+  }
+}
