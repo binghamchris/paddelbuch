@@ -98,6 +98,7 @@ RSpec.describe 'CollectionGenerator pre-computation properties' do
           generator.instance_variable_set(:@type_lookup, type_lookup)
           generator.instance_variable_set(:@waterway_lookup, {})
           generator.instance_variable_set(:@craft_type_lookup, {})
+          generator.instance_variable_set(:@spot_tip_type_lookup, {})
 
           entry = {
             'slug' => 'test-spot',
@@ -171,6 +172,7 @@ RSpec.describe 'CollectionGenerator pre-computation properties' do
           generator.instance_variable_set(:@type_lookup, type_lookup)
           generator.instance_variable_set(:@waterway_lookup, {})
           generator.instance_variable_set(:@craft_type_lookup, craft_type_lookup)
+          generator.instance_variable_set(:@spot_tip_type_lookup, {})
 
           entry = {
             'slug' => 'test-spot', 'name' => 'Test Spot', 'locale' => data[:locale],
@@ -440,6 +442,7 @@ RSpec.describe 'CollectionGenerator pre-computation properties' do
           generator.instance_variable_set(:@type_lookup, type_lookup)
           generator.instance_variable_set(:@waterway_lookup, waterway_lookup)
           generator.instance_variable_set(:@craft_type_lookup, craft_type_lookup)
+          generator.instance_variable_set(:@spot_tip_type_lookup, {})
           generator.instance_variable_set(:@locale_spots_by_slug, {})
           generator.instance_variable_set(:@locale_spots_list, [])
 
@@ -466,6 +469,95 @@ RSpec.describe 'CollectionGenerator pre-computation properties' do
           expect(doc.data['waterway_name']).to eq(expected_name),
             "collection=#{data[:collection_type]}, locale=#{data[:locale]}, waterway_slug=#{data[:waterway_slug]}: " \
             "expected #{expected_name.inspect}, got #{doc.data['waterway_name'].inspect}"
+        end
+      }
+    end
+  end
+
+  # ============================================================================
+  # Feature: spot-tips, Property 10: CollectionGenerator Spot Tip Type Resolution
+  # **Validates: Requirements 1.1, 3.1, 8.1**
+  # ============================================================================
+  describe 'Feature: spot-tips, Property 10: CollectionGenerator Spot Tip Type Resolution' do
+    it 'pre-computed spot_tip_types contains one hash per resolved slug with correct localised name and description' do
+      property_of {
+        Rantly {
+          locale = choose('de', 'en')
+          name_key = locale == 'en' ? 'name_en' : 'name_de'
+          desc_key = "description_#{locale}"
+
+          # Generate random spot tip types for the locale
+          num_tip_types = range(1, 5)
+          tip_types = Array.new(num_tip_types) do
+            slug = gen_slug
+            {
+              'locale' => locale,
+              'slug' => slug,
+              'name_de' => gen_name,
+              'name_en' => gen_name,
+              'description_de' => choose(nil, "<p>#{gen_name}</p>"),
+              'description_en' => choose(nil, "<p>#{gen_name}</p>")
+            }
+          end
+
+          # Generate tip slugs for the spot: mix of known and unknown slugs
+          num_tip_slugs = range(0, 4)
+          tip_slugs = Array.new(num_tip_slugs) do
+            if choose(true, false) && tip_types.any?
+              tip_types.sample['slug']
+            else
+              gen_slug # unknown slug — should be excluded
+            end
+          end
+
+          {
+            locale: locale,
+            name_key: name_key,
+            desc_key: desc_key,
+            tip_types: tip_types,
+            tip_slugs: tip_slugs
+          }
+        }
+      }.check(100) { |data|
+        Dir.mktmpdir do |tmpdir|
+          site, collection = build_site_with_collection(tmpdir, 'spots')
+
+          site.data['types'] = { 'spot_types' => [], 'spot_tip_types' => data[:tip_types] }
+          site.data['waterways'] = []
+
+          generator = Jekyll::CollectionGenerator.new
+          generator.instance_variable_set(:@site, site)
+
+          type_lookup = generator.send(:build_type_lookup, site.data, data[:locale])
+          spot_tip_type_lookup = generator.send(:build_spot_tip_type_lookup, site.data, data[:locale])
+          generator.instance_variable_set(:@type_lookup, type_lookup)
+          generator.instance_variable_set(:@waterway_lookup, {})
+          generator.instance_variable_set(:@craft_type_lookup, {})
+          generator.instance_variable_set(:@spot_tip_type_lookup, spot_tip_type_lookup)
+
+          entry = {
+            'slug' => 'test-spot', 'name' => 'Test Spot', 'locale' => data[:locale],
+            'spotType_slug' => 'einstieg-ausstieg', 'rejected' => false,
+            'paddleCraftTypes' => [],
+            'spotTipType_slugs' => data[:tip_slugs]
+          }
+
+          doc = generator.send(:create_document, site, collection, entry, 'test-spot', 'spot-details', data[:locale])
+
+          # Oracle: for each tip slug, look up in the tip types filtered by locale
+          expected = data[:tip_slugs].filter_map do |slug|
+            matching = data[:tip_types].find { |t| t['slug'] == slug && t['locale'] == data[:locale] }
+            next unless matching
+            {
+              'slug' => matching['slug'],
+              'name' => matching[data[:name_key]] || matching['name_de'] || matching['slug'],
+              'description' => matching[data[:desc_key]]
+            }
+          end
+
+          expect(doc.data['spot_tip_types']).to eq(expected),
+            "locale=#{data[:locale]}, tip_slugs=#{data[:tip_slugs]}: " \
+            "expected #{expected.inspect}, got #{doc.data['spot_tip_types'].inspect}"
         end
       }
     end

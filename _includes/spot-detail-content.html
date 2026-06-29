@@ -24,6 +24,10 @@
 </div>
 {% endif %}
 
+{% if page.spot_tip_types and page.spot_tip_types.size > 0 %}
+  {% include spot-tip-banners.html spot_tip_types=page.spot_tip_types %}
+{% endif %}
+
 <!-- Spot Details Table -->
 <table class="spot-details-table">
   <tbody>

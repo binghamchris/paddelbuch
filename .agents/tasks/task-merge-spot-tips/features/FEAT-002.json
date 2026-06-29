@@ -1,0 +1,31 @@
+{
+  "id": "FEAT-002",
+  "type": "fix",
+  "description": "Fix remaining quality-hardening compliance issues in merged spot-tips code: 1) Replace em dash with double hyphen in assets/js/marker-styles.js line 134 to pass ascii-compliance test. 2) Update the SCSS compile parity baseline to include the new spot-tip CSS rules. 3) Verify no other issues remain.",
+  "status": "completed",
+  "steps": [
+    "Step 1: Check assets/js/map-data-init.js for any console.log statements that should be removed (console.warn is OK). The auto-merged version has console.warn statements for errors which are acceptable. Verify it does not have console.log.",
+    "Step 2: Check assets/js/marker-styles.js for any console.log statements that should be removed.",
+    "Step 3: Check _sass/pages/_spot-details.scss uses @use '../settings/settings' as * (not @import). The file already has this pattern on the current branch, but the auto-merge from feat/spot-tips added new SCSS rules. Verify the merged file still starts with `@use \"../settings/settings\" as *;` and does not introduce @import.",
+    "Step 4: Verify _i18n/de.yml and _i18n/en.yml both have the spot_tip_types translation key (parity check).",
+    "Step 5: Check if the 'navigableByPaddlers' filter was removed from nav_top_rivers in precompute_generator.rb by the spot-tips branch. The quality-hardening branch has `w['navigableByPaddlers'] != false` in the river filter but the spot-tips diff shows it was removed. Since this is in the quality-hardening branch (our target), it should be preserved. Confirm it is still present in the merged file.",
+    "Step 6: Verify _plugins/contentful_mappers.rb passes content_type to flatten_entry correctly. The spot-tips branch changed `ContentfulMappers.flatten_entry(entry, config[:mapper], content_type)` to always pass content_type. The quality-hardening branch uses `ContentfulMappers.flatten_entry(entry, config[:mapper])` without content_type in some paths. Ensure the merged contentful_fetcher.rb uses the correct signature for flatten_entry calls - in the delta_merge path it should pass extra_args (which handles map_type), and in fetch_and_write_content it should pass content_type.",
+    "Step 7: Run tests to verify everything passes: `bundle exec rspec` and `unset NODE_OPTIONS && npx jest --no-globalSetup`."
+  ],
+  "acceptance_criteria": [
+    "No console.log statements in production JS files (assets/js/marker-styles.js, assets/js/map-data-init.js, assets/js/layer-control.js)",
+    "SCSS file _sass/pages/_spot-details.scss uses @use not @import",
+    "Translation keys de.yml and en.yml both contain spot_tip_types",
+    "precompute_generator.rb nav_top_rivers filter retains navigableByPaddlers != false check",
+    "contentful_fetcher.rb fetch_and_write_content passes content_type to flatten_entry",
+    "All RSpec tests pass",
+    "All Jest tests pass"
+  ],
+  "verification": [
+    "Run `bundle exec rspec` and confirm all tests pass",
+    "Run `unset NODE_OPTIONS && npx jest --no-globalSetup` and confirm all tests pass",
+    "Run `grep -r 'console.log' assets/js/marker-styles.js assets/js/map-data-init.js assets/js/layer-control.js` and confirm no matches"
+  ],
+  "blocked_reason": null,
+  "findings": "All fixes applied successfully. 1) Em dash replaced with double hyphen in marker-styles.js line 134 - ascii-compliance test passes. 2) SCSS baseline regenerated with new spot-tip rules - scss-compile-parity test passes (7 tests). 3) All other checks confirmed: no console.log in production JS, SCSS uses @use, translation parity exists, navigableByPaddlers filter preserved, contentful_fetcher passes content_type. 4) RSpec: 904 examples, 0 failures. 5) Jest: 104/105 suites pass, 1037 tests pass. Only failure is copy-vendor-assets (network timeout downloading Google Fonts - environment constraint, not a code issue)."
+}
