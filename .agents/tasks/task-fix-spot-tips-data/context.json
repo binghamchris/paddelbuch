@@ -1,0 +1,26 @@
+{
+  "project_type": "Jekyll static site with Ruby plugins, JavaScript frontend",
+  "language": "Ruby, JavaScript",
+  "build_system": "Bundler (Ruby gems), npm (JS), Jekyll for site generation",
+  "test_framework": "RSpec with Rantly (property-based) for Ruby, Jest with fast-check for JS",
+  "build_command": "bundle exec jekyll build (requires Contentful credentials)",
+  "test_command": "bundle exec rspec && npm test",
+  "verification_instructions": "Run bundle exec rspec to verify all Ruby tests pass. Run npm test to verify all JS tests pass. Cannot run full Jekyll build without Contentful credentials.",
+  "snapshot_or_generated_files": null,
+  "setup_instructions": "bundle install && npm install",
+  "environment_constraints": "Cannot run full Jekyll build (requires Contentful credentials). Cannot verify against real Contentful data. Tests use mocked data.",
+  "contribution_requirements": "Follow existing code patterns. Property-based tests with Rantly/fast-check. Run full test suite after changes.",
+  "key_patterns": "Contentful Ruby SDK v2.19 snakifies field names (camelCase -> snake_case). fields_with_locales returns symbols. Reference fields on content types often use the referenced content type's name as the field ID (e.g., paddleCraftType field links to paddleCraftType entries, spot field links to spot entries). Multi-reference fields may use singular content type name even for arrays.",
+  "relevant_files": [
+    "_plugins/contentful_mappers.rb",
+    "_plugins/contentful_fetcher.rb",
+    "_plugins/api_generator.rb",
+    "_plugins/tile_generator.rb",
+    "_plugins/collection_generator.rb",
+    "_plugins/precompute_generator.rb",
+    "spec/plugins/spot_tip_type_mapper_spec.rb",
+    "docs/content-model.md",
+    "_config.yml"
+  ],
+  "directory_structure": "_plugins/ - Jekyll generator plugins (data pipeline), spec/ - RSpec tests, _tests/ - Jest tests, _data/ - YAML data files from Contentful, _includes/ - Liquid partial templates, _layouts/ - page layouts, assets/js/ - client-side JS, _sass/ - SCSS styles, docs/ - project documentation"
+}

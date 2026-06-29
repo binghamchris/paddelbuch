@@ -1,0 +1,22 @@
+{
+  "project_type": "Jekyll static site with Ruby plugins and JavaScript frontend",
+  "language": "Ruby (plugins), JavaScript (frontend), SCSS (styling)",
+  "build_system": "Jekyll with Bundler for Ruby deps, npm for JS deps",
+  "test_framework": "RSpec with Rantly for Ruby property tests, Jest with fast-check for JS property tests",
+  "build_command": "bundle exec jekyll build (requires Contentful credentials, not available in sandbox)",
+  "test_command": "bundle exec rspec && npm test",
+  "verification_instructions": "Run bundle exec rspec spec/plugins/spot_tip_type_mapper_spec.rb to verify the mapper fix. Run full test suite with bundle exec rspec and npx jest.",
+  "snapshot_or_generated_files": null,
+  "setup_instructions": "bundle install && npm install",
+  "environment_constraints": "No Contentful credentials available - cannot run a full site build. Verification is limited to unit/property tests.",
+  "contribution_requirements": "Commit to branch merge/spot-tips-into-quality-hardening. Do not push.",
+  "key_patterns": "Contentful Ruby SDK converts camelCase field API IDs to snake_case symbols in fields_with_locales. Reference fields are resolved via extract_reference_slugs(resolve_field(fields, :field_name, locale)).",
+  "relevant_files": [
+    "_plugins/contentful_mappers.rb",
+    "spec/plugins/spot_tip_type_mapper_spec.rb",
+    "docs/content-model.md",
+    ".kiro/specs/spot-tips/requirements.md",
+    ".kiro/specs/spot-tips/design.md"
+  ],
+  "directory_structure": "_plugins/ contains Ruby generators and mappers, spec/ contains RSpec tests, _tests/ contains Jest tests, docs/ contains documentation, .kiro/specs/ contains feature specifications"
+}
