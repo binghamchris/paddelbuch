@@ -9,8 +9,51 @@
   }
   var config = JSON.parse(configEl.textContent);
   var currentLocale = config.currentLocale;
-  var localePrefix = config.localePrefix;
   var protectedAreaTypeNames = config.protectedAreaTypeNames || {};
+
+  /**
+   * Comprehensive coordinate validation (Requirement 8.4).
+   *
+   * A coordinate is valid only when it is a finite number, so a legitimate 0 is
+   * treated as present while null/undefined/NaN/Infinity are rejected. Prefers the
+   * shared spatial-utils module (loaded on map pages) and falls back to an inline
+   * finite-number check when the module is unavailable.
+   *
+   * @param {*} value - Candidate coordinate value
+   * @returns {boolean} True if the value is a finite number
+   */
+  function isFiniteCoordinate(value) {
+    if (window.PaddelbuchSpatialUtils && window.PaddelbuchSpatialUtils.isValidCoordinate) {
+      return window.PaddelbuchSpatialUtils.isValidCoordinate(value);
+    }
+    return typeof value === 'number' && isFinite(value);
+  }
+
+  /**
+   * Returns the first defined (non-null/undefined) argument so a legitimate 0 is
+   * preserved rather than skipped by a truthiness fallback.
+   */
+  function firstDefined() {
+    for (var i = 0; i < arguments.length; i++) {
+      if (arguments[i] !== undefined && arguments[i] !== null) {
+        return arguments[i];
+      }
+    }
+    return undefined;
+  }
+
+  /**
+   * Detects (but does not drop) coordinates outside the Switzerland bounds.
+   * Per Requirement 0, an out-of-bounds marker that would otherwise render is
+   * retained and merely logged, never removed.
+   */
+  function warnIfOutsideBounds(lat, lon, featureType, id) {
+    if (window.PaddelbuchSpatialUtils &&
+        window.PaddelbuchSpatialUtils.pointInSwitzerlandBounds &&
+        !window.PaddelbuchSpatialUtils.pointInSwitzerlandBounds(lat, lon)) {
+      console.warn('Coordinate outside Switzerland bounds for ' + featureType + ':', id || '', lat, lon);
+    }
+  }
 
   // Wait for map to be initialized
   function initLayerControls() {
@@ -99,14 +142,15 @@
      * @param {Object} spot - The spot data object
      */
     function addSpotMarker(spot) {
-      if (!spot.location || (!spot.location.lat && !spot.location.lon)) {
+      if (!spot.location) {
         return;
       }
 
-      var lat = spot.location.lat || spot.location.latitude;
-      var lon = spot.location.lon || spot.location.lng || spot.location.longitude;
+      var lat = firstDefined(spot.location.lat, spot.location.latitude);
+      var lon = firstDefined(spot.location.lon, spot.location.lng, spot.location.longitude);
 
-      if (!lat || !lon) return;
+      if (!isFiniteCoordinate(lat) || !isFiniteCoordinate(lon)) return;
+      warnIfOutsideBounds(lat, lon, 'spot', spot.slug);
 
       var isRejected = spot.rejected === true || spot.rejected === 'true';
       var spotTypeSlug = spot.spotType_slug || spot.spotTypeSlug || spot.spot_type_slug;
@@ -128,28 +172,10 @@
             popupContent = window.PaddelbuchSpotPopup.generateSpotPopupContent(spot, currentLocale);
           }
         } else {
-          // Fallback to simple popup if module not loaded
-          var escapedSpotSlug = spot.slug ? PaddelbuchHtmlUtils.escapeHtml(spot.slug) : '';
-          popupContent = '<div>';
-          popupContent += '<strong>' + PaddelbuchHtmlUtils.escapeHtml(spot.name) + '</strong>';
-          if (spot.description) {
-            var excerpt = spot.description.replace(/<[^>]*>/g, '').substring(0, 150);
-            if (spot.description.length > 150) excerpt += '...';
-            popupContent += '<p>' + excerpt + '</p>';
-          }
-          if (spot.location && (spot.location.lat || spot.location.latitude) && (spot.location.lon || spot.location.lng || spot.location.longitude)) {
-            var navLat = spot.location.lat || spot.location.latitude;
-            var navLon = spot.location.lon || spot.location.lng || spot.location.longitude;
-            popupContent += '<a href="https://www.google.com/maps/dir/?api=1&destination=' + navLat + ',' + navLon + '" ' +
-              'target="_blank" rel="noopener noreferrer" data-tinylytics-event="popup.navigate" data-tinylytics-event-value="' + escapedSpotSlug + '">' +
-              (currentLocale === 'en' ? 'Navigate To' : 'Navigieren zu') + '</a> ';
-          }
-          if (spot.slug) {
-            popupContent += '<a href="' + localePrefix + '/einstiegsorte/' + PaddelbuchHtmlUtils.escapeHtml(spot.slug) + '/" ' +
-              'data-tinylytics-event="popup.details" data-tinylytics-event-value="' + escapedSpotSlug + '">' +
-              (currentLocale === 'en' ? 'More details' : 'Weitere Details') + '</a>';
-          }
-          popupContent += '</div>';
+          // Graceful degradation: the spot popup module is unavailable, so bind an
+          // escaped-title-only popup rather than duplicating the module's HTML.
+          popupContent = '<div><span class="popup-title"><h1>' +
+            PaddelbuchHtmlUtils.escapeHtml(spot.name) + '</h1></span></div>';
         }
         marker.bindPopup(popupContent, { maxWidth: 350 });
       }
@@ -212,29 +238,10 @@
         if (window.PaddelbuchObstaclePopup) {
           popupContent = window.PaddelbuchObstaclePopup.generateObstaclePopupContent(obstacle, currentLocale);
         } else {
-          // Fallback popup content -- matches Gatsby structure
-          var escapedObstacleSlug = obstacle.slug ? PaddelbuchHtmlUtils.escapeHtml(obstacle.slug) : '';
-          popupContent = '<div>';
-          popupContent += '<span class="popup-title"><h1>' + PaddelbuchHtmlUtils.escapeHtml(obstacle.name || 'Obstacle') + '</h1></span>';
-
-          // Portage possibility status (Requirement 5.3)
-          var portageStatus;
-          if (obstacle.isPortagePossible === true || obstacle.isPortagePossible === 'true') {
-            portageStatus = currentLocale === 'en' ? 'Yes' : 'Ja';
-          } else if (obstacle.isPortagePossible === false || obstacle.isPortagePossible === 'false') {
-            portageStatus = currentLocale === 'en' ? 'No' : 'Nein';
-          } else {
-            portageStatus = currentLocale === 'en' ? 'Unknown' : 'Unbekannt';
-          }
-          popupContent += '<table><tbody><tr><th>' + (currentLocale === 'en' ? 'Portage possible' : 'Umtragen möglich') + ':</th>';
-          popupContent += '<td>' + portageStatus + '</td></tr></tbody></table>';
-
-          if (obstacle.slug) {
-            popupContent += '<button class="popup-btn popup-btn-right obstacle-details-btn" data-tinylytics-event="popup.details" data-tinylytics-event-value="' + escapedObstacleSlug + '">';
-            popupContent += '<a class="popup-btn-right" href="' + localePrefix + '/hindernisse/' + PaddelbuchHtmlUtils.escapeHtml(obstacle.slug) + '/">' +
-              (currentLocale === 'en' ? 'More details' : 'Weitere Details') + '</a></button>';
-          }
-          popupContent += '</div>';
+          // Graceful degradation: the obstacle popup module is unavailable, so bind an
+          // escaped-title-only popup rather than duplicating the module's HTML.
+          popupContent = '<div><span class="popup-title"><h1>' +
+            PaddelbuchHtmlUtils.escapeHtml(obstacle.name || '') + '</h1></span></div>';
         }
 
         obstacleLayer.bindPopup(popupContent, { maxWidth: 350 });
@@ -360,14 +367,15 @@
      * @param {Object} notice - The event notice data object
      */
     function addEventNoticeMarker(notice) {
-      if (!notice.location || (!notice.location.lat && !notice.location.lon)) {
+      if (!notice.location) {
         return;
       }
 
-      var lat = notice.location.lat || notice.location.latitude;
-      var lon = notice.location.lon || notice.location.lng || notice.location.longitude;
+      var lat = firstDefined(notice.location.lat, notice.location.latitude);
+      var lon = firstDefined(notice.location.lon, notice.location.lng, notice.location.longitude);
 
-      if (!lat || !lon) return;
+      if (!isFiniteCoordinate(lat) || !isFiniteCoordinate(lon)) return;
+      warnIfOutsideBounds(lat, lon, 'event notice', notice.slug);
 
       // Property 13: Event Notice Date Filtering
       // Only display notices where endDate is in the future (Requirement 7.1)
@@ -399,25 +407,11 @@
       if (window.PaddelbuchEventNoticePopup) {
         popupContent = window.PaddelbuchEventNoticePopup.generateEventNoticePopupContent(notice, currentLocale);
       } else {
-        // Fallback popup content if module not loaded
-        var escapedNoticeSlug = notice.slug ? PaddelbuchHtmlUtils.escapeHtml(notice.slug) : '';
-        var localeStrs = currentLocale === 'en'
-          ? { startDate: 'Approx. Start Date', endDate: 'Approx. End Date', moreDetails: 'More details' }
-          : { startDate: 'Ungefähres Startdatum', endDate: 'Ungefähres Enddatum', moreDetails: 'Weitere Details' };
-        popupContent = '<div>';
-        popupContent += '<span class="popup-title"><h1>' + PaddelbuchHtmlUtils.escapeHtml(notice.name || '') + '</h1></span>';
-        popupContent += '<table class="popup-details-table popup-eventnotice-table"><tbody>';
-        if (notice.startDate) {
-          popupContent += '<tr><th>' + localeStrs.startDate + ':</th><td>' + notice.startDate + '</td></tr>';
-        }
-        if (notice.endDate) {
-          popupContent += '<tr><th>' + localeStrs.endDate + ':</th><td>' + notice.endDate + '</td></tr>';
-        }
-        popupContent += '</tbody></table>';
-        if (notice.slug) {
-          popupContent += '<button class="popup-btn popup-btn-right" data-tinylytics-event="popup.details" data-tinylytics-event-value="' + escapedNoticeSlug + '"><a class="popup-btn-right" hreflang="' + currentLocale + '" href="' + localePrefix + '/gewaesserereignisse/' + PaddelbuchHtmlUtils.escapeHtml(notice.slug) + '/">' + localeStrs.moreDetails + '</a></button>';
-        }
-        popupContent += '</div>';
+        // Graceful degradation: the event-notice popup module is unavailable, so bind an
+        // escaped-title-only popup. This also removes the previous unescaped date
+        // interpolation rather than duplicating the module's HTML (Requirement 4.5).
+        popupContent = '<div><span class="popup-title"><h1>' +
+          PaddelbuchHtmlUtils.escapeHtml(notice.name || '') + '</h1></span></div>';
       }
 
       marker.bindPopup(popupContent, { maxWidth: 350 });
@@ -478,8 +472,6 @@
     window.paddelbuchAddObstacleLayer = addObstacleLayer;
     window.paddelbuchAddProtectedAreaLayer = addProtectedAreaLayer;
     window.paddelbuchCurrentLocale = currentLocale;
-
-    console.log('Layer controls initialized for locale:', currentLocale);
   }
 
   // Initialize when DOM is ready

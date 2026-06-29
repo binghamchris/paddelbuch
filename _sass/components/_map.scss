@@ -1,3 +1,5 @@
+@use "../settings/settings" as *;
+
 .map {
 
   position: relative;
@@ -89,7 +91,7 @@
   width: 1%;
 }
 
-.popup-title h1 {
+.popup-title h1, .popup-title .h1 {
   font-family: $font-brand;
   font-size: 1.6em;
   font-weight: 400;

@@ -37,7 +37,7 @@ labels:
 
 ## Date Formatting
 
-Use the `localized_date` and `localized_datetime` Liquid filters from `locale_filter.rb`. Never hardcode date formats — German uses `DD.MM.YYYY`, English uses `DD/MM/YYYY`.
+Use the `localized_date` and `localized_datetime` Liquid filters from `locale_filter.rb`. Never hardcode date formats. The site-wide standard is `DD MMM YYYY` (e.g. "08 Mar 2026" / "08 Mär 2026") — both locales share the same numeric-day / abbreviated-month / year layout, and only the month-name spelling differs.
 
 ## Key Rules
 

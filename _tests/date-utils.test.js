@@ -97,15 +97,16 @@ describe('Property 6: Date-in-future uses date-only comparison', () => {
 
 
 /**
- * Feature: best-practices-cleanup, Property 7: Format date dual format support
- * **Validates: Requirements 3.8**
+ * Feature: best-practices-cleanup, Property 7: formatDate produces the DD MMM YYYY standard
+ * **Validates: Requirements 3.8 (best-practices-cleanup), 7.4 (quality-and-tooling-hardening)**
  *
- * For any valid date and locale (de or en), formatDate(date, locale, 'numeric')
- * shall produce a string matching DD.MM.YYYY (for de) or DD/MM/YYYY (for en),
- * and formatDate(date, locale, 'short') shall produce a string matching
- * DD MMM YYYY where MMM is a three-letter abbreviated month name in the correct locale.
+ * The previously-supported locale-specific numeric output (DD.MM.YYYY / DD/MM/YYYY) has
+ * been removed (quality-and-tooling-hardening Task 1.5). For any valid date and locale
+ * (de or en), formatDate now always produces a string matching DD MMM YYYY where MMM is a
+ * three-letter abbreviated month name in the correct locale — regardless of any extra
+ * argument, preserving backward compatibility with callers that still pass 'short'.
  */
-describe('Property 7: Format date dual format support', () => {
+describe('Property 7: formatDate produces the DD MMM YYYY standard', () => {
   // Generator for valid dates within a reasonable range (UTC to avoid timezone shifts)
   const validDateArb = fc.record({
     year: fc.integer({ min: 1970, max: 2099 }),
@@ -115,35 +116,10 @@ describe('Property 7: Format date dual format support', () => {
 
   const localeArb = fc.constantFrom('de', 'en');
 
-  it('numeric format matches DD.MM.YYYY for de and DD/MM/YYYY for en', () => {
+  it('always matches DD MMM YYYY with the correct localised month abbreviation', () => {
     fc.assert(
       fc.property(validDateArb, localeArb, (date, locale) => {
-        const result = formatDate(date, locale, 'numeric');
-
-        if (locale === 'de') {
-          // DD.MM.YYYY
-          expect(result).toMatch(/^\d{2}\.\d{2}\.\d{4}$/);
-        } else {
-          // DD/MM/YYYY
-          expect(result).toMatch(/^\d{2}\/\d{2}\/\d{4}$/);
-        }
-
-        // Verify the components match the actual date
-        // formatDate uses local getters; at noon UTC the local date matches in all timezones
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const year = String(date.getFullYear());
-        const sep = locale === 'de' ? '.' : '/';
-        expect(result).toBe(day + sep + month + sep + year);
-      }),
-      { numRuns: 100 }
-    );
-  });
-
-  it('short format matches DD MMM YYYY pattern', () => {
-    fc.assert(
-      fc.property(validDateArb, localeArb, (date, locale) => {
-        const result = formatDate(date, locale, 'short');
+        const result = formatDate(date, locale);
 
         // DD MMM YYYY pattern: 2-digit day, space, 3-char month abbr, space, 4-digit year
         expect(result).toMatch(/^\d{2} [A-Za-zÄäÖöÜü]{3} \d{4}$/);
@@ -156,6 +132,26 @@ describe('Property 7: Format date dual format support', () => {
         const year = String(date.getFullYear());
         expect(result).toBe(day + ' ' + monthName + ' ' + year);
       }),
+      { numRuns: 100 }
+    );
+  });
+
+  it('ignores any legacy format argument — numeric (DD.MM.YYYY / DD/MM/YYYY) output is gone', () => {
+    fc.assert(
+      fc.property(
+        validDateArb,
+        localeArb,
+        fc.constantFrom(undefined, 'short', 'numeric', 'long'),
+        (date, locale, legacyFormat) => {
+          const result = formatDate(date, locale, legacyFormat);
+
+          // Always DD MMM YYYY; never a dot/slash separated numeric string
+          expect(result).toMatch(/^\d{2} [A-Za-zÄäÖöÜü]{3} \d{4}$/);
+          expect(result).not.toMatch(/[./]/);
+          // Identical regardless of the (now ignored) third argument
+          expect(result).toBe(formatDate(date, locale));
+        }
+      ),
       { numRuns: 100 }
     );
   });

@@ -33,14 +33,11 @@ module Jekyll
     # Format date according to locale
     # Usage: {{ page.date | localized_date }}
     # Usage with format: {{ page.date | localized_date: 'long' }}
-    # 
-    # Property 19: Date Locale Formatting
-    # For any date displayed in the application, the format shall match the current locale:
-    # 'en-GB' format for English locale (DD/MM/YYYY), 'de-CH' format for German locale (DD.MM.YYYY)
     #
-    # Requirements: 8.5
-    # - Format dates as 'en-GB' for English locale
-    # - Format dates as 'de-CH' for German locale
+    # Site-wide standard display format: DD MMM YYYY (e.g. "08 Mar 2026" / "08 Mär 2026").
+    # English and German share the same numeric-day / abbreviated-month / year layout;
+    # only the month-name spelling is localised (see localize_month_names). The 'iso'
+    # format type yields YYYY-MM-DD. This is the intentional, current behaviour.
     def localized_date(date, format_type = nil)
       return '' unless date
       
@@ -64,8 +61,10 @@ module Jekyll
     # Format date with time according to locale
     # Usage: {{ page.date | localized_datetime }}
     #
-    # Property 19: Date Locale Formatting
-    # Requirements: 8.5
+    # Site-wide standard display format: DD MMM YYYY HH:MM (e.g. "08 Mar 2026 14:30").
+    # The connector word is localised ("um" for de, "at" for en) in the 'long' /
+    # 'notice_updated' variants; 'iso' yields ISO 8601. This is the intentional,
+    # current behaviour.
     def localized_datetime(date, format_type = nil)
       return '' unless date
       

@@ -1,3 +1,5 @@
+@use "../settings/settings" as *;
+
 .page-spot-details {
 
   main {
@@ -49,7 +51,7 @@
     padding-top: 0.7em;
     margin-bottom: 1em;
 
-    h1 {
+    h1, .h1 {
       margin-bottom: 0;
     }
   }
@@ -121,7 +123,7 @@
     }
 
     .rejection-reason {
-      h2 {
+      h2, .h2 {
         font-size: 1.2rem;
         color: $swisscanoe-blue;
         margin-bottom: 0.75rem;

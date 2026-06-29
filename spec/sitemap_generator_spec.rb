@@ -444,10 +444,97 @@ RSpec.describe Jekyll::SitemapGenerator do
       Dir.mktmpdir do |tmpdir|
         site = build_site(tmpdir)
         gen = generator
-        allow(gen).to receive(:collect_urls).and_raise(RuntimeError, 'simulated error')
+        allow(gen).to receive(:collect_url_entries).and_raise(RuntimeError, 'simulated error')
 
         expect { gen.generate(site) }.not_to raise_error
       end
+    end
+  end
+
+  # --- SEO enhancements: optional <lastmod> + bilingual hreflang alternates ---
+  # Feature: quality-and-tooling-hardening, Task 2.7
+  # Validates: Requirements 8.6
+  describe 'SEO enhancements: lastmod and hreflang alternates' do
+    def find_generated_page(site, filename)
+      site.pages.find { |p| p.is_a?(Jekyll::PageWithoutAFile) && p.name == filename }
+    end
+
+    it 'render_url_entry includes <lastmod> and <xhtml:link> alternates when provided' do
+      alternates = [
+        { 'hreflang' => 'de', 'href' => 'https://www.paddelbuch.ch/x/' },
+        { 'hreflang' => 'en', 'href' => 'https://www.paddelbuch.ch/en/x/' },
+        { 'hreflang' => 'x-default', 'href' => 'https://www.paddelbuch.ch/x/' }
+      ]
+      xml = generator.render_url_entry('https://www.paddelbuch.ch/x/', '2026-03-29', alternates)
+
+      expect(xml).to include('<loc>https://www.paddelbuch.ch/x/</loc>')
+      expect(xml).to include('<lastmod>2026-03-29</lastmod>')
+      expect(xml).to include('<xhtml:link rel="alternate" hreflang="de" href="https://www.paddelbuch.ch/x/"/>')
+      expect(xml).to include('<xhtml:link rel="alternate" hreflang="en" href="https://www.paddelbuch.ch/en/x/"/>')
+      expect(xml).to include('<xhtml:link rel="alternate" hreflang="x-default" href="https://www.paddelbuch.ch/x/"/>')
+      expect(xml).to include('<changefreq>daily</changefreq>')
+      expect(xml).to include('<priority>0.7</priority>')
+    end
+
+    it 'render_url_entry omits <lastmod> and alternates when not provided (back-compat)' do
+      xml = generator.render_url_entry('https://www.paddelbuch.ch/x/')
+      expect(xml).to include('<loc>https://www.paddelbuch.ch/x/</loc>')
+      expect(xml).not_to include('<lastmod>')
+      expect(xml).not_to include('<xhtml:link')
+    end
+
+    it 'sub-sitemap urlset declares the xhtml namespace for hreflang links' do
+      Dir.mktmpdir do |tmpdir|
+        site = build_site(tmpdir)
+        add_page(site, 'index.html', '/')
+        generator.generate(site)
+
+        content = find_generated_page(site, 'sitemap-0.xml').content
+        expect(content).to include('xmlns:xhtml="http://www.w3.org/1999/xhtml"')
+        # The base sitemaps.org namespace remains present
+        expect(content).to include('xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"')
+      end
+    end
+
+    it 'emits <lastmod> from a collection doc updatedAt and bilingual hreflang alternates' do
+      Dir.mktmpdir do |tmpdir|
+        site = build_site(tmpdir)
+        doc = add_collection_doc(site, 'spots', 'reckingen')
+        doc.data['updatedAt'] = '2026-03-29T14:53:36Z'
+        generator.generate(site)
+
+        content = find_generated_page(site, 'sitemap-0.xml').content
+        expect(content).to include('<lastmod>2026-03-29</lastmod>')
+        expect(content).to include('<xhtml:link rel="alternate" hreflang="de" href="https://www.paddelbuch.ch/einstiegsorte/reckingen/"/>')
+        expect(content).to include('<xhtml:link rel="alternate" hreflang="en" href="https://www.paddelbuch.ch/en/einstiegsorte/reckingen/"/>')
+        expect(content).to include('<xhtml:link rel="alternate" hreflang="x-default" href="https://www.paddelbuch.ch/einstiegsorte/reckingen/"/>')
+      end
+    end
+
+    # Feature: quality-and-tooling-hardening, Task 2.7 (PBT): lastmod normalisation
+    it 'normalize_lastmod yields YYYY-MM-DD for any valid ISO datetime' do
+      property_of {
+        Rantly {
+          year = range(2000, 2099)
+          month = range(1, 12)
+          day = range(1, 28)
+          hour = range(0, 23)
+          minute = range(0, 59)
+          second = range(0, 59)
+          format('%04d-%02d-%02dT%02d:%02d:%02dZ', year, month, day, hour, minute, second)
+        }
+      }.check(100) do |iso|
+        result = generator.normalize_lastmod(iso)
+        expect(result).to match(/\A\d{4}-\d{2}-\d{2}\z/)
+        expect(result).to eq(iso[0, 10])
+      end
+    end
+
+    it 'normalize_lastmod returns nil for nil, empty, or unparseable input' do
+      expect(generator.normalize_lastmod(nil)).to be_nil
+      expect(generator.normalize_lastmod('')).to be_nil
+      expect(generator.normalize_lastmod('   ')).to be_nil
+      expect(generator.normalize_lastmod('not-a-date')).to be_nil
     end
   end
 end
