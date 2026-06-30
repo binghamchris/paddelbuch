@@ -85,6 +85,27 @@ function localFileName(family, weight) {
   return `${family.toLowerCase()}-${weight}.woff2`;
 }
 
+/**
+ * Determine whether all expected font assets are already present locally.
+ * The fonts are vendored/committed into the repo, so when every expected
+ * .woff2 file and the generated fonts.css exist we can skip the network
+ * download entirely. This keeps the build/test suite working offline and
+ * avoids re-fetching identical files on every run. Set FORCE_FONT_DOWNLOAD=1
+ * to bypass this check and always re-download.
+ */
+function allFontAssetsPresent() {
+  const fontsCssPath = path.join(CSS_DIR, 'fonts.css');
+  if (!fs.existsSync(fontsCssPath)) return false;
+
+  for (const { family, weights } of FONT_FAMILIES) {
+    for (const weight of weights) {
+      const fontPath = path.join(FONTS_DIR, localFileName(family, weight));
+      if (!fs.existsSync(fontPath)) return false;
+    }
+  }
+  return true;
+}
+
 function generateFontsCss(entries) {
   return entries
     .map(
@@ -105,6 +126,11 @@ async function main() {
   try {
     fs.mkdirSync(FONTS_DIR, { recursive: true });
     fs.mkdirSync(CSS_DIR, { recursive: true });
+
+    if (process.env.FORCE_FONT_DOWNLOAD !== '1' && allFontAssetsPresent()) {
+      console.log('All Google Fonts already present locally; skipping download. Set FORCE_FONT_DOWNLOAD=1 to refresh.');
+      return;
+    }
 
     const cssUrls = buildGoogleFontsUrls();
     const allEntries = [];
