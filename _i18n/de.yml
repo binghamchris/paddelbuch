@@ -157,6 +157,8 @@ map:
   waterway_map_label: "Karte mit diesem Gewässer"
   obstacle_map_label: "Karte mit diesem Hindernis"
   notice_map_label: "Karte mit diesem Gewässerereignis"
+  spot_with_tips_label: "%{spot}, Tipps: %{tips}"
+  spot_with_tips_generic: "Einstiegsort mit Tipps"
 
 # Date formats
 date:

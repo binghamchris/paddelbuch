@@ -174,9 +174,9 @@ _tests/
 │   ├── spot-freshness-*.property.test.js             ← Spot freshness dashboard invariants (8 files)
 │   ├── spot-*.property.test.js                       ← Spot rendering (4 files)
 │   ├── spot-tip-banner-rendering.property.test.js    ← Spot tip banner rendering completeness
-│   ├── spot-tip-composite-marker.property.test.js    ← Composite marker modifier images
+│   ├── spot-tip-composite-marker.property.test.js    ← SVG halo Composite_Icon (beads/glyphs, CSP-clean, colour, layout, a11y)
 │   ├── spot-tip-filter-match.property.test.js        ← Spot tip filter match function correctness
-│   ├── spot-tip-modifier-offsets.property.test.js    ← Modifier icon unique offsets
+│   ├── spot-tip-modifier-config.property.test.js     ← TIP_MODIFIER_CONFIG shape (glyph + colour, no offsets)
 │   ├── statistics-chartjs-*.property.test.js         ← Statistics Chart.js invariants (8 files)
 │   ├── tile-coverage.property.test.js                ← Tile grid covers Switzerland
 │   ├── url-pattern-generation.property.test.js       ← URL pattern correctness

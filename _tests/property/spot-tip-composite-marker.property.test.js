@@ -1,180 +1,218 @@
 /**
- * Property-Based Test for Composite Marker Icon Includes Modifier Images
+ * Property-Based Tests for the SVG Composite_Icon (halo redesign)
  *
- * Feature: spot-tips, Property 7: Composite Marker Icon Includes Modifier Images
- * **Validates: Requirements 4.1, 4.6**
+ * Feature: spot-tip-marker-redesign
+ * **Validates: Requirements 1.1, 1.4, 1.5, 1.6, 3.1, 3.2, 5.1, 5.3, 6.4, 7.2, 7.3, 7.4**
  *
- * Property: For any spot with one or more tip type slugs that have entries in
- * TIP_MODIFIER_CONFIG, the composite DivIcon HTML shall contain one img element
- * per matching slug with the correct src path and position offset from the config.
- * Slugs without config entries shall be skipped.
+ * The redesign replaces the old stacked-<img> composite (with inline-style offsets)
+ * with a single inline <svg> Composite_Icon: base marker <image> + open Halo arc(s)
+ * + one Bead per applicable tip + each Bead's Tip_Glyph <image>. This test exercises
+ * the real builder exported by marker-styles.js (PaddelbuchMarkerStyles.buildTipModifierSvg),
+ * not a mirror of it.
+ *
+ * Properties covered (from design.md):
+ *  - P1 CSP-clean:            markup contains no inline `style=` attribute.
+ *  - P2 bead/glyph count:     exactly `applied.length` beads + glyph images; hrefs match; unknown slugs skipped.
+ *  - P3 colour resolution:    stroke colours come from PaddelbuchColors, else colorFallback.
+ *  - P4 halo layout:          1-tip vs 2-tip arc/bead geometry equals the design constants.
+ *  - P6 accessible name:      non-empty aria-label + role="img".
+ *
+ * @jest-environment jsdom
  */
 
 const fc = require('fast-check');
 
-/**
- * Load TIP_MODIFIER_CONFIG from marker-styles.js
- */
-function loadTipModifierConfig() {
+function loadMarkerStyles() {
   const modulePath = require.resolve('../../assets/js/marker-styles.js');
   delete require.cache[modulePath];
-  const savedGlobal = global.PaddelbuchMarkerStyles;
-  require('../../assets/js/marker-styles.js');
-  const config = global.PaddelbuchMarkerStyles
-    ? global.PaddelbuchMarkerStyles.TIP_MODIFIER_CONFIG
-    : {};
-  if (savedGlobal === undefined) {
-    delete global.PaddelbuchMarkerStyles;
-  } else {
-    global.PaddelbuchMarkerStyles = savedGlobal;
-  }
-  return config;
+  const exported = require('../../assets/js/marker-styles.js');
+  return (typeof window !== 'undefined' && window.PaddelbuchMarkerStyles)
+    || global.PaddelbuchMarkerStyles
+    || (exported && exported.PaddelbuchMarkerStyles);
 }
 
-/**
- * Pure implementation of createCompositeIcon HTML generation logic,
- * mirroring the function in layer-control.js for testability without DOM/Leaflet.
- *
- * @param {string} baseIconUrl - URL to the base marker SVG
- * @param {Array<string>} tipSlugs - Array of tip type slugs
- * @param {Object} config - TIP_MODIFIER_CONFIG object
- * @returns {string} The HTML string for the composite icon
- */
-function createCompositeIconHtml(baseIconUrl, tipSlugs, config) {
-  var html = '<img src="' + baseIconUrl + '" width="32" height="53" />';
-
-  for (var i = 0; i < tipSlugs.length; i++) {
-    var modConfig = config[tipSlugs[i]];
-    if (!modConfig) continue; // Req 4.6: skip missing modifier SVGs
-    html += '<img src="' + modConfig.iconUrl + '"' +
-            ' style="position:absolute;left:' + modConfig.offset[0] + 'px;top:' + modConfig.offset[1] + 'px;"' +
-            ' width="' + (modConfig.size || 16) + '" height="' + (modConfig.size || 16) + '" />';
-  }
-
-  return html;
-}
-
-const TIP_MODIFIER_CONFIG = loadTipModifierConfig();
+const markerStyles = loadMarkerStyles();
+const TIP_MODIFIER_CONFIG = markerStyles.TIP_MODIFIER_CONFIG;
 const configSlugs = Object.keys(TIP_MODIFIER_CONFIG);
+const MAX_TIPS = markerStyles.MAX_TIPS;
 
-// Arbitrary for a slug string
+const build = (baseUrl, slugs, aria) => markerStyles.buildTipModifierSvg(baseUrl, slugs, aria);
+
+const BASE_URL = '/assets/images/markers/startingspots-entryexit.svg';
+
+// Count occurrences of a literal tag prefix (e.g. '<circle', '<path', '<image').
+function countTag(html, tagPrefix) {
+  const re = new RegExp(tagPrefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+  return (html.match(re) || []).length;
+}
+
+// Compute the expected applied config entries for a slug array (filter to config, cap at MAX_TIPS).
+function expectedApplied(slugs) {
+  const applied = [];
+  for (let i = 0; i < slugs.length && applied.length < MAX_TIPS; i++) {
+    if (TIP_MODIFIER_CONFIG[slugs[i]]) applied.push(slugs[i]);
+  }
+  return applied;
+}
+
 const slugArb = fc.stringMatching(/^[a-z][a-z0-9-]{0,14}$/);
-
-// Arbitrary for a base icon URL
-const baseIconUrlArb = fc.constant('/assets/images/markers/startingspots-entryexit.svg');
-
-// Arbitrary for a tip slug array: mix of known config slugs and random unknown slugs
 const tipSlugArrayArb = fc.array(
-  configSlugs.length > 0
-    ? fc.oneof(fc.constantFrom(...configSlugs), slugArb)
-    : slugArb,
+  configSlugs.length > 0 ? fc.oneof(fc.constantFrom(...configSlugs), slugArb) : slugArb,
   { minLength: 0, maxLength: 8 }
 );
 
-describe('Composite Marker Icon Includes Modifier Images - Property 7', () => {
-  /**
-   * Property 7: Composite Marker Icon Includes Modifier Images
-   *
-   * For any spot with tip type slugs, the composite DivIcon HTML shall contain:
-   * - The base marker img as the first element
-   * - One img per matching slug with correct src and offset
-   * - No img for slugs without config entries
-   */
+afterEach(() => {
+  delete window.PaddelbuchColors;
+});
 
-  test('composite HTML always contains the base marker image', () => {
+describe('Composite_Icon SVG - spot-tip-marker-redesign', () => {
+  test('exposes buildTipModifierSvg + geometry helpers', () => {
+    expect(typeof markerStyles.buildTipModifierSvg).toBe('function');
+    expect(typeof markerStyles.getCompositeIconSizing).toBe('function');
+    expect(MAX_TIPS).toBe(2);
+  });
+
+  test('empty / all-unknown slug arrays produce no composite (caller falls back)', () => {
+    expect(build(BASE_URL, [], 'x')).toBe('');
+    expect(build(BASE_URL, ['nope', 'also-nope'], 'x')).toBe('');
+  });
+
+  // --- Property 1: CSP-clean (no inline style) ---
+  test('P1: composite markup never contains an inline style attribute', () => {
+    fc.assert(
+      fc.property(tipSlugArrayArb, fc.string(), (slugs, aria) => {
+        // Ensure at least one applicable tip so a composite is produced.
+        const withKnown = [configSlugs[0]].concat(slugs);
+        const html = build(BASE_URL, withKnown, aria);
+        return html.length > 0 && !/\sstyle\s*=/.test(html);
+      }),
+      { numRuns: 100 }
+    );
+  });
+
+  // --- Property 2: bead/glyph count matches applicable tips ---
+  test('P2: bead + glyph counts equal applied.length; glyph hrefs match; unknown slugs skipped', () => {
+    fc.assert(
+      fc.property(tipSlugArrayArb, (slugs) => {
+        const applied = expectedApplied(slugs);
+        const html = build(BASE_URL, slugs, 'label');
+
+        if (applied.length === 0) {
+          return html === '';
+        }
+
+        const beadCount = countTag(html, '<circle');
+        const totalImages = countTag(html, '<image');
+        const glyphImages = totalImages - 1; // minus the base marker image
+
+        if (beadCount !== applied.length) return false;
+        if (glyphImages !== applied.length) return false;
+
+        // Every applied glyphUrl must appear; the base marker url must appear once.
+        if (html.indexOf('href="' + BASE_URL + '"') === -1) return false;
+        for (let i = 0; i < applied.length; i++) {
+          const glyphUrl = TIP_MODIFIER_CONFIG[applied[i]].glyphUrl;
+          if (html.indexOf('href="' + glyphUrl + '"') === -1) return false;
+        }
+        return true;
+      }),
+      { numRuns: 200 }
+    );
+  });
+
+  test('P2: more than MAX_TIPS applicable tips render only the first MAX_TIPS (bounded fallback)', () => {
+    const many = ['swiss-canoe-eco-tip', 'swiss-canoe-tip', 'swiss-canoe-eco-tip'];
+    const html = build(BASE_URL, many, 'label');
+    expect(countTag(html, '<circle')).toBe(MAX_TIPS);
+    expect(countTag(html, '<image') - 1).toBe(MAX_TIPS);
+  });
+
+  // --- Property 3: colour resolution palette-then-fallback ---
+  test('P3: stroke colours use PaddelbuchColors when present', () => {
+    window.PaddelbuchColors = { green1: '#aa11bb', swisscanoeBlue: '#cc22dd' };
+    const html = build(BASE_URL, ['swiss-canoe-eco-tip', 'swiss-canoe-tip'], 'label');
+    expect(html).toContain('stroke="#aa11bb"');
+    expect(html).toContain('stroke="#cc22dd"');
+    // The fallback hexes should NOT be used when the palette resolves.
+    expect(html).not.toContain('stroke="#07753f"');
+    expect(html).not.toContain('stroke="#1b1e43"');
+  });
+
+  test('P3: stroke colours fall back to colorFallback when the palette is unavailable', () => {
+    delete window.PaddelbuchColors;
+    const html = build(BASE_URL, ['swiss-canoe-eco-tip', 'swiss-canoe-tip'], 'label');
+    expect(html).toContain('stroke="#07753f"');
+    expect(html).toContain('stroke="#1b1e43"');
+  });
+
+  // --- Property 4: halo layout by tip count ---
+  test('P4: 1-tip layout = one full-horseshoe arc + one top-centre bead + centred glyph', () => {
+    delete window.PaddelbuchColors;
+    const html = build(BASE_URL, ['swiss-canoe-eco-tip'], 'label');
+
+    expect(countTag(html, '<path')).toBe(1);
+    expect(countTag(html, '<circle')).toBe(1);
+    expect(html).toContain('d="M10.59,50.56 A29,29 0 1 1 41.41,50.56"');
+    expect(html).toContain('cx="26" cy="-6" r="9"');
+    // Glyph box centred on the bead (12x12 => offset by 6).
+    expect(html).toContain('x="20" y="-12" width="12" height="12"');
+  });
+
+  test('P4: 2-tip layout = two split arcs + upper-left/upper-right beads + centred glyphs', () => {
+    delete window.PaddelbuchColors;
+    const html = build(BASE_URL, ['swiss-canoe-eco-tip', 'swiss-canoe-tip'], 'label');
+
+    expect(countTag(html, '<path')).toBe(2);
+    expect(countTag(html, '<circle')).toBe(2);
+    expect(html).toContain('d="M10.59,50.56 A29,29 0 0 1 26,-3"');
+    expect(html).toContain('d="M26,-3 A29,29 0 0 1 41.41,50.56"');
+    expect(html).toContain('cx="3.5" cy="3.5" r="9"');
+    expect(html).toContain('cx="48.5" cy="3.5" r="9"');
+    expect(html).toContain('x="-2.5" y="-2.5" width="12" height="12"');
+    expect(html).toContain('x="42.5" y="-2.5" width="12" height="12"');
+  });
+
+  test('P4: bead stroke-width, arc stroke-width and linecap match the mockup constants', () => {
+    const html = build(BASE_URL, ['swiss-canoe-eco-tip'], 'label');
+    expect(html).toContain('stroke-width="2.5"');
+    expect(html).toContain('stroke-linecap="round"');
+    expect(html).toContain('stroke-width="1.5"');
+    expect(html).toContain('fill="#fff"');
+  });
+
+  // --- Property 6: non-empty accessible name ---
+  test('P6: root <svg> carries role="img" and a non-empty aria-label', () => {
     fc.assert(
       fc.property(
-        baseIconUrlArb,
-        tipSlugArrayArb,
-        (baseUrl, tipSlugs) => {
-          var html = createCompositeIconHtml(baseUrl, tipSlugs, TIP_MODIFIER_CONFIG);
-          return html.indexOf('<img src="' + baseUrl + '" width="32" height="53" />') === 0;
+        fc.stringMatching(/^[A-Za-z0-9 ,.-]{1,40}$/),
+        (aria) => {
+          const html = build(BASE_URL, ['swiss-canoe-eco-tip'], aria);
+          if (html.indexOf('role="img"') === -1) return false;
+          const m = html.match(/aria-label="([^"]*)"/);
+          return !!m && m[1].length > 0;
         }
       ),
       { numRuns: 100 }
     );
   });
 
-  test('composite HTML contains one img per matching slug with correct src and offset', () => {
-    fc.assert(
-      fc.property(
-        baseIconUrlArb,
-        tipSlugArrayArb,
-        (baseUrl, tipSlugs) => {
-          var html = createCompositeIconHtml(baseUrl, tipSlugs, TIP_MODIFIER_CONFIG);
-
-          for (var i = 0; i < tipSlugs.length; i++) {
-            var slug = tipSlugs[i];
-            var modConfig = TIP_MODIFIER_CONFIG[slug];
-            if (modConfig) {
-              // Should contain an img with the correct src
-              var expectedSrc = 'src="' + modConfig.iconUrl + '"';
-              if (html.indexOf(expectedSrc) === -1) return false;
-
-              // Should contain the correct offset in the style
-              var expectedLeft = 'left:' + modConfig.offset[0] + 'px';
-              var expectedTop = 'top:' + modConfig.offset[1] + 'px';
-              if (html.indexOf(expectedLeft) === -1) return false;
-              if (html.indexOf(expectedTop) === -1) return false;
-
-              // Should contain the correct size
-              var expectedSize = modConfig.size || 16;
-              var expectedWidth = 'width="' + expectedSize + '"';
-              var expectedHeight = 'height="' + expectedSize + '"';
-              if (html.indexOf(expectedWidth) === -1) return false;
-              if (html.indexOf(expectedHeight) === -1) return false;
-            }
-          }
-          return true;
-        }
-      ),
-      { numRuns: 100 }
-    );
+  test('P6: aria-label special characters are escaped (CSP/XSS-safe interpolation)', () => {
+    const html = build(BASE_URL, ['swiss-canoe-eco-tip'], 'A & B "<C>"');
+    expect(html).toContain('aria-label="A &amp; B &quot;&lt;C&gt;&quot;"');
+    // The raw unescaped angle brackets must not leak into the markup.
+    expect(html).not.toContain('aria-label="A & B "<C>""');
   });
 
-  test('composite HTML skips slugs without config entries (Req 4.6)', () => {
-    fc.assert(
-      fc.property(
-        baseIconUrlArb,
-        fc.array(slugArb.filter(s => !Object.prototype.hasOwnProperty.call(TIP_MODIFIER_CONFIG, s)), { minLength: 1, maxLength: 5 }),
-        (baseUrl, unknownSlugs) => {
-          var html = createCompositeIconHtml(baseUrl, unknownSlugs, TIP_MODIFIER_CONFIG);
-          // Should only contain the base image, no modifier images
-          var imgCount = (html.match(/<img /g) || []).length;
-          return imgCount === 1; // only the base marker
-        }
-      ),
-      { numRuns: 100 }
-    );
-  });
-
-  test('number of modifier imgs equals number of matching slugs', () => {
-    fc.assert(
-      fc.property(
-        baseIconUrlArb,
-        tipSlugArrayArb,
-        (baseUrl, tipSlugs) => {
-          var html = createCompositeIconHtml(baseUrl, tipSlugs, TIP_MODIFIER_CONFIG);
-          var imgCount = (html.match(/<img /g) || []).length;
-
-          // Count how many slugs have config entries (including duplicates)
-          var matchingCount = 0;
-          for (var i = 0; i < tipSlugs.length; i++) {
-            if (TIP_MODIFIER_CONFIG[tipSlugs[i]]) matchingCount++;
-          }
-
-          // Total imgs = 1 (base) + matchingCount (modifiers)
-          return imgCount === 1 + matchingCount;
-        }
-      ),
-      { numRuns: 100 }
-    );
-  });
-
-  test('empty tip slug array produces only the base marker image', () => {
-    var html = createCompositeIconHtml('/assets/images/markers/test.svg', [], TIP_MODIFIER_CONFIG);
-    var imgCount = (html.match(/<img /g) || []).length;
-    expect(imgCount).toBe(1);
-    expect(html).toContain('src="/assets/images/markers/test.svg"');
+  test('sizing keeps the pin anchored at the tip and ~32px wide', () => {
+    const sizing = markerStyles.getCompositeIconSizing();
+    const g = markerStyles.COMPOSITE_GEOMETRY;
+    const k = g.mapPinWidth / g.baseBox.width;
+    // Pin tip (26,83) mapped through the scale, relative to the icon's top-left.
+    expect(sizing.iconAnchor[0]).toBeCloseTo((g.pinTip.x - g.viewBox.minX) * k, 5);
+    expect(sizing.iconAnchor[1]).toBeCloseTo((g.pinTip.y - g.viewBox.minY) * k, 5);
+    // Base pin renders ~32px wide: 52 viewBox units * k = 32.
+    expect(g.baseBox.width * k).toBeCloseTo(32, 5);
+    expect(sizing.popupAnchor[0]).toBe(0);
+    expect(sizing.popupAnchor[1]).toBeLessThan(0);
   });
 });
