@@ -203,11 +203,11 @@
   //     marker-modifier-mockups.html):
   //       - The Halo is a larger concentric open ring (radius 34) so there is a clear gap
   //         between it and the pin head, keeping it visually distinct from the marker.
-  //       - The Beads sit on the OUTER edge of that ring (centres ~39 from the head centre)
-  //         so they clear the pin head/icon instead of covering it.
+  //       - The Beads sit just beyond the OUTER edge of that ring (centres ~42 from the head
+  //         centre) so their inner edge clears the pin head/icon instead of covering it.
   //     All values are in the viewBox coordinate space.
   var COMPOSITE_GEOMETRY = {
-    viewBox: { minX: -20, minY: -32, width: 92, height: 124 },
+    viewBox: { minX: -22, minY: -34, width: 96, height: 126 },
     // Base_Marker_Icon is drawn into its native 52x84 box; head centre (26,26) r25, tip (26,83).
     baseBox: { x: 0, y: 0, width: 52, height: 84 },
     pinTip: { x: 26, y: 83 },
@@ -221,9 +221,9 @@
     arcFull: 'M7.48,54.51 A34,34 0 1 1 44.52,54.51',   // 1 tip: single-colour horseshoe
     arcLeft: 'M7.48,54.51 A34,34 0 0 1 26,-8',          // 2 tips: left half (tip[0])
     arcRight: 'M26,-8 A34,34 0 0 1 44.52,54.51',        // 2 tips: right half (tip[1])
-    // Bead centres, on the outer edge of the halo so they clear the pin head.
-    beadCentre1: { cx: 26, cy: -13 },                    // 1 tip: top-centre
-    beadCentres2: [{ cx: -1.5, cy: -1.5 }, { cx: 53.5, cy: -1.5 }] // 2 tips: upper-left, upper-right
+    // Bead centres, just beyond the outer edge of the halo so they clear the pin head.
+    beadCentre1: { cx: 26, cy: -16 },                    // 1 tip: top-centre
+    beadCentres2: [{ cx: -4, cy: -4 }, { cx: 56, cy: -4 }] // 2 tips: upper-left, upper-right
   };
 
   /**
