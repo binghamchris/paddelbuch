@@ -156,6 +156,13 @@ mockup [`marker-modifier-mockups.html`](../.kiro/specs/spot-tip-marker-redesign/
 visual source of truth for the marker tip design; the geometry constants are transcribed into
 `COMPOSITE_GEOMETRY` in `marker-styles.js`.
 
+The same Bead glyphs are surfaced in the Filter_Panel "Spot Tips" section: each tip option
+renders the glyph inside a **filter bead** (a white disc with a coloured border matching the
+tip palette — `.filter-icon-bead` / `.filter-icon-bead--{slug}`), mirroring the map markers.
+The glyph path and bead class are attached to the `spotTipType` dimension options in
+`precompute_generator.rb` (kept in sync with `TIP_MODIFIER_CONFIG`); the synthetic
+`__no_tips__` option carries no icon.
+
 ## Includes
 
 ### spot-tip-banners.html

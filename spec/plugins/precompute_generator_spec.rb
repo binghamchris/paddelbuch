@@ -432,5 +432,43 @@ RSpec.describe 'PrecomputeGenerator properties' do
         end
       }
     end
+
+    it 'attaches the marker Bead glyph icon + beadClass to the known tip type options' do
+      %w[de en].each do |locale|
+        Dir.mktmpdir do |tmpdir|
+          site = build_site(tmpdir, lang: locale, default_lang: 'de')
+          site.data['waterways'] = []
+          site.data['static_pages'] = []
+          site.data['types'] = {
+            'paddle_craft_types' => [],
+            'protected_area_types' => [],
+            'spot_tip_types' => [
+              { 'locale' => locale, 'slug' => 'swiss-canoe-eco-tip', 'name_de' => 'Eco', 'name_en' => 'Eco' },
+              { 'locale' => locale, 'slug' => 'swiss-canoe-tip', 'name_de' => 'Swiss', 'name_en' => 'Swiss' }
+            ]
+          }
+
+          generator = Jekyll::PrecomputeGenerator.new
+          generator.generate(site)
+
+          parsed = JSON.parse(site.data['map_data_config_json'])
+          tip_dim = parsed['dimensionConfigs'].find { |d| d['key'] == 'spotTipType' }
+          by_slug = tip_dim['options'].each_with_object({}) { |o, h| h[o['slug']] = o }
+
+          # The two known tip types carry the same glyph the marker Beads use,
+          # plus a beadClass for the filter-icon-bead border colour.
+          expect(by_slug['swiss-canoe-eco-tip']['icon'])
+            .to eq('/assets/images/markers/tip-modifier-swiss-canoe-eco-tip.svg')
+          expect(by_slug['swiss-canoe-eco-tip']['beadClass']).to eq('swiss-canoe-eco-tip')
+          expect(by_slug['swiss-canoe-tip']['icon'])
+            .to eq('/assets/images/markers/tip-modifier-swiss-canoe-tip.svg')
+          expect(by_slug['swiss-canoe-tip']['beadClass']).to eq('swiss-canoe-tip')
+
+          # The synthetic "no tips" option never carries an icon.
+          expect(by_slug['__no_tips__']).not_to have_key('icon')
+          expect(by_slug['__no_tips__']).not_to have_key('beadClass')
+        end
+      end
+    end
   end
 end

@@ -81,6 +81,17 @@
               icon.className = 'filter-icon-circle-img';
               circle.appendChild(icon);
               label.appendChild(circle);
+            } else if (opt.icon && opt.beadClass) {
+              // Bead: white disc with coloured border + coloured glyph, mirroring
+              // the spot tip Beads drawn on the map markers.
+              var bead = document.createElement('span');
+              bead.className = 'filter-icon-bead filter-icon-bead--' + opt.beadClass;
+              var beadImg = document.createElement('img');
+              beadImg.src = opt.icon;
+              beadImg.alt = '';
+              beadImg.className = 'filter-icon-bead-img';
+              bead.appendChild(beadImg);
+              label.appendChild(bead);
             } else if (opt.icon && opt.iconOnly) {
               var standaloneImg = document.createElement('img');
               standaloneImg.src = opt.icon;
