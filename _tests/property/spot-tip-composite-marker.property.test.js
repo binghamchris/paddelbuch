@@ -153,9 +153,9 @@ describe('Composite_Icon SVG - spot-tip-marker-redesign', () => {
     expect(countTag(html, '<path')).toBe(1);
     expect(countTag(html, '<circle')).toBe(1);
     expect(html).toContain('d="M10.59,50.56 A29,29 0 1 1 41.41,50.56"');
-    expect(html).toContain('cx="26" cy="-6" r="9"');
-    // Glyph box centred on the bead (12x12 => offset by 6).
-    expect(html).toContain('x="20" y="-12" width="12" height="12"');
+    expect(html).toContain('cx="26" cy="-6" r="18"');
+    // Glyph box centred on the bead (24x24 => offset by 12).
+    expect(html).toContain('x="14" y="-18" width="24" height="24"');
   });
 
   test('P4: 2-tip layout = two split arcs + upper-left/upper-right beads + centred glyphs', () => {
@@ -166,15 +166,15 @@ describe('Composite_Icon SVG - spot-tip-marker-redesign', () => {
     expect(countTag(html, '<circle')).toBe(2);
     expect(html).toContain('d="M10.59,50.56 A29,29 0 0 1 26,-3"');
     expect(html).toContain('d="M26,-3 A29,29 0 0 1 41.41,50.56"');
-    expect(html).toContain('cx="3.5" cy="3.5" r="9"');
-    expect(html).toContain('cx="48.5" cy="3.5" r="9"');
-    expect(html).toContain('x="-2.5" y="-2.5" width="12" height="12"');
-    expect(html).toContain('x="42.5" y="-2.5" width="12" height="12"');
+    expect(html).toContain('cx="3.5" cy="3.5" r="18"');
+    expect(html).toContain('cx="48.5" cy="3.5" r="18"');
+    expect(html).toContain('x="-8.5" y="-8.5" width="24" height="24"');
+    expect(html).toContain('x="36.5" y="-8.5" width="24" height="24"');
   });
 
   test('P4: bead stroke-width, arc stroke-width and linecap match the mockup constants', () => {
     const html = build(BASE_URL, ['swiss-canoe-eco-tip'], 'label');
-    expect(html).toContain('stroke-width="2.5"');
+    expect(html).toContain('stroke-width="5"');
     expect(html).toContain('stroke-linecap="round"');
     expect(html).toContain('stroke-width="1.5"');
     expect(html).toContain('fill="#fff"');

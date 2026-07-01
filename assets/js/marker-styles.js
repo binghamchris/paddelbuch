@@ -196,19 +196,23 @@
       .replace(/'/g, '&#39;');
   }
 
-  // --- Composite_Icon geometry (transcribed from the approved Reference_Mockup:
-  //     .kiro/specs/spot-tip-marker-redesign/reference/marker-modifier-mockups.html,
-  //     symbols m-opt3b / m-opt3b-1tip). All values are in the viewBox coordinate space. ---
+  // --- Composite_Icon geometry. Bead/Halo layout paths and centres are taken from the
+  //     approved Reference_Mockup (.kiro/specs/spot-tip-marker-redesign/reference/
+  //     marker-modifier-mockups.html, symbols m-opt3b / m-opt3b-1tip). The Bead radius,
+  //     Tip_Glyph size and Halo stroke width are 2x the mockup values because the beads
+  //     and halo were hard to read at the on-screen marker scale; the viewBox top margin
+  //     is enlarged to match so the bigger beads are not clipped. All values are in the
+  //     viewBox coordinate space. ---
   var COMPOSITE_GEOMETRY = {
-    viewBox: { minX: -20, minY: -24, width: 92, height: 116 },
+    viewBox: { minX: -20, minY: -30, width: 92, height: 122 },
     // Base_Marker_Icon is drawn into its native 52x84 box; pin tip sits at (26, 83).
     baseBox: { x: 0, y: 0, width: 52, height: 84 },
     pinTip: { x: 26, y: 83 },
     // Standard (no-tip) marker renders ~32px wide; keep the same on-screen pin size.
     mapPinWidth: 32,
-    arc: { strokeWidth: 2.5 },
-    bead: { r: 9, strokeWidth: 1.5 },
-    glyph: { size: 12 },
+    arc: { strokeWidth: 5 },
+    bead: { r: 18, strokeWidth: 1.5 },
+    glyph: { size: 24 },
     // Halo arc paths (open horseshoe hugging the head from shoulder to shoulder).
     arcFull: 'M10.59,50.56 A29,29 0 1 1 41.41,50.56',   // 1 tip: single-colour horseshoe
     arcLeft: 'M10.59,50.56 A29,29 0 0 1 26,-3',          // 2 tips: left half (tip[0])
@@ -351,11 +355,14 @@
   function getCompositeIconSizing() {
     var g = COMPOSITE_GEOMETRY;
     var k = g.mapPinWidth / g.baseBox.width; // px per viewBox unit
+    // Highest point of the tallest possible bead (the 1-tip top-centre bead),
+    // relative to the pin tip, so the popup always opens just above the halo/bead.
+    var topBeadEdge = g.beadCentre1.cy - g.bead.r - g.bead.strokeWidth;
     return {
       iconSize: [g.viewBox.width * k, g.viewBox.height * k],
       iconAnchor: [(g.pinTip.x - g.viewBox.minX) * k, (g.pinTip.y - g.viewBox.minY) * k],
-      // Opens the popup just above the halo/bead top, matching the prior [0, -53] behaviour.
-      popupAnchor: [0, -58]
+      // Derived (not hard-coded) so it stays correct as the bead geometry changes.
+      popupAnchor: [0, Math.round((topBeadEdge - g.pinTip.y) * k)]
     };
   }
 
