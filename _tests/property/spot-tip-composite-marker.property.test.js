@@ -152,10 +152,10 @@ describe('Composite_Icon SVG - spot-tip-marker-redesign', () => {
 
     expect(countTag(html, '<path')).toBe(1);
     expect(countTag(html, '<circle')).toBe(1);
-    expect(html).toContain('d="M10.59,50.56 A29,29 0 1 1 41.41,50.56"');
-    expect(html).toContain('cx="26" cy="-6" r="18"');
-    // Glyph box centred on the bead (24x24 => offset by 12).
-    expect(html).toContain('x="14" y="-18" width="24" height="24"');
+    expect(html).toContain('d="M7.48,54.51 A34,34 0 1 1 44.52,54.51"');
+    expect(html).toContain('cx="26" cy="-13" r="16"');
+    // Glyph box centred on the bead (21x21 => offset by 10.5).
+    expect(html).toContain('x="15.5" y="-23.5" width="21" height="21"');
   });
 
   test('P4: 2-tip layout = two split arcs + upper-left/upper-right beads + centred glyphs', () => {
@@ -164,12 +164,12 @@ describe('Composite_Icon SVG - spot-tip-marker-redesign', () => {
 
     expect(countTag(html, '<path')).toBe(2);
     expect(countTag(html, '<circle')).toBe(2);
-    expect(html).toContain('d="M10.59,50.56 A29,29 0 0 1 26,-3"');
-    expect(html).toContain('d="M26,-3 A29,29 0 0 1 41.41,50.56"');
-    expect(html).toContain('cx="3.5" cy="3.5" r="18"');
-    expect(html).toContain('cx="48.5" cy="3.5" r="18"');
-    expect(html).toContain('x="-8.5" y="-8.5" width="24" height="24"');
-    expect(html).toContain('x="36.5" y="-8.5" width="24" height="24"');
+    expect(html).toContain('d="M7.48,54.51 A34,34 0 0 1 26,-8"');
+    expect(html).toContain('d="M26,-8 A34,34 0 0 1 44.52,54.51"');
+    expect(html).toContain('cx="-1.5" cy="-1.5" r="16"');
+    expect(html).toContain('cx="53.5" cy="-1.5" r="16"');
+    expect(html).toContain('x="-12" y="-12" width="21" height="21"');
+    expect(html).toContain('x="43" y="-12" width="21" height="21"');
   });
 
   test('P4: bead stroke-width, arc stroke-width and linecap match the mockup constants', () => {

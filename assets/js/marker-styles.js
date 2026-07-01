@@ -196,30 +196,34 @@
       .replace(/'/g, '&#39;');
   }
 
-  // --- Composite_Icon geometry. Bead/Halo layout paths and centres are taken from the
-  //     approved Reference_Mockup (.kiro/specs/spot-tip-marker-redesign/reference/
-  //     marker-modifier-mockups.html, symbols m-opt3b / m-opt3b-1tip). The Bead radius,
-  //     Tip_Glyph size and Halo stroke width are 2x the mockup values because the beads
-  //     and halo were hard to read at the on-screen marker scale; the viewBox top margin
-  //     is enlarged to match so the bigger beads are not clipped. All values are in the
-  //     viewBox coordinate space. ---
+  // --- Composite_Icon geometry. The Base_Marker_Icon (assets/images/markers/*.svg) is a
+  //     52x84 pin whose head is a circle centred at (26, 26) with radius 25 and whose tip
+  //     sits at (26, 83). Design intent (tuned for on-map legibility, informed by the
+  //     reference mockup at .kiro/specs/spot-tip-marker-redesign/reference/
+  //     marker-modifier-mockups.html):
+  //       - The Halo is a larger concentric open ring (radius 34) so there is a clear gap
+  //         between it and the pin head, keeping it visually distinct from the marker.
+  //       - The Beads sit on the OUTER edge of that ring (centres ~39 from the head centre)
+  //         so they clear the pin head/icon instead of covering it.
+  //     All values are in the viewBox coordinate space.
   var COMPOSITE_GEOMETRY = {
-    viewBox: { minX: -20, minY: -30, width: 92, height: 122 },
-    // Base_Marker_Icon is drawn into its native 52x84 box; pin tip sits at (26, 83).
+    viewBox: { minX: -20, minY: -32, width: 92, height: 124 },
+    // Base_Marker_Icon is drawn into its native 52x84 box; head centre (26,26) r25, tip (26,83).
     baseBox: { x: 0, y: 0, width: 52, height: 84 },
     pinTip: { x: 26, y: 83 },
     // Standard (no-tip) marker renders ~32px wide; keep the same on-screen pin size.
     mapPinWidth: 32,
     arc: { strokeWidth: 5 },
-    bead: { r: 18, strokeWidth: 1.5 },
-    glyph: { size: 24 },
-    // Halo arc paths (open horseshoe hugging the head from shoulder to shoulder).
-    arcFull: 'M10.59,50.56 A29,29 0 1 1 41.41,50.56',   // 1 tip: single-colour horseshoe
-    arcLeft: 'M10.59,50.56 A29,29 0 0 1 26,-3',          // 2 tips: left half (tip[0])
-    arcRight: 'M26,-3 A29,29 0 0 1 41.41,50.56',         // 2 tips: right half (tip[1])
-    // Bead centres.
-    beadCentre1: { cx: 26, cy: -6 },                     // 1 tip: top-centre
-    beadCentres2: [{ cx: 3.5, cy: 3.5 }, { cx: 48.5, cy: 3.5 }] // 2 tips: upper-left, upper-right
+    bead: { r: 16, strokeWidth: 1.5 },
+    glyph: { size: 21 },
+    // Halo arc paths: an open horseshoe (radius 34, centred on the head at (26,26)),
+    // open at the bottom around the pin neck.
+    arcFull: 'M7.48,54.51 A34,34 0 1 1 44.52,54.51',   // 1 tip: single-colour horseshoe
+    arcLeft: 'M7.48,54.51 A34,34 0 0 1 26,-8',          // 2 tips: left half (tip[0])
+    arcRight: 'M26,-8 A34,34 0 0 1 44.52,54.51',        // 2 tips: right half (tip[1])
+    // Bead centres, on the outer edge of the halo so they clear the pin head.
+    beadCentre1: { cx: 26, cy: -13 },                    // 1 tip: top-centre
+    beadCentres2: [{ cx: -1.5, cy: -1.5 }, { cx: 53.5, cy: -1.5 }] // 2 tips: upper-left, upper-right
   };
 
   /**
