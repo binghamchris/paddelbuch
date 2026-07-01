@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Paddelbuch — marker modifier mockups (design reference)</title>
+<style>
+  :root { --ink:#1b1e43; --paper:#fbfbf7; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 28px 32px 60px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    color: #23262e; background: var(--paper); line-height: 1.5;
+  }
+  h1 { font-size: 1.5rem; margin: 0 0 4px; color: var(--ink); }
+  h2 { font-size: 1.15rem; margin: 36px 0 4px; color: var(--ink); }
+  .lede { color: #555; max-width: 70ch; margin: 0 0 8px; }
+  .note { background:#fff7e0; border:1px solid #e8d48a; border-radius:8px; padding:10px 14px; max-width:80ch; font-size:.9rem; }
+  .legend { display:flex; gap:24px; align-items:center; flex-wrap:wrap; margin:14px 0 0; font-size:.9rem; }
+  .legend span { display:inline-flex; align-items:center; gap:7px; }
+  .swatch { width:16px; height:16px; border-radius:50%; display:inline-block; }
+
+  /* faux map surface */
+  .map {
+    position: relative; border-radius: 12px; overflow:hidden;
+    border:1px solid #d4d8c8;
+    background-color:#e9edde;
+    background-image:
+      radial-gradient(130px 95px at 20% 72%, #a9d2e6 0 99%, transparent 100%),
+      radial-gradient(110px 80px at 82% 28%, #a9d2e6 0 99%, transparent 100%),
+      radial-gradient(70px 55px at 55% 90%, #a9d2e6 0 99%, transparent 100%);
+  }
+  .map::after{
+    content:""; position:absolute; inset:0; pointer-events:none;
+    background-image:
+      linear-gradient(115deg, transparent 0 48%, rgba(196,170,120,.35) 48.5% 49.5%, transparent 50%),
+      linear-gradient(200deg, transparent 0 67%, rgba(196,170,120,.30) 67.5% 68.3%, transparent 69%);
+  }
+
+  /* comparison strip */
+  .strip { display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end; padding:22px 18px 14px; }
+  .chip { display:flex; flex-direction:column; align-items:center; gap:6px; width:96px; text-align:center; }
+  .chip .cap { font-size:.72rem; font-weight:600; color:var(--ink); background:rgba(255,255,255,.78); border-radius:5px; padding:2px 6px; }
+
+  /* scene (two close markers) */
+  .scene { height:165px; }
+
+  /* option cards */
+  .cards { display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:18px; margin-top:14px; }
+  .card { border:1px solid #e2e2d8; border-radius:12px; background:#fff; padding:16px 18px 18px; }
+  .card h3 { margin:0 0 2px; font-size:1.05rem; color:var(--ink); }
+  .card .tag { font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:#7a7f6a; }
+  .card p { margin:8px 0 0; font-size:.86rem; color:#4a4d55; }
+  .row { display:flex; gap:18px; align-items:flex-end; margin-top:12px; padding:14px; border-radius:10px;
+         background-color:#e9edde;
+         background-image:radial-gradient(90px 70px at 30% 75%, #a9d2e6 0 99%, transparent 100%); }
+  .vb { display:flex; flex-direction:column; align-items:center; gap:5px; }
+  .vb small { font-size:.7rem; color:#666; }
+  .pros { display:flex; gap:18px; flex-wrap:wrap; margin-top:10px; font-size:.82rem; }
+  .pros ul { margin:4px 0 0; padding-left:18px; }
+  .pros .good strong { color:#1c7a45; }
+  .pros .bad strong { color:#a23b3b; }
+
+  .reference { display:flex; gap:26px; align-items:flex-end; padding:16px 18px; flex-wrap:wrap; }
+
+  /* marker render sizes (outer viewBox is -20 -24 92 116 => 92x116) */
+  .mk { display:block; filter: drop-shadow(0 2px 2px rgba(0,0,0,.28)); }
+  .mk.s  { width:56px; }
+  .mk.m  { width:92px; }
+  .mk.l  { width:150px; }
+  .pin.s { width:34px; }
+  .pin.l { width:96px; }
+</style>
+</head>
+<body>
+
+<h1>Marker modifier icons — visual mockups</h1>
+<p class="lede">Simulated rendering of the four proposed approaches, plus the current one for comparison. The base pins and tip colours are the real artwork from the repo.</p>
+<p class="note"><strong>Design reference — not part of the built site.</strong> This file lives in <code>docs/reference/</code>, which is excluded from the Jekyll build (<code>_config.yml</code>), so it is never served. It uses no external assets — just open it directly in a browser.</p>
+
+<div class="legend">
+  <span><span class="swatch" style="background:#07753f"></span> Leaf = <strong>Eco Tip</strong> — the leaf mark from the new banner (<code>#07753f</code>)</span>
+  <span><span class="swatch" style="background:#1b1e43"></span> Cross = <strong>Swiss Canoe Tip</strong> — the cross mark lifted from the corner of the new banner</span>
+</div>
+
+<!-- ============================= DEFS ============================= -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <!-- base pins (real paths) -->
+  <symbol id="pin-entryexit" viewBox="0 0 52 84">
+    <path d="M51,26c0-13.8-11.2-25-25-25S1,12.2,1,26s4.7,16.8,11.7,21.2l13.3,35.8,13.3-35.8c7-4.4,11.7-12.2,11.7-21.2Z" fill="#cb3cf6" stroke="#1b1e43" stroke-width=".8"/>
+    <polygon points="20.5 23.4 27.4 23.4 24 29.3 20.5 23.4" fill="#fff"/>
+    <polygon points="34.8 9.2 40.7 12.6 34.8 16.1 34.8 9.2" fill="#fff"/>
+    <path d="M24,16.4c0-2.6,1.3-4,4-4" fill="none" stroke="#fff" stroke-width="4"/>
+    <line x1="24" y1="23.9" x2="24" y2="16" stroke="#fff" stroke-width="4"/>
+    <line x1="35.3" y1="12.4" x2="27.7" y2="12.4" stroke="#fff" stroke-width="4"/>
+    <path d="M19.7,34.6c-.5.6-2.1,2.2-4.4,2.3-2.7.1-4.5-1.8-5-2.3" fill="none" stroke="#fff" stroke-width="2"/>
+    <line x1="39.5" y1="29.9" x2="36.9" y2="41.7" stroke="#fff" stroke-width="2"/>
+    <path d="M19.5,34.8c.5-.6,2.1-2.2,4.4-2.4,2.7-.1,4.5,1.8,5,2.4" fill="none" stroke="#fff" stroke-width="2"/>
+    <path d="M38.3,34.8c-.5.6-2.1,2.2-4.4,2.3-2.7.1-4.5-1.8-5-2.3" fill="none" stroke="#fff" stroke-width="2"/>
+  </symbol>
+
+  <symbol id="pin-rest" viewBox="0 0 52 84">
+    <path d="M51,26c0-13.8-11.2-25-25-25S1,12.2,1,26s4.7,16.8,11.7,21.2l13.3,35.8,13.3-35.8c7-4.4,11.7-12.2,11.7-21.2Z" fill="#e693be" stroke="#1b1e43" stroke-width=".8"/>
+    <line x1="21.7" y1="10.3" x2="21.7" y2="25.7" stroke="#fff" stroke-width="6"/>
+    <line x1="30.3" y1="10.3" x2="30.3" y2="25.7" stroke="#fff" stroke-width="6"/>
+    <path d="M21.7,32.6c-.5.6-2.1,2.2-4.4,2.4-2.7.1-4.5-1.8-5-2.4" fill="none" stroke="#fff" stroke-width="2"/>
+    <line x1="41.5" y1="27.9" x2="38.9" y2="39.7" stroke="#fff" stroke-width="2"/>
+    <path d="M21.5,32.8c.5-.6,2.1-2.2,4.4-2.4,2.7-.1,4.5,1.8,5,2.4" fill="none" stroke="#fff" stroke-width="2"/>
+    <path d="M40.3,32.8c-.5.6-2.1,2.2-4.4,2.3-2.7.1-4.5-1.8-5-2.4" fill="none" stroke="#fff" stroke-width="2"/>
+  </symbol>
+
+  <!-- tip glyphs -->
+  <!-- leaf lifted from tip-banner-swiss-canoe-eco-tip.svg (visible Layer 1 path; hidden PNG layer omitted).
+       viewBox frames the leaf's bounding box so it sits centred in each bead/well. -->
+  <symbol id="g-leaf-green" viewBox="-98 -73 1180 1180">
+    <path d="M117.624 958.056C132.095 895.76 172.291 688.323 283.517 523.968C398.677 353.798 611.244 212.617 719.752 151.931C667.896 197.448 456.113 329.506 336.033 548.179C247.622 709.182 196.709 929.678 191.672 966.147C278.396 956.25 352.014 936.523 425.303 901.591C620.828 808.399 671.879 672.304 686.361 625.667C727.759 492.353 717.702 342.433 779.913 217.468C815.047 146.892 880.896 93.7268 963.689 68.5875C803.562 86.165 637.34 74.1611 483.309 121.32C373.895 154.819 273.815 223.521 193.011 304.542C124.725 373.012 59.3607 496.479 43.0013 592.28C20.1476 726.111 38.8431 885.229 117.624 958.056Z" fill="#07753f"/>
+  </symbol>
+  <symbol id="g-leaf-white" viewBox="-98 -73 1180 1180">
+    <path d="M117.624 958.056C132.095 895.76 172.291 688.323 283.517 523.968C398.677 353.798 611.244 212.617 719.752 151.931C667.896 197.448 456.113 329.506 336.033 548.179C247.622 709.182 196.709 929.678 191.672 966.147C278.396 956.25 352.014 936.523 425.303 901.591C620.828 808.399 671.879 672.304 686.361 625.667C727.759 492.353 717.702 342.433 779.913 217.468C815.047 146.892 880.896 93.7268 963.689 68.5875C803.562 86.165 637.34 74.1611 483.309 121.32C373.895 154.819 273.815 223.521 193.011 304.542C124.725 373.012 59.3607 496.479 43.0013 592.28C20.1476 726.111 38.8431 885.229 117.624 958.056Z" fill="#fff"/>
+  </symbol>
+  <!-- cross mark lifted from the corner of tip-banner-swiss-canoe-tip.svg -->
+  <symbol id="g-cross-navy" viewBox="1.5 -0.5 23 23">
+    <path d="M9.3,21.1c2.2,0,4.5,0.2,6.8,0.4c0-2,0.2-5.2,0.2-7.2c2.3,0.2,4.9,0.6,7.2,1c0-1.8,0.1-4.5,0.3-6.3c-2.2-0.4-4.7-0.9-7.1-1.2c0.1-1.9,0.2-5.1,0.4-7c-2.1-0.3-4.6-0.5-6.8-0.6C10,2,9.8,5.2,9.7,7.2c-2.3-0.1-5.1,0-7.2,0.3c-0.1,2-0.2,4.4-0.3,6.5c2.3-0.2,4.9-0.3,7.3-0.2C9.4,15.8,9.3,19,9.3,21.1z" fill="#1b1e43"/>
+  </symbol>
+  <symbol id="g-cross-white" viewBox="1.5 -0.5 23 23">
+    <path d="M9.3,21.1c2.2,0,4.5,0.2,6.8,0.4c0-2,0.2-5.2,0.2-7.2c2.3,0.2,4.9,0.6,7.2,1c0-1.8,0.1-4.5,0.3-6.3c-2.2-0.4-4.7-0.9-7.1-1.2c0.1-1.9,0.2-5.1,0.4-7c-2.1-0.3-4.6-0.5-6.8-0.6C10,2,9.8,5.2,9.7,7.2c-2.3-0.1-5.1,0-7.2,0.3c-0.1,2-0.2,4.4-0.3,6.5c2.3-0.2,4.9-0.3,7.3-0.2C9.4,15.8,9.3,19,9.3,21.1z" fill="#fff"/>
+  </symbol>
+
+  <!-- CURRENT approach: detached corner discs -->
+  <symbol id="m-current" viewBox="-20 -24 92 116">
+    <use href="#pin-entryexit" x="0" y="0" width="52" height="84"/>
+    <circle cx="5" cy="5" r="11" fill="#044525" stroke="#1b1e43" stroke-width=".8"/>
+    <circle cx="47" cy="5" r="11" fill="#6b5a9b" stroke="#1b1e43" stroke-width=".8"/>
+    <use href="#g-leaf-white" x="-1.5" y="-1.5" width="13" height="13"/>
+    <use href="#g-cross-white" x="40.5" y="-1.5" width="13" height="13"/>
+  </symbol>
+
+  <!-- OPTION 1: docked tab on the neck (2 tips) -->
+  <symbol id="m-opt1" viewBox="-20 -24 92 116">
+    <use href="#pin-entryexit" x="0" y="0" width="52" height="84"/>
+    <rect x="13.5" y="50.5" width="25" height="14.5" rx="5" fill="#cb3cf6" stroke="#1b1e43" stroke-width=".8"/>
+    <circle cx="20.5" cy="58" r="4.7" fill="#fff" stroke="#1b1e43" stroke-width=".5"/>
+    <circle cx="31.5" cy="58" r="4.7" fill="#fff" stroke="#1b1e43" stroke-width=".5"/>
+    <use href="#g-leaf-green" x="16" y="53.5" width="9" height="9"/>
+    <use href="#g-cross-navy" x="27" y="53.5" width="9" height="9"/>
+  </symbol>
+  <!-- OPTION 1: 1 tip -->
+  <symbol id="m-opt1-1tip" viewBox="-20 -24 92 116">
+    <use href="#pin-entryexit" x="0" y="0" width="52" height="84"/>
+    <rect x="18.5" y="50.5" width="15" height="14.5" rx="5" fill="#cb3cf6" stroke="#1b1e43" stroke-width=".8"/>
+    <circle cx="26" cy="58" r="4.7" fill="#fff" stroke="#1b1e43" stroke-width=".5"/>
+    <use href="#g-leaf-green" x="21.5" y="53.5" width="9" height="9"/>
+  </symbol>
+  <!-- OPTION 1: on a (pink) rest pin, 2 tips -->
+  <symbol id="m-opt1-rest" viewBox="-20 -24 92 116">
+    <use href="#pin-rest" x="0" y="0" width="52" height="84"/>
+    <rect x="13.5" y="50.5" width="25" height="14.5" rx="5" fill="#e693be" stroke="#1b1e43" stroke-width=".8"/>
+    <circle cx="20.5" cy="58" r="4.7" fill="#fff" stroke="#1b1e43" stroke-width=".5"/>
+    <circle cx="31.5" cy="58" r="4.7" fill="#fff" stroke="#1b1e43" stroke-width=".5"/>
+    <use href="#g-leaf-green" x="16" y="53.5" width="9" height="9"/>
+    <use href="#g-cross-navy" x="27" y="53.5" width="9" height="9"/>
+  </symbol>
+
+  <!-- OPTION 2: pennant flags on a mast -->
+  <symbol id="m-opt2" viewBox="-20 -24 92 116">
+    <use href="#pin-entryexit" x="0" y="0" width="52" height="84"/>
+    <line x1="26" y1="2" x2="26" y2="-16" stroke="#1b1e43" stroke-width="1.6" stroke-linecap="round"/>
+    <circle cx="26" cy="-16" r="1.5" fill="#1b1e43"/>
+    <polygon points="26,-15 45,-11 26,-7" fill="#07753f" stroke="#1b1e43" stroke-width=".5" stroke-linejoin="round"/>
+    <polygon points="26,-7 45,-3 26,1" fill="#1b1e43" stroke="#1b1e43" stroke-width=".5" stroke-linejoin="round"/>
+    <use href="#g-leaf-white" x="28.5" y="-14.5" width="7.5" height="7.5"/>
+    <use href="#g-cross-white" x="28.5" y="-6.5" width="7.5" height="7.5"/>
+  </symbol>
+  <symbol id="m-opt2-1tip" viewBox="-20 -24 92 116">
+    <use href="#pin-entryexit" x="0" y="0" width="52" height="84"/>
+    <line x1="26" y1="2" x2="26" y2="-12" stroke="#1b1e43" stroke-width="1.6" stroke-linecap="round"/>
+    <circle cx="26" cy="-12" r="1.5" fill="#1b1e43"/>
+    <polygon points="26,-11 45,-7 26,-3" fill="#07753f" stroke="#1b1e43" stroke-width=".5" stroke-linejoin="round"/>
+    <use href="#g-leaf-white" x="28.5" y="-10.5" width="7.5" height="7.5"/>
+  </symbol>
+
+  <!-- OPTION 3: tip-coloured halo ring + beads (closed ring — used for the "before" comparison) -->
+  <symbol id="m-opt3" viewBox="-20 -24 92 116">
+    <use href="#pin-entryexit" x="0" y="0" width="52" height="84"/>
+    <path d="M26,-4 A30,30 0 0 0 26,56" fill="none" stroke="#07753f" stroke-width="2.5"/>
+    <path d="M26,-4 A30,30 0 0 1 26,56" fill="none" stroke="#1b1e43" stroke-width="2.5"/>
+    <circle cx="3.5" cy="3.5" r="9" fill="#fff" stroke="#07753f" stroke-width="1.5"/>
+    <circle cx="48.5" cy="3.5" r="9" fill="#fff" stroke="#1b1e43" stroke-width="1.5"/>
+    <use href="#g-leaf-green" x="-2.5" y="-2.5" width="12" height="12"/>
+    <use href="#g-cross-navy" x="42.5" y="-2.5" width="12" height="12"/>
+  </symbol>
+  <symbol id="m-opt3-1tip" viewBox="-20 -24 92 116">
+    <use href="#pin-entryexit" x="0" y="0" width="52" height="84"/>
+    <circle cx="26" cy="26" r="30" fill="none" stroke="#07753f" stroke-width="2.5"/>
+    <circle cx="3.5" cy="3.5" r="9" fill="#fff" stroke="#07753f" stroke-width="1.5"/>
+    <use href="#g-leaf-green" x="-2.5" y="-2.5" width="12" height="12"/>
+  </symbol>
+
+  <!-- OPTION 3b: halo OPEN at the bottom so it clears the neck.
+       Arc ends (10.59,50.56)/(41.41,50.56) are the pin's neck shoulders projected to r=29.
+       Beads r=9 (glyphs 12), centres pushed out to ~r32 so the upper-right bead clears
+       the entry/exit arrowhead (~r20 from the head centre) with a visible gap. -->
+  <symbol id="m-opt3b" viewBox="-20 -24 92 116">
+    <use href="#pin-entryexit" x="0" y="0" width="52" height="84"/>
+    <path d="M10.59,50.56 A29,29 0 0 1 26,-3" fill="none" stroke="#07753f" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M26,-3 A29,29 0 0 1 41.41,50.56" fill="none" stroke="#1b1e43" stroke-width="2.5" stroke-linecap="round"/>
+    <circle cx="3.5" cy="3.5" r="9" fill="#fff" stroke="#07753f" stroke-width="1.5"/>
+    <circle cx="48.5" cy="3.5" r="9" fill="#fff" stroke="#1b1e43" stroke-width="1.5"/>
+    <use href="#g-leaf-green" x="-2.5" y="-2.5" width="12" height="12"/>
+    <use href="#g-cross-navy" x="42.5" y="-2.5" width="12" height="12"/>
+  </symbol>
+  <symbol id="m-opt3b-1tip" viewBox="-20 -24 92 116">
+    <use href="#pin-entryexit" x="0" y="0" width="52" height="84"/>
+    <path d="M10.59,50.56 A29,29 0 1 1 41.41,50.56" fill="none" stroke="#07753f" stroke-width="2.5" stroke-linecap="round"/>
+    <circle cx="26" cy="-6" r="9" fill="#fff" stroke="#07753f" stroke-width="1.5"/>
+    <use href="#g-leaf-green" x="20" y="-12" width="12" height="12"/>
+  </symbol>
+  <symbol id="m-opt3b-rest" viewBox="-20 -24 92 116">
+    <use href="#pin-rest" x="0" y="0" width="52" height="84"/>
+    <path d="M10.59,50.56 A29,29 0 0 1 26,-3" fill="none" stroke="#07753f" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M26,-3 A29,29 0 0 1 41.41,50.56" fill="none" stroke="#1b1e43" stroke-width="2.5" stroke-linecap="round"/>
+    <circle cx="3.5" cy="3.5" r="9" fill="#fff" stroke="#07753f" stroke-width="1.5"/>
+    <circle cx="48.5" cy="3.5" r="9" fill="#fff" stroke="#1b1e43" stroke-width="1.5"/>
+    <use href="#g-leaf-green" x="-2.5" y="-2.5" width="12" height="12"/>
+    <use href="#g-cross-navy" x="42.5" y="-2.5" width="12" height="12"/>
+  </symbol>
+
+  <!-- OPTION 4: rim studs / crown -->
+  <symbol id="m-opt4" viewBox="-20 -24 92 116">
+    <use href="#pin-entryexit" x="0" y="0" width="52" height="84"/>
+    <circle cx="16" cy="2" r="5.5" fill="#fff" stroke="#07753f" stroke-width="1.2"/>
+    <circle cx="36" cy="2" r="5.5" fill="#fff" stroke="#1b1e43" stroke-width="1.2"/>
+    <use href="#g-leaf-green" x="11.7" y="-2.3" width="8.6" height="8.6"/>
+    <use href="#g-cross-navy" x="31.7" y="-2.3" width="8.6" height="8.6"/>
+  </symbol>
+  <symbol id="m-opt4-1tip" viewBox="-20 -24 92 116">
+    <use href="#pin-entryexit" x="0" y="0" width="52" height="84"/>
+    <circle cx="26" cy="1" r="5.5" fill="#fff" stroke="#07753f" stroke-width="1.2"/>
+    <use href="#g-leaf-green" x="21.7" y="-3.3" width="8.6" height="8.6"/>
+  </symbol>
+</svg>
+
+<!-- ============================= REVISED HALO ============================= -->
+<h2>Revised halo — open at the bottom so it clears the neck</h2>
+<p class="lede">Instead of a closed ring (which crosses the neck/tail), the halo becomes an open horseshoe hugging the head from shoulder to shoulder over the top. The opening is anchored to the exact points where the pin's neck meets the head, so the tail stays completely clear. Beads sit on the arc, split-coloured for two tips, and are pushed out to ~r32 so they clear the marker's own content (e.g. the entry/exit arrowhead).</p>
+<div class="map reference">
+  <div class="vb"><svg class="mk l" viewBox="-20 -24 92 116"><use href="#m-opt3"/></svg><small>before · ring crosses neck</small></div>
+  <div class="vb"><svg class="mk l" viewBox="-20 -24 92 116"><use href="#m-opt3b"/></svg><small>after · clears neck · 2 tips</small></div>
+  <div class="vb"><svg class="mk l" viewBox="-20 -24 92 116"><use href="#m-opt3b-1tip"/></svg><small>after · 1 tip</small></div>
+  <div class="vb"><svg class="mk l" viewBox="-20 -24 92 116"><use href="#m-opt3b-rest"/></svg><small>after · rest pin</small></div>
+</div>
+<div class="map strip">
+  <div class="chip"><svg class="mk s" viewBox="-20 -24 92 116"><use href="#m-opt3"/></svg><span class="cap">before (map size)</span></div>
+  <div class="chip"><svg class="mk s" viewBox="-20 -24 92 116"><use href="#m-opt3b"/></svg><span class="cap">after (map size)</span></div>
+</div>
+
+<!-- ============================= REFERENCE ============================= -->
+<h2>Reference — base pins, no tips</h2>
+<p class="lede">The "main content" that must never be covered: the coloured head + its white spot-type glyph.</p>
+<div class="map reference">
+  <div class="vb"><svg class="pin l" viewBox="0 0 52 84"><use href="#pin-entryexit" x="0" y="0" width="52" height="84"/></svg><small>Entry &amp; Exit</small></div>
+  <div class="vb"><svg class="pin l" viewBox="0 0 52 84"><use href="#pin-rest" x="0" y="0" width="52" height="84"/></svg><small>Rest</small></div>
+  <div class="vb"><svg class="pin s" viewBox="0 0 52 84"><use href="#pin-entryexit" x="0" y="0" width="52" height="84"/></svg><small>actual map size</small></div>
+</div>
+
+<!-- ============================= AT-A-GLANCE STRIP ============================= -->
+<h2>All five at true map scale (Entry &amp; Exit pin, both tips)</h2>
+<p class="lede">This is roughly how large they actually render on the Leaflet map. Judge legibility and "which pin owns the badge?" here.</p>
+<div class="map strip">
+  <div class="chip"><svg class="mk s" viewBox="-20 -24 92 116"><use href="#m-current"/></svg><span class="cap">Current</span></div>
+  <div class="chip"><svg class="mk s" viewBox="-20 -24 92 116"><use href="#m-opt1"/></svg><span class="cap">1 · Neck tab</span></div>
+  <div class="chip"><svg class="mk s" viewBox="-20 -24 92 116"><use href="#m-opt2"/></svg><span class="cap">2 · Flags</span></div>
+  <div class="chip"><svg class="mk s" viewBox="-20 -24 92 116"><use href="#m-opt3b"/></svg><span class="cap">3 · Halo</span></div>
+  <div class="chip"><svg class="mk s" viewBox="-20 -24 92 116"><use href="#m-opt4"/></svg><span class="cap">4 · Rim studs</span></div>
+</div>
+
+<!-- ============================= THE PROBLEM ============================= -->
+<h2>The problem with the current approach</h2>
+<p class="lede">Two spots close together. With detached corner discs it gets ambiguous which badge belongs to which pin, and the discs nibble the coloured head.</p>
+<div class="map scene">
+  <svg class="mk m" viewBox="-20 -24 92 116" style="position:absolute; left:70px; top:8px;"><use href="#m-current"/></svg>
+  <svg class="mk m" viewBox="-20 -24 92 116" style="position:absolute; left:150px; top:34px;"><use href="#m-current"/></svg>
+</div>
+
+<!-- ============================= OPTION CARDS ============================= -->
+<h2>The four options in detail</h2>
+<div class="cards">
+
+  <div class="card">
+    <div class="tag">Option 1 · recommended</div>
+    <h3>Docked tab on the neck</h3>
+    <div class="row">
+      <div class="vb"><svg class="mk l" viewBox="-20 -24 92 116"><use href="#m-opt1-1tip"/></svg><small>1 tip</small></div>
+      <div class="vb"><svg class="mk l" viewBox="-20 -24 92 116"><use href="#m-opt1"/></svg><small>2 tips</small></div>
+      <div class="vb"><svg class="mk l" viewBox="-20 -24 92 116"><use href="#m-opt1-rest"/></svg><small>on a rest pin</small></div>
+    </div>
+    <p>A rounded tab fused to the pin over the empty neck, holding the tip glyphs in white wells.</p>
+    <div class="pros">
+      <div class="good"><strong>Pros</strong><ul><li>Part of one silhouette — unambiguous ownership</li><li>Covers only dead space; head &amp; glyph fully visible</li><li>Compact width — clusters cleanly</li></ul></div>
+      <div class="bad"><strong>Cons</strong><ul><li>Tight for 3+ tips</li><li>Adds a little height below the head</li></ul></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="tag">Option 2</div>
+    <h3>Pennant flags on a mast</h3>
+    <div class="row">
+      <div class="vb"><svg class="mk l" viewBox="-20 -24 92 116"><use href="#m-opt2-1tip"/></svg><small>1 tip</small></div>
+      <div class="vb"><svg class="mk l" viewBox="-20 -24 92 116"><use href="#m-opt2"/></svg><small>2 tips</small></div>
+    </div>
+    <p>A short mast off the head flies one colour-coded pennant per tip.</p>
+    <div class="pros">
+      <div class="good"><strong>Pros</strong><ul><li>Eye-catching; reads as "this pin's flag"</li><li>Sits outside the head — nothing covered</li><li>Stacks easily for more tips</li></ul></div>
+      <div class="bad"><strong>Cons</strong><ul><li>Taller/wider footprint — more collisions when clustered</li><li>Busiest silhouette of the four</li></ul></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="tag">Option 3 · revised</div>
+    <h3>Tip-coloured halo + beads</h3>
+    <div class="row">
+      <div class="vb"><svg class="mk l" viewBox="-20 -24 92 116"><use href="#m-opt3b-1tip"/></svg><small>1 tip</small></div>
+      <div class="vb"><svg class="mk l" viewBox="-20 -24 92 116"><use href="#m-opt3b"/></svg><small>2 tips</small></div>
+      <div class="vb"><svg class="mk l" viewBox="-20 -24 92 116"><use href="#m-opt3b-rest"/></svg><small>on a rest pin</small></div>
+    </div>
+    <p>An open horseshoe encircles the head (split-coloured for multiple tips) with a bead per tip seated on it. Open at the bottom so the neck stays clear; beads pushed out to clear the head glyph.</p>
+    <div class="pros">
+      <div class="good"><strong>Pros</strong><ul><li>Ring ties the beads to the pin</li><li>Halo doubles as a highlight</li><li>Neck &amp; glyph stay clear</li></ul></div>
+      <div class="bad"><strong>Cons</strong><ul><li>Ring colour can clash with the head colour</li><li>Beads sit slightly proud of the open arc</li></ul></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="tag">Option 4</div>
+    <h3>Rim studs / crown</h3>
+    <div class="row">
+      <div class="vb"><svg class="mk l" viewBox="-20 -24 92 116"><use href="#m-opt4-1tip"/></svg><small>1 tip</small></div>
+      <div class="vb"><svg class="mk l" viewBox="-20 -24 92 116"><use href="#m-opt4"/></svg><small>2 tips</small></div>
+    </div>
+    <p>Tip glyphs seated into the head's top edge like studs on a crown.</p>
+    <div class="pros">
+      <div class="good"><strong>Pros</strong><ul><li>Tightly attached to the head outline</li><li>Smallest overall footprint</li></ul></div>
+      <div class="bad"><strong>Cons</strong><ul><li>Subtle / easy to miss at map scale</li><li>Sits on the head rim — pushed inward it risks crowding the glyph</li></ul></div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
