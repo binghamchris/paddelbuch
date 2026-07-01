@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'json'
+require 'yaml'
 
 # Jekyll plugin to pre-compute site-level data that is identical across all
 # pages within a locale: header navigation arrays, map config JSON strings,
@@ -177,13 +178,40 @@ module Jekyll
       pa_names = {}
       pa_types.each { |t| pa_names[t['slug']] = t[name_key] || t['name_de'] }
 
+      # Localised Spot_Tip_Type names for the composite marker accessible label
+      # (Requirement 5.4 -- sourced from the tip type data, not hard-coded in JS).
+      tip_names = {}
+      tip_types.each { |tt| tip_names[tt['slug']] = tt[name_key] || tt['name_de'] }
+
+      # Accessible-label templates, resolved from the i18n single source of truth
+      # (_i18n/<locale>.yml, keys map.spot_with_tips_label / map.spot_with_tips_generic).
+      map_i18n = load_map_i18n(site, locale)
+
       layer_control_config = {
         currentLocale: locale,
         localePrefix: locale_prefix,
-        protectedAreaTypeNames: pa_names
+        protectedAreaTypeNames: pa_names,
+        spotTipTypeNames: tip_names,
+        spotWithTipsLabel: map_i18n['spot_with_tips_label'],
+        spotWithTipsGeneric: map_i18n['spot_with_tips_generic']
       }
 
       site.data['layer_control_config_json'] = JSON.generate(layer_control_config)
+    end
+
+    # Reads the `map` section of _i18n/<locale>.yml so build-time config can carry
+    # localised accessible-label templates to the client. Returns {} on any failure
+    # so a missing/malformed file degrades gracefully.
+    def load_map_i18n(site, locale)
+      path = File.join(site.source, '_i18n', "#{locale}.yml")
+      return {} unless File.readable?(path)
+
+      data = YAML.safe_load(File.read(path)) || {}
+      map_section = data['map']
+      map_section.is_a?(Hash) ? map_section : {}
+    rescue StandardError => e
+      Jekyll.logger.warn 'PrecomputeGenerator:', "Could not load _i18n/#{locale}.yml map labels: #{e.message}"
+      {}
     end
   end
 end

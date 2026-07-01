@@ -10,6 +10,12 @@
   var config = JSON.parse(configEl.textContent);
   var currentLocale = config.currentLocale;
   var protectedAreaTypeNames = config.protectedAreaTypeNames || {};
+  // Localised Spot_Tip_Type names + accessible-label template for composite markers
+  // (Requirement 5). Sourced from the palette/i18n single sources of truth via the
+  // build-time layer-control-config JSON block; not hard-coded here.
+  var spotTipTypeNames = config.spotTipTypeNames || {};
+  var spotWithTipsLabel = config.spotWithTipsLabel || '';
+  var spotWithTipsGeneric = config.spotWithTipsGeneric || '';
 
   /**
    * Comprehensive coordinate validation (Requirement 8.4).
@@ -132,37 +138,71 @@
     }
 
     /**
-     * Creates a composite Leaflet DivIcon that overlays modifier icon SVGs
-     * on top of the base marker SVG, positioned per TIP_MODIFIER_CONFIG.
-     * Slugs without config entries are silently skipped (Requirement 4.6).
+     * Creates a composite Leaflet DivIcon for a spot that has one or more tips.
      *
-     * Requirements: 4.1, 4.2, 4.5, 4.6
+     * The icon is a single inline <svg> (the Composite_Icon) drawing the
+     * Base_Marker_Icon, an open Halo hugging the pin head, one Bead per applicable
+     * tip, and each Bead's Tip_Glyph. All positioning uses SVG geometry/presentation
+     * attributes only (no inline `style`), so it is CSP-clean. Slugs without a
+     * TIP_MODIFIER_CONFIG entry are silently skipped (Requirement 6.4).
+     *
+     * The SVG markup and sizing come from PaddelbuchMarkerStyles (the single
+     * authoritative source), so the exact geometry lives in one place.
+     *
+     * Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.9, 3.1, 3.2, 3.3, 5.1, 6.4
      *
      * @param {string} baseIconUrl - URL to the base marker SVG
      * @param {Array<string>} tipSlugs - Array of tip type slugs
-     * @returns {L.DivIcon} Composite Leaflet DivIcon
+     * @param {string} ariaLabel - Localised accessible name for the marker
+     * @returns {L.DivIcon|null} Composite Leaflet DivIcon, or null when no applicable tips
      */
-    function createCompositeIcon(baseIconUrl, tipSlugs) {
-      var config = window.PaddelbuchMarkerStyles
-        ? window.PaddelbuchMarkerStyles.TIP_MODIFIER_CONFIG
-        : {};
-      var html = '<img src="' + baseIconUrl + '" width="32" height="53" />';
+    function createCompositeIcon(baseIconUrl, tipSlugs, ariaLabel) {
+      var styles = window.PaddelbuchMarkerStyles;
+      if (!styles || !styles.buildTipModifierSvg) return null;
 
-      for (var i = 0; i < tipSlugs.length; i++) {
-        var modConfig = config[tipSlugs[i]];
-        if (!modConfig) continue; // Req 4.6: skip missing modifier SVGs
-        html += '<img src="' + modConfig.iconUrl + '"' +
-                ' style="position:absolute;left:' + modConfig.offset[0] + 'px;top:' + modConfig.offset[1] + 'px;"' +
-                ' width="' + (modConfig.size || 16) + '" height="' + (modConfig.size || 16) + '" />';
-      }
+      var html = styles.buildTipModifierSvg(baseIconUrl, tipSlugs, ariaLabel);
+      if (!html) return null; // no applicable tips -> caller falls back to standard icon
 
+      var sizing = styles.getCompositeIconSizing();
       return L.divIcon({
         html: html,
         className: 'composite-marker-icon',
-        iconSize: [32, 53],
-        iconAnchor: [16, 53],
-        popupAnchor: [0, -53]
+        iconSize: sizing.iconSize,
+        iconAnchor: sizing.iconAnchor,
+        popupAnchor: sizing.popupAnchor
       });
+    }
+
+    /**
+     * Builds a localised accessible name for a tipped spot marker (Requirement 5).
+     *
+     * Composes the spot name with the localised Spot_Tip_Type labels (from the
+     * build-time config, not hard-coded) using the `map.spot_with_tips_label`
+     * template. Falls back to the spot name, then to a generic localised label,
+     * so a non-empty accessible name is always produced (Requirement 5.5).
+     *
+     * @param {Object} spot - The spot data object
+     * @param {Array<string>} tipSlugs - The spot's tip type slugs
+     * @returns {string} A non-empty localised accessible name
+     */
+    function buildSpotAriaLabel(spot, tipSlugs) {
+      var names = [];
+      for (var i = 0; i < tipSlugs.length; i++) {
+        var name = spotTipTypeNames[tipSlugs[i]];
+        if (name) names.push(name);
+      }
+
+      var spotName = spot.name || '';
+
+      if (spotName && names.length > 0 && spotWithTipsLabel) {
+        return spotWithTipsLabel
+          .replace('%{spot}', spotName)
+          .replace('%{tips}', names.join(', '));
+      }
+      if (spotName) {
+        return spotName;
+      }
+      return spotWithTipsGeneric || spotName;
     }
 
     /**
@@ -190,14 +230,18 @@
       var spotTypeSlug = spot.spotType_slug || spot.spotTypeSlug || spot.spot_type_slug;
       var tipSlugs = spot.spotTipType_slugs || [];
 
-      // Get the appropriate icon using the marker styles module
-      // Use composite icon when spot has tip types (Req 4.1, 4.2);
-      // use standard L.icon otherwise (Req 4.2)
+      // Get the appropriate icon using the marker styles module.
+      // Use a composite Halo icon when the spot has applicable tip types
+      // (Req 1.1); otherwise use the standard L.icon (Req 1.7, 1.8).
       var icon;
       if (!isRejected && tipSlugs.length > 0 && window.PaddelbuchMarkerStyles) {
         var baseIconUrl = window.PaddelbuchMarkerStyles.getSpotIcon(spotTypeSlug, false).options.iconUrl;
-        icon = createCompositeIcon(baseIconUrl, tipSlugs);
-      } else {
+        var ariaLabel = buildSpotAriaLabel(spot, tipSlugs);
+        icon = createCompositeIcon(baseIconUrl, tipSlugs, ariaLabel);
+      }
+      // Fall back to the standard icon when there is no composite (no tips, no
+      // applicable tips, or the styles module is unavailable).
+      if (!icon) {
         icon = window.PaddelbuchMarkerStyles
           ? window.PaddelbuchMarkerStyles.getSpotIcon(spotTypeSlug, isRejected)
           : L.Icon.Default.prototype;

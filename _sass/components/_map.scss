@@ -42,9 +42,14 @@
 }
 
 .composite-marker-icon {
-  position: relative;
+  // The Composite_Icon is a single self-contained inline <svg> (base pin + open
+  // Halo + Beads + Tip_Glyphs), so no absolute-positioning context is needed.
+  // overflow is visible so the Halo/Beads that sit outside the base pin box (the
+  // <svg> viewBox is padded around the pin) are not clipped. No inline styles are
+  // used anywhere in the marker markup (CSP-clean).
   background: transparent;
   border: none;
+  overflow: visible;
 }
 
 .popup-icon {
