@@ -38,7 +38,7 @@ All modules live in `assets/js/`. They are plain scripts that attach functions t
 | Module | Purpose |
 |--------|---------|
 | `paddelbuch-map.js` | Creates the Leaflet map instance, sets Swiss bounds, adds tile layer and locate control |
-| `map-data-init.js` | Orchestrates layer creation, tile-based data loading, filter setup, and layer control |
+| `map-data-init.js` | Orchestrates layer creation, tile-based data loading, filter setup (including `spotTipType` match function), and layer control |
 | `data-loader.js` | Fetches spatial tile JSON files based on the current map viewport |
 | `spatial-utils.js` | GeoJSON geometry utilities (centroid calculation, bounds checking) |
 
@@ -46,9 +46,9 @@ All modules live in `assets/js/`. They are plain scripts that attach functions t
 
 | Module | Purpose |
 |--------|---------|
-| `filter-engine.js` | Core filter logic: multi-dimension AND filtering across spot type and paddle craft type |
+| `filter-engine.js` | Core filter logic: multi-dimension AND filtering across spot type, paddle craft type, and spot tip type |
 | `filter-panel.js` | Renders the filter toggle UI panel and handles user interactions |
-| `layer-control.js` | Custom Leaflet control for toggling map layers, includes date-based event notice filtering |
+| `layer-control.js` | Custom Leaflet control for toggling map layers, includes date-based event notice filtering and the SVG halo Composite_Icon builder for spots with tip types |
 | `zoom-layer-manager.js` | Shows/hides detail layers (obstacles, protected areas) based on zoom level (threshold: zoom 12) |
 
 ### Popups and Markers
@@ -59,7 +59,7 @@ All modules live in `assets/js/`. They are plain scripts that attach functions t
 | `obstacle-popup.js` | Generates HTML for obstacle marker popups |
 | `event-notice-popup.js` | Generates HTML for event notice popups |
 | `marker-registry.js` | Deduplicates markers by slug, manages marker add/remove lifecycle |
-| `marker-styles.js` | Defines Leaflet icon styles per spot type (entry/exit, entry-only, etc.) |
+| `marker-styles.js` | Defines Leaflet icon styles per spot type (entry/exit, entry-only, etc.), the tip modifier configuration (`TIP_MODIFIER_CONFIG`), and the SVG Composite_Icon builder (`buildTipModifierSvg`) plus the palette colour resolver (`resolveTipColor`) |
 | `layer-styles.js` | Defines colours and styles for GeoJSON layers (obstacles, protected areas, notices) |
 
 ### Utilities
@@ -109,7 +109,74 @@ On the homepage, the map initialisation follows this sequence:
    - Registers the `zoom-layer-manager` to show detail layers at zoom ≥ 12
 3. On map move/zoom, `data-loader.js` calculates which tiles overlap the viewport, fetches any unfetched tiles, and passes the data to marker creation functions
 4. `marker-registry.js` deduplicates markers (same slug = same marker) and adds them to the appropriate layer group
-5. `filter-engine.js` applies active filters by showing/hiding markers based on their spot type and paddle craft type attributes
+5. `filter-engine.js` applies active filters by showing/hiding markers based on their spot type, paddle craft type, and spot tip type attributes
+
+## Marker tip modifiers (the Composite_Icon)
+
+Spots that carry one or more advisory tips are drawn with a **Composite_Icon**: a single
+inline `<svg>` Leaflet `DivIcon` that composes the base marker pin with an open **Halo**
+(a horseshoe arc hugging the pin head from shoulder to shoulder, open at the bottom so the
+neck stays clear) and one **Bead** per tip, each Bead carrying the tip's glyph (a green leaf
+for the Eco tip, a navy cross for the Swiss Canoe tip). This redesign superseded the earlier
+floating corner-disc badges, which obscured the pin head and relied on CSP-blocked inline
+`style` offsets.
+
+Key pieces:
+
+- **`marker-styles.js` — `TIP_MODIFIER_CONFIG`** is the single authoritative map from each
+  tip slug to its glyph asset and colour. Each entry is
+  `{ glyphUrl, colorKey, colorFallback }` — no per-tip position/size offsets (Bead and Halo
+  geometry is computed from the number and order of applicable tips, not stored per tip).
+  - `glyphUrl` points at `assets/images/markers/tip-modifier-{slug}.svg` (glyph only,
+    transparent background — the Bead disc is drawn by the SVG, not the asset).
+  - `colorKey` indexes `window.PaddelbuchColors` (the palette single source of truth generated
+    from `_sass/settings/_paddelbuch_colours.scss`; the generator emits camelCase keys, so
+    `$green-1` → `green1` and `$swisscanoe-blue` → `swisscanoeBlue`).
+  - `colorFallback` mirrors the palette token as a hard-coded hex so the marker still renders
+    in the correct colour if the palette is unavailable.
+- **`marker-styles.js` — `resolveTipColor(cfg)`** resolves `PaddelbuchColors[cfg.colorKey]`,
+  falling back to `cfg.colorFallback`.
+- **`marker-styles.js` — `buildTipModifierSvg(baseIconUrl, tipSlugs, ariaLabel)`** builds the
+  Composite_Icon markup. It filters the slugs to those with a config entry (unknown slugs are
+  skipped), caps at two tips (a bounded, documented fallback with a single extension point for
+  a future 3+ layout), and positions every part with SVG geometry and presentation attributes
+  only — **no inline `style`** — so it is CSP-clean. It also sets `role="img"` and an escaped
+  `aria-label`. `getCompositeIconSizing()` derives the `DivIcon` `iconSize`/`iconAnchor`/
+  `popupAnchor` from the geometry and scale so a tipped pin renders at the same on-screen size
+  as a standard marker and stays anchored at the pin tip.
+- **`layer-control.js` — `createCompositeIcon(baseIconUrl, tipSlugs, ariaLabel)`** wraps the
+  markup from `buildTipModifierSvg` in an `L.divIcon` (`className: 'composite-marker-icon'`),
+  returning `null` when no tips apply so `addSpotMarker` falls back to the standard icon.
+  `addSpotMarker` builds the localised accessible label from `spot.name` plus the localised tip
+  names (sourced from build-time config via `layer-control-config`, not hard-coded in JS).
+
+The approved visual specification (exact geometry, sizing, and colours) lives in the reference
+mockup [`marker-modifier-mockups.html`](../.kiro/specs/spot-tip-marker-redesign/reference/marker-modifier-mockups.html)
+(symbols `m-opt3b`, `m-opt3b-1tip`, `m-opt3b-rest`) — open it directly in a browser. It is the
+visual source of truth for the marker tip design; the geometry constants are held in
+`COMPOSITE_GEOMETRY` in `marker-styles.js`. Sizes are tuned for on-map legibility: the pin
+head is a circle at (26,26) r25, the Halo is a larger concentric open ring (r34) leaving a
+clear gap around the head, and the Beads sit just beyond the halo's outer edge (~42 from the
+head centre) so their inner edge reads clearly without covering the pin icon.
+
+The same Bead glyphs are surfaced in the Filter_Panel "Spot Tips" section: each tip option
+renders the glyph inside a **filter bead** (a white disc with a coloured border matching the
+tip palette — `.filter-icon-bead` / `.filter-icon-bead--{slug}`), mirroring the map markers.
+The glyph path and bead class are attached to the `spotTipType` dimension options in
+`precompute_generator.rb` (kept in sync with `TIP_MODIFIER_CONFIG`); the synthetic
+`__no_tips__` option carries no icon.
+
+## Includes
+
+### spot-tip-banners.html
+
+The `_includes/spot-tip-banners.html` partial renders advisory tip banners on spot detail pages. For each spot tip type associated with a spot, it renders a Bootstrap alert with:
+- A CSS class `alert-spot-tip-{slug}` for per-type styling
+- An SVG icon from `assets/images/tips/tip-banner-{slug}.svg`
+- The localised tip type name
+- The rich text description (when present)
+
+Included conditionally in `_layouts/spot.html` when `page.spot_tip_types` is non-empty.
 
 ## Colour System
 
@@ -146,7 +213,7 @@ _sass/
 │   └── _components.scss             ← Barrel file
 └── pages/
     ├── _home.scss                   ← Homepage
-    ├── _spot-details.scss           ← Spot detail pages
+    ├── _spot-details.scss           ← Spot detail pages (includes spot tip banner styles)
     ├── _waterway-details.scss       ← Waterway detail pages
     ├── _obstacle-details.scss       ← Obstacle detail pages
     ├── _notice-details.scss         ← Notice detail pages

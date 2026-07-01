@@ -1,0 +1,9 @@
+{%- comment -%}
+  Geo Constants Include
+
+  Emits the authoritative Switzerland bounds + tile-size steps (from _config.yml
+  map.bounds / map.tile_size) as a CSP-safe JSON data element. spatial-utils.js reads
+  this so the browser tile math shares a single source of truth with tile_generator.rb.
+  Must be included before assets/js/spatial-utils.js.
+{%- endcomment -%}
+<script type="application/json" id="paddelbuch-geo-constants">{"bounds":{{ site.map.bounds | jsonify }},"tileSize":{{ site.map.tile_size | jsonify }}}</script>

@@ -37,7 +37,7 @@ from shapely.validation import make_valid
 load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env.development'))
 
 SPACE_ID = os.environ['CONTENTFUL_SPACE_ID']
-ENVIRONMENT = os.environ.get('CONTENTFUL_ENVIRONMENT', 'dev')
+ENVIRONMENT = os.environ.get('CONTENTFUL_ENVIRONMENT', 'master')
 CMA_TOKEN = os.environ['CONTENTFUL_MANAGEMENT_TOKEN']
 BASE_URL = f"https://api.contentful.com/spaces/{SPACE_ID}/environments/{ENVIRONMENT}"
 

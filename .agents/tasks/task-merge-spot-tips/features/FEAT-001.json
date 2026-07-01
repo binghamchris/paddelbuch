@@ -1,0 +1,28 @@
+{
+  "id": "FEAT-001",
+  "type": "chore",
+  "description": "Perform the git merge of origin/feat/spot-tips into the current spec/quality-and-tooling-hardening branch, creating a working branch, then resolve the 4 merge conflicts by combining both sides correctly, preserving all spot-tips functionality while keeping all quality-and-tooling-hardening improvements.",
+  "status": "completed",
+  "steps": [
+    "Step 1: Create a working branch from spec/quality-and-tooling-hardening: `git checkout -b merge/spot-tips-into-quality-hardening`",
+    "Step 2: Attempt the merge with `git merge origin/feat/spot-tips --no-commit` to stage the conflicts.",
+    "Step 3: Resolve _plugins/contentful_fetcher.rb conflict. The quality-hardening branch KEEPS the delta-merge/batch-fetch system (BatchFetcher include, perform_delta_merge, build_entry_id_index, etc.). The spot-tips branch only adds the 'spotTipType' entry to CONTENT_TYPES. Resolution: Keep the full quality-hardening version of the file and add the spotTipType line to CONTENT_TYPES hash between 'dataLicenseType' and 'staticPage'.",
+    "Step 4: Resolve _plugins/precompute_generator.rb conflict. The quality-hardening branch KEEPS the craft_type_meta and spot_type_meta icon/colorClass metadata (with the Merge icon and colorClass metadata into each spot type option loops). The spot-tips branch adds the spotTipType dimension. Resolution: Keep the full quality-hardening version but ADD the spot tip type dimension logic: (a) add tip_types query and tip_type_options array, (b) add the '__no_tips__' option, (c) add spotTipType dimension config to dimensionConfigs array, (d) add spot_tip_types_for_locale pre-computation.",
+    "Step 5: Resolve assets/js/layer-control.js conflict. The quality-hardening branch KEEPS: isFiniteCoordinate, firstDefined, warnIfOutsideBounds helpers; bindMarkerRecenter function; escaped-title-only popup fallback via PaddelbuchHtmlUtils.escapeHtml; Tinylytics beacon dispatch. The spot-tips branch ADDS: createCompositeIcon function, tipSlugs metadata, composite icon logic. Resolution: Produce a merged version that keeps ALL quality-hardening patterns AND adds the spot-tips functionality (createCompositeIcon, tipSlugs in metadata, composite icon for spots with tips) uprated to use isFiniteCoordinate/firstDefined/warnIfOutsideBounds in the addSpotMarker function, use escaped-title-only popup pattern for graceful degradation, include bindMarkerRecenter and Tinylytics beacon on spot markers, and expose createCompositeIcon globally. Also remove any console.log statements (quality-hardening best practice). The localePrefix should be read from config.",
+    "Step 6: Resolve docs/testing.md conflict. The quality-hardening branch has the full list including delta_sync_properties_spec.rb, dashboard tests, statistics tests, ascii-compliance, and 6 custom-build-image files. The spot-tips branch has the spot-tip test entries but removes dashboard and statistics tests. Resolution: Keep the quality-hardening version of the file and ADD the spot-tip-specific test file entries: spot_tip_type_mapper_spec.rb in spec/plugins/, the 4 spot-tip property tests in _tests/property/, and the annotation updates to api_generator_spec.rb, collection_precompute_spec.rb, and precompute_generator_spec.rb.",
+    "Step 7: After resolving all 4 conflicts, stage all resolved files with `git add` and complete the merge commit."
+  ],
+  "acceptance_criteria": [
+    "A new branch merge/spot-tips-into-quality-hardening exists with the merge commit",
+    "_plugins/contentful_fetcher.rb contains 'spotTipType' in CONTENT_TYPES AND retains BatchFetcher include, perform_delta_merge, build_entry_id_index, check_for_changes with 4 args",
+    "_plugins/precompute_generator.rb contains spotTipType dimension config AND retains craft_type_meta and spot_type_meta with icon/colorClass metadata",
+    "assets/js/layer-control.js contains createCompositeIcon AND isFiniteCoordinate AND firstDefined AND warnIfOutsideBounds AND bindMarkerRecenter AND Tinylytics beacon dispatch AND no console.log statements (except console.warn)",
+    "docs/testing.md contains both the quality-hardening test entries (delta_sync, dashboard, statistics, ascii-compliance) AND spot-tip test entries (spot_tip_type_mapper_spec, spot-tip property tests)"
+  ],
+  "verification": [
+    "Run `bundle exec rspec` and confirm all tests pass",
+    "Run `unset NODE_OPTIONS && npx jest --no-globalSetup` and confirm all tests pass"
+  ],
+  "blocked_reason": null,
+  "findings": "1. The contentful_fetcher_spec.rb test expected flatten_entry to be called with 2 args (entry, mapper) but we now pass 3 (entry, mapper, content_type). Updated the test. 2. Three pre-existing test failures unrelated to merge: scss-compile-parity.test.js (SCSS compilation issue), copy-vendor-assets.test.js (network timeout downloading Google Fonts - environment constraint), and one more SCSS-related test. All 904 Ruby tests pass. All spot-tip-related Jest tests pass (20 tests across 4 suites). Layer-control and filter-engine tests pass (20 tests across 7 suites)."
+}

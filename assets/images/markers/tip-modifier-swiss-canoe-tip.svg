@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Swiss Canoe Tip glyph (cross) for map marker beads.
+  Source: the cross mark lifted from the corner of assets/images/tips/tip-banner-swiss-canoe-tip.svg.
+  Glyph only on a transparent background - the bead/disc is drawn by the Composite_Icon.
+  viewBox frames the cross as approved in the reference mockup.
+  Colour matches the $swisscanoe-blue palette token (#1b1e43).
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="1.5 -0.5 23 23" role="img" aria-label="Swiss Canoe tip">
+  <path fill="#1b1e43" d="M9.3,21.1c2.2,0,4.5,0.2,6.8,0.4c0-2,0.2-5.2,0.2-7.2c2.3,0.2,4.9,0.6,7.2,1c0-1.8,0.1-4.5,0.3-6.3c-2.2-0.4-4.7-0.9-7.1-1.2c0.1-1.9,0.2-5.1,0.4-7c-2.1-0.3-4.6-0.5-6.8-0.6C10,2,9.8,5.2,9.7,7.2c-2.3-0.1-5.1,0-7.2,0.3c-0.1,2-0.2,4.4-0.3,6.5c2.3-0.2,4.9-0.3,7.3-0.2C9.4,15.8,9.3,19,9.3,21.1z"/>
+</svg>
