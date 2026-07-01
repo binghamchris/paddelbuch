@@ -154,9 +154,10 @@ The approved visual specification (exact geometry, sizing, and colours) lives in
 mockup [`marker-modifier-mockups.html`](../.kiro/specs/spot-tip-marker-redesign/reference/marker-modifier-mockups.html)
 (symbols `m-opt3b`, `m-opt3b-1tip`, `m-opt3b-rest`) — open it directly in a browser. It is the
 visual source of truth for the marker tip design; the geometry constants are held in
-`COMPOSITE_GEOMETRY` in `marker-styles.js` (the Bead radius, Tip_Glyph size and Halo stroke
-width are 2x the mockup values, with a matching viewBox top margin, so the beads and halo
-read clearly at the on-screen marker scale).
+`COMPOSITE_GEOMETRY` in `marker-styles.js`. Sizes are tuned for on-map legibility: the pin
+head is a circle at (26,26) r25, the Halo is a larger concentric open ring (r34) leaving a
+clear gap around the head, and the Beads sit on the halo's outer edge (~39 from the head
+centre) so they read clearly without covering the pin icon.
 
 The same Bead glyphs are surfaced in the Filter_Panel "Spot Tips" section: each tip option
 renders the glyph inside a **filter bead** (a white disc with a coloured border matching the
