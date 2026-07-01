@@ -75,6 +75,16 @@
         if (selected.has(types[i])) return true;
       }
       return false;
+    },
+    spotTipType: function(meta, selected) {
+      var tipSlugs = meta.spotTipType_slugs || [];
+      if (tipSlugs.length === 0) {
+        return selected.has('__no_tips__');
+      }
+      for (var i = 0; i < tipSlugs.length; i++) {
+        if (selected.has(tipSlugs[i])) return true;
+      }
+      return false;
     }
   };
 

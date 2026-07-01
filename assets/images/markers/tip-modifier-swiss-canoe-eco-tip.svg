@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Eco Tip glyph (leaf) for map marker beads.
+  Source: the visible Layer-1 leaf path of assets/images/tips/tip-banner-swiss-canoe-eco-tip.svg
+  (the hidden, zero-opacity embedded raster layer from the banner is excluded).
+  Glyph only on a transparent background - the bead/disc is drawn by the Composite_Icon.
+  viewBox frames the leaf to ~80% of the box so it sits centred in each bead with a clear margin.
+  Colour matches the $green-1 palette token (#07753f).
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-98 -73 1180 1180" role="img" aria-label="Eco tip">
+  <path fill="#07753f" d="M117.624 958.056C132.095 895.76 172.291 688.323 283.517 523.968C398.677 353.798 611.244 212.617 719.752 151.931C667.896 197.448 456.113 329.506 336.033 548.179C247.622 709.182 196.709 929.678 191.672 966.147C278.396 956.25 352.014 936.523 425.303 901.591C620.828 808.399 671.879 672.304 686.361 625.667C727.759 492.353 717.702 342.433 779.913 217.468C815.047 146.892 880.896 93.7268 963.689 68.5875C803.562 86.165 637.34 74.1611 483.309 121.32C373.895 154.819 273.815 223.521 193.011 304.542C124.725 373.012 59.3607 496.479 43.0013 592.28C20.1476 726.111 38.8431 885.229 117.624 958.056Z"/>
+</svg>

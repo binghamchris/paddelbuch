@@ -20,7 +20,12 @@ RSpec.describe Jekyll::TileGenerator, 'spatial logic' do
   GRID_ROWS = ((NORTH - SOUTH) / TILE_LAT).ceil # 8
 
   before do
-    # Set instance variables needed by spatial methods
+    # Set instance variables needed by spatial methods. This mirrors
+    # TileGenerator#generate, which resolves these from site config (map.bounds /
+    # map.tile_size) before the spatial methods run; the values below match the
+    # _config.yml defaults.
+    generator.instance_variable_set(:@bounds, { north: NORTH, south: SOUTH, east: EAST, west: WEST })
+    generator.instance_variable_set(:@tile_size, { lat: TILE_LAT, lon: TILE_LON })
     generator.instance_variable_set(:@grid_cols, GRID_COLS)
     generator.instance_variable_set(:@grid_rows, GRID_ROWS)
   end

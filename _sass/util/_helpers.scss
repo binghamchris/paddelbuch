@@ -1,3 +1,5 @@
+@use "../settings/settings" as *;
+
 .visually-hidden {
   overflow: hidden;
   position: absolute;

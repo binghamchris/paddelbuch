@@ -1,6 +1,6 @@
 ---
 inclusion: auto
-description: Describes the ptechnology stack, dependencies, pipeline, and key related information for the paddelbuch project.
+description: Describes the ptechnology stack, dependencies, pipeline, and key related information for the paddelbuch project only. DO NOT use for other projects in the same workspace.
 ---
 
 # Tech Stack & Build System
