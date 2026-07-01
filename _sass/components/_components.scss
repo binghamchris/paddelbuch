@@ -1,8 +1,10 @@
-@import "container";
-@import "dashboard-legend";
-@import "dashboard-switcher";
-@import "filter-panel";
-@import "header";
-@import "map";
-@import "statistics-dashboard";
-@import "waterway-list";
+// Components index: forwards each component partial so the entry point can pull
+// them all in with a single `@use "components/components" as *`.
+@forward "container";
+@forward "dashboard-legend";
+@forward "dashboard-switcher";
+@forward "filter-panel";
+@forward "header";
+@forward "map";
+@forward "statistics-dashboard";
+@forward "waterway-list";

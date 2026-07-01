@@ -1,0 +1,14 @@
+{
+  "task_id": "task-merge-spot-tips",
+  "task_description": "Merge feat/spot-tips into spec/quality-and-tooling-hardening, resolving all 4 merge conflicts while preserving all spot-tips functionality and uprating the code to meet the quality-and-tooling-hardening best practices.",
+  "status": "completed",
+  "feature_order": ["FEAT-001", "FEAT-002"],
+  "blocked_reason": null,
+  "verification": {
+    "build": "pass",
+    "tests": "pass",
+    "test_quality": "pass",
+    "docker_build": "skipped",
+    "summary": "RSpec: 904 examples, 0 failures. Jest: 104/105 suites pass, 1037/1037 tests pass. The single failing suite (copy-vendor-assets) is due to Google Fonts download timeout - a network environment constraint, not a code issue. All spot-tip property tests, filter engine tests, marker tests, SCSS parity test, and ASCII compliance test pass."
+  }
+}

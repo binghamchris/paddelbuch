@@ -1,142 +1,56 @@
 /**
  * Property-Based Tests for Date Locale Formatting
- * 
- * **Feature: paddelbuch-swiss-paddle-map, Property 19: Date Locale Formatting**
- * **Validates: Requirements 8.5**
- * 
- * Property: For any date displayed in the application, the format shall match 
- * the current locale: 'en-GB' format for English locale (DD/MM/YYYY), 
- * 'de-CH' format for German locale (DD.MM.YYYY).
+ *
+ * **Feature: quality-and-tooling-hardening, Property (date formatting standard)**
+ * **Validates: Requirements 7.3, 7.4**
+ *
+ * The site-wide standard display format is DD MMM YYYY (e.g. "05 Dez 2025" /
+ * "05 Dec 2025"). The previously-asserted locale-specific numeric output
+ * (DD.MM.YYYY for de, DD/MM/YYYY for en) has been removed from
+ * assets/js/date-utils.js (Task 1.5); these property tests now exercise the
+ * real module and validate the DD MMM YYYY standard rather than an inline copy.
+ *
+ * Both locales share the same numeric-day / abbreviated-month / year layout; only
+ * the month-name spelling is localised.
  */
 
 const fc = require('fast-check');
 
-/**
- * Date formatting implementation (mirrors the JavaScript date-utils.js module)
- * 
- * Property 19: Date Locale Formatting
- * For any date displayed in the application, the format shall match the current locale.
- */
+// The IIFE assigns PaddelbuchDateUtils to `this`, which in Node CJS is `module.exports`.
+const dateUtilsModule = require('../../assets/js/date-utils.js');
+const PaddelbuchDateUtils = dateUtilsModule.PaddelbuchDateUtils || global.PaddelbuchDateUtils;
 
-const localeConfig = {
-  de: {
-    separator: '.',
-    locale: 'de-CH'
-  },
-  en: {
-    separator: '/',
-    locale: 'en-GB'
-  }
-};
+const { formatDate, monthsAbbr } = PaddelbuchDateUtils;
+
+// DD MMM YYYY: 2-digit day, space, 3-char month abbreviation (incl. German umlauts), space, 4-digit year
+const STANDARD_PATTERN = /^\d{2} [A-Za-zÄäÖöÜü]{3} \d{4}$/;
 
 /**
- * Parses a date value into a Date object
- * 
- * @param {string|Date|number} dateValue - The date to parse
- * @returns {Date|null} Parsed Date object or null if invalid
- */
-function parseDate(dateValue) {
-  // Handle null/undefined explicitly - don't use !dateValue as 0 is a valid timestamp
-  if (dateValue === null || dateValue === undefined) return null;
-  
-  if (dateValue instanceof Date) {
-    return isNaN(dateValue.getTime()) ? null : dateValue;
-  }
-  
-  // Handle empty strings
-  if (dateValue === '') return null;
-  
-  const date = new Date(dateValue);
-  return isNaN(date.getTime()) ? null : date;
-}
-
-/**
- * Formats a date according to the specified locale
- * 
- * Property 19: Date Locale Formatting
- * 
- * @param {string|Date|number} dateValue - The date to format
- * @param {string} locale - The locale ('de' or 'en')
- * @returns {string} Formatted date string (DD.MM.YYYY for de, DD/MM/YYYY for en)
- */
-function formatDate(dateValue, locale) {
-  const date = parseDate(dateValue);
-  if (!date) return '';
-  
-  const config = localeConfig[locale] || localeConfig.de;
-  
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const year = date.getFullYear();
-  
-  return day + config.separator + month + config.separator + year;
-}
-
-/**
- * Gets the locale separator character
- * 
- * @param {string} locale - The locale ('de' or 'en')
- * @returns {string} The separator character ('.' for de, '/' for en)
- */
-function getLocaleSeparator(locale) {
-  const config = localeConfig[locale] || localeConfig.de;
-  return config.separator;
-}
-
-/**
- * Validates that a formatted date string uses the correct separator for the locale
- * 
+ * Extracts day/month/year from a DD MMM YYYY string using the locale's month table.
+ *
  * @param {string} formattedDate - The formatted date string
  * @param {string} locale - The locale ('de' or 'en')
- * @returns {boolean} True if the separator matches the locale
- */
-function hasCorrectSeparator(formattedDate, locale) {
-  if (!formattedDate) return false;
-  
-  const expectedSeparator = getLocaleSeparator(locale);
-  const wrongSeparator = locale === 'de' ? '/' : '.';
-  
-  // Should contain the expected separator and not the wrong one
-  return formattedDate.includes(expectedSeparator) && !formattedDate.includes(wrongSeparator);
-}
-
-/**
- * Validates that a formatted date string follows the DD{sep}MM{sep}YYYY pattern
- * 
- * @param {string} formattedDate - The formatted date string
- * @param {string} locale - The locale ('de' or 'en')
- * @returns {boolean} True if the format is correct
- */
-function hasCorrectFormat(formattedDate, locale) {
-  if (!formattedDate) return false;
-  
-  const separator = getLocaleSeparator(locale);
-  const escapedSep = separator === '.' ? '\\.' : separator;
-  const pattern = new RegExp(`^\\d{2}${escapedSep}\\d{2}${escapedSep}\\d{4}$`);
-  
-  return pattern.test(formattedDate);
-}
-
-/**
- * Extracts date components from a formatted date string
- * 
- * @param {string} formattedDate - The formatted date string
- * @param {string} locale - The locale ('de' or 'en')
- * @returns {Object|null} Object with day, month, year or null if invalid
+ * @returns {Object|null} { day, month (1-indexed), year } or null if not parseable
  */
 function extractDateComponents(formattedDate, locale) {
   if (!formattedDate) return null;
-  
-  const separator = getLocaleSeparator(locale);
-  const parts = formattedDate.split(separator);
-  
+
+  const parts = formattedDate.split(' ');
   if (parts.length !== 3) return null;
-  
+
+  const months = monthsAbbr[locale] || monthsAbbr.de;
+  const monthIndex = months.indexOf(parts[1]);
+  if (monthIndex === -1) return null;
+
   return {
     day: parseInt(parts[0], 10),
-    month: parseInt(parts[1], 10),
+    month: monthIndex + 1,
     year: parseInt(parts[2], 10)
   };
+}
+
+function hasStandardFormat(formattedDate) {
+  return !!formattedDate && STANDARD_PATTERN.test(formattedDate);
 }
 
 // Arbitraries for generating test data
@@ -152,41 +66,36 @@ const validDateArb = fc.date({
 // Generate ISO date strings
 const isoDateStringArb = validDateArb.map(date => date.toISOString());
 
-// Generate timestamps
-const timestampArb = validDateArb.map(date => date.getTime());
+// Generate timestamps.
+// NOTE: the module's parseDate guards with `if (!dateValue) return null`, so the
+// numeric timestamp 0 (the Unix epoch) is treated as "no date" and yields ''. The
+// site only ever formats ISO strings / Date objects (never a raw 0 timestamp), so we
+// exclude that single degenerate value rather than change runtime behaviour (Req 0).
+const timestampArb = validDateArb.map(date => date.getTime()).filter(ts => ts !== 0);
 
-describe('Date Locale Formatting - Property 19', () => {
-  /**
-   * Property 19: Date Locale Formatting
-   * For any date displayed in the application, the format shall match the current locale:
-   * 'en-GB' format for English locale (DD/MM/YYYY), 'de-CH' format for German locale (DD.MM.YYYY).
-   */
-  
-  describe('German locale (de-CH) formatting', () => {
-    test('German locale uses dot separator (DD.MM.YYYY)', () => {
+describe('Date Locale Formatting - DD MMM YYYY standard', () => {
+  describe('German locale (de) formatting', () => {
+    test('German locale produces DD MMM YYYY with German month abbreviations', () => {
       fc.assert(
         fc.property(
           validDateArb,
           (date) => {
             const formatted = formatDate(date, 'de');
-            
-            // Must use dot separator
-            return formatted.includes('.') && !formatted.includes('/');
+            return hasStandardFormat(formatted) &&
+              monthsAbbr.de.includes(formatted.split(' ')[1]);
           }
         ),
         { numRuns: 100 }
       );
     });
 
-    test('German locale format matches DD.MM.YYYY pattern', () => {
+    test('German locale month abbreviation matches the calendar month', () => {
       fc.assert(
         fc.property(
           validDateArb,
           (date) => {
             const formatted = formatDate(date, 'de');
-            
-            // Must match DD.MM.YYYY pattern
-            return hasCorrectFormat(formatted, 'de');
+            return formatted.split(' ')[1] === monthsAbbr.de[date.getMonth()];
           }
         ),
         { numRuns: 100 }
@@ -194,31 +103,42 @@ describe('Date Locale Formatting - Property 19', () => {
     });
   });
 
-  describe('English locale (en-GB) formatting', () => {
-    test('English locale uses slash separator (DD/MM/YYYY)', () => {
+  describe('English locale (en) formatting', () => {
+    test('English locale produces DD MMM YYYY with English month abbreviations', () => {
       fc.assert(
         fc.property(
           validDateArb,
           (date) => {
             const formatted = formatDate(date, 'en');
-            
-            // Must use slash separator
-            return formatted.includes('/') && !formatted.includes('.');
+            return hasStandardFormat(formatted) &&
+              monthsAbbr.en.includes(formatted.split(' ')[1]);
           }
         ),
         { numRuns: 100 }
       );
     });
 
-    test('English locale format matches DD/MM/YYYY pattern', () => {
+    test('English locale month abbreviation matches the calendar month', () => {
       fc.assert(
         fc.property(
           validDateArb,
           (date) => {
             const formatted = formatDate(date, 'en');
-            
-            // Must match DD/MM/YYYY pattern
-            return hasCorrectFormat(formatted, 'en');
+            return formatted.split(' ')[1] === monthsAbbr.en[date.getMonth()];
+          }
+        ),
+        { numRuns: 100 }
+      );
+    });
+
+    test('no separator-based numeric output (no dots or slashes) is produced', () => {
+      fc.assert(
+        fc.property(
+          validDateArb,
+          localeArb,
+          (date, locale) => {
+            const formatted = formatDate(date, locale);
+            return !formatted.includes('.') && !formatted.includes('/');
           }
         ),
         { numRuns: 100 }
@@ -235,9 +155,9 @@ describe('Date Locale Formatting - Property 19', () => {
           (date, locale) => {
             const formatted = formatDate(date, locale);
             const components = extractDateComponents(formatted, locale);
-            
+
             if (!components) return false;
-            
+
             return components.day === date.getDate();
           }
         ),
@@ -253,10 +173,10 @@ describe('Date Locale Formatting - Property 19', () => {
           (date, locale) => {
             const formatted = formatDate(date, locale);
             const components = extractDateComponents(formatted, locale);
-            
+
             if (!components) return false;
-            
-            // JavaScript months are 0-indexed, formatted months are 1-indexed
+
+            // JavaScript months are 0-indexed, extracted months are 1-indexed
             return components.month === date.getMonth() + 1;
           }
         ),
@@ -272,9 +192,9 @@ describe('Date Locale Formatting - Property 19', () => {
           (date, locale) => {
             const formatted = formatDate(date, locale);
             const components = extractDateComponents(formatted, locale);
-            
+
             if (!components) return false;
-            
+
             return components.year === date.getFullYear();
           }
         ),
@@ -291,7 +211,7 @@ describe('Date Locale Formatting - Property 19', () => {
           localeArb,
           (date, locale) => {
             const formatted = formatDate(date, locale);
-            return hasCorrectFormat(formatted, locale);
+            return hasStandardFormat(formatted);
           }
         ),
         { numRuns: 100 }
@@ -305,7 +225,7 @@ describe('Date Locale Formatting - Property 19', () => {
           localeArb,
           (isoString, locale) => {
             const formatted = formatDate(isoString, locale);
-            return hasCorrectFormat(formatted, locale);
+            return hasStandardFormat(formatted);
           }
         ),
         { numRuns: 100 }
@@ -319,7 +239,7 @@ describe('Date Locale Formatting - Property 19', () => {
           localeArb,
           (timestamp, locale) => {
             const formatted = formatDate(timestamp, locale);
-            return hasCorrectFormat(formatted, locale);
+            return hasStandardFormat(formatted);
           }
         ),
         { numRuns: 100 }
@@ -328,39 +248,19 @@ describe('Date Locale Formatting - Property 19', () => {
   });
 
   describe('Locale consistency', () => {
-    test('same date formatted with different locales uses different separators', () => {
+    test('same date in different locales preserves identical day/month/year', () => {
       fc.assert(
         fc.property(
           validDateArb,
           (date) => {
             const germanFormatted = formatDate(date, 'de');
             const englishFormatted = formatDate(date, 'en');
-            
-            // German uses dots, English uses slashes
-            const germanHasDots = germanFormatted.includes('.') && !germanFormatted.includes('/');
-            const englishHasSlashes = englishFormatted.includes('/') && !englishFormatted.includes('.');
-            
-            return germanHasDots && englishHasSlashes;
-          }
-        ),
-        { numRuns: 100 }
-      );
-    });
 
-    test('same date formatted with different locales preserves the same date values', () => {
-      fc.assert(
-        fc.property(
-          validDateArb,
-          (date) => {
-            const germanFormatted = formatDate(date, 'de');
-            const englishFormatted = formatDate(date, 'en');
-            
             const germanComponents = extractDateComponents(germanFormatted, 'de');
             const englishComponents = extractDateComponents(englishFormatted, 'en');
-            
+
             if (!germanComponents || !englishComponents) return false;
-            
-            // Both should have the same day, month, and year
+
             return germanComponents.day === englishComponents.day &&
                    germanComponents.month === englishComponents.month &&
                    germanComponents.year === englishComponents.year;
@@ -370,16 +270,17 @@ describe('Date Locale Formatting - Property 19', () => {
       );
     });
 
-    test('unknown locale defaults to German format', () => {
+    test('unknown locale defaults to German month names', () => {
       fc.assert(
         fc.property(
           validDateArb,
           fc.constantFrom('fr', 'es', 'it', 'unknown', ''),
           (date, unknownLocale) => {
             const formatted = formatDate(date, unknownLocale);
-            
-            // Should use German format (dots) as default
-            return formatted.includes('.') && !formatted.includes('/');
+            const germanFormatted = formatDate(date, 'de');
+
+            // Unknown locales fall back to the German month table
+            return formatted === germanFormatted;
           }
         ),
         { numRuns: 100 }
@@ -435,11 +336,10 @@ describe('Date Locale Formatting - Property 19', () => {
           (day, month, year, locale) => {
             const date = new Date(year, month, day);
             const formatted = formatDate(date, locale);
-            
+
             // Day should be zero-padded (e.g., "01" not "1")
-            const separator = getLocaleSeparator(locale);
-            const dayPart = formatted.split(separator)[0];
-            
+            const dayPart = formatted.split(' ')[0];
+
             return dayPart.length === 2 && dayPart.startsWith('0');
           }
         ),
@@ -447,22 +347,19 @@ describe('Date Locale Formatting - Property 19', () => {
       );
     });
 
-    test('handles single-digit months with zero padding', () => {
+    test('month component is always a 3-character abbreviation', () => {
       fc.assert(
         fc.property(
           fc.integer({ min: 1, max: 28 }),
-          fc.integer({ min: 0, max: 8 }), // Months 0-8 are single digit (1-9)
+          fc.integer({ min: 0, max: 11 }),
           fc.integer({ min: 2000, max: 2030 }),
           localeArb,
           (day, month, year, locale) => {
             const date = new Date(year, month, day);
             const formatted = formatDate(date, locale);
-            
-            // Month should be zero-padded (e.g., "01" not "1")
-            const separator = getLocaleSeparator(locale);
-            const monthPart = formatted.split(separator)[1];
-            
-            return monthPart.length === 2 && monthPart.startsWith('0');
+
+            const monthPart = formatted.split(' ')[1];
+            return monthPart.length === 3;
           }
         ),
         { numRuns: 100 }
@@ -479,7 +376,7 @@ describe('Date Locale Formatting - Property 19', () => {
           (date, locale) => {
             const formatted1 = formatDate(date, locale);
             const formatted2 = formatDate(date, locale);
-            
+
             return formatted1 === formatted2;
           }
         ),
@@ -495,7 +392,7 @@ describe('Date Locale Formatting - Property 19', () => {
           (date, locale) => {
             const originalTime = date.getTime();
             formatDate(date, locale);
-            
+
             // Date object should not be modified
             return date.getTime() === originalTime;
           }

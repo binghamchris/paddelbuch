@@ -140,8 +140,6 @@
       var zoom = map.getZoom();
       updateLayerVisibility(map, zoom, layerGroups);
     });
-
-    console.log('ZoomLayerManager initialized with threshold:', DETAIL_LAYER_ZOOM_THRESHOLD);
   }
 
   /**

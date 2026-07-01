@@ -142,6 +142,7 @@ api:
   paddle_craft_types: "Paddle Craft Types"
   protected_area_types: "Protected Area Types"
   spot_types: "Spot Types"
+  spot_tip_types: "Spot Tip Types"
   paddling_environment_types: "Paddling Environment Types"
 
 # Map accessibility labels
@@ -150,6 +151,8 @@ map:
   waterway_map_label: "Map showing this waterway"
   obstacle_map_label: "Map showing this obstacle"
   notice_map_label: "Map showing this event notice"
+  spot_with_tips_label: "%{spot}, tips: %{tips}"
+  spot_with_tips_generic: "Spot with tips"
 
 # Error pages
 errors:

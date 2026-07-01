@@ -244,4 +244,10 @@
     getLabels: getLabels
   };
 
+  // Dual_Export: expose the same public API to Node/Jest via module.exports so tests
+  // can require() the real module, while the browser continues to use the global above.
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = global.PaddelbuchSpotPopup;
+  }
+
 })(typeof window !== 'undefined' ? window : this);

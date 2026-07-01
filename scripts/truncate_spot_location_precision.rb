@@ -24,7 +24,7 @@ require 'uri'
 Dotenv.load('.env.development')
 
 SPACE_ID    = ENV.fetch('CONTENTFUL_SPACE_ID')
-ENVIRONMENT = ENV.fetch('CONTENTFUL_ENVIRONMENT', 'dev')
+ENVIRONMENT = ENV.fetch('CONTENTFUL_ENVIRONMENT', 'master')
 CMA_TOKEN   = ENV.fetch('CONTENTFUL_MANAGEMENT_TOKEN')
 DRY_RUN     = ARGV.include?('--dry-run')
 SLUG_INDEX  = ARGV.index('--slug')

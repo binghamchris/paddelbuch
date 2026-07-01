@@ -1,3 +1,5 @@
+@use "../settings/settings" as *;
+
 header {
   position: relative;
   z-index: 1050;
@@ -7,7 +9,16 @@ header {
   padding-right: 10px;
   padding-left: 0.2em;
 
-  #site-navbar > .container-fluid {
+  // Bootstrap's `.container-{sm..xxl} { @extend .container-fluid }` aliases are
+  // listed explicitly here: under @use they no longer cross module boundaries
+  // into this first-party rule, so they are reproduced to preserve the previous
+  // compiled output (Requirement 0).
+  #site-navbar > .container-fluid,
+  #site-navbar > .container-sm,
+  #site-navbar > .container-md,
+  #site-navbar > .container-lg,
+  #site-navbar > .container-xl,
+  #site-navbar > .container-xxl {
     padding-right: 0;
     padding-left: 0;
   }

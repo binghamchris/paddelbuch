@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'json'
+require 'yaml'
 
 # Jekyll plugin to pre-compute site-level data that is identical across all
 # pages within a locale: header navigation arrays, map config JSON strings,
@@ -89,6 +90,32 @@ module Jekyll
         opt[:iconOnly] = meta[:iconOnly]
       end
 
+      # Spot tip type dimension options (dynamic from data)
+      tip_types = (site.data.dig('types', 'spot_tip_types') || [])
+        .select { |t| t['locale'] == locale }
+      tip_type_options = tip_types.map { |tt| { slug: tt['slug'], label: tt[name_key] || tt['name_de'] } }
+
+      # Spot tip type icon metadata: the same colour-coded glyph shown inside the
+      # map marker Beads, rendered as a Bead (white disc, coloured border) in the
+      # filter UI. beadClass is the CSS modifier suffix for .filter-icon-bead--<beadClass>.
+      # Keep the glyph paths in sync with TIP_MODIFIER_CONFIG in marker-styles.js.
+      tip_type_meta = {
+        'swiss-canoe-eco-tip' => { icon: '/assets/images/markers/tip-modifier-swiss-canoe-eco-tip.svg', beadClass: 'swiss-canoe-eco-tip' },
+        'swiss-canoe-tip'     => { icon: '/assets/images/markers/tip-modifier-swiss-canoe-tip.svg',     beadClass: 'swiss-canoe-tip' }
+      }
+
+      tip_type_options.each do |opt|
+        meta = tip_type_meta[opt[:slug]]
+        next unless meta
+
+        opt[:icon] = meta[:icon]
+        opt[:beadClass] = meta[:beadClass]
+      end
+
+      # Add "no tips" option (no icon -- represents the absence of tips)
+      no_tips_label = locale == 'en' ? 'Spots without tips' : 'Einstiegsorte ohne Tipps'
+      tip_type_options << { slug: '__no_tips__', label: no_tips_label }
+
       # Spot type dimension options (hardcoded slugs, translated labels)
       # icon: relative path to the light SVG icon in assets/images/icons/
       # colorClass: CSS modifier suffix for .filter-icon-circle--<colorClass>
@@ -145,6 +172,11 @@ module Jekyll
             key: 'paddleCraftType',
             label: locale == 'en' ? 'Paddle Craft Type' : 'Paddelboottyp',
             options: craft_options
+          },
+          {
+            key: 'spotTipType',
+            label: locale == 'en' ? 'Spot Tips' : 'Tipps',
+            options: tip_type_options
           }
         ],
         layerLabels: layer_labels
@@ -152,19 +184,51 @@ module Jekyll
 
       site.data['map_data_config_json'] = JSON.generate(map_data_config)
 
+      # Pre-compute spot tip types for template use (avoids per-page Liquid lookups)
+      site.data['spot_tip_types_for_locale'] = tip_types.map do |tt|
+        { 'slug' => tt['slug'], 'name' => tt[name_key] || tt['name_de'] }
+      end
+
       # Layer control config
       pa_types = (site.data.dig('types', 'protected_area_types') || [])
         .select { |t| t['locale'] == locale }
       pa_names = {}
       pa_types.each { |t| pa_names[t['slug']] = t[name_key] || t['name_de'] }
 
+      # Localised Spot_Tip_Type names for the composite marker accessible label
+      # (Requirement 5.4 -- sourced from the tip type data, not hard-coded in JS).
+      tip_names = {}
+      tip_types.each { |tt| tip_names[tt['slug']] = tt[name_key] || tt['name_de'] }
+
+      # Accessible-label templates, resolved from the i18n single source of truth
+      # (_i18n/<locale>.yml, keys map.spot_with_tips_label / map.spot_with_tips_generic).
+      map_i18n = load_map_i18n(site, locale)
+
       layer_control_config = {
         currentLocale: locale,
         localePrefix: locale_prefix,
-        protectedAreaTypeNames: pa_names
+        protectedAreaTypeNames: pa_names,
+        spotTipTypeNames: tip_names,
+        spotWithTipsLabel: map_i18n['spot_with_tips_label'],
+        spotWithTipsGeneric: map_i18n['spot_with_tips_generic']
       }
 
       site.data['layer_control_config_json'] = JSON.generate(layer_control_config)
+    end
+
+    # Reads the `map` section of _i18n/<locale>.yml so build-time config can carry
+    # localised accessible-label templates to the client. Returns {} on any failure
+    # so a missing/malformed file degrades gracefully.
+    def load_map_i18n(site, locale)
+      path = File.join(site.source, '_i18n', "#{locale}.yml")
+      return {} unless File.readable?(path)
+
+      data = YAML.safe_load(File.read(path)) || {}
+      map_section = data['map']
+      map_section.is_a?(Hash) ? map_section : {}
+    rescue StandardError => e
+      Jekyll.logger.warn 'PrecomputeGenerator:', "Could not load _i18n/#{locale}.yml map labels: #{e.message}"
+      {}
     end
   end
 end

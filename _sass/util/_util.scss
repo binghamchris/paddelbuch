@@ -1,1 +1,3 @@
-@import "helpers";
+// Util index: forwards utility partials so the entry point can pull them in
+// with a single `@use "util/util" as *`.
+@forward "helpers";

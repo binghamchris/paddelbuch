@@ -1,4 +1,6 @@
-@import "colors";
-@import "fonts";
-@import "dimensions";
-@import "paddelbuch_colours";
+// Settings index: forwards all settings members (colours, fonts, dimensions)
+// so consumers can pull them in with a single `@use "settings/settings" as *`.
+@forward "colors";
+@forward "fonts";
+@forward "dimensions";
+@forward "paddelbuch_colours";

@@ -1,0 +1,7 @@
+// Bootstrap overrides: rules that must be emitted immediately after the
+// Bootstrap stylesheet so they win the cascade against Bootstrap defaults.
+
+// Override: remove border-radius from all buttons
+.btn {
+  border-radius: 0;
+}

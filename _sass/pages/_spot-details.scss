@@ -1,3 +1,5 @@
+@use "../settings/settings" as *;
+
 .page-spot-details {
 
   main {
@@ -49,7 +51,7 @@
     padding-top: 0.7em;
     margin-bottom: 1em;
 
-    h1 {
+    h1, .h1 {
       margin-bottom: 0;
     }
   }
@@ -121,7 +123,7 @@
     }
 
     .rejection-reason {
-      h2 {
+      h2, .h2 {
         font-size: 1.2rem;
         color: $swisscanoe-blue;
         margin-bottom: 0.75rem;
@@ -132,6 +134,41 @@
         line-height: 1.6;
       }
     }
+  }
+
+  // Spot tip banners (Requirement 3)
+  .alert-spot-tip {
+    border-radius: 0;
+    margin-bottom: 0.75rem;
+
+    .spot-tip-icon {
+      margin-top: 0.15em;
+    }
+
+    .spot-tip-name {
+      font-weight: 500;
+    }
+
+    .spot-tip-description {
+      margin-top: 0.25rem;
+      font-size: 0.9em;
+
+      p:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  .alert-spot-tip-swiss-canoe-eco-tip {
+    background-color: rgba($green-1, 0.15);
+    border-color: $green-1;
+    color: darken($green-1, 10%);
+  }
+
+  .alert-spot-tip-swiss-canoe-tip {
+    background-color: rgba($swisscanoe-blue, 0.15);
+    border-color: $swisscanoe-blue;
+    color: darken($swisscanoe-blue, 10%);
   }
 
   // Description text (between title and table, matching Gatsby layout)

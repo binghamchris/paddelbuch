@@ -21,9 +21,9 @@ describe('SCSS component structure', function () {
     expect(fs.existsSync(SCSS_PATH)).toBe(true);
   });
 
-  test('_components.scss imports statistics-dashboard', function () {
+  test('_components.scss forwards statistics-dashboard', function () {
     var content = fs.readFileSync(COMPONENTS_PATH, 'utf8');
-    expect(content).toContain('@import "statistics-dashboard"');
+    expect(content).toContain('@forward "statistics-dashboard"');
   });
 
   describe('required class definitions', function () {
