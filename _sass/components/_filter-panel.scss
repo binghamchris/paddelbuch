@@ -157,6 +157,33 @@
   display: block;
 }
 
+// White bead with a coloured border containing the tip glyph -- mirrors the
+// spot tip Beads drawn on the map markers (white disc, coloured stroke, coloured
+// glyph). Border colours match the tip palette tokens used by the markers.
+.filter-icon-bead {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.8em;
+  height: 1.8em;
+  border-radius: 50%;
+  padding: 0.2em;
+  margin-right: 0.4em;
+  vertical-align: middle;
+  flex-shrink: 0;
+  background-color: $white;
+  border: 1.5px solid $secondary-blue;
+
+  &--swiss-canoe-eco-tip { border-color: $green-1; }
+  &--swiss-canoe-tip     { border-color: $swisscanoe-blue; }
+}
+
+.filter-icon-bead-img {
+  width: 1.1em;
+  height: 1.1em;
+  display: block;
+}
+
 .filter-icon-standalone {
   display: inline-block;
   width: 1.8em;

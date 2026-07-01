@@ -95,7 +95,24 @@ module Jekyll
         .select { |t| t['locale'] == locale }
       tip_type_options = tip_types.map { |tt| { slug: tt['slug'], label: tt[name_key] || tt['name_de'] } }
 
-      # Add "no tips" option
+      # Spot tip type icon metadata: the same colour-coded glyph shown inside the
+      # map marker Beads, rendered as a Bead (white disc, coloured border) in the
+      # filter UI. beadClass is the CSS modifier suffix for .filter-icon-bead--<beadClass>.
+      # Keep the glyph paths in sync with TIP_MODIFIER_CONFIG in marker-styles.js.
+      tip_type_meta = {
+        'swiss-canoe-eco-tip' => { icon: '/assets/images/markers/tip-modifier-swiss-canoe-eco-tip.svg', beadClass: 'swiss-canoe-eco-tip' },
+        'swiss-canoe-tip'     => { icon: '/assets/images/markers/tip-modifier-swiss-canoe-tip.svg',     beadClass: 'swiss-canoe-tip' }
+      }
+
+      tip_type_options.each do |opt|
+        meta = tip_type_meta[opt[:slug]]
+        next unless meta
+
+        opt[:icon] = meta[:icon]
+        opt[:beadClass] = meta[:beadClass]
+      end
+
+      # Add "no tips" option (no icon -- represents the absence of tips)
       no_tips_label = locale == 'en' ? 'Spots without tips' : 'Einstiegsorte ohne Tipps'
       tip_type_options << { slug: '__no_tips__', label: no_tips_label }
 
