@@ -75,7 +75,6 @@
   }
 
   .craft-type-display-title {
-    text-align: center;
     color: $swisscanoe-blue;
     font-weight: 500;
     font-size: 1.1em;
@@ -92,7 +91,7 @@
     row-gap: 0.4em;
     justify-items: center;
     max-width: 24em;
-    margin: 1em auto 1.25em;
+    margin: 1em auto 1.75em;
   }
 
   .craft-type-entry {
@@ -113,16 +112,10 @@
     }
   }
 
-  // Keep a single-line name sitting directly above its icon (aligns to the
-  // bottom of the shared name row when the sibling name wraps to two lines).
-  .craft-type-entry-name {
-    align-self: end;
-  }
-
   // Greyed-out treatment for the unlinked craft type icon (Requirement 5.3)
   .craft-type-entry.is-unlinked .craft-icon {
     filter: grayscale(100%);
-    opacity: 0.4;
+    opacity: 0.2;
   }
 
   .craft-type-indicator {
