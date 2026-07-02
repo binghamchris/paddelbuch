@@ -306,7 +306,7 @@ RSpec.describe 'PrecomputeGenerator properties' do
           # Verify paddleCraftType dimension
           craft_dim = parsed['dimensionConfigs'][1]
           expect(craft_dim['key']).to eq('paddleCraftType')
-          expect(craft_dim['label']).to eq(data[:locale] == 'en' ? 'Paddle Craft Type' : 'Paddelboottyp')
+          expect(craft_dim['label']).to eq(data[:locale] == 'en' ? 'Accessible To' : 'Zugänglich für')
           expect(craft_dim['options']).to eq(expected_craft_options),
             "locale=#{data[:locale]}: craft options mismatch"
 

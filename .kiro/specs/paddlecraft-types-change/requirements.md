@@ -95,6 +95,7 @@ craft types, so that I can filter spots by the craft types the site now supports
 7. IF the corresponding New_Craft_Type name for the build locale is empty or absent in the Contentful
    paddle craft type data, THEN THE Dimension_Config_Generator SHALL set that filter option's label
    to the New_Craft_Type slug.
+8. THE Filter_Panel paddle craft type dimension SHALL display the localised section title "Accessible To" (English) / "Zugänglich für" (German).
 
 ### Requirement 2: Filter Behaviour Matches Existing Filters
 

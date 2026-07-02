@@ -505,6 +505,18 @@ For the `paddleCraftType` dimension, each option after this change:
 The `paddleCraftType` dimension's `options` array contains exactly these two entries, ordered
 `klappbar-und-aufblasbar` then `hardshell`.
 
+The `paddleCraftType` dimension's own section title (`label`) is localised per build locale:
+
+```ruby
+{ key: 'paddleCraftType',
+  label: locale == 'en' ? 'Accessible To' : 'Zugänglich für',
+  options: craft_options }
+```
+
+> **Note:** The paddle craft type filter dimension is titled "Accessible To" (EN) /
+> "Zugänglich für" (DE), localised per build locale via the inline `locale == 'en' ? ... : ...`
+> ternary in `precompute_map_config_json`.
+
 ### New precomputed display list (`site.data.craft_type_display_for_locale`)
 
 ```ruby

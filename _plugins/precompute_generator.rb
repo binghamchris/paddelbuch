@@ -183,7 +183,7 @@ module Jekyll
           },
           {
             key: 'paddleCraftType',
-            label: locale == 'en' ? 'Paddle Craft Type' : 'Paddelboottyp',
+            label: locale == 'en' ? 'Accessible To' : 'Zugänglich für',
             options: craft_options
           },
           {
