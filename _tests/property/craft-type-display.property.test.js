@@ -86,7 +86,7 @@ function buildDisplayList(rawNames) {
  *   <div class="craft-type-display">
  *     {% for ct in craft_types %}
  *       {% if linked_slugs contains ct.slug %} is-linked {% else %} is-unlinked {% endif %}
- *       name -> craft-icon -> tick(&#10003;)/cross(&#10007;) indicator
+ *       name -> craft-icon -> squared SVG check/cross indicator
  *     {% endfor %}
  *   </div>
  *
@@ -100,8 +100,8 @@ function renderCraftTypeDisplay(linkedSlugs, displayList) {
     const isLinked = linked.indexOf(ct.slug) !== -1;
     const stateClass = isLinked ? 'is-linked' : 'is-unlinked';
     const indicator = isLinked
-      ? '<span class="craft-type-indicator craft-type-indicator--linked" aria-hidden="true">&#10003;</span>'
-      : '<span class="craft-type-indicator craft-type-indicator--unlinked" aria-hidden="true">&#10007;</span>';
+      ? '<span class="craft-type-indicator craft-type-indicator--linked" aria-hidden="true"><svg class="craft-type-indicator-icon craft-type-indicator-icon--check" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter"><path d="M2 9 L6 13 L14 3" /></svg></span>'
+      : '<span class="craft-type-indicator craft-type-indicator--unlinked" aria-hidden="true"><svg class="craft-type-indicator-icon craft-type-indicator-icon--cross" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter"><path d="M3 3 L13 13 M13 3 L3 13" /></svg></span>';
     return '<div class="craft-type-entry ' + stateClass + '" data-slug="' + ct.slug + '">' +
       '<span class="craft-type-entry-name">' + escapeHtml(ct.name) + '</span>' +
       renderCraftIcon(ct.slug) +
@@ -130,8 +130,8 @@ function parseEntries(html) {
       slug: slug,
       isLinked: /\bis-linked\b/.test(classes),
       isUnlinked: /\bis-unlinked\b/.test(classes),
-      hasTick: inner.indexOf('&#10003;') !== -1,
-      hasCross: inner.indexOf('&#10007;') !== -1,
+      hasTick: inner.indexOf('craft-type-indicator-icon--check') !== -1,
+      hasCross: inner.indexOf('craft-type-indicator-icon--cross') !== -1,
       hasLinkedIndicator: inner.indexOf('craft-type-indicator--linked') !== -1,
       hasUnlinkedIndicator: inner.indexOf('craft-type-indicator--unlinked') !== -1,
       iconSrc: iconMatch ? iconMatch[1] : null,

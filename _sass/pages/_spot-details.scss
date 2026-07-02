@@ -75,25 +75,40 @@
   }
 
   .craft-type-display {
-    display: flex;
-    justify-content: center;
-    gap: 2em;
-    margin: 1em 0 1.25em;
+    // CSS grid + subgrid so the name / icon / indicator rows line up across both
+    // craft-type entries at all widths, even when one name wraps to two lines.
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: auto auto auto;   // name / icon / indicator
+    column-gap: 2em;
+    row-gap: 0.4em;
+    justify-items: center;
+    max-width: 24em;
+    margin: 1em auto 1.25em;
   }
 
   .craft-type-entry {
-    display: flex;
-    flex-direction: column;   // name (top) -> icon (middle) -> indicator (bottom)
-    align-items: center;
-    gap: 0.4em;
+    // Each entry spans the three shared subgrid rows, so both entries' name,
+    // icon and indicator rows stay vertically aligned regardless of name length.
+    display: grid;
+    grid-template-rows: subgrid;
+    grid-row: span 3;
+    row-gap: 0.4em;
+    justify-items: center;
+    align-content: start;
     text-align: center;
-    flex: 1 1 0;
     color: $swisscanoe-blue;
 
     .craft-icon {
       width: 100px;
       height: 50px;
     }
+  }
+
+  // Keep a single-line name sitting directly above its icon (aligns to the
+  // bottom of the shared name row when the sibling name wraps to two lines).
+  .craft-type-entry-name {
+    align-self: end;
   }
 
   // Greyed-out treatment for the unlinked craft type icon (Requirement 5.3)
@@ -103,9 +118,7 @@
   }
 
   .craft-type-indicator {
-    font-size: 1.4em;
     line-height: 1;
-    font-weight: 700;
 
     &--linked {
       color: $green-1;      // Requirement 5.2
@@ -114,6 +127,14 @@
     &--unlinked {
       color: $danger-red;   // Requirement 5.4
     }
+  }
+
+  // Squared SVG tick / cross indicators; size is em-based so they scale, and
+  // they inherit colour via currentColor from the --linked / --unlinked classes.
+  .craft-type-indicator-icon {
+    display: block;
+    width: 1.4em;
+    height: 1.4em;
   }
 
   .craft-icon {

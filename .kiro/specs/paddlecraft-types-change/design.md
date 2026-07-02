@@ -240,16 +240,35 @@ A new partial that renders exactly two vertical entries side by side (Requiremen
       <span class="craft-type-entry-name">{{ ct.name | escape }}</span>
       {% include craft-icon.html slug=ct.slug size=48 %}
       {% if is_linked %}
-        <span class="craft-type-indicator craft-type-indicator--linked" aria-hidden="true">&#10003;</span>
+        <span class="craft-type-indicator craft-type-indicator--linked" aria-hidden="true">
+          <svg class="craft-type-indicator-icon craft-type-indicator-icon--check" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter"><path d="M2 9 L6 13 L14 3" /></svg>
+        </span>
         <span class="visually-hidden">{% t labels.yes %}</span>
       {% else %}
-        <span class="craft-type-indicator craft-type-indicator--unlinked" aria-hidden="true">&#10007;</span>
+        <span class="craft-type-indicator craft-type-indicator--unlinked" aria-hidden="true">
+          <svg class="craft-type-indicator-icon craft-type-indicator-icon--cross" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter"><path d="M3 3 L13 13 M13 3 L3 13" /></svg>
+        </span>
         <span class="visually-hidden">{% t labels.no %}</span>
       {% endif %}
     </div>
   {% endfor %}
 </div>
 ```
+
+> **Indicator glyphs.** The linked/unlinked indicators use inline **squared SVG** shapes
+> (a check `M2 9 L6 13 L14 3` and a cross `M3 3 L13 13 M13 3 L3 13`) with
+> `stroke-linecap="square"` / `stroke-linejoin="miter"` rather than the curvy `&#10003;` /
+> `&#10007;` glyph characters, to match the site's squared design. They use
+> `fill="none"` and `stroke="currentColor"` so the existing `--linked` / `--unlinked`
+> colour classes still drive the green (`$green-1`) check and red (`$danger-red`) cross
+> (Requirements 5.2, 5.4). The name → icon → indicator order is unchanged (Requirement 5.6).
+
+> **Row alignment.** The display uses a **CSS grid with `subgrid`**: `.craft-type-display`
+> is a two-column, three-row grid (name / icon / indicator) and each `.craft-type-entry`
+> spans those three shared rows via `grid-template-rows: subgrid`. This keeps the name,
+> icon and indicator rows aligned across both craft types at all widths, even when the
+> longer `klappbar-und-aufblasbar` name wraps to two lines (the shared name row grows for
+> both entries, so both icons and both indicators stay level).
 
 Interface / contract:
 
@@ -286,24 +305,32 @@ Add `Craft_Type_Display` styles and remove the now-unused `.craft-type-list` /
 
 ```scss
 .craft-type-display {
-  display: flex;
-  justify-content: center;
-  gap: 2em;
-  margin: 1em 0 1.25em;
+  // grid + subgrid keeps the name / icon / indicator rows aligned across both
+  // entries at all widths, even when one name wraps to two lines.
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: auto auto auto;   // name / icon / indicator
+  column-gap: 2em;
+  row-gap: 0.4em;
+  justify-items: center;
+  max-width: 24em;
+  margin: 1em auto 1.25em;
 }
 
 .craft-type-entry {
-  display: flex;
-  flex-direction: column;   // name (top) -> icon (middle) -> indicator (bottom)
-  align-items: center;
-  gap: 0.4em;
+  display: grid;
+  grid-template-rows: subgrid;   // share the three rows above
+  grid-row: span 3;
+  row-gap: 0.4em;
+  justify-items: center;
+  align-content: start;
   text-align: center;
-  flex: 1 1 0;
   color: $swisscanoe-blue;
 
-  .craft-type-entry-name { font-weight: 500; }
-  .craft-icon { width: 48px; height: 48px; }
+  .craft-icon { width: 100px; height: 50px; }
 }
+
+.craft-type-entry-name { align-self: end; }   // single-line name sits above its icon
 
 .craft-type-entry.is-unlinked .craft-icon {
   filter: grayscale(100%);
@@ -311,13 +338,14 @@ Add `Craft_Type_Display` styles and remove the now-unused `.craft-type-list` /
 }
 
 .craft-type-indicator {
-  font-size: 1.4em;
   line-height: 1;
-  font-weight: 700;
 
-  &--linked   { color: $green-1; }     // Requirement 5.2
-  &--unlinked { color: $danger-red; }  // Requirement 5.4
+  &--linked   { color: $green-1; }     // Requirement 5.2 (via currentColor)
+  &--unlinked { color: $danger-red; }  // Requirement 5.4 (via currentColor)
 }
+
+// Squared SVG tick / cross; em-based so it scales, inherits colour via currentColor.
+.craft-type-indicator-icon { display: block; width: 1.4em; height: 1.4em; }
 ```
 
 ### 7. Contentful migration script (`scripts/add_paddle_craft_type_references.rb`, new)

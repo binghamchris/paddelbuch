@@ -48,8 +48,8 @@ function renderCraftTypeDisplay(linkedSlugs) {
     const isLinked = linked.indexOf(ct.slug) !== -1;
     const stateClass = isLinked ? 'is-linked' : 'is-unlinked';
     const indicator = isLinked
-      ? '<span class="craft-type-indicator craft-type-indicator--linked" aria-hidden="true">&#10003;</span>'
-      : '<span class="craft-type-indicator craft-type-indicator--unlinked" aria-hidden="true">&#10007;</span>';
+      ? '<span class="craft-type-indicator craft-type-indicator--linked" aria-hidden="true"><svg class="craft-type-indicator-icon craft-type-indicator-icon--check" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter"><path d="M2 9 L6 13 L14 3" /></svg></span>'
+      : '<span class="craft-type-indicator craft-type-indicator--unlinked" aria-hidden="true"><svg class="craft-type-indicator-icon craft-type-indicator-icon--cross" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter"><path d="M3 3 L13 13 M13 3 L3 13" /></svg></span>';
     return '<div class="craft-type-entry ' + stateClass + '">' +
       '<span class="craft-type-entry-name">' + ct.name + '</span>' +
       renderCraftIcon(ct.slug) +
