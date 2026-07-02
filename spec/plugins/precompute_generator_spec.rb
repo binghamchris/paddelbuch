@@ -233,10 +233,23 @@ RSpec.describe 'PrecomputeGenerator properties' do
           parsed = JSON.parse(site.data['map_data_config_json'])
           name_key = "name_#{data[:locale]}"
 
-          # Oracle: build expected structure
+          # Oracle: the generator emits exactly the two new fixed craft options,
+          # in order, each with a standalone icon and iconOnly flag, regardless of
+          # the random input rows. The label is the localised name looked up by
+          # slug among the locale-filtered rows, falling back to the slug when the
+          # name is nil/absent/blank (mirrors precompute_generator.rb).
           locale_craft_types = data[:craft_types].select { |t| t['locale'] == data[:locale] }
-          expected_craft_options = locale_craft_types.map do |ct|
-            { 'slug' => ct['slug'], 'label' => ct[name_key] || ct['name_de'] }
+          craft_by_slug = locale_craft_types.each_with_object({}) { |ct, h| h[ct['slug']] = ct }
+          craft_meta = {
+            'klappbar-und-aufblasbar' => { 'icon' => '/assets/images/icons/foldables-dark.svg', 'iconOnly' => true },
+            'hardshell'               => { 'icon' => '/assets/images/icons/hardshell-dark.svg', 'iconOnly' => true }
+          }
+          expected_craft_options = %w[klappbar-und-aufblasbar hardshell].map do |slug|
+            ct = craft_by_slug[slug]
+            raw_label = ct && ct[name_key]
+            label = (raw_label.nil? || raw_label.to_s.strip.empty?) ? slug : raw_label
+            { 'slug' => slug, 'label' => label,
+              'icon' => craft_meta[slug]['icon'], 'iconOnly' => craft_meta[slug]['iconOnly'] }
           end
 
           expected_spot_options = if data[:locale] == 'en'
@@ -293,7 +306,7 @@ RSpec.describe 'PrecomputeGenerator properties' do
           # Verify paddleCraftType dimension
           craft_dim = parsed['dimensionConfigs'][1]
           expect(craft_dim['key']).to eq('paddleCraftType')
-          expect(craft_dim['label']).to eq(data[:locale] == 'en' ? 'Paddle Craft Type' : 'Paddelboottyp')
+          expect(craft_dim['label']).to eq(data[:locale] == 'en' ? 'Accessible To' : 'Zugänglich für')
           expect(craft_dim['options']).to eq(expected_craft_options),
             "locale=#{data[:locale]}: craft options mismatch"
 

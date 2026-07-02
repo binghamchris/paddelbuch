@@ -39,7 +39,7 @@ const optionSlugArb = fc.stringMatching(/^[a-z][a-z0-9-]{0,14}$/);
 const spotTypeSlugs = ['einstieg-ausstieg', 'nur-einstieg', 'nur-ausstieg', 'rasthalte', 'notauswasserungsstelle'];
 
 /** Arbitrary: craft type slugs used in the craft type dimension */
-const craftTypeSlugs = ['seekajak', 'kanadier', 'stand-up-paddle-board'];
+const craftTypeSlugs = ['klappbar-und-aufblasbar', 'hardshell'];
 
 /**
  * Arbitrary: generate a filter state scenario -- a subset of selected slugs

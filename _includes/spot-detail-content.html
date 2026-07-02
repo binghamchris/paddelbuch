@@ -28,27 +28,12 @@
   {% include spot-tip-banners.html spot_tip_types=page.spot_tip_types %}
 {% endif %}
 
+<!-- Paddle Craft Type Display (side-by-side, above the details table) -->
+{% include craft-type-display.html spot=spot %}
+
 <!-- Spot Details Table -->
 <table class="spot-details-table">
   <tbody>
-    <!-- Paddle Craft Types (first row, matching Gatsby order) -->
-    {% if spot.paddle_craft_type_names and spot.paddle_craft_type_names.size > 0 %}
-    <tr>
-      <th class="craft-type-title">{% t labels.potentially_usable_by %}</th>
-      <td colspan="2">
-        <ul class="craft-type-list mb-0">
-          {% for craft_name in spot.paddle_craft_type_names %}
-            {% assign craft_slug = spot.paddle_craft_type_slugs[forloop.index0] %}
-            <li>
-              {% include craft-icon.html slug=craft_slug %}
-              {{ craft_name | escape }}
-            </li>
-          {% endfor %}
-        </ul>
-      </td>
-    </tr>
-    {% endif %}
-
     <!-- GPS Coordinates -->
     {% if spot.location %}
     {% assign lat = spot.location.lat | default: spot.location.latitude %}

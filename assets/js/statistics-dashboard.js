@@ -52,7 +52,9 @@
   var PADDLE_CRAFT_ICONS = {
     'seekajak': '/assets/images/icons/kayak-dark.svg',
     'kanadier': '/assets/images/icons/canoe-dark.svg',
-    'stand-up-paddle-board': '/assets/images/icons/sup-dark.svg'
+    'stand-up-paddle-board': '/assets/images/icons/sup-dark.svg',
+    'klappbar-und-aufblasbar': '/assets/images/icons/foldables-dark.svg',
+    'hardshell': '/assets/images/icons/hardshell-dark.svg'
   };
 
   /**

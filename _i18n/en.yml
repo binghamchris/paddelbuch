@@ -71,6 +71,7 @@ labels:
   unknown: "Unknown"
   summary: "Summary"
   potentially_usable_by: "Potentially Usable By"
+  accessible_to: "Accessible to:"
 
 # Actions
 actions:
