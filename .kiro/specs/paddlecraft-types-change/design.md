@@ -232,6 +232,7 @@ A new partial that renders exactly two vertical entries side by side (Requiremen
 {% assign craft_types = site.data.craft_type_display_for_locale %}
 {% assign linked_slugs = spot.paddle_craft_type_slugs %}
 
+<div class="craft-type-display-title">{% t labels.accessible_to %}</div>
 <div class="craft-type-display">
   {% for ct in craft_types %}
     {% assign is_linked = false %}
@@ -254,6 +255,11 @@ A new partial that renders exactly two vertical entries side by side (Requiremen
   {% endfor %}
 </div>
 ```
+
+> **Localised section title.** A `craft-type-display-title` element is rendered as a
+> sibling immediately **above** the `.craft-type-display` grid (not inside it, so it does
+> not become a grid cell and break the two-column layout). Its text is sourced from the
+> i18n key `labels.accessible_to` (English "Accessible to:", German "Zugänglich für:").
 
 > **Indicator glyphs.** The linked/unlinked indicators use inline **squared SVG** shapes
 > (a check `M2 9 L6 13 L14 3` and a cross `M3 3 L13 13 M13 3 L3 13`) with

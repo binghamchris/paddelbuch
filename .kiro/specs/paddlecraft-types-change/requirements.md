@@ -156,6 +156,8 @@ spot supports.
    of the name.
 6. THE Spot_Detail_Content SHALL omit the former paddle-craft-type row (the `craft-type-*` cells and
    the `craft-type-list`) from the `spot-details-table` element.
+7. THE Craft_Type_Display SHALL render a localised section title above the two craft type entries,
+   sourced from the i18n key `labels.accessible_to` (English "Accessible to:", German "Zugänglich für:").
 
 ### Requirement 5: Spot Detail Linked and Unlinked Craft Type States
 

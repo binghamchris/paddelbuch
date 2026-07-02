@@ -56,7 +56,8 @@ function renderCraftTypeDisplay(linkedSlugs) {
       indicator +
       '</div>';
   });
-  return '<div class="craft-type-display">' + entries.join('') + '</div>';
+  return '<div class="craft-type-display-title">Accessible to:</div>' +
+    '<div class="craft-type-display">' + entries.join('') + '</div>';
 }
 
 // Compose the rendered spot-detail-content document by substituting the real include's
@@ -142,6 +143,38 @@ describe('Craft_Type_Display structure (Task 4.2)', () => {
         expect(nameIdx).toBeLessThan(iconIdx);
         expect(iconIdx).toBeLessThan(indicatorIdx);
       });
+    });
+  });
+
+  describe('Requirement 4.7 - localised section title above the grid', () => {
+    test('the include source contains a craft-type-display-title referencing labels.accessible_to', () => {
+      expect(ctdSource).toMatch(/craft-type-display-title/);
+      const titleIdx = ctdSource.indexOf('craft-type-display-title');
+      const tagIdx = ctdSource.indexOf('{% t labels.accessible_to %}');
+      expect(titleIdx).toBeGreaterThan(-1);
+      expect(tagIdx).toBeGreaterThan(-1);
+    });
+
+    test('the title element precedes the craft-type-display grid in the include source', () => {
+      const titleIdx = ctdSource.indexOf('craft-type-display-title');
+      const gridIdx = ctdSource.indexOf('class="craft-type-display"');
+      expect(titleIdx).toBeGreaterThan(-1);
+      expect(gridIdx).toBeGreaterThan(-1);
+      expect(titleIdx).toBeLessThan(gridIdx);
+    });
+
+    test('the title is a sibling before the grid, not inside the .craft-type-display container', () => {
+      const titleIdx = ctdSource.indexOf('craft-type-display-title');
+      const gridIdx = ctdSource.indexOf('class="craft-type-display"');
+      // Title must appear before the grid container opens (i.e. not nested inside it).
+      expect(titleIdx).toBeLessThan(gridIdx);
+    });
+
+    test('the title class does not contain per-entry name/icon/indicator substrings', () => {
+      const titleClass = 'craft-type-display-title';
+      expect(titleClass).not.toContain('craft-type-entry-name');
+      expect(titleClass).not.toContain('craft-icon');
+      expect(titleClass).not.toContain('craft-type-indicator');
     });
   });
 });

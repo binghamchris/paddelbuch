@@ -74,6 +74,14 @@
     padding-left: 1rem;
   }
 
+  .craft-type-display-title {
+    text-align: center;
+    color: $swisscanoe-blue;
+    font-weight: 500;
+    font-size: 1.1em;
+    margin-bottom: 0.5em;
+  }
+
   .craft-type-display {
     // CSS grid + subgrid so the name / icon / indicator rows line up across both
     // craft-type entries at all widths, even when one name wraps to two lines.

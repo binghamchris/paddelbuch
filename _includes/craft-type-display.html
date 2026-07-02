@@ -5,6 +5,10 @@
   side by side above the spot details table. Each type is shown as a vertical entry:
   localised name (top) -> craft icon (middle) -> linked/unlinked indicator (bottom).
 
+  A localised section title (labels.accessible_to, e.g. "Accessible to:") is rendered
+  immediately above the grid as a sibling element (not a grid cell, to preserve the
+  2-column layout).
+
   The linked state is determined independently per entry by testing whether the
   spot's paddle_craft_type_slugs contains the entry's slug. Linked entries render a
   green tick; unlinked entries render a red cross and a greyed-out icon (via the
@@ -24,6 +28,7 @@
 {% assign craft_types = site.data.craft_type_display_for_locale %}
 {% assign linked_slugs = spot.paddle_craft_type_slugs %}
 
+<div class="craft-type-display-title">{% t labels.accessible_to %}</div>
 <div class="craft-type-display">
   {% for ct in craft_types %}
     {% assign is_linked = false %}
