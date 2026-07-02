@@ -373,42 +373,55 @@ if __FILE__ == $PROGRAM_NAME
     puts
     puts 'Phase 5: Bulk publishing updated entries...'
 
-    entities = updated_entries.map do |e|
-      {
-        sys: {
-          type: 'Link',
-          linkType: 'Entry',
-          id: e[:id],
-          version: e[:version]
+    # Contentful's Bulk Actions API rejects requests carrying more than 200
+    # entities with HTTP 422, so the publish is chunked into batches of
+    # CMA_BATCH (100) -- mirroring the batched fetch in Phase 3. Each slice is
+    # sent as its own bulk-action request with a spec-compliant Array payload,
+    # and falls back to individual publishing for just that slice on failure.
+    publish_batches = updated_entries.each_slice(CMA_BATCH).to_a
+
+    publish_batches.each_with_index do |slice, slice_idx|
+      links = slice.map do |e|
+        {
+          sys: {
+            type: 'Link',
+            linkType: 'Entry',
+            id: e[:id],
+            version: e[:version]
+          }
         }
-      }
-    end
-
-    resp = cma_request(
-      :post,
-      '/bulk_actions/publish',
-      body: { entities: { items: entities } }
-    )
-    api_calls += 1
-
-    if resp.is_a?(Net::HTTPSuccess) || resp.code.to_i == 202
-      puts "  Bulk publish accepted for #{updated_entries.size} entrie(s)"
-    else
-      puts "  WARNING: Bulk publish failed (#{resp.code}), falling back to individual publish..."
-      updated_entries.each do |e|
-        pub_resp = cma_request(
-          :put,
-          "/entries/#{e[:id]}/published",
-          headers: { 'X-Contentful-Version' => e[:version].to_s }
-        )
-        api_calls += 1
-        unless pub_resp.is_a?(Net::HTTPSuccess)
-          conflicts << e[:id] if pub_resp.code.to_i == 409
-          puts "    ERROR publishing #{e[:id]}: #{pub_resp.code} #{pub_resp.body}"
-          errors += 1
-        end
-        sleep 0.15
       end
+
+      resp = cma_request(
+        :post,
+        '/bulk_actions/publish',
+        body: { entities: { sys: { type: 'Array' }, items: links } }
+      )
+      api_calls += 1
+
+      if resp.is_a?(Net::HTTPSuccess) || resp.code.to_i == 202
+        puts "  Batch #{slice_idx + 1}/#{publish_batches.size}: bulk publish accepted for #{slice.size} entrie(s)"
+      else
+        puts "  WARNING: Bulk publish failed (#{resp.code}): #{resp.body}"
+        puts "  Batch #{slice_idx + 1}/#{publish_batches.size}: falling back to individual publish for #{slice.size} entrie(s)..."
+        slice.each do |e|
+          pub_resp = cma_request(
+            :put,
+            "/entries/#{e[:id]}/published",
+            headers: { 'X-Contentful-Version' => e[:version].to_s }
+          )
+          api_calls += 1
+          unless pub_resp.is_a?(Net::HTTPSuccess)
+            conflicts << e[:id] if pub_resp.code.to_i == 409
+            puts "    ERROR publishing #{e[:id]}: #{pub_resp.code} #{pub_resp.body}"
+            errors += 1
+          end
+          sleep 0.15
+        end
+      end
+
+      # Rate limiting between slice requests -- CMA allows ~10 req/s
+      sleep 0.15
     end
   end
 

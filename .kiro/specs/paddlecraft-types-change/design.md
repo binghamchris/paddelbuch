@@ -685,8 +685,13 @@ result set as applying it once (`apply(apply(x)) == apply(x)`).
 - **CMA request failures**: on non-2xx `PUT`, log the error, increment an error counter, and
   continue with remaining entries (per-entry isolation). Version conflicts (HTTP 409) are surfaced
   in the summary.
+- **Bulk publish batching**: Contentful bulk actions are limited to 200 entities per request
+  (a single oversized publish is rejected with HTTP 422), so the publish step chunks the updated
+  entries into batches of 100 (`CMA_BATCH`) — mirroring the Phase 3 fetch — and sends each batch
+  as its own `POST /bulk_actions/publish` with an `entities.sys.type: "Array"` payload.
 - **Bulk publish failure**: fall back to individual `PUT /entries/{id}/published` with per-entry
-  error logging, matching the reference script.
+  error logging, matching the reference script. The fallback is scoped to the entries of the
+  failing batch only, and the response body is logged alongside the status code to aid diagnosis.
 - **Rate limiting**: `sleep 0.15` between writes to respect the CMA ~10 req/s limit.
 - **Dry-run safety**: in `--dry-run`, no `PUT` or publish request is issued; only intended changes
   are printed (Requirement 6.9).

@@ -34,9 +34,44 @@ module CmaNetHttpStub
     path = request_log_path
     return unless path
 
-    File.open(path, 'a') do |f|
-      f.puts(JSON.generate('method' => req.method, 'path' => req.path))
+    entry = { 'method' => req.method, 'path' => req.path }
+
+    # For bulk-publish requests, record how many entities the batch carried so
+    # tests can assert the publish step chunks below Contentful's 200-entity
+    # limit and never drops entries.
+    if req.method == 'POST' && req.path.include?('/bulk_actions/publish')
+      entry['entity_count'] = bulk_publish_entity_count(req)
     end
+
+    File.open(path, 'a') do |f|
+      f.puts(JSON.generate(entry))
+    end
+  end
+
+  # Parse a bulk-publish request body and return the number of entities in its
+  # `entities.items` array (0 when the body is missing or unparseable).
+  def bulk_publish_entity_count(req)
+    body = req.body
+    return 0 if body.nil? || body.empty?
+
+    parsed = JSON.parse(body)
+    items = parsed.dig('entities', 'items')
+    items.is_a?(Array) ? items.length : 0
+  rescue JSON::ParserError
+    0
+  end
+
+  # Extract the set of entry IDs from a batch-fetch `sys.id[in]=a,b,c` query, or
+  # nil when the request carries no such filter (in which case the caller
+  # returns the fixture unfiltered).
+  def requested_id_filter(path)
+    query = path.split('?', 2)[1]
+    return nil unless query
+
+    match = query.split('&').find { |p| p.start_with?('sys.id[in]=') }
+    return nil unless match
+
+    match.sub('sys.id[in]=', '').split(',').reject(&:empty?)
   end
 
   # Build a real Net::HTTPResponse subclass instance with a readable body so the
@@ -56,6 +91,15 @@ module CmaNetHttpStub
 
     if method == 'GET'
       items = entries_path && File.exist?(entries_path) ? JSON.parse(File.read(entries_path)) : []
+      # Honour the batch-fetch `sys.id[in]=id1,id2,...` slicing so that a
+      # multi-batch fetch (>CMA_BATCH ids) returns each requested slice rather
+      # than the whole fixture on every call -- otherwise the accumulated
+      # `fetched_entries` would contain duplicates. When no `sys.id[in]` query
+      # is present the fixture is returned as-is (existing behaviour).
+      requested_ids = requested_id_filter(path)
+      if requested_ids
+        items = items.select { |item| requested_ids.include?(item.dig('sys', 'id')) }
+      end
       return build_response(Net::HTTPOK, '200', JSON.generate('items' => items))
     end
 

@@ -185,4 +185,93 @@ RSpec.describe 'add_paddle_craft_type_references.rb (migration side effects)' do
     expect(write_methods).to be_empty,
                              "already-migrated spot must issue no writes, got: #{requests.map { |r| "#{r['method']} #{r['path']}" }}"
   end
+
+  # Regression: Contentful's Bulk Actions API rejects a single publish request
+  # carrying more than 200 entities (HTTP 422). With more than CMA_BATCH (100)
+  # updated entries the publish step MUST chunk into batches of <= 100, issue
+  # more than one bulk-publish request, and drop nothing -- exactly as Phase 3
+  # already chunks the fetch.
+  it 'chunks bulk publish into batches of <= 100 when more than 100 entries are updated' do
+    batch_size = 100        # mirrors CMA_BATCH in the script
+    spot_count = 150        # > batch_size, forces > 1 publish batch
+
+    # Build a >100-spot cache + spots fixture, each spot referencing the legacy
+    # `seekajak` slug (mapped to an added `hardshell` reference), plus the three
+    # craft-type entries. Every spot slug resolves to a unique entry ID.
+    cache_lines = ['entry_id_index:']
+    spots_lines = []
+    fetched = []
+    (1..spot_count).each do |i|
+      slug = "test-spot-#{i}"
+      entry_id = "spot-entry-#{i}"
+      cache_lines << "  #{entry_id}:"
+      cache_lines << '    content_type: spot'
+      cache_lines << "    slug: #{slug}"
+
+      spots_lines << "- slug: #{slug}"
+      spots_lines << '  locale: de'
+      spots_lines << '  paddleCraftTypes:'
+      spots_lines << '    - seekajak'
+
+      fetched << {
+        'sys' => { 'id' => entry_id, 'version' => 3 },
+        'fields' => {
+          'paddleCraftType' => {
+            'de-CH' => [
+              { 'sys' => { 'type' => 'Link', 'linkType' => 'Entry', 'id' => 'ct-seekajak' } }
+            ]
+          }
+        }
+      }
+    end
+    cache_lines << '  ct-seekajak:'
+    cache_lines << '    content_type: paddleCraftType'
+    cache_lines << '    slug: seekajak'
+    cache_lines << '  ct-hardshell:'
+    cache_lines << '    content_type: paddleCraftType'
+    cache_lines << '    slug: hardshell'
+    cache_lines << '  ct-klappbar:'
+    cache_lines << '    content_type: paddleCraftType'
+    cache_lines << '    slug: klappbar-und-aufblasbar'
+
+    # Overwrite the small default fixtures written by the around hook; the
+    # around/ensure guard still owns cleanup of these _data/ files.
+    File.write(spots_path, spots_lines.join("\n") + "\n")
+    File.write(cache_path, cache_lines.join("\n") + "\n")
+    File.write(@entries_file, JSON.generate(fetched))
+
+    result = run_script([], @entries_file, @request_log)
+
+    expect(result[:status]).to be_success, "script failed: #{result[:stderr]}\n#{result[:stdout]}"
+
+    requests = logged_requests(@request_log)
+
+    bulk_publishes = requests.select do |r|
+      r['method'] == 'POST' && r['path'].include?('/bulk_actions/publish')
+    end
+    individual_publishes = requests.select do |r|
+      r['method'] == 'PUT' && r['path'].end_with?('/published')
+    end
+    entry_updates = requests.select do |r|
+      r['method'] == 'PUT' && r['path'].include?('/entries/') && !r['path'].end_with?('/published')
+    end
+
+    # (a) Every bulk-publish request stays within the 200-entity API limit.
+    expect(bulk_publishes).to all(satisfy { |r| r['entity_count'].to_i <= batch_size }),
+                              "some bulk publish exceeded #{batch_size} entities: #{bulk_publishes.map { |r| r['entity_count'] }}"
+
+    # (b) Chunking actually happened -- more than one bulk-publish request.
+    expect(bulk_publishes.length).to be > 1,
+                                     "expected chunked publish (> 1 request), got #{bulk_publishes.length}"
+
+    # (c) No entry was dropped: the entities published across all batches equal
+    #     the number of updated entries.
+    total_published = bulk_publishes.sum { |r| r['entity_count'].to_i }
+    expect(total_published).to eq(entry_updates.length)
+    expect(total_published).to eq(spot_count)
+
+    # (d) The bulk publish succeeded, so no individual /published fallback ran.
+    expect(individual_publishes).to be_empty,
+                                    "expected no individual publish fallback, got #{individual_publishes.length}"
+  end
 end
