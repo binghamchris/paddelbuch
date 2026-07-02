@@ -1,0 +1,43 @@
+<!--
+  Craft Type Display Include
+
+  Renders the two supported paddle craft types (klappbar-und-aufblasbar, hardshell)
+  side by side above the spot details table. Each type is shown as a vertical entry:
+  localised name (top) -> craft icon (middle) -> linked/unlinked indicator (bottom).
+
+  The linked state is determined independently per entry by testing whether the
+  spot's paddle_craft_type_slugs contains the entry's slug. Linked entries render a
+  green tick; unlinked entries render a red cross and a greyed-out icon (via the
+  .is-unlinked parent class in the stylesheet).
+
+  Parameters:
+  - include.spot: The spot object (must expose paddle_craft_type_slugs)
+
+  Data source:
+  - site.data.craft_type_display_for_locale: ordered [klappbar-und-aufblasbar, hardshell]
+    list of { slug, name, icon } produced by precompute_generator.rb
+
+  Requirements: 4.2, 4.3, 4.4, 4.5, 5.1, 5.2, 5.3, 5.4, 5.5, 5.6
+-->
+
+{% assign spot = include.spot %}
+{% assign craft_types = site.data.craft_type_display_for_locale %}
+{% assign linked_slugs = spot.paddle_craft_type_slugs %}
+
+<div class="craft-type-display">
+  {% for ct in craft_types %}
+    {% assign is_linked = false %}
+    {% if linked_slugs contains ct.slug %}{% assign is_linked = true %}{% endif %}
+    <div class="craft-type-entry {% if is_linked %}is-linked{% else %}is-unlinked{% endif %}">
+      <span class="craft-type-entry-name">{{ ct.name | escape }}</span>
+      {% include craft-icon.html slug=ct.slug size=48 %}
+      {% if is_linked %}
+        <span class="craft-type-indicator craft-type-indicator--linked" aria-hidden="true">&#10003;</span>
+        <span class="visually-hidden">{% t labels.yes %}</span>
+      {% else %}
+        <span class="craft-type-indicator craft-type-indicator--unlinked" aria-hidden="true">&#10007;</span>
+        <span class="visually-hidden">{% t labels.no %}</span>
+      {% endif %}
+    </div>
+  {% endfor %}
+</div>

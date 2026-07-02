@@ -4,21 +4,19 @@
   Renders the appropriate paddle craft type SVG icon based on slug.
 
   Parameters:
-  - include.slug: The paddle craft type slug (e.g., 'seekajak', 'kanadier', 'stand-up-paddle-board')
+  - include.slug: The paddle craft type slug (e.g., 'klappbar-und-aufblasbar', 'hardshell')
   - include.size: Icon size in pixels (default: 18)
 
-  Requirements: 3.6
+  Requirements: 3.1, 3.2, 3.3
 -->
 
 {% assign craft_size = include.size | default: 18 %}
 
 {% case include.slug %}
-  {% when 'seekajak' %}
-    {% assign craft_icon = 'kayak' %}
-  {% when 'kanadier' %}
-    {% assign craft_icon = 'canoe' %}
-  {% when 'stand-up-paddle-board' %}
-    {% assign craft_icon = 'sup' %}
+  {% when 'klappbar-und-aufblasbar' %}
+    {% assign craft_icon = 'foldables' %}
+  {% when 'hardshell' %}
+    {% assign craft_icon = 'hardshell' %}
   {% else %}
     {% assign craft_icon = nil %}
 {% endcase %}

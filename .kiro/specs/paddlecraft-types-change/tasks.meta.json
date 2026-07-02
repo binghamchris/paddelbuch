@@ -1,0 +1,33 @@
+{
+  "pbtResults": {
+    "6.2 Write property test for dashboard icon resolution and fallback": {
+      "status": "passed",
+      "lastRunTimestamp": 1783009943151
+    },
+    "2.2 Write property test for icon mapping totality": {
+      "status": "passed",
+      "lastRunTimestamp": 1783010076664
+    },
+    "8.3 Write property test for migration rule and additivity": {
+      "status": "passed",
+      "lastRunTimestamp": 1783010101393
+    },
+    "1.4 Write property test for filter option generation": {
+      "status": "passed",
+      "lastRunTimestamp": 1783010639535
+    },
+    "3.2 Write property test for display linked-state": {
+      "status": "passed",
+      "lastRunTimestamp": 1783010658730
+    },
+    "9.1 Confirm/extend the craft default-selected property test": {
+      "status": "passed",
+      "lastRunTimestamp": 1783010694904
+    },
+    "8.5 Write property test for idempotency": {
+      "status": "passed",
+      "lastRunTimestamp": 1783010889975
+    }
+  },
+  "executionHistory": {}
+}

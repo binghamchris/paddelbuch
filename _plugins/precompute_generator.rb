@@ -17,6 +17,19 @@ module Jekyll
     safe true
     priority :normal
 
+    # Ordered list of the two supported (new) paddle craft type slugs.
+    # The order here defines the order of the paddle craft type filter options
+    # and the spot-detail craft type display (Requirements 1.1, 1.2).
+    NEW_CRAFT_TYPE_SLUGS = %w[klappbar-und-aufblasbar hardshell].freeze
+
+    # Standalone icon metadata for the two new craft types (no coloured circle).
+    # Maps each supported slug to its icon path and iconOnly rendering flag
+    # (Requirement 1.5).
+    NEW_CRAFT_TYPE_META = {
+      'klappbar-und-aufblasbar' => { icon: '/assets/images/icons/foldables-dark.svg', iconOnly: true },
+      'hardshell'               => { icon: '/assets/images/icons/hardshell-dark.svg', iconOnly: true }
+    }.freeze
+
     def generate(site)
       locale = site.config['lang'] || site.config['default_lang'] || 'de'
       default_lang = site.config['default_lang'] || 'de'
@@ -70,24 +83,24 @@ module Jekyll
       locale_prefix = site.config['locale_prefix']
       name_key = "name_#{locale}"
 
-      # Paddle craft types for dimension config
+      # Paddle craft types for dimension config.
+      # Build a slug -> data-row lookup so the option order is driven by the
+      # ordered allow-list NEW_CRAFT_TYPE_SLUGS rather than by data order. This
+      # guarantees exactly two options, in a fixed order, and inherently excludes
+      # the legacy slugs (Requirements 1.1, 1.2).
       craft_types = (site.data.dig('types', 'paddle_craft_types') || [])
         .select { |t| t['locale'] == locale }
-      craft_options = craft_types.map { |ct| { slug: ct['slug'], label: ct[name_key] || ct['name_de'] } }
+      craft_by_slug = craft_types.each_with_object({}) { |ct, h| h[ct['slug']] = ct }
 
-      # Paddle craft type icon metadata (standalone icons, no colored circle)
-      craft_type_meta = {
-        'seekajak'              => { icon: '/assets/images/icons/kayak-dark.svg', iconOnly: true },
-        'kanadier'              => { icon: '/assets/images/icons/canoe-dark.svg', iconOnly: true },
-        'stand-up-paddle-board' => { icon: '/assets/images/icons/sup-dark.svg',   iconOnly: true }
-      }
-
-      craft_options.each do |opt|
-        meta = craft_type_meta[opt[:slug]]
-        next unless meta
-
-        opt[:icon] = meta[:icon]
-        opt[:iconOnly] = meta[:iconOnly]
+      craft_options = NEW_CRAFT_TYPE_SLUGS.map do |slug|
+        ct = craft_by_slug[slug]
+        # Localised label for the build locale (Requirements 1.3/1.4). When the
+        # resolved label is nil, absent, or whitespace-only, fall back to the
+        # option's slug (Requirement 1.7).
+        raw_label = ct && ct[name_key]
+        label = (raw_label.nil? || raw_label.to_s.strip.empty?) ? slug : raw_label
+        meta = NEW_CRAFT_TYPE_META[slug]
+        { slug: slug, label: label, icon: meta[:icon], iconOnly: meta[:iconOnly] }
       end
 
       # Spot tip type dimension options (dynamic from data)
@@ -187,6 +200,18 @@ module Jekyll
       # Pre-compute spot tip types for template use (avoids per-page Liquid lookups)
       site.data['spot_tip_types_for_locale'] = tip_types.map do |tt|
         { 'slug' => tt['slug'], 'name' => tt[name_key] || tt['name_de'] }
+      end
+
+      # Pre-compute the ordered craft type display list for the Spot detail
+      # Craft_Type_Display (Requirements 4.2, 4.3). Mirrors the
+      # spot_tip_types_for_locale pattern above, emitting exactly the two new
+      # types in order. Uses the same localised-name selection with slug
+      # fallback as the filter labels (Requirements 4.4, 4.5).
+      site.data['craft_type_display_for_locale'] = NEW_CRAFT_TYPE_SLUGS.map do |slug|
+        ct = craft_by_slug[slug]
+        raw = ct && ct[name_key]
+        name = (raw.nil? || raw.to_s.strip.empty?) ? slug : raw
+        { 'slug' => slug, 'name' => name, 'icon' => NEW_CRAFT_TYPE_META[slug][:icon] }
       end
 
       # Layer control config

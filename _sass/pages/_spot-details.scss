@@ -26,17 +26,6 @@
       height: 60vh;
     }
   }
-  @media screen and (min-width: 1186px) {
-    .craft-type-title {
-      padding-right: 2em;
-    }
-  }
-  @media screen and (max-width: 580px) {
-    .craft-type-title {
-      padding-right: 3em;
-    }
-  }
-
   .spot-description {
     padding-right: 1.5em;
     padding-left: 1.5em;
@@ -85,16 +74,49 @@
     padding-left: 1rem;
   }
 
-  .craft-type-list {
-    list-style: none;
-    padding-left: 0;
-    margin-left: -43px;
+  .craft-type-display {
+    display: flex;
+    justify-content: center;
+    gap: 2em;
+    margin: 1em 0 1.25em;
+  }
 
-    li {
-      display: flex;
-      align-items: center;
-      gap: 0.5em;
-      padding: 0.15em 0;
+  .craft-type-entry {
+    display: flex;
+    flex-direction: column;   // name (top) -> icon (middle) -> indicator (bottom)
+    align-items: center;
+    gap: 0.4em;
+    text-align: center;
+    flex: 1 1 0;
+    color: $swisscanoe-blue;
+
+    .craft-type-entry-name {
+      font-weight: 500;
+    }
+
+    .craft-icon {
+      width: 48px;
+      height: 48px;
+    }
+  }
+
+  // Greyed-out treatment for the unlinked craft type icon (Requirement 5.3)
+  .craft-type-entry.is-unlinked .craft-icon {
+    filter: grayscale(100%);
+    opacity: 0.4;
+  }
+
+  .craft-type-indicator {
+    font-size: 1.4em;
+    line-height: 1;
+    font-weight: 700;
+
+    &--linked {
+      color: $green-1;      // Requirement 5.2
+    }
+
+    &--unlinked {
+      color: $danger-red;   // Requirement 5.4
     }
   }
 
