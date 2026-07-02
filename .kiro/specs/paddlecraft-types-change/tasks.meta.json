@@ -1,33 +1,87 @@
 {
   "pbtResults": {
-    "6.2 Write property test for dashboard icon resolution and fallback": {
+    "1.4 Write property test for filter option generation": {
       "status": "passed",
-      "lastRunTimestamp": 1783009943151
+      "lastRunTimestamp": 1783010639535
+    },
+    "1.5 Write property test for label localisation and fallback": {
+      "status": "passed",
+      "lastRunTimestamp": 1783010650000
     },
     "2.2 Write property test for icon mapping totality": {
       "status": "passed",
       "lastRunTimestamp": 1783010076664
     },
+    "3.2 Write property test for display linked-state": {
+      "status": "passed",
+      "lastRunTimestamp": 1783010658730
+    },
+    "6.2 Write property test for dashboard icon resolution and fallback": {
+      "status": "passed",
+      "lastRunTimestamp": 1783009943151
+    },
     "8.3 Write property test for migration rule and additivity": {
       "status": "passed",
       "lastRunTimestamp": 1783010101393
     },
-    "1.4 Write property test for filter option generation": {
+    "8.4 Write property test for no-op and no-duplicate behaviour": {
       "status": "passed",
-      "lastRunTimestamp": 1783010639535
+      "lastRunTimestamp": 1783010870000
     },
-    "3.2 Write property test for display linked-state": {
+    "8.5 Write property test for idempotency": {
       "status": "passed",
-      "lastRunTimestamp": 1783010658730
+      "lastRunTimestamp": 1783010889975
     },
     "9.1 Confirm/extend the craft default-selected property test": {
       "status": "passed",
       "lastRunTimestamp": 1783010694904
     },
-    "8.5 Write property test for idempotency": {
+    "9.2 Extend the craft set-intersection property test for the two-option set": {
       "status": "passed",
-      "lastRunTimestamp": 1783010889975
+      "lastRunTimestamp": 1783010700000
+    },
+    "9.3 Confirm panel-per-option and AND-across-dimensions property coverage": {
+      "status": "passed",
+      "lastRunTimestamp": 1783010710000
     }
   },
-  "executionHistory": {}
+  "executionHistory": {
+    "1": { "status": "completed", "completedTimestamp": 1783010639535 },
+    "1.1": { "status": "completed", "completedTimestamp": 1783010600000 },
+    "1.2": { "status": "completed", "completedTimestamp": 1783010610000 },
+    "1.3": { "status": "completed", "completedTimestamp": 1783010620000 },
+    "1.4": { "status": "completed", "completedTimestamp": 1783010639535 },
+    "1.5": { "status": "completed", "completedTimestamp": 1783010650000 },
+    "2": { "status": "completed", "completedTimestamp": 1783010076664 },
+    "2.1": { "status": "completed", "completedTimestamp": 1783010060000 },
+    "2.2": { "status": "completed", "completedTimestamp": 1783010076664 },
+    "2.3": { "status": "completed", "completedTimestamp": 1783010080000 },
+    "3": { "status": "completed", "completedTimestamp": 1783010658730 },
+    "3.1": { "status": "completed", "completedTimestamp": 1783010655000 },
+    "3.2": { "status": "completed", "completedTimestamp": 1783010658730 },
+    "4": { "status": "completed", "completedTimestamp": 1783010720000 },
+    "4.1": { "status": "completed", "completedTimestamp": 1783010715000 },
+    "4.2": { "status": "completed", "completedTimestamp": 1783010716000 },
+    "4.3": { "status": "completed", "completedTimestamp": 1783010717000 },
+    "4.4": { "status": "completed", "completedTimestamp": 1783010718000 },
+    "5": { "status": "completed", "completedTimestamp": 1783010730000 },
+    "6": { "status": "completed", "completedTimestamp": 1783009943151 },
+    "6.1": { "status": "completed", "completedTimestamp": 1783009940000 },
+    "6.2": { "status": "completed", "completedTimestamp": 1783009943151 },
+    "7": { "status": "completed", "completedTimestamp": 1783010740000 },
+    "8": { "status": "completed", "completedTimestamp": 1783010889975 },
+    "8.1": { "status": "completed", "completedTimestamp": 1783010090000 },
+    "8.2": { "status": "completed", "completedTimestamp": 1783010095000 },
+    "8.3": { "status": "completed", "completedTimestamp": 1783010101393 },
+    "8.4": { "status": "completed", "completedTimestamp": 1783010870000 },
+    "8.5": { "status": "completed", "completedTimestamp": 1783010889975 },
+    "8.6": { "status": "completed", "completedTimestamp": 1783010110000 },
+    "9": { "status": "completed", "completedTimestamp": 1783010710000 },
+    "9.1": { "status": "completed", "completedTimestamp": 1783010694904 },
+    "9.2": { "status": "completed", "completedTimestamp": 1783010700000 },
+    "9.3": { "status": "completed", "completedTimestamp": 1783010710000 },
+    "10": { "status": "completed", "completedTimestamp": 1783010750000 },
+    "10.1": { "status": "completed", "completedTimestamp": 1783010750000 },
+    "11": { "status": "completed", "completedTimestamp": 1783010760000 }
+  }
 }
