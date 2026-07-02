@@ -26,17 +26,6 @@
       height: 60vh;
     }
   }
-  @media screen and (min-width: 1186px) {
-    .craft-type-title {
-      padding-right: 2em;
-    }
-  }
-  @media screen and (max-width: 580px) {
-    .craft-type-title {
-      padding-right: 3em;
-    }
-  }
-
   .spot-description {
     padding-right: 1.5em;
     padding-left: 1.5em;
@@ -85,17 +74,68 @@
     padding-left: 1rem;
   }
 
-  .craft-type-list {
-    list-style: none;
-    padding-left: 0;
-    margin-left: -43px;
+  .craft-type-display-title {
+    color: $swisscanoe-blue;
+    font-weight: 500;
+    font-size: 1.1em;
+    margin-bottom: 0.5em;
+  }
 
-    li {
-      display: flex;
-      align-items: center;
-      gap: 0.5em;
-      padding: 0.15em 0;
+  .craft-type-display {
+    // CSS grid + subgrid so the name / icon / indicator rows line up across both
+    // craft-type entries at all widths, even when one name wraps to two lines.
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: auto auto auto;   // name / icon / indicator
+    column-gap: 2em;
+    row-gap: 0.4em;
+    justify-items: center;
+    max-width: 24em;
+    margin: 1em auto 1.75em;
+  }
+
+  .craft-type-entry {
+    // Each entry spans the three shared subgrid rows, so both entries' name,
+    // icon and indicator rows stay vertically aligned regardless of name length.
+    display: grid;
+    grid-template-rows: subgrid;
+    grid-row: span 3;
+    row-gap: 0.4em;
+    justify-items: center;
+    align-content: start;
+    text-align: center;
+    color: $swisscanoe-blue;
+
+    .craft-icon {
+      width: 100px;
+      height: 50px;
     }
+  }
+
+  // Greyed-out treatment for the unlinked craft type icon (Requirement 5.3)
+  .craft-type-entry.is-unlinked .craft-icon {
+    filter: grayscale(100%);
+    opacity: 0.2;
+  }
+
+  .craft-type-indicator {
+    line-height: 1;
+
+    &--linked {
+      color: $green-1;      // Requirement 5.2
+    }
+
+    &--unlinked {
+      color: $danger-red;   // Requirement 5.4
+    }
+  }
+
+  // Squared SVG tick / cross indicators; size is em-based so they scale, and
+  // they inherit colour via currentColor from the --linked / --unlinked classes.
+  .craft-type-indicator-icon {
+    display: block;
+    width: 1.4em;
+    height: 1.4em;
   }
 
   .craft-icon {

@@ -22,9 +22,8 @@ const SPOT_TYPE_SLUGS = [
 
 // Paddle craft type slugs used in the system
 const PADDLE_CRAFT_SLUGS = [
-  'seekajak',
-  'kanadier',
-  'stand-up-paddle-board'
+  'klappbar-und-aufblasbar',
+  'hardshell'
 ];
 
 // Paddling environment type slugs

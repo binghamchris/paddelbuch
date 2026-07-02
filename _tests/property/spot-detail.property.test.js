@@ -5,7 +5,13 @@
  * **Validates: Requirements 3.6**
  * 
  * Property: For any non-rejected spot, the detail page shall display the full description,
- * GPS coordinates, approximate address, waterway link, paddle craft types, and last updated timestamp.
+ * GPS coordinates, approximate address, waterway link, and last updated timestamp.
+ *
+ * Note: Paddle craft type presentation is no longer covered here. Under the
+ * paddlecraft-types-change design, the Craft_Type_Display always renders exactly the two
+ * new types (each linked or unlinked) independent of the spot's references, so the old
+ * conditional-presence/length model is invalid. That behaviour is covered by Property 8
+ * in craft-type-display.property.test.js.
  */
 
 const fc = require('fast-check');
@@ -17,15 +23,6 @@ const VALID_SPOT_TYPES = [
   'nur-ausstieg',
   'rasthalte',
   'notauswasserungsstelle'
-];
-
-// Valid paddle craft type slugs
-const VALID_PADDLE_CRAFT_TYPES = [
-  'kajak',
-  'kanu',
-  'sup',
-  'ruderboot',
-  'schlauchboot'
 ];
 
 /**
@@ -42,13 +39,11 @@ function generateSpotDetailContent(spot, waterway = null) {
     hasGPS: false,
     hasApproximateAddress: false,
     hasWaterwayLink: false,
-    hasPaddleCraftTypes: false,
     hasLastUpdated: false,
     fullDescription: null,
     gps: null,
     approximateAddress: null,
     waterwayLink: null,
-    paddleCraftTypes: [],
     lastUpdated: null
   };
 
@@ -84,11 +79,9 @@ function generateSpotDetailContent(spot, waterway = null) {
     };
   }
 
-  // Paddle craft types (Requirement 3.6)
-  if (spot.paddleCraftTypes && Array.isArray(spot.paddleCraftTypes) && spot.paddleCraftTypes.length > 0) {
-    content.hasPaddleCraftTypes = true;
-    content.paddleCraftTypes = spot.paddleCraftTypes;
-  }
+  // Paddle craft types are no longer part of the spot-details model.
+  // The Craft_Type_Display (Property 8) always renders exactly the two new types,
+  // independent of the spot's references, so no conditional-presence field is modelled here.
 
   // Last updated timestamp (Requirement 3.6)
   if (spot.updatedAt) {
@@ -141,15 +134,8 @@ function validateDetailContent(spot, waterway, detailContent) {
     }
   }
 
-  // Paddle craft types must be present if spot has them
-  if (spot.paddleCraftTypes && Array.isArray(spot.paddleCraftTypes) && spot.paddleCraftTypes.length > 0) {
-    if (!detailContent.hasPaddleCraftTypes) {
-      return false;
-    }
-    if (detailContent.paddleCraftTypes.length !== spot.paddleCraftTypes.length) {
-      return false;
-    }
-  }
+  // Paddle craft types are no longer validated here; the Craft_Type_Display always
+  // renders both new types regardless of the spot's references (covered by Property 8).
 
   // Last updated must be present if spot has updatedAt
   if (spot.updatedAt) {
@@ -163,7 +149,6 @@ function validateDetailContent(spot, waterway, detailContent) {
 
 // Arbitraries for generating test data
 const validSpotTypeArb = fc.constantFrom(...VALID_SPOT_TYPES);
-const validPaddleCraftTypeArb = fc.constantFrom(...VALID_PADDLE_CRAFT_TYPES);
 
 const locationArb = fc.record({
   lat: fc.float({ min: Math.fround(45.8), max: Math.fround(47.8), noNaN: true }),
@@ -193,7 +178,6 @@ const nonRejectedSpotArb = fc.record({
     fc.constant(''),
     fc.string({ minLength: 1, maxLength: 200 }).filter(s => s.trim().length > 0)
   ),
-  paddleCraftTypes: fc.array(validPaddleCraftTypeArb, { minLength: 0, maxLength: 5 }),
   waterway_slug: fc.option(fc.string({ minLength: 1, maxLength: 50 }).filter(s => s.trim().length > 0), { nil: undefined }),
   updatedAt: fc.option(isoDateArb, { nil: undefined })
 });
@@ -301,21 +285,6 @@ describe('Spot Detail Page Content - Property 3', () => {
       );
     });
 
-    test('detail page includes paddle craft types when spot has them', () => {
-      fc.assert(
-        fc.property(
-          nonRejectedSpotArb.filter(s => s.paddleCraftTypes && s.paddleCraftTypes.length > 0),
-          (spot) => {
-            const detailContent = generateSpotDetailContent(spot);
-            
-            return detailContent.hasPaddleCraftTypes && 
-                   detailContent.paddleCraftTypes.length === spot.paddleCraftTypes.length;
-          }
-        ),
-        { numRuns: 100 }
-      );
-    });
-
     test('detail page includes last updated timestamp when spot has updatedAt', () => {
       fc.assert(
         fc.property(
@@ -389,17 +358,6 @@ describe('Spot Detail Page Content - Property 3', () => {
       };
       const detailContent = generateSpotDetailContent(spot, null);
       expect(detailContent.hasWaterwayLink).toBe(false);
-    });
-
-    test('empty paddle craft types array results in no craft types section', () => {
-      const spot = {
-        name: 'Test Spot',
-        slug: 'test-spot',
-        rejected: false,
-        paddleCraftTypes: []
-      };
-      const detailContent = generateSpotDetailContent(spot);
-      expect(detailContent.hasPaddleCraftTypes).toBe(false);
     });
 
     test('missing updatedAt results in no last updated section', () => {
