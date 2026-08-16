@@ -91,4 +91,32 @@ describe('CSP Configuration in frontend-deploy.yaml', () => {
   test('worker-src directive includes self', () => {
     expect(directives['worker-src']).toContain("'self'");
   });
+
+  // Semantic search issues a cross-origin fetch to API Gateway, which
+  // connect-src must permit or the browser blocks every search request.
+  test('connect-src directive includes the search API host placeholder', () => {
+    expect(directives['connect-src']).toContain('${SearchApiCspHost}');
+  });
+
+  test('CustomHeaders is a Sub block so the search host can be interpolated', () => {
+    expect(yamlContent).toMatch(/CustomHeaders: !Sub \|-/);
+  });
+
+  test('SearchApiCspHost is the only placeholder inside CustomHeaders', () => {
+    // A stray ${...} in a !Sub block fails the stack with an unresolved-reference
+    // error, so the placeholder set is pinned rather than merely spot-checked.
+    var block = yamlContent.match(/CustomHeaders: !Sub \|-\n([\s\S]*?)(?=\n {6}[A-Za-z])/);
+    expect(block).not.toBeNull();
+    var placeholders = block[1].match(/\$\{[^}]*\}/g) || [];
+    expect(placeholders).toEqual(['${SearchApiCspHost}']);
+  });
+
+  test('search API parameters are declared with safe empty defaults', () => {
+    // Empty defaults keep existing deploys working: no search config means the
+    // search UI is simply not rendered.
+    ['EnvVarSearchApiEndpoint', 'EnvVarSearchApiKey', 'SearchApiCspHost'].forEach(function(param) {
+      var declared = new RegExp('^  ' + param + ':', 'm');
+      expect(yamlContent).toMatch(declared);
+    });
+  });
 });

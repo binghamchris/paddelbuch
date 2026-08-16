@@ -10,16 +10,26 @@
    * @param {L.Map} map - Leaflet map instance
    * @param {Array} dimensionConfigs - Array of dimension config objects
    * @param {Array} layerToggles - Array of { key, label, layerGroup, defaultChecked }
+   * @param {Object} [panelOptions] - Optional hooks
+   * @param {Function} [panelOptions.onSearchHostReady] - Called with the search
+   *   host element once the panel content exists, so an optional search module
+   *   can render itself at the top of the panel. Omitted or null when search is
+   *   not configured for this build.
+   *
+   * Named panelOptions rather than options deliberately: onAdd already declares
+   * `var options` for the per-dimension option loop, and var hoisting would
+   * shadow an outer `options` across the whole of onAdd.
    */
-  function init(map, dimensionConfigs, layerToggles) {
+  function init(map, dimensionConfigs, layerToggles, panelOptions) {
     if (!map) {
       console.warn('Filter panel: map not ready, retrying...');
-      setTimeout(function() { init(map, dimensionConfigs, layerToggles); }, 100);
+      setTimeout(function() { init(map, dimensionConfigs, layerToggles, panelOptions); }, 100);
       return;
     }
 
     dimensionConfigs = dimensionConfigs || [];
     layerToggles = layerToggles || [];
+    panelOptions = panelOptions || {};
 
     FilterPanelControl = L.Control.extend({
       options: { position: 'topleft' },
@@ -39,6 +49,18 @@
 
         // Content area
         var content = L.DomUtil.create('div', 'filter-panel-content', container);
+
+        // Search host -- sits above the dimension fieldsets so free-text search
+        // reads as the primary control, with the checkbox facets refining it.
+        // The panel owns the slot; the search module owns what goes in it.
+        var searchHost = L.DomUtil.create('div', 'filter-panel-search', content);
+        if (typeof panelOptions.onSearchHostReady === 'function') {
+          try {
+            panelOptions.onSearchHostReady(searchHost);
+          } catch (e) {
+            console.warn('Filter panel: search module failed to initialise', e);
+          }
+        }
 
         // Spot filter section -- one fieldset per dimension
         for (var i = 0; i < dimensionConfigs.length; i++) {

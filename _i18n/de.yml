@@ -161,6 +161,17 @@ map:
   spot_with_tips_label: "%{spot}, Tipps: %{tips}"
   spot_with_tips_generic: "Einstiegsort mit Tipps"
 
+# Semantic search over spots
+search:
+  placeholder: "Einstiegsorte suchen..."
+  aria_label: "Einstiegsorte durchsuchen"
+  clear_label: "Suche löschen"
+  searching: "Suche läuft..."
+  no_results: "Keine Ergebnisse gefunden"
+  results_one: "1 Ergebnis"
+  results_many: "{count} Ergebnisse"
+  error: "Suche momentan nicht verfügbar"
+
 # Date formats
 date:
   format: "%d.%m.%Y"

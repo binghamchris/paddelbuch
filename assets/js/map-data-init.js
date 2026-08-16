@@ -127,9 +127,27 @@
       { key: 'protectedAreas', label: layerLabels.protectedAreas, layerGroup: layerGroups.protectedAreas, defaultChecked: true, icon: '/assets/images/icons/protectedarea-light.svg', iconOnly: true }
     ];
 
-    // Initialize filter engine and panel
-    PaddelbuchFilterEngine.init(dimensionConfigs, map);
-    PaddelbuchFilterPanel.init(map, dimensionConfigs, layerToggles);
+    // Initialize filter engine and panel.
+    //
+    // The semantic-search dimension is registered with the ENGINE only, never
+    // with the panel: it carries no options, so the panel would render an empty
+    // fieldset for it. Appending it to the engine's dimension list is what makes
+    // search AND-combine with the checkbox dimensions, since evaluateMarker
+    // requires every active dimension to match.
+    var engineDimensions = dimensionConfigs.slice();
+    var searchEnabled = !!(window.PaddelbuchSemanticSearch
+      && window.PaddelbuchSemanticSearch.isConfigured());
+
+    if (searchEnabled) {
+      engineDimensions.push(window.PaddelbuchSemanticSearch.getDimensionConfig());
+    }
+
+    PaddelbuchFilterEngine.init(engineDimensions, map);
+    PaddelbuchFilterPanel.init(map, dimensionConfigs, layerToggles, {
+      onSearchHostReady: searchEnabled
+        ? function(host) { window.PaddelbuchSemanticSearch.init(map, host); }
+        : null
+    });
 
     // Initial data load for the current viewport
     var bounds = PaddelbuchSpatialUtils.leafletBoundsToObject(map.getBounds());

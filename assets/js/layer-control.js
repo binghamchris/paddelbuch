@@ -272,7 +272,11 @@
         marker.addTo(layerGroups.noEntry);
       } else {
         // Register in marker registry (Requirements 4.1, 9.1, 9.3)
+        // `slug` is carried in the metadata as well as being the registry key,
+        // because filter dimensions receive only the metadata object. The
+        // semantic-search dimension matches on it.
         var metadata = {
+          slug: spot.slug,
           spotType_slug: spotTypeSlug,
           paddleCraftTypes: spot.paddleCraftTypes || [],
           paddlingEnvironmentType_slug: spot.paddlingEnvironmentType_slug || '',

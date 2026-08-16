@@ -155,6 +155,17 @@ map:
   spot_with_tips_label: "%{spot}, tips: %{tips}"
   spot_with_tips_generic: "Spot with tips"
 
+# Semantic search over spots
+search:
+  placeholder: "Search spots..."
+  aria_label: "Search spots"
+  clear_label: "Clear search"
+  searching: "Searching..."
+  no_results: "No results found"
+  results_one: "1 result"
+  results_many: "{count} results"
+  error: "Search currently unavailable"
+
 # Error pages
 errors:
   not_found_title: "Page Not Found"

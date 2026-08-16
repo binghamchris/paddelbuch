@@ -46,8 +46,9 @@ All modules live in `assets/js/`. They are plain scripts that attach functions t
 
 | Module | Purpose |
 |--------|---------|
-| `filter-engine.js` | Core filter logic: multi-dimension AND filtering across spot type, paddle craft type, and spot tip type |
+| `filter-engine.js` | Core filter logic: multi-dimension AND filtering across spot type, paddle craft type, spot tip type, and semantic search |
 | `filter-panel.js` | Renders the filter toggle UI panel and handles user interactions |
+| `semantic-search.js` | Free-text semantic search over spots, expressed as a filter dimension so it AND-combines with the checkbox dimensions. See "Semantic Search" below |
 | `layer-control.js` | Custom Leaflet control for toggling map layers, includes date-based event notice filtering and the SVG halo Composite_Icon builder for spots with tip types |
 | `zoom-layer-manager.js` | Shows/hides detail layers (obstacles, protected areas) based on zoom level (threshold: zoom 12) |
 
@@ -225,6 +226,83 @@ _sass/
 
 The main entry point is `assets/css/application.scss`, which imports Bootstrap and then the project's settings, utilities, components, and page styles.
 
+## Semantic Search
+
+Free-text search over spots on the home-page map, backed by the separate
+`paddelbuch-searchengine` service (API Gateway + Lambda + Bedrock Titan
+embeddings + a DynamoDB vector store).
+
+### How it fits the filter system
+
+Search is a **filter dimension**, not a separate rendering path. The module turns
+a query into a set of spot slugs, hands that set to `filter-engine.js` via
+`setDimensionSelection('search', slugs)`, and the engine's existing AND
+evaluation does the rest. A marker is visible only when it matches the search AND
+every active checkbox dimension.
+
+Two consequences worth knowing:
+
+- **An empty selection means "inactive", not "match nothing".** That is the
+  engine's pre-existing convention, and search relies on it: clearing the box, a
+  too-short query, a zero-result query, and a failed request all converge on an
+  empty set and all correctly restore the checkbox-only view.
+- **The search dimension is registered with the engine but not the panel.** It
+  has no options, so rendering it as a fieldset would produce an empty box. That
+  asymmetry lives in `map-data-init.js`.
+
+Search results also drive `map.fitBounds`. This is functional, not cosmetic: the
+marker registry only holds spots whose viewport tiles have loaded, so without
+moving the map a match in another region has no marker to reveal.
+
+### Why not render markers straight from the API response?
+
+The response carries enough to draw a marker, but the backend does not map
+`spotTipType_slugs`. Markers built from API data would look like "no tips" and
+would break AND-combination for the tip dimension. Filtering the tile-loaded
+markers avoids this, since each already carries correct metadata.
+
+### Configuration
+
+```
+Amplify parameter -> Amplify env var -> _plugins/env_loader.rb
+  -> site.search_api_endpoint / site.search_api_key
+  -> #semantic-search-config JSON block -> JSON.parse in semantic-search.js
+```
+
+| Variable / parameter | Purpose |
+|---|---|
+| `SEARCH_API_ENDPOINT` / `EnvVarSearchApiEndpoint` | Full search endpoint URL. **The search UI renders only when this is non-empty.** |
+| `SEARCH_API_KEY` / `EnvVarSearchApiKey` | API Gateway usage-plan key |
+| `SearchApiCspHost` | Search API origin added to CSP `connect-src` |
+
+Empty and whitespace-only values are treated as unset, because CloudFormation
+supplies `""` for an omitted parameter and `""` is truthy in both Ruby and Liquid.
+A build with none of these set omits the search box entirely and leaves the
+filter panel unchanged.
+
+**On the API key.** It is rendered into the public HTML, because the site is
+statically generated with no server-side rendering layer. That is acceptable only
+because an API Gateway API key is a usage-plan identifier for throttling and
+quota attribution, not an authorisation secret. Access control for the endpoint
+is its Origin allow-list plus WAF. Never route an IAM credential through this
+path.
+
+**Local development.** The deployed API validates the request Origin against an
+allow-list in SSM (`/paddelbuch-search/allowed-origins`). Localhost is not on
+that list by default, so searches from a local build return HTTP 403 until it is
+added.
+
+### Tuning
+
+`limit` (default 40) and `minScore` (default 0.25) are sent with every request
+and are configurable via `site.search.*`. The threshold comes from the backend's
+own e2e query set, which treats 0.2 as the relevance floor and 0.3 as the
+expected top-match score.
+
+Note the tension: a tight `limit` can interact badly with restrictive checkbox
+filters, because the AND may empty out when a qualifying spot ranked just outside
+the limit. Raising `limit` widens the pool at the cost of payload size.
+
 ## Content Security Policy
 
 The site enforces a strict Content Security Policy (CSP) via the CloudFormation template (`deploy/frontend-deploy.yaml`). This is a deliberate design constraint that shapes how frontend code can be written.
@@ -237,9 +315,16 @@ img-src 'self' data: raw.githubusercontent.com api.mapbox.com;
 style-src 'self';
 script-src 'self' https://tinylytics.app;
 font-src 'self' data:;
-connect-src 'self' tiles.openfreemap.org https://tinylytics.app;
+connect-src 'self' tiles.openfreemap.org https://tinylytics.app ${SearchApiCspHost};
 worker-src 'self' blob:
 ```
+
+`${SearchApiCspHost}` is substituted by CloudFormation from the `SearchApiCspHost`
+template parameter, which must hold the scheme and host of the search API (no
+path) whenever semantic search is enabled. The `CustomHeaders` block is a `!Sub`
+block for this reason; it is the only placeholder in it, and a test pins that so
+a stray `${` cannot silently break every header on the site. When the parameter
+is empty the directive simply has no extra source.
 
 ### Design Decisions
 

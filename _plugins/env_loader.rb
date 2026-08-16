@@ -21,7 +21,7 @@
 module Jekyll
   class EnvLoader
     ENV_VAR_PATTERN = /\A([A-Za-z_][A-Za-z0-9_]*)=(.*)\z/
-    KNOWN_KEYS = %w[MAPBOX_URL CONTENTFUL_SPACE_ID CONTENTFUL_ACCESS_TOKEN CONTENTFUL_ENVIRONMENT SITE_URL].freeze
+    KNOWN_KEYS = %w[MAPBOX_URL CONTENTFUL_SPACE_ID CONTENTFUL_ACCESS_TOKEN CONTENTFUL_ENVIRONMENT SITE_URL SEARCH_API_ENDPOINT SEARCH_API_KEY].freeze
 
     class << self
       def load_env_file(path)
@@ -88,6 +88,31 @@ Jekyll::Hooks.register :site, :after_init do |site|
   # Map SITE_URL to site.url
   site_url = env_vars['SITE_URL'] || env_vars['NEXT_PUBLIC_SITE_URL']
   site.config['url'] = site_url if site_url
+
+  # Map the semantic-search API config to site.search_api_endpoint /
+  # site.search_api_key.
+  #
+  # Both values reach the browser: they are rendered into a JSON config block in
+  # the built HTML, because this is a static site with no server-side rendering.
+  # That is acceptable for an API Gateway API key, which is a usage-plan
+  # identifier for throttling and quota attribution rather than an
+  # authorisation secret. Access control for the endpoint rests on the Origin
+  # allow-list and WAF, not on the key being private. Do NOT route an IAM
+  # credential or signing secret through here.
+  #
+  # When SEARCH_API_ENDPOINT is unset the search UI does not render at all, so
+  # a local build without these vars is a supported configuration.
+  #
+  # Empty strings are treated as unset: CloudFormation passes "" for an omitted
+  # parameter, and "" is truthy in both Ruby and Liquid, so without this guard an
+  # unconfigured deploy would render a search config block with a blank endpoint.
+  search_endpoint = env_vars['SEARCH_API_ENDPOINT']
+  search_endpoint = nil if search_endpoint.nil? || search_endpoint.strip.empty?
+  site.config['search_api_endpoint'] = search_endpoint if search_endpoint
+
+  search_api_key = env_vars['SEARCH_API_KEY']
+  search_api_key = nil if search_api_key.nil? || search_api_key.strip.empty?
+  site.config['search_api_key'] = search_api_key if search_api_key
 
   # Also set them as actual ENV vars so Rake tasks and other plugins can use them
   env_vars.each { |k, v| ENV[k] ||= v }

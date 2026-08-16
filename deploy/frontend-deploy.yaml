@@ -38,6 +38,29 @@ Parameters:
     Type: String
     Description: The production site URL for Jekyll build (only required for PRODUCTION stage)
     Default: ""
+  EnvVarSearchApiEndpoint:
+    Type: String
+    Description: >-
+      Full URL of the semantic search endpoint, e.g.
+      https://abc123.execute-api.eu-central-1.amazonaws.com/prod/search.
+      Leave empty to build the site without the search UI.
+    Default: ""
+  EnvVarSearchApiKey:
+    Type: String
+    Description: >-
+      API Gateway API key for the search usage plan. This value is rendered into
+      the public HTML, so it must be a usage-plan identifier only, never an
+      authorisation secret. Access control for the endpoint is its Origin
+      allow-list plus WAF.
+    Default: ""
+  SearchApiCspHost:
+    Type: String
+    Description: >-
+      Origin of the search API to add to the CSP connect-src directive, e.g.
+      https://abc123.execute-api.eu-central-1.amazonaws.com (scheme and host
+      only, no path). Must be set whenever EnvVarSearchApiEndpoint is set,
+      otherwise the browser blocks the search fetch.
+    Default: ""
   GithubRepoUrl:
     Type: String
     Description: The URL of the GitHub repo to be deployed
@@ -63,7 +86,7 @@ Resources:
     Properties: 
       AccessToken:
         Ref: GithubToken
-      CustomHeaders: |-
+      CustomHeaders: !Sub |-
         customHeaders:
           # Security and default cache headers for all files (recursive)
           - pattern: '**/*'
@@ -85,7 +108,8 @@ Resources:
                   default-src 'self'; img-src 'self' data:
                   raw.githubusercontent.com api.mapbox.com; style-src 'self';
                   script-src 'self' https://tinylytics.app; font-src 'self' data:;
-                  connect-src 'self' tiles.openfreemap.org https://tinylytics.app;
+                  connect-src 'self' tiles.openfreemap.org https://tinylytics.app
+                  ${SearchApiCspHost};
                   worker-src 'self' blob:
               - key: Permissions-Policy
                 value: >-
@@ -153,6 +177,12 @@ Resources:
         - Name: CONTENTFUL_ENVIRONMENT
           Value:
             Ref: EnvVarContentfulEnv
+        - Name: SEARCH_API_ENDPOINT
+          Value:
+            Ref: EnvVarSearchApiEndpoint
+        - Name: SEARCH_API_KEY
+          Value:
+            Ref: EnvVarSearchApiKey
         - Name: JEKYLL_ENV
           Value: production
         - Name: _CUSTOM_IMAGE

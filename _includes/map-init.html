@@ -60,4 +60,40 @@
 <script type="application/json" id="map-data-config">
 {{ site.data.map_data_config_json }}
 </script>
+
+<!--
+  Semantic search configuration as a CSP-safe JSON data element.
+
+  Rendered only when site.search_api_endpoint is set (from SEARCH_API_ENDPOINT
+  via _plugins/env_loader.rb). Without it the search module finds no config and
+  renders nothing, which is the expected state for a local build.
+
+  The api key is an API Gateway usage-plan identifier, not an authorisation
+  secret; the endpoint's access control is its Origin allow-list plus WAF.
+-->
+{% if site.search_api_endpoint %}
+<script type="application/json" id="semantic-search-config">
+{
+  "endpoint": {{ site.search_api_endpoint | jsonify }},
+  "apiKey": {{ site.search_api_key | default: "" | jsonify }},
+  "locale": "{{ current_locale }}",
+  "limit": {{ site.search.limit | default: 40 }},
+  "minScore": {{ site.search.min_score | default: 0.25 }},
+  "minQueryLength": {{ site.search.min_query_length | default: 2 }},
+  "debounceMs": {{ site.search.debounce_ms | default: 350 }},
+  "i18n": {
+    "placeholder": "{% t search.placeholder %}",
+    "ariaLabel": "{% t search.aria_label %}",
+    "clearLabel": "{% t search.clear_label %}",
+    "searching": "{% t search.searching %}",
+    "noResults": "{% t search.no_results %}",
+    "resultsOne": "{% t search.results_one %}",
+    "resultsMany": "{% t search.results_many %}",
+    "error": "{% t search.error %}"
+  }
+}
+</script>
+<script src="{{ '/assets/js/semantic-search.js' | relative_url }}"></script>
+{% endif %}
+
 <script src="{{ '/assets/js/map-data-init.js' | relative_url }}"></script>
