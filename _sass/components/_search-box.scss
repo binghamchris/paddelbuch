@@ -7,6 +7,15 @@
 // rule that touches shared Leaflet structure is scoped to
 // `.has-search-control`, a class the search module adds to its own corner
 // element at runtime, so no other map corner and no other page is affected.
+//
+// Colours come from $swisscanoe-blue / $secondary-blue / $white in
+// _sass/settings/_paddelbuch_colours.scss, the project's single source of truth
+// for colour. No literal hex values appear in this file.
+
+// Height of the filter control's visible block, which this search box matches so
+// the two align top and bottom: the 34px .filter-panel-toggle button plus the
+// 1px top and bottom border on .filter-panel.
+$search-box-height: 36px;
 
 // Lay this ONE corner out as a row so the search box sits beside the filter
 // button instead of stacking beneath it. Leaflet's default
@@ -24,15 +33,15 @@
   flex-wrap: wrap;
 }
 
+// A transparent wrapper: the input itself is the visible box, so its height can
+// match the filter control exactly without a surrounding border adding to it.
+// The font matches .filter-panel so the two controls share typography.
 .search-control {
-  // Match the filter panel's visual language without depending on its styles.
   width: 240px;
   max-width: calc(100vw - 90px);
-  padding: 0.4em 0.5em;
   font: 1.2em/1.4 $font-sans-serif;
-  background: $white;
-  border: 1px solid $secondary-blue;
-  border-radius: 0;
+  background: transparent;
+  border: none;
   box-shadow: none;
 }
 
@@ -46,11 +55,15 @@
   flex: 1 1 auto;
   width: 100%;
   min-width: 0;
-  padding: 0.35rem 1.75rem 0.35rem 0.5rem;
+  // border-box so the border is included in the matched height.
+  box-sizing: border-box;
+  height: $search-box-height;
+  // No vertical padding: the input centres its own text across the full height.
+  padding: 0 1.75rem 0 0.5rem;
   font: inherit;
   color: $swisscanoe-blue;
   background: $white;
-  border: 1px solid $secondary-blue;
+  border: 1px solid $swisscanoe-blue;
   border-radius: 0;
 
   &::placeholder {
@@ -73,23 +86,33 @@
 
 .search-box-clear {
   position: absolute;
-  right: 0.25rem;
+  right: 0.3rem;
+  // Centre on the input's fixed height; the button is absolutely positioned so
+  // the field's flex alignment does not apply to it.
+  top: 50%;
+  transform: translateY(-50%);
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 1.25rem;
-  height: 1.25rem;
+  width: 1.15rem;
+  height: 1.15rem;
   padding: 0;
-  font: inherit;
+  font-family: inherit;
+  font-size: 1.05em;
+  font-weight: 700;
   line-height: 1;
   color: $swisscanoe-blue;
   cursor: pointer;
   background: transparent;
   border: none;
+  border-radius: 0;
+  opacity: 1;
 
+  // Invert on interaction for an unambiguous affordance.
   &:hover,
   &:focus {
-    color: $secondary-blue;
+    color: $white;
+    background: $swisscanoe-blue;
   }
 
   &[hidden] {
@@ -98,11 +121,16 @@
 }
 
 .search-box-status {
+  // The wrapper is transparent, so the status line carries its own surface to
+  // stay legible over the map.
   margin: 0.25rem 0 0;
+  padding: 0.15rem 0.4rem;
   font-size: 0.7em;
-  color: $secondary-blue;
+  color: $swisscanoe-blue;
+  background: $white;
+  border: 1px solid $secondary-blue;
 
-  // Collapse to nothing when empty so the control does not reserve dead space.
+  // Collapse to nothing when empty so no empty box floats over the map.
   &:empty {
     display: none;
   }
