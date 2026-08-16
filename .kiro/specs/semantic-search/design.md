@@ -42,7 +42,11 @@ The important detail is what an empty set means. `evaluateMarker` already skips 
 
 ### `assets/js/filter-panel.js` — the search host slot
 
-The panel creates an empty `div.filter-panel-search` at the top of its content area and invokes an optional `panelOptions.onSearchHostReady(host)` callback. The panel owns the slot; the search module owns the contents. The callback is wrapped in try/catch so a search failure cannot prevent the filter checkboxes from rendering.
+The panel creates an empty `div.filter-panel-search` as a **direct child of the control container**, above the funnel toggle and deliberately **outside** `.filter-panel-content`, then invokes an optional `panelOptions.onSearchHostReady(host)` callback. The panel owns the slot; the search module owns the contents. The callback is wrapped in try/catch so a search failure cannot prevent the filter checkboxes from rendering.
+
+The placement is load-bearing and was initially wrong. The search box first went *inside* `.filter-panel-content`, which carries `display: none` until the toggle adds `.expanded`. Everything was wired correctly and the markup was present, but nothing was visible until the user clicked the funnel, so on the deployed site the feature looked absent. Search has to be visible without a click: it is the primary way to find a spot, and the checkbox facets refine what it returns. The fieldsets remain collapsible; only the input is promoted. `_tests/unit/search-box-visibility.test.js` pins this by asserting the host is a direct child of `.filter-panel` and is not reachable through the collapsible region.
+
+Because the host is still inside the control container, it keeps the container's `disableClickPropagation` / `disableScrollPropagation` guards, so typing in the input never pans or zooms the map.
 
 The fourth parameter is named `panelOptions`, not `options`, deliberately: `onAdd` already declares `var options = dim.options || []` inside its dimension loop, and `var` hoisting would shadow an outer `options` across the entire function, making it `undefined` at the top. This was caught by the existing filter-panel tests.
 

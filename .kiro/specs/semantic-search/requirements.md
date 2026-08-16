@@ -29,7 +29,7 @@ This supersedes the earlier `semantic-search` requirements on the abandoned `fea
 
 #### Acceptance Criteria
 
-1. THE Search_Box SHALL render at the top of the Filter_Panel content area, above the filter dimension fieldsets.
+1. THE Search_Box SHALL render as a direct child of the Filter_Panel control, above the funnel toggle and outside the collapsible content region, so that it is visible on page load without any interaction.
 2. THE Search_Box SHALL render a placeholder and an accessible label in the current Locale.
 3. THE Search_Box SHALL render a clear button that is hidden while the input is empty.
 4. THE Search_Box SHALL render a status region that announces search outcomes to assistive technology.

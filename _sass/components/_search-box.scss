@@ -1,11 +1,19 @@
 @use "../settings/settings" as *;
 
-// Semantic search box - rendered at the top of the filter panel content, above
-// the dimension fieldsets. Styling deliberately mirrors .filter-panel so the
-// search input reads as part of the same control rather than a bolted-on widget.
+// Semantic search box - rendered as a DIRECT child of .filter-panel, above the
+// funnel toggle and outside the collapsible .filter-panel-content. It must stay
+// visible without any click, so it deliberately does not live in the region
+// that .expanded reveals.
+//
+// Styling mirrors .filter-panel so the input reads as part of the same control
+// rather than a bolted-on widget.
 
 .filter-panel-search {
-  padding: 0 0 0.5rem;
+  padding: 0.4em 0.5em;
+  // The panel is only as wide as its content when collapsed; give the search
+  // row a sensible floor so the input is usable before anything is expanded.
+  min-width: 210px;
+  border-bottom: 1px solid $secondary-blue;
 }
 
 .search-box-field {
@@ -16,6 +24,7 @@
 
 .search-box-input {
   flex: 1 1 auto;
+  width: 100%;
   min-width: 0;
   padding: 0.35rem 1.75rem 0.35rem 0.5rem;
   font: inherit;
@@ -73,8 +82,8 @@
   font-size: 0.75em;
   color: $secondary-blue;
 
-  // Collapse to nothing when empty so the panel does not reserve dead space
-  // between the input and the first fieldset.
+  // Collapse to nothing when empty so the search row does not reserve dead
+  // space above the funnel toggle.
   &:empty {
     display: none;
   }

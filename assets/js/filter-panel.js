@@ -39,6 +39,25 @@
         L.DomEvent.disableClickPropagation(container);
         L.DomEvent.disableScrollPropagation(container);
 
+        // Search host -- a DIRECT child of the container, deliberately OUTSIDE
+        // .filter-panel-content.
+        //
+        // .filter-panel-content is display:none until the funnel toggle adds
+        // .expanded, so anything placed inside it is invisible on page load.
+        // Search must be visible without a click: it is the primary way to find
+        // a spot, and the checkbox facets refine what it returns. Putting the
+        // input here keeps it always on screen while the fieldsets stay
+        // collapsible, and it still inherits the container's click/scroll
+        // propagation guards so typing never pans the map.
+        var searchHost = L.DomUtil.create('div', 'filter-panel-search', container);
+        if (typeof panelOptions.onSearchHostReady === 'function') {
+          try {
+            panelOptions.onSearchHostReady(searchHost);
+          } catch (e) {
+            console.warn('Filter panel: search module failed to initialise', e);
+          }
+        }
+
         // Toggle button
         var toggleBtn = L.DomUtil.create('button', 'filter-panel-toggle', container);
         toggleBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>';
@@ -49,18 +68,6 @@
 
         // Content area
         var content = L.DomUtil.create('div', 'filter-panel-content', container);
-
-        // Search host -- sits above the dimension fieldsets so free-text search
-        // reads as the primary control, with the checkbox facets refining it.
-        // The panel owns the slot; the search module owns what goes in it.
-        var searchHost = L.DomUtil.create('div', 'filter-panel-search', content);
-        if (typeof panelOptions.onSearchHostReady === 'function') {
-          try {
-            panelOptions.onSearchHostReady(searchHost);
-          } catch (e) {
-            console.warn('Filter panel: search module failed to initialise', e);
-          }
-        }
 
         // Spot filter section -- one fieldset per dimension
         for (var i = 0; i < dimensionConfigs.length; i++) {
