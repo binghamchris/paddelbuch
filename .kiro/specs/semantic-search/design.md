@@ -40,15 +40,23 @@ The important detail is what an empty set means. `evaluateMarker` already skips 
 
 `evaluateMarker` receives only the metadata object, not the registry key, so the slug had to be added to the metadata for the search dimension to match on it. The registry already keys on the same value, so this duplicates a value rather than introducing a new source of truth.
 
-### `assets/js/filter-panel.js` — the search host slot
+### Search placement — a standalone Leaflet control
 
-The panel creates an empty `div.filter-panel-search` as a **direct child of the control container**, above the funnel toggle and deliberately **outside** `.filter-panel-content`, then invokes an optional `panelOptions.onSearchHostReady(host)` callback. The panel owns the slot; the search module owns the contents. The callback is wrapped in try/catch so a search failure cannot prevent the filter checkboxes from rendering.
+The search box is its **own** `L.Control` at `topleft`, added after the filter panel. `filter-panel.js` is untouched by this feature and is byte-identical to its pre-feature state.
 
-The placement is load-bearing and was initially wrong. The search box first went *inside* `.filter-panel-content`, which carries `display: none` until the toggle adds `.expanded`. Everything was wired correctly and the markup was present, but nothing was visible until the user clicked the funnel, so on the deployed site the feature looked absent. Search has to be visible without a click: it is the primary way to find a spot, and the checkbox facets refine what it returns. The fieldsets remain collapsible; only the input is promoted. `_tests/unit/search-box-visibility.test.js` pins this by asserting the host is a direct child of `.filter-panel` and is not reachable through the collapsible region.
+Placement took three attempts, and both failures are worth recording because each was invisible to the tests at the time:
 
-Because the host is still inside the control container, it keeps the container's `disableClickPropagation` / `disableScrollPropagation` guards, so typing in the input never pans or zooms the map.
+1. **Inside `.filter-panel-content`.** Fully wired and present in the DOM, but that region is `display: none` until the funnel toggle adds `.expanded`, so no search UI appeared on page load. On the deployed site the feature looked entirely absent.
+2. **As a direct child of `.filter-panel`.** Visible, but it widened the panel and changed the filter button's appearance — the panel is sized by its content.
+3. **Its own control (current).** Visible without interaction, and structurally incapable of affecting the panel's size or styling.
 
-The fourth parameter is named `panelOptions`, not `options`, deliberately: `onAdd` already declares `var options = dim.options || []` inside its dimension loop, and `var` hoisting would shadow an outer `options` across the entire function, making it `undefined` at the top. This was caught by the existing filter-panel tests.
+Leaflet stacks controls within a corner vertically (`.leaflet-control { float: left; clear: both; }`). To place search to the *right* of the filter button, the module adds a `has-search-control` class to its own corner element at runtime, and CSS lays out only that corner as a flex row. The scoping matters: no other corner and no other page can be affected, and the class only ever exists when search is configured. This is safe on the home map because the filter panel is the corner's only other occupant — zoom and locate are both `bottomright`.
+
+The control container gets Leaflet's `disableClickPropagation` and `disableScrollPropagation`, so typing and text selection never pan or zoom the map.
+
+One shared behaviour worth knowing: `filter-panel.js` sets the corner element's `z-index` to 0 on `popupopen` and restores it on `popupclose`. Because both controls share that corner, the search box is also lowered while a popup is open. That is consistent with how the filter panel already behaves and keeps popups above both controls.
+
+The layout uses `flex-wrap: wrap` and a `max-width` on the control so a narrow viewport wraps the search box below the filter button rather than overflowing the map.
 
 ### `assets/js/map-data-init.js` — wiring
 

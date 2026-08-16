@@ -1,19 +1,39 @@
 @use "../settings/settings" as *;
 
-// Semantic search box - rendered as a DIRECT child of .filter-panel, above the
-// funnel toggle and outside the collapsible .filter-panel-content. It must stay
-// visible without any click, so it deliberately does not live in the region
-// that .expanded reveals.
+// Semantic search box - a STANDALONE Leaflet control sitting to the right of the
+// filter button, not markup inside the filter panel.
 //
-// Styling mirrors .filter-panel so the input reads as part of the same control
-// rather than a bolted-on widget.
+// Nothing here targets .filter-panel or any other existing element. The only
+// rule that touches shared Leaflet structure is scoped to
+// `.has-search-control`, a class the search module adds to its own corner
+// element at runtime, so no other map corner and no other page is affected.
 
-.filter-panel-search {
+// Lay this ONE corner out as a row so the search box sits beside the filter
+// button instead of stacking beneath it. Leaflet's default
+// `.leaflet-control { float: left; clear: both; }` stacks children vertically;
+// flex on the parent supersedes those floats without restyling the children.
+//
+// On the home map the filter panel is this corner's only other occupant (zoom
+// and locate are both bottom-right), so the filter button keeps its exact
+// position, size, and appearance.
+.leaflet-top.leaflet-left.has-search-control {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  // Wrap rather than overflow on narrow viewports.
+  flex-wrap: wrap;
+}
+
+.search-control {
+  // Match the filter panel's visual language without depending on its styles.
+  width: 240px;
+  max-width: calc(100vw - 90px);
   padding: 0.4em 0.5em;
-  // The panel is only as wide as its content when collapsed; give the search
-  // row a sensible floor so the input is usable before anything is expanded.
-  min-width: 210px;
-  border-bottom: 1px solid $secondary-blue;
+  font: 1.2em/1.4 $font-sans-serif;
+  background: $white;
+  border: 1px solid $secondary-blue;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .search-box-field {
@@ -79,11 +99,10 @@
 
 .search-box-status {
   margin: 0.25rem 0 0;
-  font-size: 0.75em;
+  font-size: 0.7em;
   color: $secondary-blue;
 
-  // Collapse to nothing when empty so the search row does not reserve dead
-  // space above the funnel toggle.
+  // Collapse to nothing when empty so the control does not reserve dead space.
   &:empty {
     display: none;
   }

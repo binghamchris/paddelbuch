@@ -513,6 +513,65 @@
   }
 
   /**
+   * Add the search box to the map as its OWN Leaflet control.
+   *
+   * Deliberately a separate control rather than markup inside the filter panel.
+   * Two reasons:
+   *
+   *   1. Visibility. The filter panel's content region is display:none until the
+   *      funnel toggle expands it, so anything nested there is invisible on page
+   *      load.
+   *   2. Isolation. Living in its own control means the search box cannot change
+   *      the filter panel's size, styling, or behaviour -- the panel is
+   *      untouched, exactly as it ships without this feature.
+   *
+   * The control is registered at 'topleft', the same corner as the filter panel.
+   * Leaflet stacks controls in a corner vertically, so the corner element is
+   * marked with 'has-search-control' and CSS lays that ONE corner out as a row,
+   * putting the search box to the right of the filter button. Only this corner is
+   * affected, and on the home map the filter panel is its only other occupant
+   * (zoom and locate both sit bottom-right).
+   *
+   * @param {L.Map} mapInstance - Leaflet map instance
+   * @returns {Object|null} The control instance, or null when not applicable
+   */
+  function createControl(mapInstance) {
+    if (!config) {
+      config = readConfig();
+    }
+    if (!config || !mapInstance || typeof L === 'undefined') {
+      return null;
+    }
+
+    map = mapInstance;
+
+    var SearchControl = L.Control.extend({
+      options: { position: 'topleft' },
+
+      onAdd: function() {
+        var container = L.DomUtil.create('div', 'search-control');
+        // Keep clicks and scrolls inside the control from reaching the map, so
+        // typing and text selection never pan or zoom it.
+        L.DomEvent.disableClickPropagation(container);
+        L.DomEvent.disableScrollPropagation(container);
+        buildDom(container);
+        return container;
+      }
+    });
+
+    var instance = new SearchControl();
+    instance.addTo(mapInstance);
+
+    var el = typeof instance.getContainer === 'function' ? instance.getContainer() : null;
+    var corner = el && el.parentNode;
+    if (corner && corner.classList) {
+      corner.classList.add('has-search-control');
+    }
+
+    return instance;
+  }
+
+  /**
    * Report whether search is configured for this build.
    *
    * @returns {boolean}
@@ -526,6 +585,7 @@
 
   global.PaddelbuchSemanticSearch = {
     init: init,
+    createControl: createControl,
     isConfigured: isConfigured,
     getDimensionConfig: getDimensionConfig,
     matchFn: matchFn,

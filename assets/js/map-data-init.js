@@ -143,11 +143,17 @@
     }
 
     PaddelbuchFilterEngine.init(engineDimensions, map);
-    PaddelbuchFilterPanel.init(map, dimensionConfigs, layerToggles, {
-      onSearchHostReady: searchEnabled
-        ? function(host) { window.PaddelbuchSemanticSearch.init(map, host); }
-        : null
-    });
+
+    // The filter panel is initialised exactly as it is without this feature --
+    // no extra arguments, no injected markup -- so search cannot alter its
+    // design, size, or behaviour.
+    PaddelbuchFilterPanel.init(map, dimensionConfigs, layerToggles);
+
+    // The search box is its own Leaflet control, sitting beside the filter
+    // button rather than inside the collapsible panel.
+    if (searchEnabled) {
+      window.PaddelbuchSemanticSearch.createControl(map);
+    }
 
     // Initial data load for the current viewport
     var bounds = PaddelbuchSpatialUtils.leafletBoundsToObject(map.getBounds());

@@ -10,26 +10,16 @@
    * @param {L.Map} map - Leaflet map instance
    * @param {Array} dimensionConfigs - Array of dimension config objects
    * @param {Array} layerToggles - Array of { key, label, layerGroup, defaultChecked }
-   * @param {Object} [panelOptions] - Optional hooks
-   * @param {Function} [panelOptions.onSearchHostReady] - Called with the search
-   *   host element once the panel content exists, so an optional search module
-   *   can render itself at the top of the panel. Omitted or null when search is
-   *   not configured for this build.
-   *
-   * Named panelOptions rather than options deliberately: onAdd already declares
-   * `var options` for the per-dimension option loop, and var hoisting would
-   * shadow an outer `options` across the whole of onAdd.
    */
-  function init(map, dimensionConfigs, layerToggles, panelOptions) {
+  function init(map, dimensionConfigs, layerToggles) {
     if (!map) {
       console.warn('Filter panel: map not ready, retrying...');
-      setTimeout(function() { init(map, dimensionConfigs, layerToggles, panelOptions); }, 100);
+      setTimeout(function() { init(map, dimensionConfigs, layerToggles); }, 100);
       return;
     }
 
     dimensionConfigs = dimensionConfigs || [];
     layerToggles = layerToggles || [];
-    panelOptions = panelOptions || {};
 
     FilterPanelControl = L.Control.extend({
       options: { position: 'topleft' },
@@ -38,25 +28,6 @@
         var container = L.DomUtil.create('div', 'filter-panel leaflet-bar');
         L.DomEvent.disableClickPropagation(container);
         L.DomEvent.disableScrollPropagation(container);
-
-        // Search host -- a DIRECT child of the container, deliberately OUTSIDE
-        // .filter-panel-content.
-        //
-        // .filter-panel-content is display:none until the funnel toggle adds
-        // .expanded, so anything placed inside it is invisible on page load.
-        // Search must be visible without a click: it is the primary way to find
-        // a spot, and the checkbox facets refine what it returns. Putting the
-        // input here keeps it always on screen while the fieldsets stay
-        // collapsible, and it still inherits the container's click/scroll
-        // propagation guards so typing never pans the map.
-        var searchHost = L.DomUtil.create('div', 'filter-panel-search', container);
-        if (typeof panelOptions.onSearchHostReady === 'function') {
-          try {
-            panelOptions.onSearchHostReady(searchHost);
-          } catch (e) {
-            console.warn('Filter panel: search module failed to initialise', e);
-          }
-        }
 
         // Toggle button
         var toggleBtn = L.DomUtil.create('button', 'filter-panel-toggle', container);

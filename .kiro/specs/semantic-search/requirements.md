@@ -29,7 +29,8 @@ This supersedes the earlier `semantic-search` requirements on the abandoned `fea
 
 #### Acceptance Criteria
 
-1. THE Search_Box SHALL render as a direct child of the Filter_Panel control, above the funnel toggle and outside the collapsible content region, so that it is visible on page load without any interaction.
+1. THE Search_Box SHALL render as its own Leaflet control, positioned immediately to the right of the Filter_Panel's toggle button, outside the collapsible filter panel, and SHALL be visible on page load without any interaction.
+7. THE Search_Box SHALL NOT alter the layout, size, styling, or behaviour of the Filter_Panel or any other existing site element. `assets/js/filter-panel.js` and `_sass/components/_filter-panel.scss` SHALL remain byte-identical to their pre-feature state.
 2. THE Search_Box SHALL render a placeholder and an accessible label in the current Locale.
 3. THE Search_Box SHALL render a clear button that is hidden while the input is empty.
 4. THE Search_Box SHALL render a status region that announces search outcomes to assistive technology.
