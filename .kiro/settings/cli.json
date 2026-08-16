@@ -1,0 +1,6 @@
+{
+  "chat.modelDefaults": {},
+  "toolSearch.enabled": true,
+  "toolSearch.minPct": 0,
+  "toolSearch.minTokens": 0
+}
