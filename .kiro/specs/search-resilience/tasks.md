@@ -132,39 +132,74 @@ how a fault behaves.
   - [ ] 9.6 Add the property test that cache keys differ whenever any request
         parameter differs
 
-- [ ] 10. Make the notice action state-dependent (Requirement 4)
-  - [ ] 10.1 Extend `showNotice` to take an action: label, analytics event,
-        handler
-  - [ ] 10.2 Keep one permanently attached listener that dispatches to the
-        current action
-  - [ ] 10.3 Offer clear-search on no-results, retry on failure
-  - [ ] 10.4 Make retry a no-op that hides the notice when the input is empty
-  - [ ] 10.5 Add tests for both actions, and for the empty-input retry
+- [ ] 10. Persist the cache across navigation (Requirement 12)
+  - [ ] 10.1 Render `contentVersion` into the search config block from
+        `site.data.last_updates['spots']`, the signal `api_generator.rb` already
+        produces and `offene-daten/api.html` already consumes
+  - [ ] 10.2 Use `localStorage`, not `sessionStorage` -- a 7-day TTL is
+        meaningless within one tab session
+  - [ ] 10.3 One key per query: `pbsearch:<schema>:<contentVersion>:<requestUrl>`,
+        so a lookup is a single getItem with no index and no enumeration
+  - [ ] 10.4 Store each entry SELF-CONTAINED, with its own slugs and locations. Do
+        not implement the shared-table-plus-indices layout: it is 15.8x smaller but
+        two tabs appending concurrently diverge, after which one tab's positional
+        indices resolve to the other's spots
+  - [ ] 10.5 Read nothing during page or map initialisation -- reads happen only
+        when a query is issued
+  - [ ] 10.6 Stamp each entry with its write time; treat entries older than 7 days
+        as a miss and delete them
+  - [ ] 10.7 Purge superseded content/schema versions lazily via
+        `requestIdleCallback`, falling back to a zero-delay timeout. Never during
+        init -- enumeration is the one operation that touches every key
+  - [ ] 10.8 On `QuotaExceededError`, evict least-recently-used and retry once; on
+        a second failure or any other storage error, disable persistence for the
+        page and continue with the in-memory tier
+  - [ ] 10.9 Budget 4 MB, not the 9.88 MB measured in Chromium, because mobile
+        Safari provides less
+  - [ ] 10.10 Read order: in-memory, then persisted, then network
+  - [ ] 10.11 Tests: a persisted hit makes zero Attempts; a hit survives a
+        simulated navigation (fresh module against the same storage); an expired
+        entry is a miss and is deleted; a changed `contentVersion` orphans every
+        entry; a throwing `setItem` degrades silently with search still working;
+        Safari-private-style storage that throws on any write is handled; nothing
+        is read at init
 
-- [ ] 11. Configuration and localisation
-  - [ ] 11.1 Add `timeoutMs` to the `#semantic-search-config` block in
-        `_includes/map-init.html`
-  - [ ] 11.2 Add `timeout`, `timeout_hint`, `rate_limited`, `rate_limited_hint`,
+- [ ] 11. Make the notice action state-dependent (Requirement 4)
+  - [ ] 11.1 Extend `showNotice` to take an action: label, analytics event,
+        handler
+  - [ ] 11.2 Keep one permanently attached listener that dispatches to the
+        current action
+  - [ ] 11.3 Offer clear-search on no-results, retry on failure
+  - [ ] 11.4 Make retry a no-op that hides the notice when the input is empty
+  - [ ] 11.5 Add tests for both actions, and for the empty-input retry
+
+- [ ] 12. Configuration and localisation
+  - [ ] 12.1 Add `timeoutMs` and `contentVersion` to the
+        `#semantic-search-config` block in `_includes/map-init.html`
+  - [ ] 12.2 Add `timeout`, `timeout_hint`, `rate_limited`, `rate_limited_hint`,
         `rate_limited_hint_generic`, and `retry_label` to `_i18n/de.yml` and
         `_i18n/en.yml`
-  - [ ] 11.3 Pass the new strings through the config block's `i18n` object
-  - [ ] 11.4 Confirm `spec/i18n_key_parity_spec.rb` still passes
+  - [ ] 12.3 Pass the new strings through the config block's `i18n` object
+  - [ ] 12.4 Confirm `spec/i18n_key_parity_spec.rb` still passes
 
-- [ ] 12. Verification
-  - [ ] 12.1 Full Jest suite green, with the compiled-CSS baseline unchanged —
+- [ ] 13. Verification
+  - [ ] 13.1 Full Jest suite green, with the compiled-CSS baseline unchanged —
         this feature adds no CSS
-  - [ ] 12.2 Full RSpec suite green, including the new env_loader coverage.
+  - [ ] 13.2 Full RSpec suite green, including the new env_loader coverage.
         Remember Ruby tests are not part of the Amplify build, so run them
         locally before pushing
-  - [ ] 12.3 Confirm no request is issued to the Search_API before user input,
+  - [ ] 13.3 Confirm no request is issued to the Search_API before user input,
         and no availability probe exists
-  - [ ] 12.4 Exercise the real failure modes against the deployed branch: a
+  - [ ] 13.4 Exercise the real failure modes against the deployed branch: a
         blocked endpoint, a slow response, and a `429`
-  - [ ] 12.5 Deploy once with `SEARCH_DISABLED=true` and confirm the built page
+  - [ ] 13.5 Deploy once with `SEARCH_DISABLED=true` and confirm the built page
         has no search markup, no `semantic-search.js` request, and no search host
         in the CSP header — and that the map, markers, filter panel, and layer
         toggles are unaffected
-  - [ ] 12.6 Confirm the map behaves identically with search enabled, disabled by
+  - [ ] 13.6 Confirm the map behaves identically with search enabled, disabled by
         flag, disabled by absent endpoint, and enabled but broken
-  - [ ] 12.7 Update `docs/frontend.md` with the degradation behaviour, the new
+  - [ ] 13.6a On a real mobile device, confirm a persisted hit after navigation is
+        instant, and that first render is unaffected -- the desktop measurement was
+        0.033 ms for the largest entry, so this is a confirmation, not a discovery
+  - [ ] 13.7 Update `docs/frontend.md` with the degradation behaviour, the new
         config key, and the flag

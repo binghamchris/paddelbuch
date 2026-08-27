@@ -319,3 +319,50 @@ deliberately and reverse that decision without having to recover the endpoint UR
     enabled but unused.
 13. THE disabled build SHALL be indistinguishable, in rendered output and
     behaviour, from a build with no endpoint configured.
+
+### Requirement 12: Cache Persistence Across Navigation
+
+**User Story:** As a paddler who searches, opens a spot, and comes back to refine
+the search, I want my earlier searches to still be answered instantly, so the site
+does not re-ask the backend for something it already knows.
+
+**Why this is separate from Requirement 7:** the site is multi-page with no
+client-side router, so an in-memory cache is destroyed by the first navigation.
+Opening a spot's detail page and pressing back discards it entirely, which is the
+single most common thing a paddler does after searching.
+
+#### Acceptance Criteria
+
+1. THE Result_Cache SHALL persist across page navigations and across tab
+   closure, so a returning visitor benefits from searches made earlier.
+2. THE Result_Cache SHALL use `localStorage`, not `sessionStorage`, because a
+   multi-day retention period is meaningless within a single tab session.
+3. THE Result_Cache SHALL store each query as its own independent, self-contained
+   storage entry, so that a read never loads or parses more than the one entry it
+   needs.
+4. THE Result_Cache SHALL NOT read or parse any persisted data during page or map
+   initialisation. Reads SHALL happen only when a query is issued.
+5. Each persisted entry SHALL carry the time it was written.
+6. THE Result_Cache SHALL treat an entry older than 7 days as a miss and SHALL
+   delete it.
+7. THE Result_Cache SHALL namespace persisted entries by a content version
+   derived from the spots table's `lastUpdatedAt`, so that a content change
+   invalidates every persisted entry precisely rather than waiting for the TTL to
+   expire.
+8. THE Result_Cache SHALL namespace persisted entries by a schema version, so a
+   future change to the entry format cannot misread old entries.
+9. THE Result_Cache SHALL remove entries belonging to a superseded content or
+   schema version, and SHALL do that work outside initialisation.
+10. WHEN a write fails because the storage quota is exhausted, THE Result_Cache
+    SHALL evict least-recently-used entries and retry once.
+11. WHEN a write still fails, or when storage is unavailable altogether, THE
+    Search_Module SHALL disable persistence for the remainder of the page and
+    SHALL continue to operate with the in-memory cache only.
+12. No storage failure SHALL surface to the user, fail a search, or throw.
+13. THE persisted cache SHALL be bounded well inside the smallest quota the
+    supported browsers provide, budgeting for 4 MB rather than the 9.88 MB
+    measured in Chromium, because mobile Safari provides less.
+14. A persisted hit SHALL apply the selection and fit the map exactly as a fresh
+    result does, and SHALL make no Attempt.
+15. THE in-memory cache of Requirement 7 SHALL be consulted before the persisted
+    cache, and the persisted cache before the network.

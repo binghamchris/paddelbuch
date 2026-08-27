@@ -222,38 +222,127 @@ until reload. Contentful syncs are infrequent, the cache dies with the page, and
 the alternative — a TTL or revalidation — costs the request the cache exists to
 avoid.
 
-### Deferred decision: the cache dies on every navigation
+## Persisting the cache across navigation
 
-Worth stating plainly because it caps how much cost an in-memory cache can save.
-The site is multi-page with no SPA router — verified: no `pushState` or Turbo
-anywhere in `assets/js`, and the popup's "More details" is a plain `<a href>` to
-`/einstiegsorte/<slug>/`. So the sequence a paddler actually performs — search,
-open a spot, press back, refine the search — **throws the whole cache away at step
-two** and re-queries the backend from scratch.
+The in-memory cache alone captures very little, because the site is multi-page with
+no client-side router — verified: no `pushState` or Turbo anywhere in `assets/js`,
+and the popup's "More details" is a plain `<a href>` to `/einstiegsorte/<slug>/`.
+So the sequence a paddler actually performs — search, open a spot, back, refine —
+**throws the entire cache away at step two.** Persistence is therefore not a
+refinement of the cache; it is most of the cache's value.
 
-That means the in-memory cache only saves repeat queries within one uninterrupted
-visit to the map page. It is still worth having, but it does not capture the
-browsing pattern the feature is for.
+### The objection I raised against this was wrong, and here are the numbers
 
-`sessionStorage` would: it is per-tab, survives navigation, and is cleared when the
-tab closes, which matches the staleness tolerance above exactly. The costs are real
-though and pull against the 4.5 MB budget:
+An earlier draft deferred this on the grounds that parsing a persisted cache would
+compete with first render on mobile. That reasoning assumed a single monolithic
+blob loaded eagerly at startup. With one storage key per query it does not apply,
+and the measured costs are not close:
 
-- Typical quota is 5 MB per origin, and it stores strings, so entries must be
-  serialised. As JSON in UTF-16 a result costs roughly twice its heap cost, so the
-  same 60 000 results would not fit — a persisted tier would need its own smaller
-  cap, on the order of 1–2 MB.
-- `JSON.stringify` on write and `JSON.parse` on read are synchronous main-thread
-  work. On a mobile device, parsing a megabyte of cache during map initialisation
-  competes with first render, which is the one place this feature must not cost
-  anything.
+| operation | cost |
+|---|---|
+| read + parse one 51 KB entry | 0.033 ms |
+| read + parse one 3 KB entry | 0.002 ms |
+| stringify + write one 51 KB entry | 0.016 ms |
+| parse the whole 69 KB spot table | 0.056 ms |
+| *for comparison:* one warm API call | **286 ms** |
+| *for comparison:* one cold API call | **~4800 ms** |
 
-A reasonable shape would be a small persisted tier — the most recent handful of
-queries, capped by serialised bytes rather than results — layered under the larger
-in-memory one, written debounced and read lazily rather than during init. That is
-a genuine cost reduction and a genuine mobile-performance risk in the same change,
-so it is deliberately **not** specified here: it needs its own decision, and
-measurement of parse cost on a real device rather than an estimate.
+Measured in headless Chromium on arm64 over 2000 iterations with real time. Even
+the largest single-entry read is **four orders of magnitude** cheaper than the
+request it avoids. A mobile CPU is perhaps 3–5x slower, which leaves it at ~0.1 ms.
+There is no first-render cost to protect against, provided nothing is read
+eagerly — which Requirement 12.4 makes explicit.
+
+Measured `localStorage` quota in Chromium: **9.88 MB** before `QuotaExceededError`.
+Mobile Safari is smaller, historically 5 MB, so the design budgets 4 MB.
+
+Nothing else on the site uses `localStorage` or `sessionStorage`, so the cache has
+the whole quota to itself and cannot evict somebody else's data.
+
+### `localStorage`, not `sessionStorage`
+
+`sessionStorage` survives navigation but dies with the tab, which makes a 7-day
+retention period meaningless — a tab session almost never spans days. The
+requirement is multi-day, so it has to be `localStorage`.
+
+### One key per query, and why the entry is self-contained
+
+Key shape:
+
+```
+pbsearch:<schemaVersion>:<contentVersion>:<requestUrl>
+```
+
+The request URL is already the in-memory cache's key and already encodes `q`,
+`locale`, `limit`, `fields`, and `minScore`, so it needs no transformation. Because
+the key is derivable from the query, a lookup is a single `getItem` — no index to
+maintain, no enumeration, and nothing to load before the first search. That is what
+makes Requirement 12.4 achievable rather than aspirational.
+
+Each entry holds its own slugs AND its own locations, duplicating locations across
+entries that share spots. That duplication is deliberate, and it is worth recording
+that the alternative was built and measured before being rejected:
+
+| layout | per broad query (436 results) | broad queries in 4 MB |
+|---|---|---|
+| self-contained slugs + locations | 51.2 KB | ~78 |
+| shared spot table + per-query indices | 3.2 KB + 69 KB once | ~1200 |
+
+The compressed layout is **15.8x smaller** and was rejected anyway. It requires a
+shared, mutable, append-ordered table, and per-query entries that reference it by
+*position*. Two tabs searching concurrently would append to that table
+independently and diverge, after which one tab's indices resolve to the other tab's
+spots — a silent wrong-results bug, in a cache, across tabs, which is close to the
+worst place to put one. Detecting it needs a checksum per entry, at which point the
+simplicity is gone too.
+
+It optimises a resource that is not scarce. ~78 broad queries is the worst case —
+every query matching 436 spots — while a realistic session issues perhaps 5 to 30
+distinct queries, most far narrower. Self-contained entries are correct by
+construction: independent, immutable once written, with no shared state for a
+second tab to corrupt.
+
+### Invalidation: version first, TTL second
+
+The 7-day TTL is the backstop, not the primary mechanism, because a TTL can only
+ever be too slow or too aggressive. The primary mechanism is precise:
+`site.data.last_updates['spots']` is already produced by
+`_plugins/api_generator.rb` and already consumed by `offene-daten/api.html`, so the
+spots table's `lastUpdatedAt` can be rendered into the search config block as
+`contentVersion`.
+
+When spots change in Contentful the site rebuilds — and the same Contentful sync
+drives the indexer that refreshes the vector store — so a new `lastUpdatedAt` means
+a new index. Because it is part of the key prefix, every stale entry becomes
+unreachable the moment content changes, with no expiry to wait for and no
+revalidation request.
+
+The TTL then covers what the version cannot: an index refreshed without a site
+rebuild, and entries lingering for a version that is still current but very old. 7
+days matches the site's update cadence, as requested.
+
+Superseded-version keys are removed lazily — `requestIdleCallback` where available,
+otherwise a zero-delay timeout — never during initialisation. Enumeration is the
+one operation that touches every key, so it is kept off the startup path.
+
+### Failure handling
+
+`localStorage` can fail in ways worth naming: quota exhaustion mid-write, and
+Safari private browsing, which has historically thrown on any write at all. Both
+are handled the same way, and the handling is the same principle as the rest of
+this spec — a storage problem may cost the user the cache, and nothing else:
+
+1. A write that throws `QuotaExceededError` evicts least-recently-used entries and
+   retries once.
+2. A second failure, or any other storage error, disables persistence for the
+   remainder of the page. The in-memory cache carries on.
+3. No storage failure reaches the user, fails a search, or throws.
+
+### Read order
+
+In-memory, then persisted, then network. The in-memory tier holds parsed objects so
+a repeat within one page load costs nothing at all; the persisted tier costs the
+0.033 ms above; the network costs 286 ms warm and up to ~4.8 s cold.
 
 ## Search_Notice action
 
@@ -536,7 +625,9 @@ compiled-CSS baseline untouched, since this feature adds no CSS.
   above: ~1 KB of dead CSS against a conditional byte-exact baseline fixture.
 - **Backend changes.** The Search_API already returns `503` and `429`
   appropriately.
-- **Persisting the cache** across page loads.
+- **Revalidating a persisted entry against the backend.** The content version in
+  the cache key makes it unnecessary, and a revalidation request would cost exactly
+  what the cache exists to save.
 - **A runtime kill switch.** Requirement 11 is build-time. Turning search off
   without a rebuild would need the flag served as data the page fetches, which
   reintroduces the load-time request this design rejects.
