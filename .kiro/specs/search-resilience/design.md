@@ -109,6 +109,45 @@ top-level shape becomes strict: one malformed spot should not lose the other 400
 
 ## Retry policy
 
+### The timeout value is measured, not chosen
+
+Taken from CloudWatch over the seven days to 2026-08-27, 164 invocations of
+`paddelbuch-search` (256 MB, arm64, python3.12):
+
+| | invocations | p50 | p95 | p99 | max |
+|---|---|---|---|---|---|
+| warm | 140 (85%) | 286 ms | 2095 ms | 2249 ms | 2344 ms |
+| cold | 24 (15%) | 3351 ms | 3897 ms | 3905 ms | 3905 ms |
+
+Cold-start `Init Duration` separately: min 687 ms, avg 927 ms, max 1130 ms. Init
+is reported apart from invocation duration, so a cold request's worst-case server
+time is their sum — **about 5.0 s** — before any network or TLS cost. Live
+`curl` timings agree: warm requests landed at 0.17–0.42 s, with occasional 1.9 s
+and 3.4 s outliers that match the cold profile.
+
+Two conclusions follow, and the first invalidates the original value.
+
+**The Lambda's own timeout is 10000 ms.** A 10 s client budget therefore never
+fires before the server's own failure — it races it, and loses. A client timeout
+is only worth having if it is strictly below the server's, so 10 s was
+functionally dead code.
+
+**6000 ms is the useful floor that still clears cold starts.** It sits above the
+~5.0 s cold ceiling with about a second of margin, and well below the server's
+10 s, so it catches a genuine hang at 6 s instead of 10.
+
+A shorter 5000 ms budget is defensible but is a real trade, not a free win: it
+would abort the slowest cold starts, which are 15% of invocations here. The retry
+does recover them, and recovers them well — an aborted request does not stop the
+Lambda, so the container it warmed is very likely the one the retry lands on, at
+a warm p50 of 286 ms. The user-visible cost is roughly 5 s + 1 s retry delay +
+0.3 s ≈ 6.3 s for a two-attempt sequence, against 5 s for the one-attempt path a
+6 s budget would have allowed. That is why Requirement 1.2b makes the retry a
+precondition for any budget below the cold ceiling: shipping a 5 s timeout without
+the retry would turn a working slow search into a failed one.
+
+## Retry mechanics
+
 Two Attempts maximum, ~1000 ms apart, only for a Transient_Failure. The value of
 this is narrow and specific: the most likely real-world "unavailable" is a cold
 Lambda plus a Bedrock embedding call on the first search of a session. A single
@@ -135,15 +174,86 @@ the URL already encodes every input that changes the answer — `q`, `locale`,
 projections, and it cannot go stale against a config change without also changing
 the key.
 
-Bounded at 50 entries, oldest evicted first, to keep a long session with many
-distinct queries from growing without limit. Successes only, including empty
-results (Requirement 7.3): "nothing matches" is a real answer and re-asking the
-backend for it is the same waste as re-asking for a hit.
+### Bounding by results, not entries
 
-Known and accepted staleness: if the index gains a spot mid-session, a query
-already run in that session keeps its cached answer until reload. Contentful syncs
-are infrequent, the cache dies with the page, and the alternative — a TTL or
-revalidation — costs the request the cache exists to avoid.
+The original bound — 50 entries — was the wrong metric, because entry sizes here
+differ by more than two orders of magnitude. A query matching nothing and a query
+matching 436 spots are both "one entry". Measured in headless Chromium with
+`--enable-precise-memory-info`, building entries from the 737 real slugs with
+fresh strings per entry so shared references could not understate the cost:
+
+| cache shape | cached results | heap |
+|---|---|---|
+| 50 x 20 results | 1 000 | 0.13 MB |
+| 50 x 436 results | 21 800 | 1.73 MB |
+| 200 x 50 results | 10 000 | 0.89 MB |
+| 500 x 50 results | 25 000 | 1.50 MB |
+| 1000 x 50 results | 50 000 | 3.73 MB |
+| 200 x 436 results | 87 200 | 6.07 MB |
+| 500 x 436 results | 218 000 | 14.13 MB |
+
+The cost is linear and consistent at **70–80 bytes per cached result** across all
+seven shapes, so total results is the metric that actually predicts memory. Under
+the old bound, "50 entries" meant anywhere from 0.13 MB to about 1.9 MB — a 13x
+range from one number.
+
+Bounds chosen: **60 000 results (~4.5 MB) and 500 entries**, evicting until both
+hold. Each bites in a different regime — at the API's 500-result limit the result
+bound stops it at ~120 entries, while for typical 50-result queries the entry
+bound stops it at 25 000 results — so neither can be circumvented by query shape.
+
+4.5 MB is a deliberate choice for a map page that already holds tiles, markers,
+and spot data. Mobile browsers reclaim background tabs under memory pressure, and
+the cost of being wrong is the whole page reloading rather than a slow search, so
+the budget stays well under the ~14 MB the largest measured shape would reach.
+
+### LRU rather than FIFO
+
+Oldest-first eviction would discard the user's first query, which for a session
+that keeps returning to one broad term is exactly the entry worth keeping. A JS
+`Map` preserves insertion order, so LRU is a `delete` followed by a `set` on every
+hit — a line of code for a strictly better hit rate, which is the whole point of
+the cache.
+
+### Staleness
+
+If the index gains a spot mid-session, a query already run keeps its cached answer
+until reload. Contentful syncs are infrequent, the cache dies with the page, and
+the alternative — a TTL or revalidation — costs the request the cache exists to
+avoid.
+
+### Deferred decision: the cache dies on every navigation
+
+Worth stating plainly because it caps how much cost an in-memory cache can save.
+The site is multi-page with no SPA router — verified: no `pushState` or Turbo
+anywhere in `assets/js`, and the popup's "More details" is a plain `<a href>` to
+`/einstiegsorte/<slug>/`. So the sequence a paddler actually performs — search,
+open a spot, press back, refine the search — **throws the whole cache away at step
+two** and re-queries the backend from scratch.
+
+That means the in-memory cache only saves repeat queries within one uninterrupted
+visit to the map page. It is still worth having, but it does not capture the
+browsing pattern the feature is for.
+
+`sessionStorage` would: it is per-tab, survives navigation, and is cleared when the
+tab closes, which matches the staleness tolerance above exactly. The costs are real
+though and pull against the 4.5 MB budget:
+
+- Typical quota is 5 MB per origin, and it stores strings, so entries must be
+  serialised. As JSON in UTF-16 a result costs roughly twice its heap cost, so the
+  same 60 000 results would not fit — a persisted tier would need its own smaller
+  cap, on the order of 1–2 MB.
+- `JSON.stringify` on write and `JSON.parse` on read are synchronous main-thread
+  work. On a mobile device, parsing a megabyte of cache during map initialisation
+  competes with first render, which is the one place this feature must not cost
+  anything.
+
+A reasonable shape would be a small persisted tier — the most recent handful of
+queries, capped by serialised bytes rather than results — layered under the larger
+in-memory one, written debounced and read lazily rather than during init. That is
+a genuine cost reduction and a genuine mobile-performance risk in the same change,
+so it is deliberately **not** specified here: it needs its own decision, and
+measurement of parse cost on a real device rather than an estimate.
 
 ## Search_Notice action
 

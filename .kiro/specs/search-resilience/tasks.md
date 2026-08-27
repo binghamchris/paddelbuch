@@ -82,7 +82,13 @@ how a fault behaves.
 
 - [ ] 6. Add the per-Attempt timeout (Requirement 1)
   - [ ] 6.1 Read `timeoutMs` from config through a positive-finite coercion,
-        defaulting to 10000
+        defaulting to 6000 -- measured: cold-start ceiling is ~5.0s (init max
+        1130ms + cold invocation max 3905ms), and the Lambda's own timeout is
+        10000ms, so a 10s client budget would never fire before the server's own
+        failure
+  - [ ] 6.1a Do NOT ship a budget below ~5000ms until task 8 (retry) is in
+        place: below the cold ceiling the timeout aborts legitimate cold starts,
+        and only the retry recovers them
   - [ ] 6.2 Arm a timer per Attempt that sets `timedOut` and aborts
   - [ ] 6.3 Report a Timeout_Abort with the timeout message; keep a
         Supersede_Abort silent
@@ -114,8 +120,15 @@ how a fault behaves.
   - [ ] 9.1 Key entries by the full request URL from `buildUrl(query)`
   - [ ] 9.2 Serve a hit without any Attempt, still applying selection and fit
   - [ ] 9.3 Cache successes only, including empty results; never cache a failure
-  - [ ] 9.4 Bound to 50 entries with oldest-first eviction
-  - [ ] 9.5 Add tests for the hit path making zero Attempts, and for eviction
+  - [ ] 9.4 Bound by total cached results, not entries: 60000 results (~4.5MB at
+        the measured 70-80 bytes per result) AND 500 entries, evicting until both
+        hold. Entry count alone is the wrong metric -- 50 entries measured
+        anywhere from 0.13MB to 1.9MB depending on query breadth
+  - [ ] 9.4a Evict least-recently-USED, not oldest-first: a JS Map preserves
+        insertion order, so LRU is a delete-then-set on each hit
+  - [ ] 9.5 Add tests for the hit path making zero Attempts, for eviction under
+        each bound independently, and for LRU ordering (a re-hit entry survives
+        eviction that would have removed it under FIFO)
   - [ ] 9.6 Add the property test that cache keys differ whenever any request
         parameter differs
 

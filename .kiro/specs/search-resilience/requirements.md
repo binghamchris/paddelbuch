@@ -76,10 +76,17 @@ cannot answer to tell me so, rather than leaving me watching a spinner.
 #### Acceptance Criteria
 
 1. THE Search_Module SHALL abort any Attempt that has not settled within a
-   configurable time budget, defaulting to 10000 ms.
+   configurable time budget, defaulting to 6000 ms.
 2. THE Search_Module SHALL read the budget from the `timeoutMs` key of the
    search config block, falling back to the default when the value is absent or
    not a finite positive number.
+2a. THE default budget SHALL remain strictly below the Search_API Lambda's own
+   10000 ms timeout, so that the client gives up before the server does rather
+   than racing it.
+2b. WHEN the configured budget is below the measured cold-start ceiling of
+   approximately 5000 ms, THE retry of Requirement 6 SHALL be implemented,
+   because a budget under that ceiling aborts legitimate cold starts and only the
+   retry recovers them.
 3. WHEN a Search_Operation ends in a Timeout_Abort, THE Search_Module SHALL show
    the Search_Notice with a timeout-specific message and SHALL leave the
    Search_Dimension as an Inactive_Dimension.
@@ -201,8 +208,17 @@ cheap to run.
 3. THE Result_Cache SHALL cache a successful empty result, since it is a valid
    answer.
 4. THE Result_Cache SHALL NOT cache any failure.
-5. THE Result_Cache SHALL be bounded to at most 50 entries, evicting the oldest
-   first.
+5. THE Result_Cache SHALL be bounded by the total number of cached results, not
+   by the number of entries, because entry sizes differ by more than two orders
+   of magnitude — a query matching nothing and a query matching 500 spots are
+   both one entry.
+5a. THE Result_Cache SHALL hold at most 60000 cached results in total, which at
+   the measured 70–80 bytes per result is approximately 4.5 MB.
+5b. THE Result_Cache SHALL additionally hold at most 500 entries, so that a long
+   session of narrow queries cannot accumulate unbounded bookkeeping.
+5c. THE Result_Cache SHALL evict least-recently-USED entries, not oldest-first,
+   so that a query the user keeps returning to survives.
+5d. THE Result_Cache SHALL evict until both bounds hold.
 6. THE Result_Cache SHALL live only for the page load and SHALL NOT be persisted.
 7. WHEN serving a cache hit, THE Search_Module SHALL apply the selection and fit
    the map exactly as it does for a fresh result.
