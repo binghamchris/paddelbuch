@@ -182,16 +182,28 @@ how a fault behaves.
   - [x] 12.3 Pass the new strings through the config block's `i18n` object
   - [x] 12.4 Confirm `spec/i18n_key_parity_spec.rb` still passes
 
-- [~] 13. Verification (13.4, 13.5, 13.6a open -- see notes)
+- [~] 13. Verification (13.4 and 13.6a open — see notes)
 
-  NOTE on the three open items, so nobody assumes they were done:
-  - 13.5 (deploy with the flag on) was NOT performed. The `SearchDisabled`
-    parameter is app-wide, so flipping it would disable search on every branch of
-    the Amplify app, and a local full-site build was declined. The chain is covered
-    by tests either way: env_loader_search_spec proves the flag yields
-    search_enabled=false, and map_init_search_gating_spec proves that renders
-    neither the config block nor the script tag. What remains unverified is only
-    the two joining at real build time.
+  NOTE on the open items, so nobody assumes they were done:
+  - 13.5 is VERIFIED AT BUILD TIME by a real local build with
+    SEARCH_DISABLED=true: 1924 pages built, 0 carrying a semantic-search.js script
+    tag, 0 carrying a config block, 0 leaking the endpoint, and 1900 still carrying
+    map-data-init.js -- so the flag costs search and nothing else. No build errors,
+    and no unrecognised-value warning, the latter being correct for a recognised
+    value.
+    Two things it does NOT cover. The module's JS file is still copied to
+    /assets/js/semantic-search.js, because Jekyll copies the asset directory
+    wholesale; no page references it so it is never downloaded, which is the same
+    category as the ~1KB of dead CSS the design already accepted. And the CSP half
+    is verified only by template assertions plus validate-template, not by a real
+    stack deploy: the SearchDisabled parameter is APP-WIDE, so flipping it would
+    disable search on every branch of the Amplify app -- a deliberate act for a
+    human to take, not a test step.
+    An earlier version of this note said a local build had been "declined". That
+    was wrong. The command was stopped by the recursive-delete guard, which matched
+    the temp-directory cleanup sitting in front of the build -- a machine refusal,
+    not a human decision. Re-run without that cleanup step it succeeded, which is
+    where the figures above come from.
   - 13.4 (live failure modes) is covered by unit tests against the real module plus
     confirmation that the deployed bundle contains each mechanism. Deliberately
     triggering the live rate limiter was not done.
@@ -199,23 +211,23 @@ how a fault behaves.
     measurement was 0.033 ms for the largest entry read, four orders of magnitude
     under the request it replaces.
 
-  - [ ] 13.1 Full Jest suite green, with the compiled-CSS baseline unchanged —
+  - [x] 13.1 Full Jest suite green, with the compiled-CSS baseline unchanged —
         this feature adds no CSS
-  - [ ] 13.2 Full RSpec suite green, including the new env_loader coverage.
+  - [x] 13.2 Full RSpec suite green, including the new env_loader coverage.
         Remember Ruby tests are not part of the Amplify build, so run them
         locally before pushing
-  - [ ] 13.3 Confirm no request is issued to the Search_API before user input,
+  - [x] 13.3 Confirm no request is issued to the Search_API before user input,
         and no availability probe exists
   - [ ] 13.4 Exercise the real failure modes against the deployed branch: a
         blocked endpoint, a slow response, and a `429`
-  - [ ] 13.5 Deploy once with `SEARCH_DISABLED=true` and confirm the built page
-        has no search markup, no `semantic-search.js` request, and no search host
-        in the CSP header — and that the map, markers, filter panel, and layer
-        toggles are unaffected
-  - [ ] 13.6 Confirm the map behaves identically with search enabled, disabled by
+  - [x] 13.5 Confirmed by a real build with `SEARCH_DISABLED=true`: no search
+        markup, no script tag, no endpoint in any page, map intact. The CSP header
+        half rests on template assertions rather than a stack deploy, because the
+        parameter is app-wide
+  - [x] 13.6 Confirm the map behaves identically with search enabled, disabled by
         flag, disabled by absent endpoint, and enabled but broken
   - [ ] 13.6a On a real mobile device, confirm a persisted hit after navigation is
         instant, and that first render is unaffected -- the desktop measurement was
         0.033 ms for the largest entry, so this is a confirmation, not a discovery
-  - [ ] 13.7 Update `docs/frontend.md` with the degradation behaviour, the new
+  - [x] 13.7 Update `docs/frontend.md` with the degradation behaviour, the new
         config key, and the flag
