@@ -59,6 +59,12 @@ than replacements:
   one. Not a failure.
 - **Result_Cache**: An in-memory, per-page-load map of request URL to parsed
   results.
+- **Search_Disabled_Flag**: The build-time environment variable
+  `SEARCH_DISABLED`. When set to a recognised true value, the search feature is
+  built out of the site entirely.
+- **Search_Enabled**: The single derived boolean, computed in
+  `_plugins/env_loader.rb`, that the site's templates consume. True only when an
+  endpoint is configured AND the Search_Disabled_Flag is not set.
 
 ## Requirements
 
@@ -221,6 +227,10 @@ tests, because it is the behaviour nobody exercises by hand.
 7. THE test suite SHALL include property-based coverage asserting that no
    arbitrary `2xx` payload shape can cause markers to be hidden except a genuine
    array of zero results.
+8. THE test suite SHALL cover the Search_Disabled_Flag: the full value-parsing
+   matrix including an unrecognised value, the derived `site.search_enabled` for
+   every combination of flag and endpoint, and that a disabled build renders
+   neither the config block nor the script tag.
 
 ### Requirement 9: Unconfigured-Safe Public API
 
@@ -255,3 +265,41 @@ pinned, so that this work cannot regress them.
    NOT be modified by this feature.
 6. THE compiled stylesheet SHALL be unchanged by this feature, which requires no
    new CSS.
+
+### Requirement 11: Build-Time Feature Flag
+
+**User Story:** As an operator, I want to switch the search feature off in a
+build without discarding its configuration, so that I can remove it from the site
+deliberately and reverse that decision without having to recover the endpoint URL.
+
+#### Acceptance Criteria
+
+1. THE build SHALL accept an environment variable `SEARCH_DISABLED` which, when
+   set to a recognised true value, disables the search feature entirely.
+2. THE build SHALL treat `true`, `1`, and `yes` as true values, compared
+   case-insensitively after trimming surrounding whitespace.
+3. THE build SHALL treat an absent value, an empty value, `false`, `0`, and `no`
+   as not-disabled, compared the same way.
+4. WHEN `SEARCH_DISABLED` holds any other value, THE build SHALL treat the
+   feature as disabled AND SHALL emit a warning naming the unrecognised value.
+5. THE build SHALL expose exactly one derived boolean, `site.search_enabled`,
+   true only when an endpoint is configured AND the Search_Disabled_Flag is not
+   set. Templates SHALL consume only this boolean.
+6. THE Search_Disabled_Flag SHALL take precedence over a configured endpoint.
+7. WHEN search is disabled, THE built HTML SHALL contain neither the
+   `#semantic-search-config` block nor any `script` tag referencing
+   `semantic-search.js`.
+8. WHEN search is disabled, THE Search_Dimension SHALL NOT be registered with the
+   Filter_Engine and no Search_Box or Search_Notice SHALL be created.
+9. WHEN search is disabled, THE `Content-Security-Policy` `connect-src` directive
+   SHALL NOT include the search API host, so that the endpoint is unreachable
+   from the page even if script were injected.
+10. THE deployment template SHALL expose the flag as a parameter restricted to
+    `true` and `false`, defaulting to `false`.
+11. THE default build — with the flag absent — SHALL behave exactly as it does
+    today, so that existing deploys are unaffected.
+12. WHEN search is disabled, THE map, markers, Filter_Panel, layer toggles, and
+    every other site feature SHALL behave identically to a build with search
+    enabled but unused.
+13. THE disabled build SHALL be indistinguishable, in rendered output and
+    behaviour, from a build with no endpoint configured.
