@@ -71,7 +71,7 @@
   The api key is an API Gateway usage-plan identifier, not an authorisation
   secret; the endpoint's access control is its Origin allow-list plus WAF.
 -->
-{% if site.search_api_endpoint %}
+{% if site.search_enabled %}
 <script type="application/json" id="semantic-search-config">
 {
   "endpoint": {{ site.search_api_endpoint | jsonify }},

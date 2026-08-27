@@ -53,6 +53,18 @@ Parameters:
       authorisation secret. Access control for the endpoint is its Origin
       allow-list plus WAF.
     Default: ""
+  SearchDisabled:
+    Type: String
+    Description: >-
+      Build-time feature flag. Set to "true" to remove the search feature from the
+      site entirely: no search UI is rendered, semantic-search.js is not served,
+      and the search API host is dropped from the CSP so the endpoint cannot be
+      reached even by injected script. Leaves EnvVarSearchApiEndpoint intact, so
+      the feature can be switched back on without recovering the URL.
+    Default: "false"
+    AllowedValues:
+      - "true"
+      - "false"
   SearchApiCspHost:
     Type: String
     Description: >-
@@ -76,6 +88,9 @@ Parameters:
     Description: The ECR image URI for the custom Amplify build image (leave empty to use default Amplify image)
     Default: ""
 Conditions:
+  # When search is switched off, the CSP must not advertise the search host --
+  # a disabled feature should not leave a reachable endpoint behind it.
+  IsSearchDisabled: !Equals [!Ref SearchDisabled, "true"]
   IsProduction:
     !Equals
       - !Ref AppStage
@@ -86,66 +101,72 @@ Resources:
     Properties: 
       AccessToken:
         Ref: GithubToken
-      CustomHeaders: !Sub |-
-        customHeaders:
-          # Security and default cache headers for all files (recursive)
-          - pattern: '**/*'
-            headers:
-              - key: Cache-Control
-                value: public, max-age=21600, s-maxage=21600
-              - key: Strict-Transport-Security
-                value: max-age=31536000; includeSubDomains; preload
-              - key: X-Frame-Options
-                value: DENY
-              - key: X-XSS-Protection
-                value: 1; mode=block
-              - key: X-Content-Type-Options
-                value: nosniff
-              - key: Referrer-Policy
-                value: strict-origin-when-cross-origin
-              - key: Content-Security-Policy
-                value: >-
-                  default-src 'self'; img-src 'self' data:
-                  raw.githubusercontent.com api.mapbox.com; style-src 'self';
-                  script-src 'self' https://tinylytics.app; font-src 'self' data:;
-                  connect-src 'self' tiles.openfreemap.org https://tinylytics.app
-                  ${SearchApiCspHost};
-                  worker-src 'self' blob:
-              - key: Permissions-Policy
-                value: >-
-                  accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(),
-                  camera=(), cross-origin-isolated=(), display-capture=(),
-                  document-domain=(), encrypted-media=(),
-                  execution-while-not-rendered=(), execution-while-out-of-viewport=(),
-                  fullscreen=(self), geolocation=(self), gyroscope=(), magnetometer=(),
-                  microphone=(), midi=(), navigation-override=(), payment=(),
-                  picture-in-picture=(), publickey-credentials-get=(),
-                  screen-wake-lock=(), sync-xhr=(), usb=(), web-share=(),
-                  xr-spatial-tracking=(), clipboard-read=(), clipboard-write=(),
-                  gamepad=(), speaker-selection=(), conversion-measurement=(),
-                  focus-without-user-activation=(), hid=(), idle-detection=(),
-                  serial=(), sync-script=(), trust-token-redemption=(),
-                  vertical-scroll=(self)
-          # HTML pages - 1 day TTL - site changes infrequently
-          - pattern: '*.html'
-            headers:
-              - key: Cache-Control
-                value: public, max-age=86400, s-maxage=86400, must-revalidate
-          # Spatial tile JSON files - long TTL (7 days) as they only change on rebuild
-          - pattern: '/api/tiles/**/*.json'
-            headers:
-              - key: Cache-Control
-                value: public, max-age=604800, s-maxage=604800, immutable
-          # API JSON files - 1 day TTL
-          - pattern: '/api/*.json'
-            headers:
-              - key: Cache-Control
-                value: public, max-age=86400, s-maxage=86400
-          # Static assets (CSS, JS, images) - long TTL (30 days)
-          - pattern: '/assets/**/*'
-            headers:
-              - key: Cache-Control
-                value: public, max-age=2592000, s-maxage=2592000, immutable
+      # !Sub with a variable map rather than a bare !Sub, so the search host can
+      # be dropped from the CSP when the feature flag disables search. A bare
+      # !Sub can only interpolate parameters, and a parameter cannot be made
+      # conditional.
+      CustomHeaders: !Sub
+        - |-
+          customHeaders:
+            # Security and default cache headers for all files (recursive)
+            - pattern: '**/*'
+              headers:
+                - key: Cache-Control
+                  value: public, max-age=21600, s-maxage=21600
+                - key: Strict-Transport-Security
+                  value: max-age=31536000; includeSubDomains; preload
+                - key: X-Frame-Options
+                  value: DENY
+                - key: X-XSS-Protection
+                  value: 1; mode=block
+                - key: X-Content-Type-Options
+                  value: nosniff
+                - key: Referrer-Policy
+                  value: strict-origin-when-cross-origin
+                - key: Content-Security-Policy
+                  value: >-
+                    default-src 'self'; img-src 'self' data:
+                    raw.githubusercontent.com api.mapbox.com; style-src 'self';
+                    script-src 'self' https://tinylytics.app; font-src 'self' data:;
+                    connect-src 'self' tiles.openfreemap.org https://tinylytics.app
+                    ${SearchCspHostEffective};
+                    worker-src 'self' blob:
+                - key: Permissions-Policy
+                  value: >-
+                    accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(),
+                    camera=(), cross-origin-isolated=(), display-capture=(),
+                    document-domain=(), encrypted-media=(),
+                    execution-while-not-rendered=(), execution-while-out-of-viewport=(),
+                    fullscreen=(self), geolocation=(self), gyroscope=(), magnetometer=(),
+                    microphone=(), midi=(), navigation-override=(), payment=(),
+                    picture-in-picture=(), publickey-credentials-get=(),
+                    screen-wake-lock=(), sync-xhr=(), usb=(), web-share=(),
+                    xr-spatial-tracking=(), clipboard-read=(), clipboard-write=(),
+                    gamepad=(), speaker-selection=(), conversion-measurement=(),
+                    focus-without-user-activation=(), hid=(), idle-detection=(),
+                    serial=(), sync-script=(), trust-token-redemption=(),
+                    vertical-scroll=(self)
+            # HTML pages - 1 day TTL - site changes infrequently
+            - pattern: '*.html'
+              headers:
+                - key: Cache-Control
+                  value: public, max-age=86400, s-maxage=86400, must-revalidate
+            # Spatial tile JSON files - long TTL (7 days) as they only change on rebuild
+            - pattern: '/api/tiles/**/*.json'
+              headers:
+                - key: Cache-Control
+                  value: public, max-age=604800, s-maxage=604800, immutable
+            # API JSON files - 1 day TTL
+            - pattern: '/api/*.json'
+              headers:
+                - key: Cache-Control
+                  value: public, max-age=86400, s-maxage=86400
+            # Static assets (CSS, JS, images) - long TTL (30 days)
+            - pattern: '/assets/**/*'
+              headers:
+                - key: Cache-Control
+                  value: public, max-age=2592000, s-maxage=2592000, immutable
+        - SearchCspHostEffective: !If [IsSearchDisabled, "", !Ref SearchApiCspHost]
       CustomRules:
         !If
           - IsProduction
@@ -183,6 +204,9 @@ Resources:
         - Name: SEARCH_API_KEY
           Value:
             Ref: EnvVarSearchApiKey
+        - Name: SEARCH_DISABLED
+          Value:
+            Ref: SearchDisabled
         - Name: JEKYLL_ENV
           Value: production
         - Name: _CUSTOM_IMAGE

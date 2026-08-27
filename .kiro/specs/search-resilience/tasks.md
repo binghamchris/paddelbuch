@@ -10,34 +10,34 @@ after it ships with a switch already in place. Tasks 2–4 then remove the ways 
 search fault can damage something else, and only after that do tasks 5–10 improve
 how a fault behaves.
 
-- [ ] 1. Build-time feature flag (Requirement 11)
-  - [ ] 1.1 Add `SEARCH_DISABLED` to `KNOWN_KEYS` in `_plugins/env_loader.rb`
-  - [ ] 1.2 Parse it: trimmed, case-insensitive; `true`/`1`/`yes` disable;
+- [x] 1. Build-time feature flag (Requirement 11)
+  - [x] 1.1 Add `SEARCH_DISABLED` to `KNOWN_KEYS` in `_plugins/env_loader.rb`
+  - [x] 1.2 Parse it: trimmed, case-insensitive; `true`/`1`/`yes` disable;
         absent/`""`/`false`/`0`/`no` do not; anything else disables AND warns,
         naming the value
-  - [ ] 1.3 Derive the single positive boolean `site.config['search_enabled']` =
+  - [x] 1.3 Derive the single positive boolean `site.config['search_enabled']` =
         endpoint present AND not disabled; leave the endpoint value in config for
         the config block to render
-  - [ ] 1.4 Change `_includes/map-init.html` to gate on `site.search_enabled`
+  - [x] 1.4 Change `_includes/map-init.html` to gate on `site.search_enabled`
         instead of `site.search_api_endpoint`, covering both the config block and
         the `semantic-search.js` script tag
-  - [ ] 1.5 Add the `SearchDisabled` parameter to `deploy/frontend-deploy.yaml`
+  - [x] 1.5 Add the `SearchDisabled` parameter to `deploy/frontend-deploy.yaml`
         (`AllowedValues: [true, false]`, default `false`) and wire it to the
         `SEARCH_DISABLED` environment variable
-  - [ ] 1.6 Add the CloudFormation condition that empties the CSP `connect-src`
+  - [x] 1.6 Add the CloudFormation condition that empties the CSP `connect-src`
         search host when the flag is set, so a disabled build cannot reach the
         endpoint even via injected script
-  - [ ] 1.7 Extend `spec/env_loader_spec.rb` with the full parsing matrix and the
+  - [x] 1.7 Extend `spec/env_loader_spec.rb` with the full parsing matrix and the
         derived boolean for every flag/endpoint combination. Note it currently
         asserts nothing about the search keys at all, so cover
         `SEARCH_API_ENDPOINT` and `SEARCH_API_KEY` here too
-  - [ ] 1.8 Assert a disabled build emits neither the config block nor the script
+  - [x] 1.8 Assert a disabled build emits neither the config block nor the script
         tag. Prefer rendering the include per `spec/notice_page_fixes_spec.rb`,
         which needs the `{% t %}` tag and `relative_url` filter stubbed — check
         that before assuming the pattern drops in; fall back to
         `spec/integration_spec.rb` against built output. Do not substitute a
         regex over the source
-  - [ ] 1.9 Confirm the default build (flag absent) is byte-identical in rendered
+  - [x] 1.9 Confirm the default build (flag absent) is byte-identical in rendered
         output to today's
 
 - [ ] 2. Isolate map initialisation from search faults (Requirement 2)

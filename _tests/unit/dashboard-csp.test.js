@@ -94,21 +94,49 @@ describe('CSP Configuration in frontend-deploy.yaml', () => {
 
   // Semantic search issues a cross-origin fetch to API Gateway, which
   // connect-src must permit or the browser blocks every search request.
-  test('connect-src directive includes the search API host placeholder', () => {
-    expect(directives['connect-src']).toContain('${SearchApiCspHost}');
+  test('connect-src directive includes the search host placeholder', () => {
+    // Now the conditional variable rather than the parameter directly, so the
+    // host can be dropped when SEARCH_DISABLED removes the feature.
+    expect(directives['connect-src']).toContain('${SearchCspHostEffective}');
   });
 
-  test('CustomHeaders is a Sub block so the search host can be interpolated', () => {
-    expect(yamlContent).toMatch(/CustomHeaders: !Sub \|-/);
+  test('CustomHeaders uses the Sub variable-map form', () => {
+    // A bare `!Sub |-` can only interpolate parameters, and a parameter cannot be
+    // made conditional -- so the search host could not follow the feature flag.
+    expect(yamlContent).toMatch(/CustomHeaders: !Sub\n\s+- \|-/);
+    expect(yamlContent).not.toMatch(/CustomHeaders: !Sub \|-/);
   });
 
-  test('SearchApiCspHost is the only placeholder inside CustomHeaders', () => {
+  test('the search host resolves to empty when the feature is disabled', () => {
+    expect(yamlContent).toMatch(
+      /SearchCspHostEffective: !If \[IsSearchDisabled, "", !Ref SearchApiCspHost\]/);
+    expect(yamlContent).toMatch(/IsSearchDisabled: !Equals \[!Ref SearchDisabled, "true"\]/);
+  });
+
+  test('SearchCspHostEffective is the only placeholder inside CustomHeaders', () => {
     // A stray ${...} in a !Sub block fails the stack with an unresolved-reference
     // error, so the placeholder set is pinned rather than merely spot-checked.
-    var block = yamlContent.match(/CustomHeaders: !Sub \|-\n([\s\S]*?)(?=\n {6}[A-Za-z])/);
+    var block = yamlContent.match(
+      /CustomHeaders: !Sub\n\s+- \|-\n([\s\S]*?)(?=\n {8}- [A-Za-z])/);
     expect(block).not.toBeNull();
     var placeholders = block[1].match(/\$\{[^}]*\}/g) || [];
-    expect(placeholders).toEqual(['${SearchApiCspHost}']);
+    expect(placeholders).toEqual(['${SearchCspHostEffective}']);
+  });
+
+  test('the feature flag parameter is constrained and defaults to enabled', () => {
+    // Absence must mean "behave as today": a default of "true" would silently
+    // disable search on every existing deploy.
+    expect(yamlContent).toMatch(/^  SearchDisabled:/m);
+    var block = yamlContent.match(/^  SearchDisabled:\n([\s\S]*?)(?=^  [A-Za-z])/m);
+    expect(block).not.toBeNull();
+    expect(block[1]).toMatch(/Default: "false"/);
+    expect(block[1]).toMatch(/AllowedValues:/);
+    expect(block[1]).toMatch(/- "true"/);
+    expect(block[1]).toMatch(/- "false"/);
+  });
+
+  test('SEARCH_DISABLED reaches the build as an environment variable', () => {
+    expect(yamlContent).toMatch(/- Name: SEARCH_DISABLED\n\s+Value:\n\s+Ref: SearchDisabled/);
   });
 
   test('search API parameters are declared with safe empty defaults', () => {

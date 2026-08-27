@@ -21,7 +21,7 @@
 module Jekyll
   class EnvLoader
     ENV_VAR_PATTERN = /\A([A-Za-z_][A-Za-z0-9_]*)=(.*)\z/
-    KNOWN_KEYS = %w[MAPBOX_URL CONTENTFUL_SPACE_ID CONTENTFUL_ACCESS_TOKEN CONTENTFUL_ENVIRONMENT SITE_URL SEARCH_API_ENDPOINT SEARCH_API_KEY].freeze
+    KNOWN_KEYS = %w[MAPBOX_URL CONTENTFUL_SPACE_ID CONTENTFUL_ACCESS_TOKEN CONTENTFUL_ENVIRONMENT SITE_URL SEARCH_API_ENDPOINT SEARCH_API_KEY SEARCH_DISABLED].freeze
 
     class << self
       def load_env_file(path)
@@ -42,6 +42,31 @@ module Jekyll
           end
         end
         vars
+      end
+
+      # Decide whether the search feature is switched off, from the raw flag
+      # value.
+      #
+      # An unrecognised value disables, with a warning: someone who types a value
+      # into a kill switch intended to use it, so resolving a typo to "stays on"
+      # would defeat the switch at the moment they were intervening. Treating any
+      # non-empty value as disabling was rejected, because SEARCH_DISABLED=false
+      # would then disable search.
+      #
+      # @param raw [String, nil] the SEARCH_DISABLED value as supplied
+      # @return [Boolean] true when search must be built out of the site
+      def search_disabled?(raw)
+        return false if raw.nil?
+
+        value = raw.strip.downcase
+        return false if value.empty?
+        return true if %w[true 1 yes].include?(value)
+        return false if %w[false 0 no].include?(value)
+
+        Jekyll.logger.warn 'EnvLoader:',
+                           "SEARCH_DISABLED value #{raw.inspect} is not " \
+                           'recognised; disabling search. Use true or false.'
+        true
       end
     end
   end
@@ -113,6 +138,29 @@ Jekyll::Hooks.register :site, :after_init do |site|
   search_api_key = env_vars['SEARCH_API_KEY']
   search_api_key = nil if search_api_key.nil? || search_api_key.strip.empty?
   site.config['search_api_key'] = search_api_key if search_api_key
+
+  # SEARCH_DISABLED is the build-time feature flag. Setting it removes the search
+  # feature from the site entirely.
+  #
+  # The flag is NEGATIVE deliberately. Its absence has to mean "behave as today",
+  # which is search on wherever an endpoint is configured; a positive
+  # SEARCH_ENABLED would make absence mean off, silently shipping a site with no
+  # search on the next deploy of every existing environment. The endpoint is
+  # already the opt-in -- search cannot appear without it -- so the only job left
+  # for a flag is the override, "configured but off", which is inherently
+  # negative.
+  #
+  # An unrecognised value DISABLES, with a warning. Someone who types a value into
+  # a kill switch intended to use it, and resolving their typo to "stays on" would
+  # defeat the switch at the moment they were intervening. The opposite policy --
+  # any non-empty value disables -- was rejected because SEARCH_DISABLED=false
+  # would then disable search.
+  site.config['search_disabled'] =
+    Jekyll::EnvLoader.search_disabled?(env_vars['SEARCH_DISABLED'])
+
+  # One derived boolean for templates to consume, so the double negative lives
+  # here and nowhere else, and so Liquid never has to make this decision.
+  site.config['search_enabled'] = !search_endpoint.nil? && !site.config['search_disabled']
 
   # Also set them as actual ENV vars so Rake tasks and other plugins can use them
   env_vars.each { |k, v| ENV[k] ||= v }
