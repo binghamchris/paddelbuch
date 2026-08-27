@@ -135,3 +135,13 @@ $search-box-height: 36px;
     display: none;
   }
 }
+
+// "No matches found" and error states. A plain result count is incidental
+// information, but these two tell the user the map is empty ON PURPOSE, so they
+// need to be unmissable rather than a faint grey footnote.
+.search-box-status--empty {
+  font-weight: 700;
+  color: $white;
+  background: $swisscanoe-blue;
+  border-color: $swisscanoe-blue;
+}

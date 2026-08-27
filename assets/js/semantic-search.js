@@ -210,10 +210,18 @@
    * Announce a message in the status region.
    *
    * @param {string} message
+   * @param {boolean} [isEmpty] - true to mark this as a no-matches message, which
+   *   is styled more prominently than a plain result count.
    */
-  function setStatus(message) {
-    if (statusEl) {
-      statusEl.textContent = message || '';
+  function setStatus(message, isEmpty) {
+    if (!statusEl) {
+      return;
+    }
+    statusEl.textContent = message || '';
+    if (isEmpty) {
+      statusEl.classList.add('search-box-status--empty');
+    } else {
+      statusEl.classList.remove('search-box-status--empty');
     }
   }
 
@@ -234,6 +242,21 @@
   }
 
   /**
+   * Slug that no spot can have, used to express "this search matched nothing".
+   *
+   * The filter engine treats an EMPTY selection set as "dimension inactive" and
+   * skips it, which is correct when the search box is cleared -- every marker
+   * should come back. But it is exactly wrong for a search that ran and found
+   * nothing: an empty set would reveal every spot on the map, the opposite of
+   * "no matches found".
+   *
+   * Selecting one impossible slug keeps the dimension ACTIVE while matching no
+   * marker. Real slugs are lowercase alphanumerics and hyphens, so a null
+   * character cannot collide with one.
+   */
+  var NO_MATCH_SENTINEL = '\u0000__no_match__';
+
+  /**
    * Apply a set of matching slugs to the filter engine and refresh the map.
    *
    * @param {Array|null} slugs - Matching slugs, or null to deactivate search
@@ -247,6 +270,16 @@
     if (typeof engine.applyFilters === 'function') {
       engine.applyFilters();
     }
+  }
+
+  /**
+   * Apply the outcome of a search that returned no results.
+   *
+   * Distinct from clearing the box: the dimension stays active so that no marker
+   * is shown, and the status region says so.
+   */
+  function applyNoMatches() {
+    applySelection([NO_MATCH_SENTINEL]);
   }
 
   /**
@@ -362,11 +395,20 @@
       .then(function(payload) {
         var parsed = parseResults(payload);
         lastResultLocations = parsed.locations;
+
+        if (parsed.slugs.length === 0) {
+          // The query ran and matched nothing. Keep the dimension active so no
+          // marker shows, and say so -- an empty selection would instead reveal
+          // every spot, which reads as "search ignored".
+          applyNoMatches();
+          setStatus(strings.noResults, true);
+          activeController = null;
+          return;
+        }
+
         applySelection(parsed.slugs);
         setStatus(formatCount(parsed.slugs.length));
-        if (parsed.slugs.length > 0) {
-          fitToResults();
-        }
+        fitToResults();
         activeController = null;
       })
       .catch(function(err) {
@@ -380,7 +422,7 @@
         // Deactivate rather than leaving a stale result set filtering the map,
         // so a failed search degrades to "no search" instead of a wrong view.
         applySelection(null);
-        setStatus(strings.error);
+        setStatus(strings.error, true);
         activeController = null;
       });
   }
@@ -634,6 +676,7 @@
     isConfigured: isConfigured,
     getDimensionConfig: getDimensionConfig,
     matchFn: matchFn,
+    NO_MATCH_SENTINEL: NO_MATCH_SENTINEL,
     clearSearch: clearSearch,
     // Exposed for tests: pure helpers with no DOM or network dependency.
     _parseResults: parseResults,
