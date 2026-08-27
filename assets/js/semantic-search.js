@@ -57,9 +57,12 @@
     clearLabel: 'Suche loeschen',
     searching: 'Suche laeuft...',
     noResults: 'Keine Ergebnisse gefunden',
+    noResultsHint: 'Kein Einstiegsort entspricht Ihrer Suche. Versuchen Sie einen anderen '
+      + 'Begriff, weniger Woerter, oder loeschen Sie die Suche.',
     resultsOne: '1 Ergebnis',
     resultsMany: '{count} Ergebnisse',
-    error: 'Suche momentan nicht verfuegbar'
+    error: 'Suche momentan nicht verfuegbar',
+    errorHint: 'Bitte versuchen Sie es in einem Moment erneut.'
   };
 
   var config = null;
@@ -68,6 +71,9 @@
   var inputEl = null;
   var statusEl = null;
   var clearBtn = null;
+  var noticeEl = null;
+  var noticeTitleEl = null;
+  var noticeHintEl = null;
   var debounceTimer = null;
   var activeController = null;
   // Slug -> {lat, lon} for the most recent result set, used to fit map bounds.
@@ -204,6 +210,119 @@
       url += '&minScore=' + encodeURIComponent(String(config.minScore));
     }
     return url;
+  }
+
+  /**
+   * Report whether a node is still in the document.
+   *
+   * Prefers Node.isConnected and falls back to document.contains for engines
+   * that predate it.
+   *
+   * @param {Node} node
+   * @returns {boolean}
+   */
+  function isAttached(node) {
+    if (!node) {
+      return false;
+    }
+    if (typeof node.isConnected === 'boolean') {
+      return node.isConnected;
+    }
+    return !!(document.documentElement && document.documentElement.contains(node));
+  }
+
+  /**
+   * Build the central map notice, once, inside the map's own container.
+   *
+   * Placed in the map container rather than the search control so it can sit in
+   * the middle of the map: a "no results" state where the map has silently gone
+   * blank is confusing, and a small line of text beside the input is easy to miss
+   * when the user's attention is on the map itself.
+   *
+   * The overlay is a direct child of the map container, not of a Leaflet pane, so
+   * it stays centred instead of being translated away when the map is panned.
+   * It does not intercept pointer events except on its button, so the map remains
+   * fully draggable while the notice is showing.
+   *
+   * @param {L.Map} mapInstance
+   */
+  function buildNotice(mapInstance) {
+    if (!mapInstance || typeof mapInstance.getContainer !== 'function') {
+      return;
+    }
+    // Rebuild when the existing node is no longer attached to the document, not
+    // merely when it is absent. A detached node would otherwise leave the notice
+    // permanently invisible if the map were ever torn down and recreated.
+    if (noticeEl && isAttached(noticeEl)) {
+      return;
+    }
+    var mapContainer = mapInstance.getContainer();
+    if (!mapContainer) {
+      return;
+    }
+
+    noticeEl = document.createElement('div');
+    noticeEl.className = 'map-search-notice';
+    noticeEl.hidden = true;
+
+    var inner = document.createElement('div');
+    inner.className = 'map-search-notice-inner';
+    // The authoritative announcement for this state. The compact status line
+    // beside the input is cleared while the notice shows, so screen readers get
+    // one message rather than two.
+    inner.setAttribute('role', 'status');
+    inner.setAttribute('aria-live', 'polite');
+
+    noticeTitleEl = document.createElement('p');
+    noticeTitleEl.className = 'map-search-notice-title';
+
+    noticeHintEl = document.createElement('p');
+    noticeHintEl.className = 'map-search-notice-hint';
+
+    var clear = document.createElement('button');
+    clear.type = 'button';
+    clear.className = 'map-search-notice-clear';
+    clear.textContent = strings.clearLabel;
+    clear.setAttribute('data-tinylytics-event', 'search.clear-from-notice');
+    clear.addEventListener('click', function() {
+      if (inputEl) {
+        inputEl.value = '';
+      }
+      clearSearch();
+      if (inputEl) {
+        inputEl.focus();
+      }
+    });
+
+    inner.appendChild(noticeTitleEl);
+    inner.appendChild(noticeHintEl);
+    inner.appendChild(clear);
+    noticeEl.appendChild(inner);
+    mapContainer.appendChild(noticeEl);
+  }
+
+  /**
+   * Show the central notice with a title and a next step.
+   *
+   * @param {string} title
+   * @param {string} hint - What the user can do to carry on using the site.
+   */
+  function showNotice(title, hint) {
+    if (!noticeEl) {
+      return;
+    }
+    noticeTitleEl.textContent = title || '';
+    noticeHintEl.textContent = hint || '';
+    noticeEl.hidden = false;
+  }
+
+  /**
+   * Hide the central notice.
+   */
+  function hideNotice() {
+    if (noticeEl) {
+      noticeEl.hidden = true;
+    }
   }
 
   /**
@@ -383,6 +502,7 @@
       options.signal = activeController.signal;
     }
 
+    hideNotice();
     setStatus(strings.searching);
 
     fetch(buildUrl(query), options)
@@ -401,11 +521,13 @@
           // marker shows, and say so -- an empty selection would instead reveal
           // every spot, which reads as "search ignored".
           applyNoMatches();
-          setStatus(strings.noResults, true);
+          setStatus('');
+          showNotice(strings.noResults, strings.noResultsHint);
           activeController = null;
           return;
         }
 
+        hideNotice();
         applySelection(parsed.slugs);
         setStatus(formatCount(parsed.slugs.length));
         fitToResults();
@@ -422,7 +544,8 @@
         // Deactivate rather than leaving a stale result set filtering the map,
         // so a failed search degrades to "no search" instead of a wrong view.
         applySelection(null);
-        setStatus(strings.error, true);
+        setStatus('');
+        showNotice(strings.error, strings.errorHint);
         activeController = null;
       });
   }
@@ -438,6 +561,7 @@
     }
     lastResultLocations = [];
     applySelection(null);
+    hideNotice();
     setStatus('');
     updateClearVisibility();
   }
@@ -469,6 +593,7 @@
       abortInFlight();
       lastResultLocations = [];
       applySelection(null);
+      hideNotice();
       setStatus('');
       return;
     }
@@ -648,6 +773,7 @@
 
     var instance = new SearchControl();
     instance.addTo(mapInstance);
+    buildNotice(mapInstance);
 
     var el = typeof instance.getContainer === 'function' ? instance.getContainer() : null;
     var corner = el && el.parentNode;
@@ -677,6 +803,9 @@
     getDimensionConfig: getDimensionConfig,
     matchFn: matchFn,
     NO_MATCH_SENTINEL: NO_MATCH_SENTINEL,
+    _buildNoticeForTest: buildNotice,
+    _showNoticeForTest: showNotice,
+    _hideNoticeForTest: hideNotice,
     clearSearch: clearSearch,
     // Exposed for tests: pure helpers with no DOM or network dependency.
     _parseResults: parseResults,

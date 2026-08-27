@@ -136,12 +136,88 @@ $search-box-height: 36px;
   }
 }
 
-// "No matches found" and error states. A plain result count is incidental
-// information, but these two tell the user the map is empty ON PURPOSE, so they
-// need to be unmissable rather than a faint grey footnote.
+// "No matches found" and error states on the compact status line. A plain result
+// count is incidental information, but these two tell the user the map is empty
+// ON PURPOSE, so they need to be unmissable rather than a faint grey footnote.
 .search-box-status--empty {
   font-weight: 700;
   color: $white;
   background: $swisscanoe-blue;
   border-color: $swisscanoe-blue;
+}
+
+// Central map notice.
+//
+// Shown when a search returns nothing, or when the search service is
+// unavailable. A blank map with no explanation reads as breakage, so the notice
+// sits in the middle of the map where the user is already looking, states what
+// happened, and offers a way to carry on.
+//
+// Positioned against the Leaflet map container, which Leaflet gives
+// `position: relative`. Deliberately NOT inside a map pane: panes are translated
+// as the user drags, which would slide the notice off centre.
+.map-search-notice {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  // Above tiles, markers and popups, below the Leaflet controls (which start at
+  // 800) so the filter panel and search input stay reachable.
+  z-index: 700;
+  width: max-content;
+  max-width: min(22rem, calc(100% - 2rem));
+  // The overlay must not swallow map drags; only its button takes pointer events.
+  pointer-events: none;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.map-search-notice-inner {
+  padding: 1rem 1.25rem;
+  font: 1.2em/1.45 $font-sans-serif;
+  text-align: center;
+  color: $swisscanoe-blue;
+  background: $white;
+  border: 2px solid $swisscanoe-blue;
+  border-radius: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.map-search-notice-title {
+  margin: 0 0 0.4rem;
+  font-size: 1.05em;
+  font-weight: 700;
+}
+
+.map-search-notice-hint {
+  margin: 0 0 0.9rem;
+  font-size: 0.8em;
+  color: $secondary-blue;
+}
+
+.map-search-notice-clear {
+  // Re-enable interaction on the one element that needs it.
+  pointer-events: auto;
+  padding: 0.4rem 0.9rem;
+  font: inherit;
+  font-size: 0.8em;
+  font-weight: 700;
+  color: $white;
+  cursor: pointer;
+  background: $swisscanoe-blue;
+  border: 1px solid $swisscanoe-blue;
+  border-radius: 0;
+
+  &:hover,
+  &:focus {
+    color: $swisscanoe-blue;
+    background: $white;
+  }
+
+  &:focus {
+    outline: 2px solid $swisscanoe-blue;
+    outline-offset: 2px;
+  }
 }

@@ -162,9 +162,11 @@ search:
   clear_label: "Clear search"
   searching: "Searching..."
   no_results: "No results found"
+  no_results_hint: "No spot matches your search. Try a different word, use fewer words, or clear the search to see all spots again."
   results_one: "1 result"
   results_many: "{count} results"
   error: "Search currently unavailable"
+  error_hint: "Please try again in a moment. You can still use the map with the filters."
 
 # Error pages
 errors:

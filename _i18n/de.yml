@@ -168,9 +168,11 @@ search:
   clear_label: "Suche löschen"
   searching: "Suche läuft..."
   no_results: "Keine Ergebnisse gefunden"
+  no_results_hint: "Kein Einstiegsort entspricht Ihrer Suche. Versuchen Sie einen anderen Begriff, weniger Wörter, oder löschen Sie die Suche, um wieder alle Einstiegsorte zu sehen."
   results_one: "1 Ergebnis"
   results_many: "{count} Ergebnisse"
   error: "Suche momentan nicht verfügbar"
+  error_hint: "Bitte versuchen Sie es in einem Moment erneut. Sie können die Karte weiterhin mit den Filtern nutzen."
 
 # Date formats
 date:
