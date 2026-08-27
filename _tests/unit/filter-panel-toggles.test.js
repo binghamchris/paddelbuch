@@ -86,12 +86,22 @@ function createMockLayerGroup() {
  */
 function createMockMap() {
   const handlers = {};
-  return {
+  const map = {
     on: jest.fn(function(event, handler) {
       handlers[event] = handler;
     }),
+    // Records the last panBy so tests can assert whether, and how far, the map
+    // was moved to get a popup clear of the controls.
+    panBy: jest.fn(function(offset) {
+      map._pannedBy = offset;
+    }),
+    getSize: jest.fn(function() {
+      return { x: 800, y: 600 };
+    }),
+    _pannedBy: null,
     _handlers: handlers
   };
+  return map;
 }
 
 /**
@@ -333,39 +343,125 @@ describe('Filter Panel Toggles', () => {
       expect(toggleBtn.getAttribute('aria-expanded')).toBe('false');
     });
 
-    test('popupopen sets parent container z-index to 0', () => {
+    // These replace two earlier tests that asserted the control corner's z-index
+    // was forced to '0' on popupopen and restored on popupclose. That mechanism
+    // was removed: dropping the corner to 0 put it below .leaflet-map-pane
+    // (stacking context at 400), so every marker (600) painted over the filter
+    // panel and the search box and swallowed clicks meant for them. The tests
+    // went with the mechanism -- they pinned an implementation detail, not
+    // Requirement 5.8, which only asks for the panel to collapse.
+    test('popupopen leaves the control corner z-index alone', () => {
       setupLeafletMocks();
       const panel = loadFilterPanel();
       const mockMap = createMockMap();
 
       panel.init(mockMap, [], []);
 
-      // The container's parentNode is document.body in our test setup
-      const container = document.querySelector('.filter-panel');
-      const parentNode = container.parentNode;
+      const parentNode = document.querySelector('.filter-panel').parentNode;
+      const before = parentNode.style.zIndex;
 
       mockMap._handlers.popupopen();
 
-      expect(parentNode.style.zIndex).toBe('0');
+      // Untouched, so the Leaflet default (1000) keeps controls above markers.
+      expect(parentNode.style.zIndex).toBe(before);
+      expect(parentNode.style.zIndex).not.toBe('0');
     });
 
-    test('popupclose restores parent container z-index', () => {
+    test('no popupclose handler is registered, since nothing needs restoring', () => {
       setupLeafletMocks();
       const panel = loadFilterPanel();
       const mockMap = createMockMap();
 
       panel.init(mockMap, [], []);
 
+      expect(mockMap._handlers.popupclose).toBeUndefined();
+    });
+
+    test('popupopen still collapses the panel (Requirement 5.8)', () => {
+      setupLeafletMocks();
+      const panel = loadFilterPanel();
+      const mockMap = createMockMap();
+
+      panel.init(mockMap, [], []);
       const container = document.querySelector('.filter-panel');
-      const parentNode = container.parentNode;
+      container.classList.add('expanded');
 
-      // First collapse via popupopen
       mockMap._handlers.popupopen();
-      expect(parentNode.style.zIndex).toBe('0');
 
-      // Then restore via popupclose
-      mockMap._handlers.popupclose();
-      expect(parentNode.style.zIndex).toBe('');
+      expect(container.classList.contains('expanded')).toBe(false);
+    });
+
+    test('a popup overlapping the controls pans the map clear of them', () => {
+      setupLeafletMocks();
+      const panel = loadFilterPanel();
+      const mockMap = createMockMap();
+      panel.init(mockMap, [], []);
+
+      const corner = document.querySelector('.filter-panel').parentNode;
+      corner.getBoundingClientRect = () => ({
+        left: 0, top: 0, right: 300, bottom: 40, width: 300, height: 40
+      });
+      const popupEl = document.createElement('div');
+      popupEl.getBoundingClientRect = () => ({
+        left: 100, top: 10, right: 400, bottom: 200, width: 300, height: 190
+      });
+
+      mockMap._handlers.popupopen({ popup: { getElement: () => popupEl } });
+
+      // 30px of vertical overlap plus the 8px gap.
+      expect(mockMap._pannedBy).toEqual([0, -38]);
+    });
+
+    test('a popup nowhere near the controls does not move the map', () => {
+      setupLeafletMocks();
+      const panel = loadFilterPanel();
+      const mockMap = createMockMap();
+      panel.init(mockMap, [], []);
+
+      const corner = document.querySelector('.filter-panel').parentNode;
+      corner.getBoundingClientRect = () => ({
+        left: 0, top: 0, right: 300, bottom: 40, width: 300, height: 40
+      });
+      const popupEl = document.createElement('div');
+      popupEl.getBoundingClientRect = () => ({
+        left: 500, top: 400, right: 700, bottom: 560, width: 200, height: 160
+      });
+
+      mockMap._handlers.popupopen({ popup: { getElement: () => popupEl } });
+
+      expect(mockMap._pannedBy).toBeNull();
+    });
+
+    test('the pan is capped so a huge popup cannot fling the marker off screen', () => {
+      setupLeafletMocks();
+      const panel = loadFilterPanel();
+      const mockMap = createMockMap();
+      panel.init(mockMap, [], []);
+
+      const corner = document.querySelector('.filter-panel').parentNode;
+      corner.getBoundingClientRect = () => ({
+        left: 0, top: 0, right: 300, bottom: 900, width: 300, height: 900
+      });
+      const popupEl = document.createElement('div');
+      popupEl.getBoundingClientRect = () => ({
+        left: 0, top: 0, right: 300, bottom: 900, width: 300, height: 900
+      });
+
+      mockMap._handlers.popupopen({ popup: { getElement: () => popupEl } });
+
+      // Map height is 600 in the mock, so the shift is capped at half of it.
+      expect(mockMap._pannedBy).toEqual([0, -300]);
+    });
+
+    test('a popupopen without a popup is handled without throwing', () => {
+      setupLeafletMocks();
+      const panel = loadFilterPanel();
+      const mockMap = createMockMap();
+      panel.init(mockMap, [], []);
+
+      expect(() => mockMap._handlers.popupopen()).not.toThrow();
+      expect(() => mockMap._handlers.popupopen({})).not.toThrow();
+      expect(mockMap._pannedBy).toBeNull();
     });
 
     test('popupopen collapses panel even when layer toggles are present', () => {

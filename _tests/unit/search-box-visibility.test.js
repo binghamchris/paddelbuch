@@ -238,9 +238,26 @@ describe('Filter panel source is free of search coupling', () => {
   test('filter-panel.js contains no search or callback plumbing', () => {
     // The panel was reverted to its original form; this guards against the
     // coupling creeping back in and changing the filter button again.
-    var src = getFilterPanelScript();
+    //
+    // Asserted against the source with comments stripped, because the intent is
+    // that no search PLUMBING exists -- not that the word can never be written.
+    // The popup/z-index fix has to explain, in a comment, that markers were
+    // covering the search box, and that explanation is worth keeping.
+    var src = getFilterPanelScript()
+      .replace(/\/\*[\s\S]*?\*\//g, ' ')
+      .replace(/(^|[^:])\/\/[^\n]*/g, '$1 ');
     expect(src).not.toMatch(/search/i);
     expect(src).not.toMatch(/onSearchHostReady/);
     expect(src).not.toMatch(/panelOptions/);
+  });
+
+  test('the comment-stripping in the test above cannot hide real plumbing', () => {
+    // Guard the guard: if stripping ever swallowed live code, the assertions
+    // would silently pass. Prove it only removes comments.
+    var stripped = 'var a = 1; // search host\n/* search */ var b = onSearchHostReady;'
+      .replace(/\/\*[\s\S]*?\*\//g, ' ')
+      .replace(/(^|[^:])\/\/[^\n]*/g, '$1 ');
+    expect(stripped).toMatch(/var a = 1;/);
+    expect(stripped).toMatch(/onSearchHostReady/);
   });
 });
