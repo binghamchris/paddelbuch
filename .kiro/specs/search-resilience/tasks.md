@@ -182,7 +182,23 @@ how a fault behaves.
   - [x] 12.3 Pass the new strings through the config block's `i18n` object
   - [x] 12.4 Confirm `spec/i18n_key_parity_spec.rb` still passes
 
-- [ ] 13. Verification
+- [~] 13. Verification (13.4, 13.5, 13.6a open -- see notes)
+
+  NOTE on the three open items, so nobody assumes they were done:
+  - 13.5 (deploy with the flag on) was NOT performed. The `SearchDisabled`
+    parameter is app-wide, so flipping it would disable search on every branch of
+    the Amplify app, and a local full-site build was declined. The chain is covered
+    by tests either way: env_loader_search_spec proves the flag yields
+    search_enabled=false, and map_init_search_gating_spec proves that renders
+    neither the config block nor the script tag. What remains unverified is only
+    the two joining at real build time.
+  - 13.4 (live failure modes) is covered by unit tests against the real module plus
+    confirmation that the deployed bundle contains each mechanism. Deliberately
+    triggering the live rate limiter was not done.
+  - 13.6a (mobile device) could not be done -- no device available. The desktop
+    measurement was 0.033 ms for the largest entry read, four orders of magnitude
+    under the request it replaces.
+
   - [ ] 13.1 Full Jest suite green, with the compiled-CSS baseline unchanged —
         this feature adds no CSS
   - [ ] 13.2 Full RSpec suite green, including the new env_loader coverage.

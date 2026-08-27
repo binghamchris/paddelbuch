@@ -265,15 +265,75 @@ markers avoids this, since each already carries correct metadata.
 
 ```
 Amplify parameter -> Amplify env var -> _plugins/env_loader.rb
-  -> site.search_api_endpoint / site.search_api_key
+  -> site.search_api_endpoint / site.search_api_key / site.search_enabled
   -> #semantic-search-config JSON block -> JSON.parse in semantic-search.js
 ```
+
+Templates gate on `site.search_enabled`, never on the endpoint directly. It is
+derived once in the plugin as "an endpoint is configured AND the feature is not
+disabled", so the decision is made in testable Ruby rather than in Liquid.
 
 | Variable / parameter | Purpose |
 |---|---|
 | `SEARCH_API_ENDPOINT` / `EnvVarSearchApiEndpoint` | Full search endpoint URL. **The search UI renders only when this is non-empty.** |
 | `SEARCH_API_KEY` / `EnvVarSearchApiKey` | API Gateway usage-plan key |
 | `SearchApiCspHost` | Search API origin added to CSP `connect-src` |
+| `SEARCH_DISABLED` / `SearchDisabled` | Feature flag. `true` removes search from the build entirely, keeping the endpoint configured |
+| `site.search.timeout_ms` | Per-attempt request budget, default 6000 |
+
+#### Turning search off
+
+Set the `SearchDisabled` stack parameter to `"true"`. That removes the config
+block and the `semantic-search.js` script tag, so the module is never downloaded,
+and empties the search host from the CSP `connect-src`, so the endpoint cannot be
+reached even by injected script. The endpoint parameter is left intact, so
+switching search back on does not mean recovering the URL.
+
+The flag is negative deliberately: its absence has to mean "behave as today", and
+a positive `SEARCH_ENABLED` would silently disable search on the next deploy of
+every existing environment. An unrecognised value disables and warns in the build
+log, because someone who types a value into a kill switch intended to use it.
+
+Note the parameter is **app-wide**, not per-branch: flipping it affects every
+branch of the Amplify app.
+
+### Graceful degradation
+
+The governing rule: a search backend problem may cost the user search, and nothing
+else. What that means concretely:
+
+- **No request is made at page load.** The first call happens on user input, so a
+  backend that is down when the site loads has no effect on loading the site.
+  There is deliberately no availability probe -- it would cost a request per page
+  view and can be wrong in both directions.
+- **Search init cannot break the map.** Both calls into the module during map
+  initialisation are individually guarded, because the initial data load happens
+  further down the same function and a throw would otherwise leave the map with no
+  markers at all.
+- **A malformed response is a failure, not an empty result.** A `2xx` whose body is
+  not an array is rejected. Treating it as zero results would apply the no-match
+  sentinel and hide every marker, reporting a backend fault as "no spots match".
+- **Every failure deactivates the search dimension**, so a failure degrades to "no
+  search" rather than a stale or empty view.
+- **Timeout is 6000 ms per attempt**, above the measured ~5.0s cold-start ceiling
+  and strictly below the Lambda's own 10s, so the client gives up before the
+  server does rather than racing it.
+- **One retry after 1s** on a network error, timeout, or `5xx`. Never on a `4xx`:
+  `429` in particular is not retried, because retrying a rate limit is what caused
+  it. The status keeps reading "searching" across the retry so no failure is
+  flashed before a success.
+- **The notice's action follows the state**: clear the search for "nothing
+  matched", try again for a failure.
+- **Results are cached in memory and in `localStorage`.** The persisted key carries
+  the spots table's `lastUpdatedAt`, so a content change orphans every entry at
+  once; a 7-day TTL is the backstop. Any storage failure disables persistence for
+  the page and the in-memory tier carries on.
+
+Known limitation: `Retry-After` is not a CORS-safelisted response header and the
+search API does not send `Access-Control-Expose-Headers`, so the browser cannot
+read it. The rate-limit message therefore always uses its generic form rather than
+naming a wait time. The frontend handles both forms; making the specific one
+reachable needs one header added to the API's responses.
 
 Empty and whitespace-only values are treated as unset, because CloudFormation
 supplies `""` for an omitted parameter and `""` is truthy in both Ruby and Liquid.
