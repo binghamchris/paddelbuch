@@ -174,6 +174,59 @@ describe('PaddelbuchSemanticSearch', () => {
       });
       expect(SemanticSearch._buildUrl('x')).not.toContain('minScore');
     });
+
+    test('omits minScore entirely when it is null', () => {
+      // Null means "no relevance floor". A single cosine floor cut German far
+      // harder than English for the same concept, which was the reported
+      // 40-versus-36 asymmetry.
+      SemanticSearch._setConfigForTest({
+        endpoint: 'https://api.example.com/prod/search',
+        locale: 'de',
+        limit: 500,
+        minScore: null,
+        fields: 'slim',
+        dimensionKey: 'search'
+      });
+      expect(SemanticSearch._buildUrl('parking')).not.toContain('minScore');
+    });
+
+    test('requests the slim projection when configured', () => {
+      SemanticSearch._setConfigForTest({
+        endpoint: 'https://api.example.com/prod/search',
+        locale: 'en',
+        limit: 500,
+        minScore: null,
+        fields: 'slim',
+        dimensionKey: 'search'
+      });
+      var url = SemanticSearch._buildUrl('parking');
+      expect(url).toContain('fields=slim');
+      expect(url).toContain('limit=500');
+    });
+  });
+
+  describe('defaults', () => {
+    test('default limit carries every match to a broad term', () => {
+      // "parking" matches 441 of 737 spots on the live index; a smaller limit
+      // silently truncated the result the user asked for.
+      expect(SemanticSearch.DEFAULTS.limit).toBeGreaterThanOrEqual(441);
+    });
+
+    test('no relevance floor is applied by default', () => {
+      expect(SemanticSearch.DEFAULTS.minScore).toBeNull();
+    });
+
+    test('the slim projection is the default', () => {
+      // Only slug and location are read by this module; the full form carries
+      // rendered HTML that would be downloaded and discarded.
+      expect(SemanticSearch.DEFAULTS.fields).toBe('slim');
+    });
+
+    test('_numberOr and the nullable variant differ on absent values', () => {
+      // A missing limit must fall back to a number; a missing floor must stay null.
+      expect(SemanticSearch._numberOr(undefined, 500)).toBe(500);
+      expect(SemanticSearch.DEFAULTS.minScore).toBeNull();
+    });
   });
 
   describe('_mergeStrings', () => {

@@ -31,8 +31,22 @@
     dimensionKey: 'search',
     minQueryLength: 2,
     debounceMs: 350,
-    limit: 40,
-    minScore: 0.25,
+    // High enough to carry every match to a broad term. "parking" matches 441 of
+    // 737 spots, and truncating that was the original complaint. This is
+    // affordable only because of fields=slim below.
+    limit: 500,
+    // No relevance floor. The API now decides membership lexically, so a
+    // threshold is no longer needed for precision -- and a single cosine floor
+    // actively harmed German, which scores lower for the same concept because
+    // the German text uses different words. That asymmetry was the reported
+    // 40-results-in-English versus 36-in-German.
+    minScore: null,
+    // Ask for the minimal projection. This module only reads slug and location,
+    // and the full form carries rendered HTML that would be discarded. Measured
+    // on the live index, slim is ~5x smaller for a 441-result response
+    // (69KB versus 336KB). Data transfer is the only search cost that scales
+    // with result count.
+    fields: 'slim',
     fitPadding: 40,
     fitMaxZoom: 12
   };
@@ -93,7 +107,8 @@
       minQueryLength: numberOr(parsed.minQueryLength, DEFAULTS.minQueryLength),
       debounceMs: numberOr(parsed.debounceMs, DEFAULTS.debounceMs),
       limit: numberOr(parsed.limit, DEFAULTS.limit),
-      minScore: numberOr(parsed.minScore, DEFAULTS.minScore),
+      minScore: nullableNumber(parsed.minScore, DEFAULTS.minScore),
+      fields: parsed.fields || DEFAULTS.fields,
       fitPadding: numberOr(parsed.fitPadding, DEFAULTS.fitPadding),
       fitMaxZoom: numberOr(parsed.fitMaxZoom, DEFAULTS.fitMaxZoom)
     };
@@ -113,6 +128,27 @@
    * @returns {number}
    */
   function numberOr(value, fallback) {
+    var num = typeof value === 'number' ? value : parseFloat(value);
+    if (typeof num !== 'number' || isNaN(num) || !isFinite(num)) {
+      return fallback;
+    }
+    return num;
+  }
+
+  /**
+   * Coerce a config value to a finite number, or null when it is absent.
+   *
+   * Distinct from numberOr because an OMITTED relevance floor is meaningful:
+   * null means "send no minScore at all", which is different from sending 0.
+   *
+   * @param {*} value
+   * @param {number|null} fallback
+   * @returns {number|null}
+   */
+  function nullableNumber(value, fallback) {
+    if (value === null || value === undefined || value === '') {
+      return fallback;
+    }
     var num = typeof value === 'number' ? value : parseFloat(value);
     if (typeof num !== 'number' || isNaN(num) || !isFinite(num)) {
       return fallback;
@@ -153,9 +189,18 @@
       + '&locale=' + encodeURIComponent(config.locale)
       + '&limit=' + encodeURIComponent(String(config.limit));
 
-    // minScore is optional server-side; omit it when not a usable threshold so
-    // the API applies no filter rather than receiving an invalid value.
-    if (config.minScore >= -1 && config.minScore <= 1) {
+    if (config.fields) {
+      url += '&fields=' + encodeURIComponent(config.fields);
+    }
+
+    // minScore is optional. Null means "no relevance floor", which is the
+    // default: the API decides membership lexically, so a cosine floor adds
+    // nothing and cuts the two locales unevenly. Only a finite in-range number
+    // is sent.
+    if (typeof config.minScore === 'number'
+        && isFinite(config.minScore)
+        && config.minScore >= -1
+        && config.minScore <= 1) {
       url += '&minScore=' + encodeURIComponent(String(config.minScore));
     }
     return url;

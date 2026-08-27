@@ -77,8 +77,8 @@
   "endpoint": {{ site.search_api_endpoint | jsonify }},
   "apiKey": {{ site.search_api_key | default: "" | jsonify }},
   "locale": "{{ current_locale }}",
-  "limit": {{ site.search.limit | default: 40 }},
-  "minScore": {{ site.search.min_score | default: 0.25 }},
+  "limit": {{ site.search.limit | default: 500 }},
+  "fields": "{{ site.search.fields | default: 'slim' }}",
   "minQueryLength": {{ site.search.min_query_length | default: 2 }},
   "debounceMs": {{ site.search.debounce_ms | default: 350 }},
   "i18n": {
