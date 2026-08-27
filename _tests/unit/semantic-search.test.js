@@ -91,9 +91,17 @@ describe('PaddelbuchSemanticSearch', () => {
       expect(parsed.slugs).toEqual(['good']);
     });
 
-    test('returns empty results for a non-array payload', () => {
-      expect(SemanticSearch._parseResults(null).slugs).toEqual([]);
-      expect(SemanticSearch._parseResults({}).slugs).toEqual([]);
+    test('rejects a non-array payload instead of reporting an empty result', () => {
+      // This previously asserted the opposite -- that a non-array yielded zero
+      // slugs. That was the bug: zero slugs is indistinguishable from a genuine
+      // empty result, so the caller applied the no-match sentinel and hid EVERY
+      // marker, presenting a backend fault as "no spots match your search".
+      expect(() => SemanticSearch._parseResults(null)).toThrow();
+      expect(() => SemanticSearch._parseResults({})).toThrow();
+      expect(() => SemanticSearch._parseResults({ length: 0 })).toThrow();
+
+      // An empty ARRAY remains a valid successful result.
+      expect(SemanticSearch._parseResults([]).slugs).toEqual([]);
     });
 
     test('ignores non-numeric coordinates', () => {

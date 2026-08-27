@@ -189,6 +189,11 @@
    * @returns {string}
    */
   function buildUrl(query) {
+    // Exported for tests, so it must hold the same unconfigured-safe contract as
+    // the rest of the public API rather than relying on its callers.
+    if (!config || !config.endpoint) {
+      return '';
+    }
     var url = config.endpoint
       + (config.endpoint.indexOf('?') === -1 ? '?' : '&')
       + 'q=' + encodeURIComponent(query)
@@ -381,6 +386,13 @@
    * @param {Array|null} slugs - Matching slugs, or null to deactivate search
    */
   function applySelection(slugs) {
+    // Guard on config, matching getDimensionConfig. Without this, calling the
+    // exported clearSearch() on an unconfigured build throws on
+    // config.dimensionKey -- an exported function that is unsafe in the very
+    // state the module is designed to sit in.
+    if (!config) {
+      return;
+    }
     var engine = global.PaddelbuchFilterEngine;
     if (!engine || typeof engine.setDimensionSelection !== 'function') {
       return;
@@ -441,15 +453,25 @@
    * The API returns a bare JSON array of result objects. Entries without a
    * slug are unusable as a filter key and are skipped.
    *
+   * Throws when the payload is not an array. That distinction is load-bearing: a
+   * non-array body used to produce zero slugs, which the caller could not tell
+   * apart from a genuine empty result, so it applied the no-match sentinel and
+   * hid EVERY marker -- reporting a backend fault as "no spots match your
+   * search". A shape failure is a failure, and belongs on the error path.
+   *
+   * Individual bad entries are still tolerated rather than failing the whole
+   * response: one malformed spot should not lose the other four hundred.
+   *
    * @param {Array} payload
    * @returns {Object} { slugs: Array, locations: Array }
+   * @throws {Error} when payload is not an array
    */
   function parseResults(payload) {
     var slugs = [];
     var locations = [];
 
-    if (!payload || typeof payload.length !== 'number') {
-      return { slugs: slugs, locations: locations };
+    if (!Array.isArray(payload)) {
+      throw new Error('Search API returned a non-array body');
     }
 
     for (var i = 0; i < payload.length; i++) {
@@ -460,12 +482,25 @@
       slugs.push(item.slug);
 
       var loc = item.location;
-      if (loc && typeof loc.lat === 'number' && typeof loc.lon === 'number') {
+      if (loc && isFiniteNumber(loc.lat) && isFiniteNumber(loc.lon)) {
         locations.push({ lat: loc.lat, lon: loc.lon });
       }
     }
 
     return { slugs: slugs, locations: locations };
+  }
+
+  /**
+   * Report whether a value is a usable finite number.
+   *
+   * NaN and Infinity are typeof 'number' but cannot be mapped, and would poison
+   * the bounds passed to fitBounds.
+   *
+   * @param {*} value
+   * @returns {boolean}
+   */
+  function isFiniteNumber(value) {
+    return typeof value === 'number' && isFinite(value);
   }
 
   /**

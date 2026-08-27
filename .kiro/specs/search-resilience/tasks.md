@@ -56,19 +56,19 @@ how a fault behaves.
   - [x] 2.5 Assert that a dimension registered without a Search_Box remains an
         Inactive_Dimension and hides no marker
 
-- [ ] 3. Stop a malformed response masquerading as an empty result (Requirement 3)
-  - [ ] 3.1 Reject a non-array `2xx` body with `Array.isArray`, throwing into the
+- [x] 3. Stop a malformed response masquerading as an empty result (Requirement 3)
+  - [x] 3.1 Reject a non-array `2xx` body with `Array.isArray`, throwing into the
         failure path instead of returning zero slugs
-  - [ ] 3.2 Keep per-entry tolerance: skip entries with no `slug`, and skip
+  - [x] 3.2 Keep per-entry tolerance: skip entries with no `slug`, and skip
         `location` values that are not a pair of finite numbers
-  - [ ] 3.3 Keep an empty array as a valid successful "nothing matched"
-  - [ ] 3.4 Add the property test asserting no `2xx` payload shape hides markers
+  - [x] 3.3 Keep an empty array as a valid successful "nothing matched"
+  - [x] 3.4 Add the property test asserting no `2xx` payload shape hides markers
         except a genuine zero-length array
 
-- [ ] 4. Make every export unconfigured-safe (Requirement 9)
-  - [ ] 4.1 Guard `applySelection` on the presence of config, matching the
+- [x] 4. Make every export unconfigured-safe (Requirement 9)
+  - [x] 4.1 Guard `applySelection` on the presence of config, matching the
         pattern already used by `getDimensionConfig`
-  - [ ] 4.2 Add a test that walks every exported function in the unconfigured
+  - [x] 4.2 Add a test that walks every exported function in the unconfigured
         state and asserts none throws
 
 - [ ] 5. Replace the loose abort state with a per-operation request record
