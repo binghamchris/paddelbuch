@@ -81,6 +81,8 @@
   "fields": "{{ site.search.fields | default: 'slim' }}",
   "minQueryLength": {{ site.search.min_query_length | default: 2 }},
   "debounceMs": {{ site.search.debounce_ms | default: 350 }},
+  "timeoutMs": {{ site.search.timeout_ms | default: 6000 }},
+  "contentVersion": {{ site.data.last_updates['spots'] | default: '' | jsonify }},
   "i18n": {
     "placeholder": "{% t search.placeholder %}",
     "ariaLabel": "{% t search.aria_label %}",
@@ -91,7 +93,13 @@
     "resultsOne": "{% t search.results_one %}",
     "resultsMany": "{% t search.results_many %}",
     "error": "{% t search.error %}",
-    "errorHint": "{% t search.error_hint %}"
+    "errorHint": "{% t search.error_hint %}",
+    "timeout": "{% t search.timeout %}",
+    "timeoutHint": "{% t search.timeout_hint %}",
+    "rateLimited": "{% t search.rate_limited %}",
+    "rateLimitedHint": "{% t search.rate_limited_hint %}",
+    "rateLimitedHintGeneric": "{% t search.rate_limited_hint_generic %}",
+    "retryLabel": "{% t search.retry_label %}"
   }
 }
 </script>

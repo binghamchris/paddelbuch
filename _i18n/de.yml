@@ -173,6 +173,12 @@ search:
   results_many: "{count} Ergebnisse"
   error: "Suche momentan nicht verfügbar"
   error_hint: "Bitte versuchen Sie es in einem Moment erneut. Sie können die Karte weiterhin mit den Filtern nutzen."
+  timeout: "Die Suche hat zu lange gedauert"
+  timeout_hint: "Die Suche hat nicht rechtzeitig geantwortet. Versuchen Sie es erneut, oder nutzen Sie die Karte weiterhin mit den Filtern."
+  rate_limited: "Zu viele Suchanfragen"
+  rate_limited_hint: "Bitte warten Sie {seconds} Sekunden und versuchen Sie es erneut."
+  rate_limited_hint_generic: "Bitte warten Sie einen Moment und versuchen Sie es erneut."
+  retry_label: "Erneut versuchen"
 
 # Date formats
 date:

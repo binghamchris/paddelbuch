@@ -49,7 +49,13 @@ const SAFE_ARGS = {
   _hideNoticeForTest: [],
   _setConfigForTest: [null],
   _setStringsForTest: [{}],
-  _getStringsForTest: []
+  _getStringsForTest: [],
+  _runNoticeActionForTest: [],
+  _lookupResultForTest: ['parking'],
+  _rememberResultForTest: ['parking', { slugs: [], locations: [] }],
+  _purgeSupersededForTest: [],
+  _resetCachesForTest: [],
+  _memoryStatsForTest: []
 };
 
 describe('the search module when unconfigured', () => {

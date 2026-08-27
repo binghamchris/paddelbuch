@@ -167,6 +167,12 @@ search:
   results_many: "{count} results"
   error: "Search currently unavailable"
   error_hint: "Please try again in a moment. You can still use the map with the filters."
+  timeout: "The search took too long"
+  timeout_hint: "The search did not answer in time. Try again, or carry on using the map with the filters."
+  rate_limited: "Too many searches"
+  rate_limited_hint: "Please wait {seconds} seconds and try again."
+  rate_limited_hint_generic: "Please wait a moment and try again."
+  retry_label: "Try again"
 
 # Error pages
 errors:

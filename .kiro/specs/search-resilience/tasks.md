@@ -71,116 +71,116 @@ how a fault behaves.
   - [x] 4.2 Add a test that walks every exported function in the unconfigured
         state and asserts none throws
 
-- [ ] 5. Replace the loose abort state with a per-operation request record
+- [x] 5. Replace the loose abort state with a per-operation request record
         (Requirements 1, 6)
-  - [ ] 5.1 Introduce the record: controller, timer, `timedOut`, `superseded`,
+  - [x] 5.1 Introduce the record: controller, timer, `timedOut`, `superseded`,
         query, attempt number
-  - [ ] 5.2 Capture the record in the promise closure so a late-settling request
+  - [x] 5.2 Capture the record in the promise closure so a late-settling request
         reads its own state, not the current one
-  - [ ] 5.3 Make `abortInFlight()` set `superseded`, clear the timer, then abort
-  - [ ] 5.4 Clear the timer on every exit path — success, failure, supersede
+  - [x] 5.3 Make `abortInFlight()` set `superseded`, clear the timer, then abort
+  - [x] 5.4 Clear the timer on every exit path — success, failure, supersede
 
-- [ ] 6. Add the per-Attempt timeout (Requirement 1)
-  - [ ] 6.1 Read `timeoutMs` from config through a positive-finite coercion,
+- [x] 6. Add the per-Attempt timeout (Requirement 1)
+  - [x] 6.1 Read `timeoutMs` from config through a positive-finite coercion,
         defaulting to 6000 -- measured: cold-start ceiling is ~5.0s (init max
         1130ms + cold invocation max 3905ms), and the Lambda's own timeout is
         10000ms, so a 10s client budget would never fire before the server's own
         failure
-  - [ ] 6.1a Do NOT ship a budget below ~5000ms until task 8 (retry) is in
+  - [x] 6.1a Do NOT ship a budget below ~5000ms until task 8 (retry) is in
         place: below the cold ceiling the timeout aborts legitimate cold starts,
         and only the retry recovers them
-  - [ ] 6.2 Arm a timer per Attempt that sets `timedOut` and aborts
-  - [ ] 6.3 Report a Timeout_Abort with the timeout message; keep a
+  - [x] 6.2 Arm a timer per Attempt that sets `timedOut` and aborts
+  - [x] 6.3 Report a Timeout_Abort with the timeout message; keep a
         Supersede_Abort silent
-  - [ ] 6.4 Assert the status region is never left reading "searching" for any
+  - [x] 6.4 Assert the status region is never left reading "searching" for any
         outcome
-  - [ ] 6.5 Add the timeout and supersede tests, including that a supersede does
+  - [x] 6.5 Add the timeout and supersede tests, including that a supersede does
         **not** retry
 
-- [ ] 7. Classify failures in one place (Requirements 5, 6)
-  - [ ] 7.1 Add the classifier returning retryability, message key, and dimension
+- [x] 7. Classify failures in one place (Requirements 5, 6)
+  - [x] 7.1 Add the classifier returning retryability, message key, and dimension
         action for each outcome in the design's table
-  - [ ] 7.2 Handle `429` distinctly: its own message, never retried
-  - [ ] 7.3 Parse `Retry-After` when finite, non-negative, and plausible; fall
+  - [x] 7.2 Handle `429` distinctly: its own message, never retried
+  - [x] 7.3 Parse `Retry-After` when finite, non-negative, and plausible; fall
         back to the generic wait message otherwise
-  - [ ] 7.4 Route every failure through `applySelection(null)` so the dimension
+  - [x] 7.4 Route every failure through `applySelection(null)` so the dimension
         is left Inactive
-  - [ ] 7.5 Add tests for `429` with a usable header, `429` without, other `4xx`,
+  - [x] 7.5 Add tests for `429` with a usable header, `429` without, other `4xx`,
         `5xx`, and a network error
 
-- [ ] 8. Add the single retry (Requirement 6)
-  - [ ] 8.1 Allow at most two Attempts per Search_Operation
-  - [ ] 8.2 Retry only a Transient_Failure, never a `4xx`, never a supersede
-  - [ ] 8.3 Delay the retry by ~1000 ms, each Attempt carrying its own timeout
-  - [ ] 8.4 Keep the status reading searching across the retry, with no failure
+- [x] 8. Add the single retry (Requirement 6)
+  - [x] 8.1 Allow at most two Attempts per Search_Operation
+  - [x] 8.2 Retry only a Transient_Failure, never a `4xx`, never a supersede
+  - [x] 8.3 Delay the retry by ~1000 ms, each Attempt carrying its own timeout
+  - [x] 8.4 Keep the status reading searching across the retry, with no failure
         flash
-  - [ ] 8.5 Add tests pinning the Attempt counts: two on transient, one on `4xx`
+  - [x] 8.5 Add tests pinning the Attempt counts: two on transient, one on `4xx`
 
-- [ ] 9. Add the Result_Cache (Requirement 7)
-  - [ ] 9.1 Key entries by the full request URL from `buildUrl(query)`
-  - [ ] 9.2 Serve a hit without any Attempt, still applying selection and fit
-  - [ ] 9.3 Cache successes only, including empty results; never cache a failure
-  - [ ] 9.4 Bound by total cached results, not entries: 60000 results (~4.5MB at
+- [x] 9. Add the Result_Cache (Requirement 7)
+  - [x] 9.1 Key entries by the full request URL from `buildUrl(query)`
+  - [x] 9.2 Serve a hit without any Attempt, still applying selection and fit
+  - [x] 9.3 Cache successes only, including empty results; never cache a failure
+  - [x] 9.4 Bound by total cached results, not entries: 60000 results (~4.5MB at
         the measured 70-80 bytes per result) AND 500 entries, evicting until both
         hold. Entry count alone is the wrong metric -- 50 entries measured
         anywhere from 0.13MB to 1.9MB depending on query breadth
-  - [ ] 9.4a Evict least-recently-USED, not oldest-first: a JS Map preserves
+  - [x] 9.4a Evict least-recently-USED, not oldest-first: a JS Map preserves
         insertion order, so LRU is a delete-then-set on each hit
-  - [ ] 9.5 Add tests for the hit path making zero Attempts, for eviction under
+  - [x] 9.5 Add tests for the hit path making zero Attempts, for eviction under
         each bound independently, and for LRU ordering (a re-hit entry survives
         eviction that would have removed it under FIFO)
-  - [ ] 9.6 Add the property test that cache keys differ whenever any request
+  - [x] 9.6 Add the property test that cache keys differ whenever any request
         parameter differs
 
-- [ ] 10. Persist the cache across navigation (Requirement 12)
-  - [ ] 10.1 Render `contentVersion` into the search config block from
+- [x] 10. Persist the cache across navigation (Requirement 12)
+  - [x] 10.1 Render `contentVersion` into the search config block from
         `site.data.last_updates['spots']`, the signal `api_generator.rb` already
         produces and `offene-daten/api.html` already consumes
-  - [ ] 10.2 Use `localStorage`, not `sessionStorage` -- a 7-day TTL is
+  - [x] 10.2 Use `localStorage`, not `sessionStorage` -- a 7-day TTL is
         meaningless within one tab session
-  - [ ] 10.3 One key per query: `pbsearch:<schema>:<contentVersion>:<requestUrl>`,
+  - [x] 10.3 One key per query: `pbsearch:<schema>:<contentVersion>:<requestUrl>`,
         so a lookup is a single getItem with no index and no enumeration
-  - [ ] 10.4 Store each entry SELF-CONTAINED, with its own slugs and locations. Do
+  - [x] 10.4 Store each entry SELF-CONTAINED, with its own slugs and locations. Do
         not implement the shared-table-plus-indices layout: it is 15.8x smaller but
         two tabs appending concurrently diverge, after which one tab's positional
         indices resolve to the other's spots
-  - [ ] 10.5 Read nothing during page or map initialisation -- reads happen only
+  - [x] 10.5 Read nothing during page or map initialisation -- reads happen only
         when a query is issued
-  - [ ] 10.6 Stamp each entry with its write time; treat entries older than 7 days
+  - [x] 10.6 Stamp each entry with its write time; treat entries older than 7 days
         as a miss and delete them
-  - [ ] 10.7 Purge superseded content/schema versions lazily via
+  - [x] 10.7 Purge superseded content/schema versions lazily via
         `requestIdleCallback`, falling back to a zero-delay timeout. Never during
         init -- enumeration is the one operation that touches every key
-  - [ ] 10.8 On `QuotaExceededError`, evict least-recently-used and retry once; on
+  - [x] 10.8 On `QuotaExceededError`, evict least-recently-used and retry once; on
         a second failure or any other storage error, disable persistence for the
         page and continue with the in-memory tier
-  - [ ] 10.9 Budget 4 MB, not the 9.88 MB measured in Chromium, because mobile
+  - [x] 10.9 Budget 4 MB, not the 9.88 MB measured in Chromium, because mobile
         Safari provides less
-  - [ ] 10.10 Read order: in-memory, then persisted, then network
-  - [ ] 10.11 Tests: a persisted hit makes zero Attempts; a hit survives a
+  - [x] 10.10 Read order: in-memory, then persisted, then network
+  - [x] 10.11 Tests: a persisted hit makes zero Attempts; a hit survives a
         simulated navigation (fresh module against the same storage); an expired
         entry is a miss and is deleted; a changed `contentVersion` orphans every
         entry; a throwing `setItem` degrades silently with search still working;
         Safari-private-style storage that throws on any write is handled; nothing
         is read at init
 
-- [ ] 11. Make the notice action state-dependent (Requirement 4)
-  - [ ] 11.1 Extend `showNotice` to take an action: label, analytics event,
+- [x] 11. Make the notice action state-dependent (Requirement 4)
+  - [x] 11.1 Extend `showNotice` to take an action: label, analytics event,
         handler
-  - [ ] 11.2 Keep one permanently attached listener that dispatches to the
+  - [x] 11.2 Keep one permanently attached listener that dispatches to the
         current action
-  - [ ] 11.3 Offer clear-search on no-results, retry on failure
-  - [ ] 11.4 Make retry a no-op that hides the notice when the input is empty
-  - [ ] 11.5 Add tests for both actions, and for the empty-input retry
+  - [x] 11.3 Offer clear-search on no-results, retry on failure
+  - [x] 11.4 Make retry a no-op that hides the notice when the input is empty
+  - [x] 11.5 Add tests for both actions, and for the empty-input retry
 
-- [ ] 12. Configuration and localisation
-  - [ ] 12.1 Add `timeoutMs` and `contentVersion` to the
+- [x] 12. Configuration and localisation
+  - [x] 12.1 Add `timeoutMs` and `contentVersion` to the
         `#semantic-search-config` block in `_includes/map-init.html`
-  - [ ] 12.2 Add `timeout`, `timeout_hint`, `rate_limited`, `rate_limited_hint`,
+  - [x] 12.2 Add `timeout`, `timeout_hint`, `rate_limited`, `rate_limited_hint`,
         `rate_limited_hint_generic`, and `retry_label` to `_i18n/de.yml` and
         `_i18n/en.yml`
-  - [ ] 12.3 Pass the new strings through the config block's `i18n` object
-  - [ ] 12.4 Confirm `spec/i18n_key_parity_spec.rb` still passes
+  - [x] 12.3 Pass the new strings through the config block's `i18n` object
+  - [x] 12.4 Confirm `spec/i18n_key_parity_spec.rb` still passes
 
 - [ ] 13. Verification
   - [ ] 13.1 Full Jest suite green, with the compiled-CSS baseline unchanged —
