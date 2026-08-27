@@ -91,6 +91,48 @@ describe('An empty result set hides every marker', () => {
   });
 });
 
+describe('The notice button type treatment', () => {
+  // The compiled stylesheet, so these assert what the browser actually receives
+  // rather than what the SCSS source appears to say.
+  const fs = require('fs');
+  const path = require('path');
+  const css = fs.readFileSync(
+    path.join(__dirname, '..', 'fixtures', 'application.baseline.css'), 'utf-8');
+
+  function rule(selector) {
+    const m = css.match(new RegExp(selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\{([^}]*)\\}'));
+    return m ? m[1] : null;
+  }
+
+  test('the clear button inherits its family rather than declaring its own', () => {
+    const declarations = rule('.map-search-notice-clear');
+    expect(declarations).not.toBeNull();
+    expect(declarations).toContain('font:inherit');
+    expect(declarations).not.toMatch(/font-family:/);
+  });
+
+  test('it is not bold, matching every other button on the site', () => {
+    // It was font-weight: 700, which made it the only bold button in the UI.
+    expect(rule('.map-search-notice-clear')).not.toMatch(/font-weight:(700|bold)/);
+    expect(rule('.popup-btn')).not.toMatch(/font-weight:(700|bold)/);
+  });
+
+  test('its size ratio matches the popup button', () => {
+    expect(rule('.map-search-notice-clear')).toMatch(/font-size:\.9em/);
+    expect(rule('.popup-btn')).toMatch(/font-size:\.9em/);
+  });
+
+  test('the popup button still sets no family of its own, so both inherit', () => {
+    // If this ever changes, the two buttons stop matching and this suite should
+    // be revisited rather than the assertion above being relaxed.
+    expect(rule('.popup-btn')).not.toMatch(/font-family:/);
+  });
+
+  test('the title stays bold, so the hierarchy inside the notice is preserved', () => {
+    expect(rule('.map-search-notice-title')).toMatch(/font-weight:700/);
+  });
+});
+
 describe('The central map notice', () => {
   var mapContainer;
   var fakeMap;

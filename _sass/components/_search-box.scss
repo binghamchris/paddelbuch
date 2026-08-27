@@ -201,9 +201,13 @@ $search-box-height: 36px;
   // Re-enable interaction on the one element that needs it.
   pointer-events: auto;
   padding: 0.4rem 0.9rem;
+  // Match the type treatment of .popup-btn, the site's other on-map button:
+  // inherited family (Quicksand, as the popup wrapper sets it) at 0.9em and
+  // normal weight. `font: inherit` carries the family and resets weight to
+  // normal, so no explicit font-weight is needed -- and adding one back here is
+  // what previously made this button the only bold button on the site.
   font: inherit;
-  font-size: 0.8em;
-  font-weight: 700;
+  font-size: 0.9em;
   color: $white;
   cursor: pointer;
   background: $swisscanoe-blue;
