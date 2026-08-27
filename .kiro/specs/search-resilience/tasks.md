@@ -40,20 +40,20 @@ how a fault behaves.
   - [x] 1.9 Confirm the default build (flag absent) is byte-identical in rendered
         output to today's
 
-- [ ] 2. Isolate map initialisation from search faults (Requirement 2)
-  - [ ] 2.1 Wrap the `getDimensionConfig()` registration in `map-data-init.js` in
+- [x] 2. Isolate map initialisation from search faults (Requirement 2)
+  - [x] 2.1 Wrap the `getDimensionConfig()` registration in `map-data-init.js` in
         a try/catch that logs, sets `searchEnabled = false`, and continues
-  - [ ] 2.2 Wrap the `createControl(map)` call the same way
-  - [ ] 2.3 Build `_tests/unit/map-data-init-isolation.test.js`, the first test
+  - [x] 2.2 Wrap the `createControl(map)` call the same way
+  - [x] 2.3 Build `_tests/unit/map-data-init-isolation.test.js`, the first test
         that EXECUTES `map-data-init.js` rather than reading its source. Needs
         mocks for `PaddelbuchMap`, `PaddelbuchFilterEngine`,
         `PaddelbuchFilterPanel`, `PaddelbuchMarkerRegistry`,
         `PaddelbuchSpatialUtils`, `PaddelbuchDataLoader`,
         `PaddelbuchZoomLayerManager`, and Leaflet. Do not substitute a regex over
         the source: it would pass while the behaviour was broken
-  - [ ] 2.4 Assert with that harness that the initial data load still runs, and
+  - [x] 2.4 Assert with that harness that the initial data load still runs, and
         the Filter_Engine is still initialised, when either search call throws
-  - [ ] 2.5 Assert that a dimension registered without a Search_Box remains an
+  - [x] 2.5 Assert that a dimension registered without a Search_Box remains an
         Inactive_Dimension and hides no marker
 
 - [ ] 3. Stop a malformed response masquerading as an empty result (Requirement 3)
