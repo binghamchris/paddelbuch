@@ -42,6 +42,9 @@ const SAFE_ARGS = {
   _parseResults: [[]],
   _formatCount: [0],
   _buildUrl: ['parking'],
+  // Pure string predicate with no config or DOM dependency, so it is safe
+  // unconfigured by construction rather than by care.
+  _endsWithConnector: ['parkplatz und'],
   _mergeStrings: [{ a: 'x' }, {}],
   _numberOr: [1, 2],
   _buildNoticeForTest: [null],

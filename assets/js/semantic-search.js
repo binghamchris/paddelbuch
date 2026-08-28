@@ -27,6 +27,58 @@
 (function(global) {
   'use strict';
 
+  /**
+   * Words that syntactically require a following term.
+   *
+   * A query ending in one of these is mid-thought, so firing it spends a request on
+   * an answer the user is not asking for yet. Two measurements against the live API
+   * on 2026-08-28 show that is not merely wasteful:
+   *
+   *   "und"             ->   0 results   a "no matches" notice for an unfinished word
+   *   "parkplatz ohne"  ->   6 results   NOT the 429 that "parkplatz" returns
+   *
+   * The second is a visible defect. `ohne` is a NEGATOR in the backend's lexical
+   * model, not a plain stopword: it forms its own query group, which is then strictly
+   * ANDed against nothing. So typing "parkplatz ohne toiletten" used to flash six
+   * wrong spots before correcting itself.
+   *
+   * DELIBERATELY NOT the backend's STOPWORDS set, which this looks like it should
+   * reuse. That set has 84 entries and includes `meter`, `sehr`, `hier`, `bitte`,
+   * `beachten` -- words that carry no following term and would suppress perfectly
+   * complete queries. This list is only the connectors and negators, in both
+   * languages, and is intentionally short enough to read.
+   *
+   * Prefixes are a free bonus rather than a problem: typing "underwater" pauses at
+   * "und" and defers one request, then fires normally at "unde".
+   */
+  var CONNECTORS = {
+    // conjunctions
+    'and': true, 'und': true, 'or': true, 'oder': true, 'plus': true,
+    // prepositions that take an object
+    'with': true, 'mit': true, 'for': true, 'fur': true, 'für': true,
+    'near': true, 'nahe': true, 'next': true, 'neben': true,
+    'from': true, 'von': true, 'vom': true, 'bei': true,
+    // negators -- "X without" is definitionally incomplete
+    'without': true, 'ohne': true, 'no': true, 'not': true, 'non': true,
+    'kein': true, 'keine': true, 'keinen': true, 'keinem': true, 'nicht': true
+  };
+
+  /**
+   * True when the query's last word requires a following term.
+   *
+   * Lower-cased before lookup so "Parkplatz UND" is treated the same as
+   * "parkplatz und". The query arrives already trimmed, so a trailing space cannot
+   * hide the connector from this check.
+   */
+  function endsWithConnector(query) {
+    if (!query) {
+      return false;
+    }
+    var words = query.split(/\s+/);
+    var last = words[words.length - 1];
+    return !!(last && CONNECTORS[last.toLowerCase()]);
+  }
+
   var DEFAULTS = {
     dimensionKey: 'search',
     minQueryLength: 2,
@@ -1305,6 +1357,24 @@
       return;
     }
 
+    // The query ends in a connector, so the user is mid-thought. Schedule nothing.
+    //
+    // Note what is deliberately NOT done here. The display is left exactly as it is:
+    // no abort, no cleared selection, no status change. If a result is already on
+    // screen it stays, which is right -- for "parking and" the finished query returns
+    // the same 429 spots, so the deferral is invisible. An in-flight request for the
+    // shorter query is also still the result the user wants, so aborting would be
+    // strictly worse.
+    //
+    // Accepted trade-off: typing straight through "parkplatz und" without ever
+    // pausing on "parkplatz" cancels the pending fire and schedules nothing, so no
+    // results appear until more is typed. Previously six wrong spots appeared. Showing
+    // nothing briefly is the better of the two, and this is a chosen behaviour rather
+    // than an accident.
+    if (endsWithConnector(query)) {
+      return;
+    }
+
     debounceTimer = setTimeout(function() {
       debounceTimer = null;
 
@@ -1546,6 +1616,8 @@
     _parseResults: parseResults,
     _formatCount: formatCount,
     _buildUrl: buildUrl,
+    _endsWithConnector: endsWithConnector,
+    _CONNECTORS: CONNECTORS,
     _mergeStrings: mergeStrings,
     _numberOr: numberOr,
     _setConfigForTest: function(next) { config = next; },

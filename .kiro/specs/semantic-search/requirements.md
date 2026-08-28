@@ -63,6 +63,64 @@ This supersedes the earlier `semantic-search` requirements on the abandoned `fea
 5. WHEN the user presses Escape in the Search_Box, THE Search_Module SHALL clear the query and deactivate the Search_Dimension.
 6. THE Search_Module SHALL send the current Locale with every request.
 7. THE Search_Module SHALL send a result `limit` so that the response payload is bounded.
+8. WHEN the trimmed query's last word is a connector — a word that syntactically requires
+   a following term — THE Search_Module SHALL issue no request, because the query is
+   mid-thought.
+9. WHEN a request is withheld under criterion 8, THE Search_Module SHALL leave the
+   Search_Dimension, the status region and any in-flight request untouched, so that a
+   result already on screen remains visible.
+10. THE connector list SHALL cover conjunctions, object-taking prepositions and negators
+    in both locales, and SHALL NOT be the backend's `STOPWORDS` set.
+
+##### Why criterion 8 exists
+
+Measured against the live API on 2026-08-28, a deferred query is not merely a saved
+request — the request it replaces returns a *wrong* answer:
+
+| query | results |
+|---|---|
+| `und` | **0** — a "no matches" notice for a word the user had not finished |
+| `parkplatz ohne` | **6** — not the 429 that `parkplatz` returns |
+| `parking and` | 429 — identical to `parking`, so deferring is invisible |
+
+The middle row is the defect. `ohne` is a **negator** in the backend's lexical model, not
+a plain stopword: it forms its own query group, which is then strictly ANDed against
+nothing. So typing `parkplatz ohne toiletten` flashed six wrong spots before correcting
+itself.
+
+The cost saving is secondary and small. After the backend's Lambda work, a novel query
+costs about $0.0000131 of which the shared-cache write is 52%, so a partial query is
+roughly 3.1x a repeat and leaves a cache entry that will never be read again. At an
+assumed 2.2x partial multiplier that is ~$0.19/month — real but not the justification.
+**The justification is the removed flash of wrong results.**
+
+##### Why criterion 10 forbids reusing STOPWORDS
+
+The backend already has an 84-word `STOPWORDS` frozenset, and reusing it is the obvious
+simplification. It would be wrong: it contains `meter`, `sehr`, `hier`, `bitte`,
+`beachten` and `direkt`, none of which imply a following term, so complete queries ending
+in them would be suppressed and never searched. A test pins the list's size and asserts
+those words are absent.
+
+##### The accepted trade-off in criterion 9
+
+Typing straight through `parkplatz und` without ever pausing on `parkplatz` cancels the
+pending fire and schedules nothing, so no results appear until more is typed. Previously
+six wrong spots appeared. Showing nothing briefly is the better of the two, and it is
+recorded here as chosen rather than discovered.
+
+##### Rejected: a minimum-change rule
+
+Suppressing a request unless the query changed by at least N characters was considered
+and rejected. Measured: `see` returns 500 results and `seen` returns 4 — a
+**one-character** change that completely changes the answer. A minimum-delta rule would
+suppress that transition permanently, leaving the user looking at 500 results for a query
+they never made. German singular/plural and umlaut corrections are routinely one
+character, so this is the common case rather than a corner.
+
+The safe form of that idea is to *delay* small changes rather than suppress them — a
+longer debounce for a small delta, and the normal interval for a correction. It remains
+unimplemented.
 
 ### Requirement 4: Map Behaviour
 
