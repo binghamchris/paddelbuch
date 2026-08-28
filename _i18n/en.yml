@@ -172,6 +172,10 @@ search:
   rate_limited: "Too many searches"
   rate_limited_hint: "Please wait {seconds} seconds and try again."
   rate_limited_hint_generic: "Please wait a moment and try again."
+  quota_exhausted: "Daily search limit reached"
+  quota_exhausted_hint: "Search will be available again at {time}. You can still use the map with the filters."
+  busy: "Search is very busy right now"
+  busy_hint: "Please try again in a few seconds."
   retry_label: "Try again"
 
 # Error pages

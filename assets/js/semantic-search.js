@@ -146,6 +146,11 @@
     rateLimited: 'Zu viele Suchanfragen',
     rateLimitedHint: 'Bitte warten Sie {seconds} Sekunden und versuchen Sie es erneut.',
     rateLimitedHintGeneric: 'Bitte warten Sie einen Moment und versuchen Sie es erneut.',
+    quotaExhausted: 'Tageslimit fuer Suchanfragen erreicht',
+    quotaExhaustedHint: 'Die Suche ist ab {time} wieder verfuegbar. Sie koennen die Karte '
+      + 'weiterhin mit den Filtern nutzen.',
+    busy: 'Die Suche ist gerade sehr gefragt',
+    busyHint: 'Bitte versuchen Sie es in wenigen Sekunden erneut.',
     retryLabel: 'Erneut versuchen'
   };
 
@@ -1091,10 +1096,30 @@
    * @param {number} status - HTTP status, or 0 when no response arrived
    * @returns {Object} { retryable: boolean, kind: string }
    */
-  function classifyFailure(record, status) {
+  function classifyFailure(record, status, errorCode) {
     // Checked first: a timeout is an AbortError, and so is a supersede.
     if (record.timedOut) {
       return { retryable: true, kind: 'timeout' };
+    }
+    // The machine code is checked BEFORE the status, because the status alone cannot
+    // tell a daily quota from a one-second throttle -- both are 429. Retrying either
+    // is useless, and retrying the quota is useless for up to 24 hours.
+    if (errorCode === 'quota_exceeded') {
+      return { retryable: false, kind: 'quotaExhausted' };
+    }
+    if (errorCode === 'throttled') {
+      return { retryable: false, kind: 'busy' };
+    }
+    if (errorCode === 'rate_limited') {
+      // WAF's per-IP block. Lands on the existing rateLimited path, which already
+      // parses Retry-After and already falls back when it is unusable.
+      return { retryable: false, kind: 'rateLimited' };
+    }
+    if (errorCode === 'unavailable') {
+      // Saturation or a transient integration failure. This one IS worth retrying --
+      // it clears in milliseconds -- and the retry is already delayed by
+      // RETRY_DELAY_MS, so it does not arrive while the function is still saturated.
+      return { retryable: true, kind: 'busy' };
     }
     if (status === 429) {
       // Deliberately NOT retryable. Retrying a rate limit is what caused it.
@@ -1114,6 +1139,63 @@
     // unparseable JSON, or a body that is not an array. The backend answered, so
     // asking again would get the same wrong answer.
     return { retryable: false, kind: 'error' };
+  }
+
+  /**
+   * Read the machine-readable error code out of a failed response body.
+   *
+   * The backend's edge rejections carry a stable code -- `quota_exceeded`,
+   * `throttled`, `unavailable`, `rate_limited` -- precisely so this does not have to
+   * string-match AWS's own prose, which is not a documented interface.
+   *
+   * @param {string} text - Raw response body
+   * @returns {string|null} null when unparseable, which classifies by status as before
+   */
+  function parseErrorCode(text) {
+    if (typeof text !== 'string' || text === '') {
+      return null;
+    }
+    var body;
+    try {
+      body = JSON.parse(text);
+    } catch (e) {
+      return null;
+    }
+    if (body === null || typeof body !== 'object' || typeof body.error !== 'string') {
+      return null;
+    }
+    return body.error;
+  }
+
+  /**
+   * When the daily quota next resets, as a local wall-clock string.
+   *
+   * The API Gateway quota is a DAY period and resets at midnight UTC. The server does
+   * not send that instant, deliberately: computing it here is unit-testable with a
+   * frozen clock, whereas the alternative is arithmetic in a CloudFormation
+   * gateway-response template with no test harness. A skewed client clock only skews
+   * what is DISPLAYED -- it cannot grant access, because the quota is enforced
+   * server-side regardless of what this believes.
+   *
+   * Rendered in the user's own timezone, because "available again at 02:00" is
+   * something a visitor can act on where "in 8 hours" is arithmetic they must redo.
+   *
+   * @param {Date} [now] - Injectable for tests
+   * @returns {string} Localised time of day
+   */
+  function quotaResetTime(now) {
+    var base = now instanceof Date ? now : new Date();
+    var reset = new Date(Date.UTC(
+      base.getUTCFullYear(), base.getUTCMonth(), base.getUTCDate() + 1, 0, 0, 0, 0
+    ));
+    try {
+      return reset.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    } catch (e) {
+      // Fall back rather than throw: this runs inside an error path, and throwing here
+      // would replace the message the user needs with no message at all.
+      return reset.getHours() + ':' + (reset.getMinutes() < 10 ? '0' : '')
+        + reset.getMinutes();
+    }
   }
 
   /**
@@ -1149,7 +1231,7 @@
    * @param {number|null} retryAfterSeconds
    * @returns {Object} { title, hint }
    */
-  function failureMessage(verdict, retryAfterSeconds) {
+  function failureMessage(verdict, retryAfterSeconds, now) {
     if (verdict.kind === 'timeout') {
       return { title: strings.timeout, hint: strings.timeoutHint };
     }
@@ -1160,6 +1242,18 @@
           ? strings.rateLimitedHintGeneric
           : strings.rateLimitedHint.replace('{seconds}', String(retryAfterSeconds))
       };
+    }
+    if (verdict.kind === 'quotaExhausted') {
+      return {
+        title: strings.quotaExhausted,
+        hint: strings.quotaExhaustedHint.replace('{time}', quotaResetTime(now))
+      };
+    }
+    if (verdict.kind === 'busy') {
+      // Deliberately no countdown. Burst throttling clears in under a second and
+      // saturation in milliseconds, so any number here would be theatre -- and a wrong
+      // one teaches the user that the message cannot be trusted.
+      return { title: strings.busy, hint: strings.busyHint };
     }
     return { title: strings.error, hint: strings.errorHint };
   }
@@ -1196,8 +1290,8 @@
    * @param {number} status
    * @param {string|null} retryAfterRaw
    */
-  function handleFailure(record, err, status, retryAfterRaw) {
-    var verdict = classifyFailure(record, status);
+  function handleFailure(record, err, status, retryAfterRaw, errorCode) {
+    var verdict = classifyFailure(record, status, errorCode);
 
     if (verdict.retryable && record.attempt < MAX_ATTEMPTS) {
       // The status region keeps reading "searching" across the retry. Flashing a
@@ -1276,6 +1370,7 @@
 
     var status = 0;
     var retryAfterRaw = null;
+    var errorCode = null;
 
     fetch(buildUrl(query), options)
       .then(function(response) {
@@ -1284,7 +1379,16 @@
           retryAfterRaw = response.headers.get('Retry-After');
         }
         if (!response.ok) {
-          throw new Error('Search API returned HTTP ' + response.status);
+          // Read the body before throwing: the edge rejections carry a machine code
+          // that classifyFailure needs, and it is unreachable once this rejects.
+          // A body that cannot be read is not a failure of its own -- classification
+          // falls back to the status code, which is the old behaviour.
+          return response.text().then(function(text) {
+            errorCode = parseErrorCode(text);
+            throw new Error('Search API returned HTTP ' + response.status);
+          }, function() {
+            throw new Error('Search API returned HTTP ' + response.status);
+          });
         }
         return response.json();
       })
@@ -1305,7 +1409,7 @@
         if (record.superseded) {
           return;
         }
-        handleFailure(record, err, status, retryAfterRaw);
+        handleFailure(record, err, status, retryAfterRaw, errorCode);
       });
   }
 
@@ -1620,6 +1724,10 @@
     _CONNECTORS: CONNECTORS,
     _mergeStrings: mergeStrings,
     _numberOr: numberOr,
+    _parseErrorCode: parseErrorCode,
+    _quotaResetTime: quotaResetTime,
+    _classifyFailure: classifyFailure,
+    _failureMessage: failureMessage,
     _setConfigForTest: function(next) { config = next; },
     _setStringsForTest: function(next) { strings = next; },
     _getStringsForTest: function() { return strings; },

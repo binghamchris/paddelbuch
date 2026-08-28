@@ -178,6 +178,10 @@ search:
   rate_limited: "Zu viele Suchanfragen"
   rate_limited_hint: "Bitte warten Sie {seconds} Sekunden und versuchen Sie es erneut."
   rate_limited_hint_generic: "Bitte warten Sie einen Moment und versuchen Sie es erneut."
+  quota_exhausted: "Tageslimit für Suchanfragen erreicht"
+  quota_exhausted_hint: "Die Suche ist ab {time} wieder verfügbar. Sie können die Karte weiterhin mit den Filtern nutzen."
+  busy: "Die Suche ist gerade sehr gefragt"
+  busy_hint: "Bitte versuchen Sie es in wenigen Sekunden erneut."
   retry_label: "Erneut versuchen"
 
 # Date formats

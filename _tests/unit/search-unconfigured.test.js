@@ -58,7 +58,17 @@ const SAFE_ARGS = {
   _rememberResultForTest: ['parking', { slugs: [], locations: [] }],
   _purgeSupersededForTest: [],
   _resetCachesForTest: [],
-  _memoryStatsForTest: []
+  _memoryStatsForTest: [],
+  // Limit-transparency helpers. All four must be safe with no config, because they run
+  // on the failure path -- and an unconfigured module is exactly the state in which a
+  // request fails. A helper that threw here would replace the message the user needs
+  // with no message at all.
+  _parseErrorCode: ['{"error":"quota_exceeded","scope":"daily"}'],
+  _quotaResetTime: [new Date('2026-08-28T15:00:00Z')],
+  // classifyFailure reads record.timedOut, so it needs a record rather than nothing.
+  _classifyFailure: [{ timedOut: false, attempt: 1 }, 429, 'quota_exceeded'],
+  // failureMessage reads the string table, which is the I18N default when unconfigured.
+  _failureMessage: [{ retryable: false, kind: 'quotaExhausted' }, null, new Date()]
 };
 
 describe('the search module when unconfigured', () => {
