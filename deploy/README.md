@@ -30,6 +30,93 @@ Environment variables can be set in two ways:
 1. **Via CloudFormation**: Pass values as parameters when deploying the stack
 2. **Via Amplify Console**: Navigate to App Settings > Environment Variables
 
+## DNS: environment subdomain zones
+
+`dns.yaml` creates the Route 53 hosted zone for an environment's subdomain — currently
+`dev.paddelbuch.ch` in the dev account. The apex `paddelbuch.ch` zone lives in the
+**production** account and is not managed by this template.
+
+It is a separate stack from `frontend-deploy.yaml` on purpose. A hosted zone's four
+nameservers are assigned by AWS at creation and cannot be chosen; the parent zone
+delegates to those exact values. If the zone were destroyed and recreated it would come
+back with **different** nameservers and the delegation would silently stop resolving —
+no error anywhere, because the parent still points confidently at servers that no longer
+host the zone. Keeping the zone out of the frequently-changing Amplify stack, with
+`DeletionPolicy: Retain`, is what prevents that.
+
+### Deploy
+
+```bash
+aws cloudformation deploy \
+  --template-file dns.yaml \
+  --stack-name paddelbuch-dns \
+  --no-fail-on-empty-changeset \
+  --profile paddelbuch-dev --region eu-central-1 \
+  --parameter-overrides HostedZoneName=dev.paddelbuch.ch EnvironmentName=dev
+```
+
+### Creating the zone is not enough — the parent must delegate to it
+
+**Until an `NS` record for the subdomain exists in the parent zone, nothing under
+`dev.paddelbuch.ch` resolves anywhere on the internet.** The zone accepts records and
+looks healthy in the console, but no resolver on earth can find it.
+
+The practical consequence: an ACM certificate for `search.dev.paddelbuch.ch` validated by
+DNS will sit in `PENDING_VALIDATION` indefinitely, because ACM resolves the validation
+record through the public DNS hierarchy rather than by reading the zone directly. That is
+the failure this section exists to prevent, since it presents as "ACM is broken" rather
+than "DNS is not delegated".
+
+The delegation is a **cross-account, production** change. The dev stack cannot perform it.
+
+1. Read the dev zone's nameservers:
+
+   ```bash
+   aws cloudformation describe-stacks --stack-name paddelbuch-dns \
+     --profile paddelbuch-dev --region eu-central-1 \
+     --query 'Stacks[0].Outputs[?OutputKey==`NameServers`].OutputValue' --output text
+   ```
+
+2. In the **production** account's `paddelbuch.ch` zone, create an `NS` record for the
+   name `dev.paddelbuch.ch` containing exactly those four values. This is the only
+   record the parent needs; do not copy anything else across.
+
+3. Confirm the delegation has propagated before relying on it:
+
+   ```bash
+   dig +short NS dev.paddelbuch.ch
+   ```
+
+   An empty result means the delegation is absent or has not propagated. It should return
+   the four nameservers from step 1.
+
+Recorded for the record, dev at time of writing: zone `Z0319173110CBU9A6YYE1`, delegated
+to `ns-1727.awsdns-23.co.uk`, `ns-373.awsdns-46.com`, `ns-1043.awsdns-02.org`,
+`ns-866.awsdns-44.net`. Re-read them from the stack rather than trusting this list, since
+a zone recreation would change them.
+
+### Consuming the zone from other stacks
+
+The zone ID and name are published to SSM Parameter Store:
+
+| parameter | value |
+|---|---|
+| `/paddelbuch/dev/dns/hosted-zone-id` | the zone ID |
+| `/paddelbuch/dev/dns/hosted-zone-name` | `dev.paddelbuch.ch` |
+
+SSM rather than a CloudFormation `Export`, deliberately. An export creates a hard
+dependency: while another stack imports the value, this stack cannot be updated in any way
+that changes it and cannot be deleted at all. That is the wrong coupling for a
+foundational resource read by stacks in a different repository — the search API's custom
+domain being the first of them. Standard SSM parameters are free.
+
+### Cost
+
+**$0.50/month per hosted zone**, plus $0.40 per million DNS queries. Worth stating
+plainly: that is roughly four times the search backend's entire running cost (~$0.12/month)
+and 2.5% of the $20 monthly budget. `DeletionPolicy: Retain` means deleting the stack does
+**not** stop the charge — the zone must be removed deliberately.
+
 ## CloudFormation Deployment
 
 ### Prerequisites
