@@ -67,33 +67,63 @@ record through the public DNS hierarchy rather than by reading the zone directly
 the failure this section exists to prevent, since it presents as "ACM is broken" rather
 than "DNS is not delegated".
 
-The delegation is a **cross-account, production** change. The dev stack cannot perform it.
+The delegation is a **cross-account, production** change: the apex `paddelbuch.ch` zone
+lives in the production account. `dns-delegation.yaml` performs it as IaC rather than a
+console or CLI edit.
 
-1. Read the dev zone's nameservers:
+```bash
+# 1. Read the dev zone's nameservers from its stack. Never copy them from
+#    documentation -- a zone recreation changes them.
+NS=$(aws cloudformation describe-stacks --stack-name paddelbuch-dns \
+  --profile paddelbuch-dev --region eu-central-1 \
+  --query 'Stacks[0].Outputs[?OutputKey==`NameServers`].OutputValue' --output text)
 
-   ```bash
-   aws cloudformation describe-stacks --stack-name paddelbuch-dns \
-     --profile paddelbuch-dev --region eu-central-1 \
-     --query 'Stacks[0].Outputs[?OutputKey==`NameServers`].OutputValue' --output text
-   ```
+# 2. Deploy the delegation into the PRODUCTION account.
+aws cloudformation deploy \
+  --template-file dns-delegation.yaml \
+  --stack-name paddelbuch-dns-delegation \
+  --no-fail-on-empty-changeset \
+  --profile paddelbuch-prod --region eu-central-1 \
+  --parameter-overrides \
+    ParentHostedZoneId=Z0408920ISG62DD5PPEU \
+    SubdomainName=dev.paddelbuch.ch \
+    "SubdomainNameServers=${NS// /}"
+```
 
-2. In the **production** account's `paddelbuch.ch` zone, create an `NS` record for the
-   name `dev.paddelbuch.ch` containing exactly those four values. This is the only
-   record the parent needs; do not copy anything else across.
+The apex zone carries the live site's `A` record, the `www` CNAME and the whole email
+chain (`MX`, SPF, `_dmarc`, and DKIM CNAMEs for Google and ProtonMail). Preview with a
+change set before executing and confirm it reports exactly **one** `Add` of an
+`AWS::Route53::RecordSet` — CloudFormation only manages what it declares, so a stack
+holding one record cannot disturb the rest, but the preview is cheap and the zone carries
+mail.
 
-3. Confirm the delegation has propagated before relying on it:
+#### Verifying it — and the trap that makes it look broken
 
-   ```bash
-   dig +short NS dev.paddelbuch.ch
-   ```
+`dig +short NS dev.paddelbuch.ch` is **not** a reliable check, and will very likely tell
+you the delegation failed when it has not:
 
-   An empty result means the delegation is absent or has not propagated. It should return
-   the four nameservers from step 1.
+- A delegating nameserver returns NS records in the **authority** section as a referral,
+  which `+short` does not print.
+- Worse, if you queried the name *before* the delegation existed, your resolver cached the
+  `NXDOMAIN`. The parent zone's SOA sets a negative-cache TTL of **86400**, so that false
+  negative can persist for a day.
 
-Recorded for the record, dev at time of writing: zone `Z0319173110CBU9A6YYE1`, delegated
-to `ns-1727.awsdns-23.co.uk`, `ns-373.awsdns-46.com`, `ns-1043.awsdns-02.org`,
-`ns-866.awsdns-44.net`. Re-read them from the stack rather than trusting this list, since
-a zone recreation would change them.
+Both happened when this was first deployed: local `dig` reported `NXDOMAIN` from an
+authoritative server while the record was demonstrably present in the zone.
+
+Check against a public resolver over DoH instead, which bypasses the local cache:
+
+```bash
+curl -s -H 'accept: application/dns-json' \
+  'https://cloudflare-dns.com/dns-query?name=dev.paddelbuch.ch&type=NS'
+```
+
+`"Status": 0` with four `Answer` entries means the delegation is live. Confirm the child
+zone is actually reachable through it by asking for the `SOA` the same way.
+
+Recorded for the record: dev zone `Z0319173110CBU9A6YYE1` delegated from apex zone
+`Z0408920ISG62DD5PPEU` on 2026-08-28, to `ns-1727.awsdns-23.co.uk`,
+`ns-373.awsdns-46.com`, `ns-1043.awsdns-02.org`, `ns-866.awsdns-44.net`.
 
 ### Consuming the zone from other stacks
 
