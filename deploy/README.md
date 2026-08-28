@@ -30,6 +30,32 @@ Environment variables can be set in two ways:
 1. **Via CloudFormation**: Pass values as parameters when deploying the stack
 2. **Via Amplify Console**: Navigate to App Settings > Environment Variables
 
+## Search API endpoint
+
+The search API is served on a custom domain. Two parameters point the frontend at it, and
+**both must change in the same deploy**:
+
+| parameter | dev value |
+|---|---|
+| `EnvVarSearchApiEndpoint` | `https://search.dev.paddelbuch.ch/search` |
+| `SearchApiCspHost` | `https://search.dev.paddelbuch.ch` |
+
+No frontend code change is needed — both are CloudFormation parameters and the CSP
+`connect-src` is assembled from `SearchApiCspHost`.
+
+If the endpoint moves without the CSP host, the browser blocks the fetch under Content
+Security Policy and **the server sees nothing at all**: no request, no log line, no metric,
+no alarm. The symptom is "search is broken" against a perfectly healthy backend, visible only
+in the browser console. That is why the two values travel together.
+
+**Rollback** is reverting both to the generic endpoint,
+`https://oog1eio5zc.execute-api.eu-central-1.amazonaws.com/prod/search` and
+`https://oog1eio5zc.execute-api.eu-central-1.amazonaws.com`. That works because the backend
+deliberately does not set `DisableExecuteApiEndpoint`, so the generic endpoint stays live.
+
+Production, when it happens: `https://search.paddelbuch.ch/search` and
+`https://search.paddelbuch.ch`.
+
 ## DNS: environment subdomain zones
 
 `dns.yaml` creates the Route 53 hosted zone for an environment's subdomain — currently
