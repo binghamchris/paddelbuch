@@ -119,6 +119,34 @@
   // no user action.
   var MAX_ATTEMPTS = 2;
   var RETRY_DELAY_MS = 1000;
+
+  // How long a query must sit unchanged before it is reported to analytics.
+  //
+  // NOT the search debounce. Two independent reasons it is much longer:
+  //
+  // Data quality -- the search debounce is 350 ms, so typing "parkplatz" with one natural
+  // pause runs two searches, "park" and "parkplatz". Reporting each would record a prefix
+  // nobody meant to search.
+  //
+  // Silent loss -- Tinylytics drops any two events sharing a debounce key within 500 ms,
+  // and that key is `target.id || target.className || target.tagName`. The beacon module
+  // sets className 'tinylytics-beacon' and no id, so EVERY beacon dispatch shares one key
+  // and collides. Read from the deployed script, not the docs. 1500 ms keeps dispatches
+  // outside that window as a consequence rather than by luck.
+  var ANALYTICS_SETTLE_MS = 1500;
+
+  // Query length cap for the analytics value. The client script performs no truncation of
+  // its own -- verified by reading it -- but server-side handling is unverified, so the
+  // count is appended AFTER this cap: a server that truncates eats query text before it
+  // reaches the count.
+  var ANALYTICS_QUERY_MAX = 100;
+
+  // Cannot occur in a value after sanitisation, and readable in the dashboard's value list.
+  // Transport-safe either way: the script encodeURIComponent()s the value, so this becomes
+  // %7C rather than a URL delimiter.
+  var ANALYTICS_DELIMITER = '|';
+
+  var analyticsTimer = null;
   // Above this, a Retry-After is reported without a figure rather than telling
   // somebody to come back in an hour.
   var RETRY_AFTER_MAX_SECONDS = 300;
@@ -1142,6 +1170,79 @@
   }
 
   /**
+   * Build the analytics value carrying a query and its result count.
+   *
+   * One event, one value: Tinylytics events have no session or request identifier, so two
+   * separate events could never be joined back together and "which queries returned
+   * nothing" -- the whole point of this -- would be unanswerable. The pair therefore has to
+   * be atomic.
+   *
+   * The query is case-folded to match the backend, which folds before embedding precisely
+   * so capitalisation cannot change results. Logging `Parkplatz` and `parkplatz` separately
+   * would split one intent across two rows and make the top-queries list wrong.
+   *
+   * @param {string} query
+   * @param {number} count - Results as reported to the visitor
+   * @returns {string} e.g. "parkplatz|429"
+   */
+  function formatSearchEventValue(query, count) {
+    var text = typeof query === 'string' ? query : '';
+    // Strip control characters and the delimiter, so neither can corrupt the value or
+    // fake a count.
+    text = text.replace(/[\u0000-\u001f\u007f]/g, ' ')
+      .split(ANALYTICS_DELIMITER).join(' ')
+      .trim()
+      .replace(/\s+/g, ' ')
+      .toLowerCase();
+    if (text.length > ANALYTICS_QUERY_MAX) {
+      text = text.slice(0, ANALYTICS_QUERY_MAX);
+    }
+    var n = (typeof count === 'number' && isFinite(count) && count >= 0)
+      ? Math.floor(count)
+      : 0;
+    return text + ANALYTICS_DELIMITER + String(n);
+  }
+
+  /**
+   * Cancel a pending analytics report.
+   *
+   * Called when the search is cleared or superseded, so a query the visitor abandoned or
+   * replaced is never reported as though they had searched for it.
+   */
+  function cancelAnalytics() {
+    if (analyticsTimer) {
+      clearTimeout(analyticsTimer);
+      analyticsTimer = null;
+    }
+  }
+
+  /**
+   * Report a completed search once it has settled.
+   *
+   * Deliberately runs AFTER the visitor's results have been applied, and cannot throw
+   * outward: an absent, broken or ad-blocker-mangled beacon must never stop search working.
+   *
+   * @param {string} query
+   * @param {number} count
+   */
+  function scheduleAnalytics(query, count) {
+    cancelAnalytics();
+    var value = formatSearchEventValue(query, count);
+    analyticsTimer = setTimeout(function() {
+      analyticsTimer = null;
+      try {
+        if (typeof PaddelbuchTinylyticsBeacon !== 'undefined'
+            && PaddelbuchTinylyticsBeacon
+            && typeof PaddelbuchTinylyticsBeacon.dispatch === 'function') {
+          PaddelbuchTinylyticsBeacon.dispatch('search.query', value);
+        }
+      } catch (e) {
+        // Analytics is not worth a broken search. Swallowed on purpose.
+      }
+    }, ANALYTICS_SETTLE_MS);
+  }
+
+  /**
    * Read the machine-readable error code out of a failed response body.
    *
    * The backend's edge rejections carry a stable code -- `quota_exceeded`,
@@ -1263,9 +1364,15 @@
    *
    * @param {Object} parsed - { slugs, locations }
    */
-  function applyParsedResult(parsed) {
+  function applyParsedResult(parsed, query) {
     lastResultLocations = parsed.locations;
 
+    // Analytics is scheduled from here rather than from the fetch handler because this is
+    // the single point where a result set becomes the visitor's reality -- and it is
+    // reached by the CACHE path too. Hooking the network path instead would have
+    // undercounted exactly the popular queries most likely to be cached.
+    //
+    // Scheduled at the END of each branch, after the visitor's outcome is applied.
     if (parsed.slugs.length === 0) {
       // The query ran and matched nothing. Keep the dimension active so no
       // marker shows, and say so -- an empty selection would instead reveal
@@ -1273,6 +1380,8 @@
       applyNoMatches();
       setStatus('');
       showNotice(strings.noResults, strings.noResultsHint, ACTION_CLEAR);
+      // A zero-result search is the highest-value case here: a content gap, not a fault.
+      scheduleAnalytics(query, 0);
       return;
     }
 
@@ -1280,6 +1389,7 @@
     applySelection(parsed.slugs);
     setStatus(formatCount(parsed.slugs.length));
     fitToResults();
+    scheduleAnalytics(query, parsed.slugs.length);
   }
 
   /**
@@ -1399,7 +1509,7 @@
         }
         var parsed = parseResults(payload);
         rememberResult(query, parsed);
-        applyParsedResult(parsed);
+        applyParsedResult(parsed, query);
         activeRequest = null;
       })
       .catch(function(err) {
@@ -1418,6 +1528,8 @@
    */
   function clearSearch() {
     abortInFlight();
+    // A query the visitor cleared before it settled was not a search they made.
+    cancelAnalytics();
     if (debounceTimer) {
       clearTimeout(debounceTimer);
       debounceTimer = null;
@@ -1487,7 +1599,9 @@
       var cached = lookupResult(query);
       if (cached) {
         abortInFlight();
-        applyParsedResult(cached);
+        // The cache path reports to analytics too: the visitor searched either way, and
+        // omitting it would bias the data against the most popular queries.
+        applyParsedResult(cached, query);
         return;
       }
 
@@ -1532,7 +1646,15 @@
     inputEl.setAttribute('aria-label', strings.ariaLabel);
     inputEl.setAttribute('aria-describedby', 'spot-search-status');
     inputEl.setAttribute('autocomplete', 'off');
-    inputEl.setAttribute('data-tinylytics-event', 'search.query');
+    // search.focus, NOT search.query. Tinylytics fires on CLICK, so an attribute on a
+    // text input records the visitor clicking into the box -- it cannot see what they
+    // typed, and it carries no value. This was named search.query, which asserted
+    // something it does not measure; any historical search.query data is a focus count.
+    //
+    // Kept rather than deleted: a visitor who opens the search box and never searches is
+    // a funnel signal available nowhere else, and comparing it against the real
+    // search.query event gives an engagement rate neither provides alone.
+    inputEl.setAttribute('data-tinylytics-event', 'search.focus');
 
     clearBtn = document.createElement('button');
     clearBtn.type = 'button';
@@ -1725,6 +1847,8 @@
     _mergeStrings: mergeStrings,
     _numberOr: numberOr,
     _parseErrorCode: parseErrorCode,
+    _formatSearchEventValue: formatSearchEventValue,
+    _ANALYTICS_SETTLE_MS: ANALYTICS_SETTLE_MS,
     _quotaResetTime: quotaResetTime,
     _classifyFailure: classifyFailure,
     _failureMessage: failureMessage,

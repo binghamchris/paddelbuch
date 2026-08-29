@@ -68,7 +68,10 @@ const SAFE_ARGS = {
   // classifyFailure reads record.timedOut, so it needs a record rather than nothing.
   _classifyFailure: [{ timedOut: false, attempt: 1 }, 429, 'quota_exceeded'],
   // failureMessage reads the string table, which is the I18N default when unconfigured.
-  _failureMessage: [{ retryable: false, kind: 'quotaExhausted' }, null, new Date()]
+  _failureMessage: [{ retryable: false, kind: 'quotaExhausted' }, null, new Date()],
+  // Analytics value builder. Must be safe unconfigured, because it runs on the success path
+  // of a search and an unconfigured module is a state in which searches still fail.
+  _formatSearchEventValue: ['parkplatz', 429]
 };
 
 describe('the search module when unconfigured', () => {

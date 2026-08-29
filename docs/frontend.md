@@ -416,3 +416,78 @@ The CloudFormation template also sets these headers on all responses (`**/*`):
 | `X-Content-Type-Options` | `nosniff` | Prevents MIME-type sniffing |
 | `Referrer-Policy` | `strict-origin-when-cross-origin` | Limits referrer information to external sites |
 | `Permissions-Policy` | (restrictive) | Only `fullscreen`, `geolocation`, and `vertical-scroll` are allowed for `self`; all other browser features are disabled |
+
+## Search analytics
+
+Each completed search emits one Tinylytics event carrying both the query and the result
+count in a single value:
+
+```
+search.query  →  "parkplatz|429"
+                  ^query     ^count
+```
+
+**Why one event rather than two.** Tinylytics events carry no session, request or visitor
+identifier, so `search.query` and a separate `search.results` could never be joined back
+together — and *which queries return nothing* is the whole point. The pair has to be atomic.
+
+**Reading the values.** Split on the last `|`. The query is case-folded, whitespace-collapsed,
+and capped at 100 characters; the count is an integer. `Parkplatz` and `parkplatz` are one
+row, deliberately: the backend folds before embedding, so they return identical results, and
+splitting them would make the top-queries list wrong.
+
+**A count of 500 means "at least 500".** The frontend requests `limit: 500`, so that value is
+a cap rather than a total.
+
+**The count is last on purpose.** The Tinylytics client applies no truncation — verified by
+reading the deployed script — but server-side handling is unverified, so anything that
+truncates eats query text before it reaches the count.
+
+### Why the dashboard can show nothing while the code is correct
+
+Three reasons, in the order they are likely:
+
+1. **Your own hits are ignored.** Tinylytics does not fire events when hit tracking is
+   disabled, whether via site settings or `?ignore`. This is the most likely cause and looks
+   exactly like a broken implementation.
+2. **The beacon was blocked.** Delivery uses `navigator.sendBeacon`, which some privacy
+   browsers and ad blockers block. Event counts are therefore a **floor**, not a total — this
+   is already true of the site's other events.
+3. **Event tracking is a beta feature** and documented as subject to change.
+
+To check dispatch without the dashboard, watch for the synthetic click and the outbound
+request to `tinylytics.app` in the browser's network panel.
+
+### The 1500 ms settle window
+
+Analytics reports a query only after it has sat unchanged for 1500 ms — not on every search.
+Two independent reasons:
+
+- The search debounce is 350 ms, so typing `parkplatz` with one pause runs two searches,
+  `park` and `parkplatz`. Reporting each would record prefixes nobody meant to search.
+- **The Tinylytics client debounces events at 500 ms, keyed on
+  `target.id || target.className || target.tagName`.** `tinylytics-beacon.js` sets
+  `className = 'tinylytics-beacon'` and no id, so *every* dispatch through the beacon shares
+  one key and any two within 500 ms are dropped — silently, and regardless of event name.
+  The settle window keeps dispatches outside that window as a consequence rather than by
+  luck.
+
+That second point has a consequence beyond search, **not** addressed here: two `marker.click`
+events within 500 ms also lose one, and a search event colliding with a marker click is
+possible for the same reason. Fixing it means giving the beacon element a unique `id` per
+dispatch, which changes behaviour for six existing call sites.
+
+### `search.focus` versus `search.query`
+
+`search.query` used to be set as an attribute on the search **input**. Tinylytics fires on
+click, so it recorded a visitor *clicking into the box* — not a query, and with no value.
+It is now `search.focus`, and is kept: open-the-box-but-never-search is a funnel signal
+available nowhere else, and comparing it against `search.query` gives an engagement rate
+neither provides alone.
+
+**Historical `search.query` data is a focus count and is not comparable** with the new event,
+even though the dashboard shows one continuous series across the rename.
+
+Failed searches are **not** reported: no results were returned, so there is no count. Logging
+refusal codes (`quota_exceeded`, `rate_limited`, `throttled`) is deferred — see
+`.kiro/specs/search-event-analytics/`.
