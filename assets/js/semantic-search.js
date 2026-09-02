@@ -332,15 +332,37 @@
    * @param {string} query
    * @returns {string}
    */
+  // The backend accepts 1-500 characters after control-character stripping and answers
+  // 400 beyond that, so this mirrors its contract rather than inventing a number.
+  // Enforced in TWO places deliberately: maxLength on the element stops ordinary typing,
+  // and buildUrl bounds every other route to a request (programmatic set, paste on an
+  // older browser, a value restored from the persisted cache).
+  //
+  // No 413/414 branch is added. With the bound in place an over-long query cannot be
+  // sent, so the branch would be dead code -- recorded here so its absence is not later
+  // read as an oversight.
+  var MAX_QUERY_LENGTH = 500;
+
   function buildUrl(query) {
     // Exported for tests, so it must hold the same unconfigured-safe contract as
     // the rest of the public API rather than relying on its callers.
     if (!config || !config.endpoint) {
       return '';
     }
+    // Bound the query here as well as on the input element. maxLength constrains only
+    // TYPING -- it does nothing to a value set programmatically, pasted past the limit by
+    // an older browser, or restored from the persisted cache. The backend rejects anything
+    // over MAX_QUERY_LENGTH with a 400, so sending it wastes a round trip and spends a
+    // request against the shared daily quota for a response that cannot succeed.
+    //
+    // Truncating rather than refusing: a user who pastes an over-long string gets results
+    // for the part that could be searched, which is more useful than an error, and the
+    // input element already prevents this for ordinary typing.
+    var bounded = String(query === null || query === undefined ? '' : query)
+      .slice(0, MAX_QUERY_LENGTH);
     var url = config.endpoint
       + (config.endpoint.indexOf('?') === -1 ? '?' : '&')
-      + 'q=' + encodeURIComponent(query)
+      + 'q=' + encodeURIComponent(bounded)
       + '&locale=' + encodeURIComponent(config.locale)
       + '&limit=' + encodeURIComponent(String(config.limit));
 
@@ -1643,6 +1665,7 @@
     inputEl.className = 'search-box-input';
     inputEl.id = 'spot-search-input';
     inputEl.setAttribute('placeholder', strings.placeholder);
+    inputEl.setAttribute('maxlength', String(MAX_QUERY_LENGTH));
     inputEl.setAttribute('aria-label', strings.ariaLabel);
     inputEl.setAttribute('aria-describedby', 'spot-search-status');
     inputEl.setAttribute('autocomplete', 'off');

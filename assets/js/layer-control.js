@@ -435,8 +435,27 @@
 
         // Dispatch marker.click beacon event when protected area layer is clicked
         protectedAreaLayer.on('click', function() {
-          if (typeof PaddelbuchTinylyticsBeacon !== 'undefined') {
-            PaddelbuchTinylyticsBeacon.dispatch('marker.click', protectedArea.slug || protectedArea.name || '');
+          // Guarded, and deliberately not `slug || name || ''`.
+          //
+          // The `.name` fallback was free CMS text reaching the analytics dashboard. It
+          // could not be INJECTED -- setAttribute stores a string and never parses markup
+          // -- but it was unbounded in length and unsanitised, including the `|` character
+          // this project uses as an event-value delimiter.
+          //
+          // Removing it is safe because Contentful enforces a slug on every protected
+          // area, verified on real generated data: the tile projection feeding this
+          // function carries geometry, name, protectedAreaType_slug and slug, and across
+          // 1,386 tile records (plus 693 per locale in the full payload) not one lacks a
+          // slug.
+          //
+          // The GUARD matters as much as the removal. PaddelbuchTinylyticsBeacon.dispatch
+          // validates only its event NAME (`if (!eventName) return;`) and never its value,
+          // so `dispatch('marker.click', protectedArea.slug)` on an absent slug would set
+          // the attribute to the literal string "undefined" -- worse than the fallback --
+          // and `slug || ''` would dispatch an empty-value event, creating a meaningless
+          // bucket. No slug means no event.
+          if (typeof PaddelbuchTinylyticsBeacon !== 'undefined' && protectedArea.slug) {
+            PaddelbuchTinylyticsBeacon.dispatch('marker.click', protectedArea.slug);
           }
         });
 
