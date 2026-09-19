@@ -1,0 +1,112 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: >-
+  Paddel Buch DNS — the Route 53 hosted zone for an environment's subdomain.
+  Deployed once per environment, in that environment's own account.
+
+# Why this is a SEPARATE stack from frontend-deploy.yaml
+# ------------------------------------------------------
+# A hosted zone's four nameservers are assigned by AWS at creation and cannot be
+# chosen. The parent zone delegates to those exact nameservers, so if the zone is
+# ever destroyed and recreated it comes back with DIFFERENT nameservers and the
+# delegation silently stops resolving — with no error anywhere, because the parent
+# still points confidently at servers that no longer host the zone.
+#
+# Putting the zone inside the Amplify stack would tie that risk to every Amplify
+# change: a replacement of that stack would take the zone with it. This stack exists
+# so the zone's lifecycle is independent of anything that changes often.
+#
+# DeletionPolicy: Retain reinforces the same point — deleting this stack leaves the
+# zone in place rather than invalidating the parent's delegation. The zone then keeps
+# costing $0.50/month until it is removed deliberately, which is the correct trade
+# against silently breaking DNS.
+
+Parameters:
+  HostedZoneName:
+    Type: String
+    Default: dev.paddelbuch.ch
+    AllowedPattern: "^[a-z0-9.-]+$"
+    Description: >-
+      Fully qualified name of the zone to create, without a trailing dot. This is a
+      SUBDOMAIN zone: the apex paddelbuch.ch zone lives in the production account and
+      is not managed here.
+
+  EnvironmentName:
+    Type: String
+    Default: dev
+    AllowedValues: [dev, prod]
+    Description: >-
+      Which environment this zone serves. Used only to namespace the SSM parameters
+      below, so a stack deployed to the wrong account is visible rather than silently
+      overwriting another environment's values.
+
+Resources:
+  # The delegated subdomain zone.
+  #
+  # Creating this zone does NOT make the subdomain resolve. Route 53 assigns four
+  # nameservers, and until an NS record for this subdomain exists in the PARENT zone
+  # pointing at them, nothing under it resolves anywhere on the internet — including
+  # ACM's DNS validation, which is why a certificate for search.dev.paddelbuch.ch
+  # would sit in PENDING_VALIDATION forever. See the Outputs and deploy/README.md.
+  HostedZone:
+    Type: AWS::Route53::HostedZone
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      Name: !Ref HostedZoneName
+      HostedZoneConfig:
+        Comment: !Sub "Delegated subdomain zone for the ${EnvironmentName} environment"
+      HostedZoneTags:
+        - Key: environment
+          Value: !Ref EnvironmentName
+        - Key: managed-by
+          Value: cloudformation
+        - Key: stack
+          Value: !Ref AWS::StackName
+
+  # Published to SSM rather than exported as a CloudFormation output, deliberately.
+  #
+  # A CloudFormation Export creates a hard dependency: while another stack imports
+  # the value, this stack cannot be updated in any way that changes it, and cannot be
+  # deleted at all. That is the wrong coupling for a foundational resource that other
+  # stacks — notably the search API's custom domain, which lives in a different
+  # repository — will read.
+  #
+  # SSM also matches the pattern the backend already uses for cross-stack values.
+  # Standard parameters are free.
+  HostedZoneIdParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub "/paddelbuch/${EnvironmentName}/dns/hosted-zone-id"
+      Type: String
+      Value: !Ref HostedZone
+      Description: >-
+        Route 53 hosted zone ID for this environment's subdomain. Consumed by stacks
+        that create records in it, such as the search API custom domain.
+
+  HostedZoneNameParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub "/paddelbuch/${EnvironmentName}/dns/hosted-zone-name"
+      Type: String
+      Value: !Ref HostedZoneName
+      Description: >-
+        Fully qualified name of this environment's subdomain zone, without a trailing
+        dot. Consumed when composing record names such as search.dev.paddelbuch.ch.
+
+Outputs:
+  HostedZoneId:
+    Description: Route 53 hosted zone ID
+    Value: !Ref HostedZone
+
+  HostedZoneName:
+    Description: Fully qualified zone name
+    Value: !Ref HostedZoneName
+
+  NameServers:
+    Description: >-
+      The four nameservers the PARENT zone must delegate to. Nothing under this
+      subdomain resolves until an NS record for it exists in the parent zone with
+      exactly these values. The parent zone for paddelbuch.ch is in the PRODUCTION
+      account, so this is a manual, cross-account step — see deploy/README.md.
+    Value: !Join [", ", !GetAtt HostedZone.NameServers]

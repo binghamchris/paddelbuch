@@ -67,6 +67,36 @@
   }
 
   /**
+   * Replace the entire selection set for one dimension.
+   *
+   * Checkbox-driven dimensions build their selection one option at a time via
+   * setOption. A computed dimension -- semantic search, whose selection is the
+   * set of slugs the search API matched -- needs to replace the whole set at
+   * once, and needs to work for a dimension declared with no options.
+   *
+   * Passing null or an empty collection deactivates the dimension. Per
+   * evaluateMarker, an empty selection means "skip this dimension", NOT
+   * "match nothing", so clearing a search restores every marker rather than
+   * hiding all of them.
+   *
+   * @param {string} dimensionKey - e.g. 'search'
+   * @param {Array|Set|null} slugs - Slugs to select, or null/empty to deactivate
+   */
+  function setDimensionSelection(dimensionKey, slugs) {
+    if (!dimensionKey) {
+      return;
+    }
+
+    var next = new Set();
+    if (slugs && typeof slugs.forEach === 'function') {
+      slugs.forEach(function(slug) {
+        next.add(slug);
+      });
+    }
+    filterState[dimensionKey] = next;
+  }
+
+  /**
    * Evaluate a single marker against current filter state.
    * AND-logic: returns true if marker passes every active dimension.
    * Dimensions with empty selected set are inactive/skipped.
@@ -120,6 +150,7 @@
     init: init,
     getFilterState: getFilterState,
     setOption: setOption,
+    setDimensionSelection: setDimensionSelection,
     applyFilters: applyFilters,
     evaluateMarker: evaluateMarker
   };

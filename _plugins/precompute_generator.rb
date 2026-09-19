@@ -195,7 +195,12 @@ module Jekyll
         layerLabels: layer_labels
       }
 
-      site.data['map_data_config_json'] = JSON.generate(map_data_config)
+      # ScriptSafeJson, not JSON.generate: this string is emitted raw inside a
+      # <script type="application/json"> element by map-init.html and
+      # detail-map-layers.html, and it carries Contentful-editable type names. Plain
+      # JSON.generate leaves a literal </script>, which closes the element early and
+      # turns the rest of the data into markup.
+      site.data['map_data_config_json'] = ScriptSafeJson.generate(map_data_config)
 
       # Pre-compute spot tip types for template use (avoids per-page Liquid lookups)
       site.data['spot_tip_types_for_locale'] = tip_types.map do |tt|
@@ -238,7 +243,9 @@ module Jekyll
         spotWithTipsGeneric: map_i18n['spot_with_tips_generic']
       }
 
-      site.data['layer_control_config_json'] = JSON.generate(layer_control_config)
+      # Same hazard as map_data_config above, and this one carries protectedAreaTypeNames
+      # and spotTipTypeNames -- both read straight from Contentful `name` fields.
+      site.data['layer_control_config_json'] = ScriptSafeJson.generate(layer_control_config)
     end
 
     # Reads the `map` section of _i18n/<locale>.yml so build-time config can carry

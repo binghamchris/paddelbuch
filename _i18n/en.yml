@@ -155,6 +155,29 @@ map:
   spot_with_tips_label: "%{spot}, tips: %{tips}"
   spot_with_tips_generic: "Spot with tips"
 
+# Semantic search over spots
+search:
+  placeholder: "Search spots..."
+  aria_label: "Search spots"
+  clear_label: "Clear search"
+  searching: "Searching..."
+  no_results: "No results found"
+  no_results_hint: "No spot matches your search. Try a different word, use fewer words, or clear the search to see all spots again."
+  results_one: "1 result"
+  results_many: "{count} results"
+  error: "Search currently unavailable"
+  error_hint: "Please try again in a moment. You can still use the map with the filters."
+  timeout: "The search took too long"
+  timeout_hint: "The search did not answer in time. Try again, or carry on using the map with the filters."
+  rate_limited: "Too many searches"
+  rate_limited_hint: "Please wait {seconds} seconds and try again."
+  rate_limited_hint_generic: "Please wait a moment and try again."
+  quota_exhausted: "Daily search limit reached"
+  quota_exhausted_hint: "Search will be available again at {time}. You can still use the map with the filters."
+  busy: "Search is very busy right now"
+  busy_hint: "Please try again in a few seconds."
+  retry_label: "Try again"
+
 # Error pages
 errors:
   not_found_title: "Page Not Found"

@@ -4,6 +4,9 @@
   var FilterPanelControl = null;
   var controlInstance = null;
 
+  // Breathing room left between a popup and the controls it was moved clear of.
+  var POPUP_CONTROL_GAP = 8;
+
   /**
    * Initialize the filter panel and add it to the map.
    *
@@ -182,16 +185,70 @@
     controlInstance = new FilterPanelControl();
     controlInstance.addTo(map);
 
-    // Collapse on popupopen, restore on popupclose (Requirement 5.8)
-    var controlContainer = controlInstance.getContainer().parentNode;
-    map.on('popupopen', function() {
+    // Collapse on popupopen so the panel does not cover popup content
+    // (Requirement 5.8), then move the popup clear of the controls if it still
+    // overlaps them.
+    //
+    // This deliberately does NOT touch the control corner's z-index. Forcing it
+    // to 0 (as an earlier implementation did) drops the whole corner below
+    // .leaflet-map-pane, whose stacking context sits at z-index 400 -- so every
+    // marker in .leaflet-marker-pane (600) then paints OVER the filter panel and
+    // the search box, and swallows clicks meant for them. That is worse than the
+    // problem it solved: a popup is transient and dismissible, whereas the
+    // controls are the user's only way to filter or search.
+    var controlCorner = controlInstance.getContainer().parentNode;
+    map.on('popupopen', function(e) {
       L.DomUtil.removeClass(controlInstance.getContainer(), 'expanded');
       controlInstance._toggleBtn.setAttribute('aria-expanded', 'false');
-      controlContainer.style.zIndex = '0';
+      panPopupClearOfControls(map, e && e.popup, controlCorner);
     });
-    map.on('popupclose', function() {
-      controlContainer.style.zIndex = '';
-    });
+  }
+
+  /**
+   * Pan the map just far enough that an open popup is not hidden behind the
+   * map controls.
+   *
+   * The controls sit above the map's panes, which is what keeps markers from
+   * covering them -- but it also means a popup opening under the control cluster
+   * is clipped by it. Leaflet's own autoPan only keeps a popup inside the
+   * VIEWPORT; it has no notion of a control being in the way. So once the popup
+   * is placed, measure the actual overlap and shift the view by exactly that
+   * much, which moves the popup out from under the controls.
+   *
+   * Only pans when there is a real overlap, so the common case (a popup nowhere
+   * near the corner) does not move the map at all.
+   *
+   * @param {L.Map} map
+   * @param {L.Popup} popup
+   * @param {HTMLElement} corner - The Leaflet control corner holding the controls.
+   */
+  function panPopupClearOfControls(map, popup, corner) {
+    if (!popup || typeof popup.getElement !== 'function' || !corner) {
+      return;
+    }
+    var popupEl = popup.getElement();
+    if (!popupEl || typeof popupEl.getBoundingClientRect !== 'function') {
+      return;
+    }
+    var p = popupEl.getBoundingClientRect();
+    var c = corner.getBoundingClientRect();
+    if (!c.width || !c.height || !p.width || !p.height) {
+      return;
+    }
+    var overlapX = Math.min(p.right, c.right) - Math.max(p.left, c.left);
+    var overlapY = Math.min(p.bottom, c.bottom) - Math.max(p.top, c.top);
+    if (overlapX <= 0 || overlapY <= 0) {
+      return;
+    }
+    // Cap the shift so a popup taller than the map cannot fling the marker off
+    // screen; a partially covered popup beats losing the spot the user clicked.
+    var limit = Math.floor(map.getSize().y / 2);
+    var shift = Math.min(Math.ceil(overlapY) + POPUP_CONTROL_GAP, limit);
+    if (shift > 0) {
+      // Negative y pans the view up, which moves the popup DOWN the screen and
+      // out from under the controls.
+      map.panBy([0, -shift]);
+    }
   }
 
   global.PaddelbuchFilterPanel = {

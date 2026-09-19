@@ -161,6 +161,29 @@ map:
   spot_with_tips_label: "%{spot}, Tipps: %{tips}"
   spot_with_tips_generic: "Einstiegsort mit Tipps"
 
+# Semantic search over spots
+search:
+  placeholder: "Einstiegsorte suchen..."
+  aria_label: "Einstiegsorte durchsuchen"
+  clear_label: "Suche löschen"
+  searching: "Suche läuft..."
+  no_results: "Keine Ergebnisse gefunden"
+  no_results_hint: "Kein Einstiegsort entspricht Ihrer Suche. Versuchen Sie einen anderen Begriff, weniger Wörter, oder löschen Sie die Suche, um wieder alle Einstiegsorte zu sehen."
+  results_one: "1 Ergebnis"
+  results_many: "{count} Ergebnisse"
+  error: "Suche momentan nicht verfügbar"
+  error_hint: "Bitte versuchen Sie es in einem Moment erneut. Sie können die Karte weiterhin mit den Filtern nutzen."
+  timeout: "Die Suche hat zu lange gedauert"
+  timeout_hint: "Die Suche hat nicht rechtzeitig geantwortet. Versuchen Sie es erneut, oder nutzen Sie die Karte weiterhin mit den Filtern."
+  rate_limited: "Zu viele Suchanfragen"
+  rate_limited_hint: "Bitte warten Sie {seconds} Sekunden und versuchen Sie es erneut."
+  rate_limited_hint_generic: "Bitte warten Sie einen Moment und versuchen Sie es erneut."
+  quota_exhausted: "Tageslimit für Suchanfragen erreicht"
+  quota_exhausted_hint: "Die Suche ist ab {time} wieder verfügbar. Sie können die Karte weiterhin mit den Filtern nutzen."
+  busy: "Die Suche ist gerade sehr gefragt"
+  busy_hint: "Bitte versuchen Sie es in wenigen Sekunden erneut."
+  retry_label: "Erneut versuchen"
+
 # Date formats
 date:
   format: "%d.%m.%Y"
