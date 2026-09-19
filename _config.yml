@@ -31,6 +31,12 @@ exclude:
   - spec/
   - _tests/
   - jest.config.js
+  # Jest HTML coverage report. Git-ignored but present in any working tree where
+  # `jest --coverage` has been run, and Jekyll would otherwise copy the whole
+  # report into the built site. Those files carry inline <script> blocks, which
+  # both leaks internals into production output and trips
+  # tests/test_csp_inline_scripts.py.
+  - coverage/
   - deploy/
   - docs/
   - scripts/

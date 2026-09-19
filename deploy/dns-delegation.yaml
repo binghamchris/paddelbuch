@@ -1,0 +1,97 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: >-
+  Paddel Buch DNS delegation — an NS record in the apex paddelbuch.ch zone pointing a
+  subdomain at a hosted zone in another account. Deployed to the PRODUCTION account,
+  because that is where the apex zone lives.
+
+# What this stack is for
+# ----------------------
+# Creating a subdomain hosted zone does not make the subdomain resolve. Route 53 assigns
+# four nameservers, and until the PARENT zone carries an NS record for the subdomain with
+# exactly those values, nothing under it resolves anywhere on the internet. The zone
+# accepts records and looks healthy in the console regardless, which is what makes the
+# missing delegation hard to spot: an ACM certificate validated by DNS sits in
+# PENDING_VALIDATION forever, presenting as "ACM is broken".
+#
+# The subdomain zone lives in the dev account; the apex zone lives in production. So this
+# is unavoidably a cross-account, two-stack arrangement.
+#
+# SCOPE — read this before extending the template
+# -----------------------------------------------
+# The apex zone carries live records this stack must never touch: the site's A record and
+# www CNAME, and the email chain (MX, SPF/TXT, _dmarc, and DKIM CNAMEs for both Google and
+# ProtonMail). CloudFormation only manages resources it declares, so a stack containing
+# exactly one RecordSet cannot affect them. Keep it that way: add further records as their
+# own stacks rather than growing this one, so a rollback here can never take mail down.
+
+Parameters:
+  ParentHostedZoneId:
+    Type: String
+    Description: >-
+      Hosted zone ID of the apex zone that will delegate — paddelbuch.ch in the
+      production account.
+
+  SubdomainName:
+    Type: String
+    Description: >-
+      Fully qualified subdomain to delegate, without a trailing dot, e.g.
+      dev.paddelbuch.ch.
+    AllowedPattern: "^[a-z0-9.-]+$"
+
+  SubdomainNameServers:
+    Type: CommaDelimitedList
+    Description: >-
+      The four nameservers assigned to the subdomain's hosted zone, taken from the
+      NameServers output of that zone's stack. These are assigned by AWS at zone creation
+      and change if the zone is ever recreated, so read them from the stack rather than
+      from documentation.
+
+  RecordTtl:
+    Type: Number
+    Default: 300
+    MinValue: 60
+    MaxValue: 172800
+    Description: >-
+      TTL in seconds for the parent's delegation record. Route 53's own default for a
+      delegation is 172800 (two days).
+
+      A caveat worth knowing, because the obvious reasoning is wrong: setting this low
+      does NOT by itself make a zone recreation quick to recover. Resolvers follow the
+      referral once and then cache the CHILD zone's own NS record set, which Route 53
+      creates with a TTL of 172800 and which this stack does not control. Verified after
+      deployment: Cloudflare returned the delegation with TTL 172800, not 300. To make
+      recovery genuinely fast, the child zone's NS record TTL has to be lowered too.
+
+      300 is kept anyway: it bounds how long a resolver that has not yet followed the
+      referral keeps the stale parent record, and the extra query volume is immaterial at
+      $0.40 per million.
+
+Resources:
+  # Deliberately WITHOUT DeletionPolicy: Retain.
+  #
+  # Retaining would keep the subdomain working if this stack were deleted by accident,
+  # which sounds prudent but is the wrong trade. A delegation left pointing at a hosted
+  # zone that no longer exists is a dangling delegation — a subdomain-takeover surface,
+  # since another party who obtains a zone on the same nameserver set could then serve
+  # content for this subdomain. The delegation should disappear with the stack that
+  # declares it; a broken dev subdomain is obvious and recoverable, a takeover is neither.
+  SubdomainDelegation:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Ref ParentHostedZoneId
+      Name: !Ref SubdomainName
+      Type: NS
+      TTL: !Ref RecordTtl
+      ResourceRecords: !Ref SubdomainNameServers
+
+Outputs:
+  DelegatedSubdomain:
+    Description: The subdomain now delegated by the apex zone
+    Value: !Ref SubdomainName
+
+  VerificationCommand:
+    Description: >-
+      Run this to confirm the delegation resolves. An empty result means it has not
+      propagated yet; it should return the four nameservers.
+    Value: !Sub "dig +short NS ${SubdomainName}"

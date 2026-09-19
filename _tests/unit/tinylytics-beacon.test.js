@@ -360,7 +360,24 @@ describe('Layer-control beacon dispatch integration (Task 10.2)', () => {
     );
   });
 
-  test('protected area without slug falls back to name', () => {
+  test('protected area without a slug dispatches NOTHING', () => {
+    // CHANGED 2026-09-02 (security-hardening-v12 Task 11b). This test previously
+    // asserted the OPPOSITE -- that a slugless area falls back to protectedArea.name --
+    // and it was right to exist, because that fallback WAS a deliberate choice.
+    //
+    // The owner withdrew it. `.name` is free CMS text, so the fallback put an unbounded,
+    // unsanitised string into the analytics dashboard, including the `|` this project
+    // uses as an event-value delimiter. It could not be injected (setAttribute never
+    // parses markup), so this is consistency with the sanitised search path rather than
+    // a vulnerability.
+    //
+    // Safe to remove because Contentful enforces a slug on every protected area,
+    // verified on real generated data: 1,386 tile records and 693 per locale, none
+    // missing a slug.
+    //
+    // NOTHING is right rather than an empty value, because dispatch validates only its
+    // event NAME. A bare `protectedArea.slug` would send the literal string "undefined",
+    // and `slug || ''` would create an empty-value event -- a meaningless dashboard bucket.
     setupLayerControlEnv();
     loadLayerControl();
 
@@ -372,8 +389,24 @@ describe('Layer-control beacon dispatch integration (Task 10.2)', () => {
     expect(lastCreatedLayers.length).toBeGreaterThanOrEqual(1);
     lastCreatedLayers[0]._fireClick();
 
+    expect(window.PaddelbuchTinylyticsBeacon.dispatch).not.toHaveBeenCalled();
+  });
+
+  test('protected area WITH a slug still dispatches the slug', () => {
+    // The other half: removing the fallback must not have removed the event.
+    setupLayerControlEnv();
+    loadLayerControl();
+
+    window.paddelbuchAddProtectedAreaLayer({
+      slug: 'naturschutzgebiet-rhein',
+      name: 'Naturschutzgebiet Rhein',
+      geometry: JSON.stringify({ type: 'Polygon', coordinates: [[[8, 47], [8.1, 47], [8.1, 47.1], [8, 47.1], [8, 47]]] })
+    });
+
+    lastCreatedLayers[0]._fireClick();
+
     expect(window.PaddelbuchTinylyticsBeacon.dispatch).toHaveBeenCalledWith(
-      'marker.click', 'Naturschutzgebiet Rhein'
+      'marker.click', 'naturschutzgebiet-rhein'
     );
   });
 

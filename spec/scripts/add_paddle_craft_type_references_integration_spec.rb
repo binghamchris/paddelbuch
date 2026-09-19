@@ -2,6 +2,7 @@
 
 require 'json'
 require 'tmpdir'
+require 'fileutils'
 require 'open3'
 
 # Integration / mock-based tests for the side effects of the migration script
@@ -15,16 +16,21 @@ require 'open3'
 # and talks to Contentful through `Net::HTTP`. Rather than refactoring the
 # script (and risking a behaviour change), these tests run it as a subprocess
 # with `Net::HTTP` stubbed in the child process (spec/support/cma_net_http_stub.rb
-# loaded via `ruby -r`). No network request is ever made. Fixture `_data` files
-# are written to the repo's `_data/` directory (which is git-ignored and empty
-# in a fresh checkout) and removed afterwards.
+# loaded via `ruby -r`). No network request is ever made.
+#
+# The fixture `_data` files live in a per-example temporary SANDBOX, never in the
+# repository working tree. The script resolves its data directory as
+# `../_data` relative to its own location, so copying the script to
+# `<sandbox>/scripts/` makes it read and write `<sandbox>/_data/` instead.
+#
+# This replaces an earlier approach that wrote fixtures into the repo's real
+# `_data/` and refused to run if those files already existed. `_data/*.yml` is
+# git-ignored but is populated by the Contentful sync, so on any machine that
+# has built the site the guard tripped and these examples could never run.
 RSpec.describe 'add_paddle_craft_type_references.rb (migration side effects)' do
   repo_root = File.expand_path('../..', __dir__)
   script_path = File.join(repo_root, 'scripts', 'add_paddle_craft_type_references.rb')
   stub_path = File.join(repo_root, 'spec', 'support', 'cma_net_http_stub.rb')
-  data_dir = File.join(repo_root, '_data')
-  spots_path = File.join(data_dir, 'spots.yml')
-  cache_path = File.join(data_dir, '.contentful_sync_cache.yml')
 
   # A candidate spot that references the legacy `seekajak` slug, which the
   # migration rule maps to an added `hardshell` reference.
@@ -67,22 +73,36 @@ RSpec.describe 'add_paddle_craft_type_references.rb (migration side effects)' do
   ]
 
   around(:each) do |example|
-    # Guard: never clobber real data files if they happen to exist.
-    raise "refusing to overwrite existing #{spots_path}" if File.exist?(spots_path)
-    raise "refusing to overwrite existing #{cache_path}" if File.exist?(cache_path)
+    # Build a throwaway repo layout so the script never touches the real
+    # working tree. DATA_DIR in the script is `../_data` relative to the
+    # script's own directory, so placing a copy at <sandbox>/scripts/ redirects
+    # all of its reads and writes into <sandbox>/_data/.
+    Dir.mktmpdir('pcr-sandbox') do |sandbox|
+      FileUtils.mkdir_p(File.join(sandbox, 'scripts'))
+      FileUtils.mkdir_p(File.join(sandbox, '_data'))
+      FileUtils.cp(script_path, File.join(sandbox, 'scripts', File.basename(script_path)))
 
-    File.write(spots_path, spots_fixture)
-    File.write(cache_path, cache_fixture)
+      File.write(File.join(sandbox, '_data', 'spots.yml'), spots_fixture)
+      File.write(File.join(sandbox, '_data', '.contentful_sync_cache.yml'), cache_fixture)
 
-    Dir.mktmpdir('cma-stub') do |tmp|
-      @entries_file = File.join(tmp, 'entries.json')
-      @request_log = File.join(tmp, 'requests.log')
-      File.write(@entries_file, JSON.generate(fetched_entries))
-      example.run
+      @sandbox = sandbox
+
+      Dir.mktmpdir('cma-stub') do |tmp|
+        @entries_file = File.join(tmp, 'entries.json')
+        @request_log = File.join(tmp, 'requests.log')
+        File.write(@entries_file, JSON.generate(fetched_entries))
+        example.run
+      end
     end
-  ensure
-    File.delete(spots_path) if File.exist?(spots_path)
-    File.delete(cache_path) if File.exist?(cache_path)
+  end
+
+  # Paths inside the sandbox, for examples that replace the default fixtures.
+  def sandbox_spots_path
+    File.join(@sandbox, '_data', 'spots.yml')
+  end
+
+  def sandbox_cache_path
+    File.join(@sandbox, '_data', '.contentful_sync_cache.yml')
   end
 
   # Run the migration script as a subprocess with Net::HTTP stubbed.
@@ -107,8 +127,8 @@ RSpec.describe 'add_paddle_craft_type_references.rb (migration side effects)' do
   end
 
   before(:each) do
-    @repo_root_local = repo_root
-    @script_path_local = script_path
+    @repo_root_local = @sandbox
+    @script_path_local = File.join(@sandbox, 'scripts', File.basename(script_path))
     @stub_path_local = stub_path
   end
 
@@ -234,10 +254,11 @@ RSpec.describe 'add_paddle_craft_type_references.rb (migration side effects)' do
     cache_lines << '    content_type: paddleCraftType'
     cache_lines << '    slug: klappbar-und-aufblasbar'
 
-    # Overwrite the small default fixtures written by the around hook; the
-    # around/ensure guard still owns cleanup of these _data/ files.
-    File.write(spots_path, spots_lines.join("\n") + "\n")
-    File.write(cache_path, cache_lines.join("\n") + "\n")
+    # Overwrite the small default fixtures written by the around hook. These
+    # live in the per-example sandbox, so the repository's own _data/ is never
+    # read or written.
+    File.write(sandbox_spots_path, spots_lines.join("\n") + "\n")
+    File.write(sandbox_cache_path, cache_lines.join("\n") + "\n")
     File.write(@entries_file, JSON.generate(fetched))
 
     result = run_script([], @entries_file, @request_log)

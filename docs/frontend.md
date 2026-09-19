@@ -46,8 +46,9 @@ All modules live in `assets/js/`. They are plain scripts that attach functions t
 
 | Module | Purpose |
 |--------|---------|
-| `filter-engine.js` | Core filter logic: multi-dimension AND filtering across spot type, paddle craft type, and spot tip type |
+| `filter-engine.js` | Core filter logic: multi-dimension AND filtering across spot type, paddle craft type, spot tip type, and semantic search |
 | `filter-panel.js` | Renders the filter toggle UI panel and handles user interactions |
+| `semantic-search.js` | Free-text semantic search over spots, expressed as a filter dimension so it AND-combines with the checkbox dimensions. See "Semantic Search" below |
 | `layer-control.js` | Custom Leaflet control for toggling map layers, includes date-based event notice filtering and the SVG halo Composite_Icon builder for spots with tip types |
 | `zoom-layer-manager.js` | Shows/hides detail layers (obstacles, protected areas) based on zoom level (threshold: zoom 12) |
 
@@ -225,6 +226,143 @@ _sass/
 
 The main entry point is `assets/css/application.scss`, which imports Bootstrap and then the project's settings, utilities, components, and page styles.
 
+## Semantic Search
+
+Free-text search over spots on the home-page map, backed by the separate
+`paddelbuch-searchengine` service (API Gateway + Lambda + Bedrock Titan
+embeddings + a DynamoDB vector store).
+
+### How it fits the filter system
+
+Search is a **filter dimension**, not a separate rendering path. The module turns
+a query into a set of spot slugs, hands that set to `filter-engine.js` via
+`setDimensionSelection('search', slugs)`, and the engine's existing AND
+evaluation does the rest. A marker is visible only when it matches the search AND
+every active checkbox dimension.
+
+Two consequences worth knowing:
+
+- **An empty selection means "inactive", not "match nothing".** That is the
+  engine's pre-existing convention, and search relies on it: clearing the box, a
+  too-short query, a zero-result query, and a failed request all converge on an
+  empty set and all correctly restore the checkbox-only view.
+- **The search dimension is registered with the engine but not the panel.** It
+  has no options, so rendering it as a fieldset would produce an empty box. That
+  asymmetry lives in `map-data-init.js`.
+
+Search results also drive `map.fitBounds`. This is functional, not cosmetic: the
+marker registry only holds spots whose viewport tiles have loaded, so without
+moving the map a match in another region has no marker to reveal.
+
+### Why not render markers straight from the API response?
+
+The response carries enough to draw a marker, but the backend does not map
+`spotTipType_slugs`. Markers built from API data would look like "no tips" and
+would break AND-combination for the tip dimension. Filtering the tile-loaded
+markers avoids this, since each already carries correct metadata.
+
+### Configuration
+
+```
+Amplify parameter -> Amplify env var -> _plugins/env_loader.rb
+  -> site.search_api_endpoint / site.search_api_key / site.search_enabled
+  -> #semantic-search-config JSON block -> JSON.parse in semantic-search.js
+```
+
+Templates gate on `site.search_enabled`, never on the endpoint directly. It is
+derived once in the plugin as "an endpoint is configured AND the feature is not
+disabled", so the decision is made in testable Ruby rather than in Liquid.
+
+| Variable / parameter | Purpose |
+|---|---|
+| `SEARCH_API_ENDPOINT` / `EnvVarSearchApiEndpoint` | Full search endpoint URL. **The search UI renders only when this is non-empty.** |
+| `SEARCH_API_KEY` / `EnvVarSearchApiKey` | API Gateway usage-plan key |
+| `SearchApiCspHost` | Search API origin added to CSP `connect-src` |
+| `SEARCH_DISABLED` / `SearchDisabled` | Feature flag. `true` removes search from the build entirely, keeping the endpoint configured |
+| `site.search.timeout_ms` | Per-attempt request budget, default 6000 |
+
+#### Turning search off
+
+Set the `SearchDisabled` stack parameter to `"true"`. That removes the config
+block and the `semantic-search.js` script tag, so the module is never downloaded,
+and empties the search host from the CSP `connect-src`, so the endpoint cannot be
+reached even by injected script. The endpoint parameter is left intact, so
+switching search back on does not mean recovering the URL.
+
+The flag is negative deliberately: its absence has to mean "behave as today", and
+a positive `SEARCH_ENABLED` would silently disable search on the next deploy of
+every existing environment. An unrecognised value disables and warns in the build
+log, because someone who types a value into a kill switch intended to use it.
+
+Note the parameter is **app-wide**, not per-branch: flipping it affects every
+branch of the Amplify app.
+
+### Graceful degradation
+
+The governing rule: a search backend problem may cost the user search, and nothing
+else. What that means concretely:
+
+- **No request is made at page load.** The first call happens on user input, so a
+  backend that is down when the site loads has no effect on loading the site.
+  There is deliberately no availability probe -- it would cost a request per page
+  view and can be wrong in both directions.
+- **Search init cannot break the map.** Both calls into the module during map
+  initialisation are individually guarded, because the initial data load happens
+  further down the same function and a throw would otherwise leave the map with no
+  markers at all.
+- **A malformed response is a failure, not an empty result.** A `2xx` whose body is
+  not an array is rejected. Treating it as zero results would apply the no-match
+  sentinel and hide every marker, reporting a backend fault as "no spots match".
+- **Every failure deactivates the search dimension**, so a failure degrades to "no
+  search" rather than a stale or empty view.
+- **Timeout is 6000 ms per attempt**, above the measured ~5.0s cold-start ceiling
+  and strictly below the Lambda's own 10s, so the client gives up before the
+  server does rather than racing it.
+- **One retry after 1s** on a network error, timeout, or `5xx`. Never on a `4xx`:
+  `429` in particular is not retried, because retrying a rate limit is what caused
+  it. The status keeps reading "searching" across the retry so no failure is
+  flashed before a success.
+- **The notice's action follows the state**: clear the search for "nothing
+  matched", try again for a failure.
+- **Results are cached in memory and in `localStorage`.** The persisted key carries
+  the spots table's `lastUpdatedAt`, so a content change orphans every entry at
+  once; a 7-day TTL is the backstop. Any storage failure disables persistence for
+  the page and the in-memory tier carries on.
+
+Known limitation: `Retry-After` is not a CORS-safelisted response header and the
+search API does not send `Access-Control-Expose-Headers`, so the browser cannot
+read it. The rate-limit message therefore always uses its generic form rather than
+naming a wait time. The frontend handles both forms; making the specific one
+reachable needs one header added to the API's responses.
+
+Empty and whitespace-only values are treated as unset, because CloudFormation
+supplies `""` for an omitted parameter and `""` is truthy in both Ruby and Liquid.
+A build with none of these set omits the search box entirely and leaves the
+filter panel unchanged.
+
+**On the API key.** It is rendered into the public HTML, because the site is
+statically generated with no server-side rendering layer. That is acceptable only
+because an API Gateway API key is a usage-plan identifier for throttling and
+quota attribution, not an authorisation secret. Access control for the endpoint
+is its Origin allow-list plus WAF. Never route an IAM credential through this
+path.
+
+**Local development.** The deployed API validates the request Origin against an
+allow-list in SSM (`/paddelbuch-search/allowed-origins`). Localhost is not on
+that list by default, so searches from a local build return HTTP 403 until it is
+added.
+
+### Tuning
+
+`limit` (default 40) and `minScore` (default 0.25) are sent with every request
+and are configurable via `site.search.*`. The threshold comes from the backend's
+own e2e query set, which treats 0.2 as the relevance floor and 0.3 as the
+expected top-match score.
+
+Note the tension: a tight `limit` can interact badly with restrictive checkbox
+filters, because the AND may empty out when a qualifying spot ranked just outside
+the limit. Raising `limit` widens the pool at the cost of payload size.
+
 ## Content Security Policy
 
 The site enforces a strict Content Security Policy (CSP) via the CloudFormation template (`deploy/frontend-deploy.yaml`). This is a deliberate design constraint that shapes how frontend code can be written.
@@ -237,9 +375,16 @@ img-src 'self' data: raw.githubusercontent.com api.mapbox.com;
 style-src 'self';
 script-src 'self' https://tinylytics.app;
 font-src 'self' data:;
-connect-src 'self' tiles.openfreemap.org https://tinylytics.app;
+connect-src 'self' tiles.openfreemap.org https://tinylytics.app ${SearchApiCspHost};
 worker-src 'self' blob:
 ```
+
+`${SearchApiCspHost}` is substituted by CloudFormation from the `SearchApiCspHost`
+template parameter, which must hold the scheme and host of the search API (no
+path) whenever semantic search is enabled. The `CustomHeaders` block is a `!Sub`
+block for this reason; it is the only placeholder in it, and a test pins that so
+a stray `${` cannot silently break every header on the site. When the parameter
+is empty the directive simply has no extra source.
 
 ### Design Decisions
 
@@ -271,3 +416,78 @@ The CloudFormation template also sets these headers on all responses (`**/*`):
 | `X-Content-Type-Options` | `nosniff` | Prevents MIME-type sniffing |
 | `Referrer-Policy` | `strict-origin-when-cross-origin` | Limits referrer information to external sites |
 | `Permissions-Policy` | (restrictive) | Only `fullscreen`, `geolocation`, and `vertical-scroll` are allowed for `self`; all other browser features are disabled |
+
+## Search analytics
+
+Each completed search emits one Tinylytics event carrying both the query and the result
+count in a single value:
+
+```
+search.query  →  "parkplatz|429"
+                  ^query     ^count
+```
+
+**Why one event rather than two.** Tinylytics events carry no session, request or visitor
+identifier, so `search.query` and a separate `search.results` could never be joined back
+together — and *which queries return nothing* is the whole point. The pair has to be atomic.
+
+**Reading the values.** Split on the last `|`. The query is case-folded, whitespace-collapsed,
+and capped at 100 characters; the count is an integer. `Parkplatz` and `parkplatz` are one
+row, deliberately: the backend folds before embedding, so they return identical results, and
+splitting them would make the top-queries list wrong.
+
+**A count of 500 means "at least 500".** The frontend requests `limit: 500`, so that value is
+a cap rather than a total.
+
+**The count is last on purpose.** The Tinylytics client applies no truncation — verified by
+reading the deployed script — but server-side handling is unverified, so anything that
+truncates eats query text before it reaches the count.
+
+### Why the dashboard can show nothing while the code is correct
+
+Three reasons, in the order they are likely:
+
+1. **Your own hits are ignored.** Tinylytics does not fire events when hit tracking is
+   disabled, whether via site settings or `?ignore`. This is the most likely cause and looks
+   exactly like a broken implementation.
+2. **The beacon was blocked.** Delivery uses `navigator.sendBeacon`, which some privacy
+   browsers and ad blockers block. Event counts are therefore a **floor**, not a total — this
+   is already true of the site's other events.
+3. **Event tracking is a beta feature** and documented as subject to change.
+
+To check dispatch without the dashboard, watch for the synthetic click and the outbound
+request to `tinylytics.app` in the browser's network panel.
+
+### The 1500 ms settle window
+
+Analytics reports a query only after it has sat unchanged for 1500 ms — not on every search.
+Two independent reasons:
+
+- The search debounce is 350 ms, so typing `parkplatz` with one pause runs two searches,
+  `park` and `parkplatz`. Reporting each would record prefixes nobody meant to search.
+- **The Tinylytics client debounces events at 500 ms, keyed on
+  `target.id || target.className || target.tagName`.** `tinylytics-beacon.js` sets
+  `className = 'tinylytics-beacon'` and no id, so *every* dispatch through the beacon shares
+  one key and any two within 500 ms are dropped — silently, and regardless of event name.
+  The settle window keeps dispatches outside that window as a consequence rather than by
+  luck.
+
+That second point has a consequence beyond search, **not** addressed here: two `marker.click`
+events within 500 ms also lose one, and a search event colliding with a marker click is
+possible for the same reason. Fixing it means giving the beacon element a unique `id` per
+dispatch, which changes behaviour for six existing call sites.
+
+### `search.focus` versus `search.query`
+
+`search.query` used to be set as an attribute on the search **input**. Tinylytics fires on
+click, so it recorded a visitor *clicking into the box* — not a query, and with no value.
+It is now `search.focus`, and is kept: open-the-box-but-never-search is a funnel signal
+available nowhere else, and comparing it against `search.query` gives an engagement rate
+neither provides alone.
+
+**Historical `search.query` data is a focus count and is not comparable** with the new event,
+even though the dashboard shows one continuous series across the rename.
+
+Failed searches are **not** reported: no results were returned, so there is no count. Logging
+refusal codes (`quota_exceeded`, `rate_limited`, `throttled`) is deferred — see
+`.kiro/specs/search-event-analytics/`.

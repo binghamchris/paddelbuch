@@ -127,9 +127,53 @@
       { key: 'protectedAreas', label: layerLabels.protectedAreas, layerGroup: layerGroups.protectedAreas, defaultChecked: true, icon: '/assets/images/icons/protectedarea-light.svg', iconOnly: true }
     ];
 
-    // Initialize filter engine and panel
-    PaddelbuchFilterEngine.init(dimensionConfigs, map);
+    // Initialize filter engine and panel.
+    //
+    // The semantic-search dimension is registered with the ENGINE only, never
+    // with the panel: it carries no options, so the panel would render an empty
+    // fieldset for it. Appending it to the engine's dimension list is what makes
+    // search AND-combine with the checkbox dimensions, since evaluateMarker
+    // requires every active dimension to match.
+    var engineDimensions = dimensionConfigs.slice();
+    var searchEnabled = !!(window.PaddelbuchSemanticSearch
+      && window.PaddelbuchSemanticSearch.isConfigured());
+
+    // Every call into the search module is treated as failable. Nothing below
+    // throws today, but the initial data load happens further down this same
+    // function, so an exception here would cost the map ALL of its markers --
+    // the whole map lost to a search fault. A search problem may cost the user
+    // search and nothing else.
+    if (searchEnabled) {
+      try {
+        engineDimensions.push(window.PaddelbuchSemanticSearch.getDimensionConfig());
+      } catch (err) {
+        console.warn('Search dimension registration failed; continuing without search:', err);
+        searchEnabled = false;
+        engineDimensions = dimensionConfigs.slice();
+      }
+    }
+
+    PaddelbuchFilterEngine.init(engineDimensions, map);
+
+    // The filter panel is initialised exactly as it is without this feature --
+    // no extra arguments, no injected markup -- so search cannot alter its
+    // design, size, or behaviour.
     PaddelbuchFilterPanel.init(map, dimensionConfigs, layerToggles);
+
+    // The search box is its own Leaflet control, sitting beside the filter
+    // button rather than inside the collapsible panel.
+    //
+    // If this throws, the dimension may already be registered with the engine.
+    // That is safe: a dimension with an empty selection is inactive and the
+    // engine skips it, so it cannot hide markers.
+    if (searchEnabled) {
+      try {
+        window.PaddelbuchSemanticSearch.createControl(map);
+      } catch (err) {
+        console.warn('Search control creation failed; continuing without search:', err);
+        searchEnabled = false;
+      }
+    }
 
     // Initial data load for the current viewport
     var bounds = PaddelbuchSpatialUtils.leafletBoundsToObject(map.getBounds());
