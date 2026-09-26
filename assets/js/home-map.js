@@ -7,10 +7,6 @@
  * Also stores the home-page target zoom (default + 3) so that marker click
  * handlers can zoom in when recentering on the home page map.
  *
- * When a popup is closed without another popup opening immediately after
- * (i.e. the user manually dismissed it), the map resets to its default
- * center and zoom level.
- *
  * The home page map has no geometry to render or bounds to fit -- it just needs
  * the map instance stored globally.
  *
@@ -31,25 +27,5 @@
 
     // Store target zoom for marker-click recentering (default zoom + 3)
     window.paddelbuchHomeTargetZoom = defaultZoom + 3;
-
-    // Reset map to default view when a popup is closed manually.
-    // A short timer distinguishes manual close from marker-to-marker
-    // navigation: if popupopen fires before the timer, the reset is
-    // cancelled so clicking between markers behaves normally.
-    var resetTimer = null;
-
-    map.on('popupclose', function() {
-      resetTimer = setTimeout(function() {
-        map.setView(defaultCenter, defaultZoom);
-        resetTimer = null;
-      }, 150);
-    });
-
-    map.on('popupopen', function() {
-      if (resetTimer) {
-        clearTimeout(resetTimer);
-        resetTimer = null;
-      }
-    });
   });
 })();
