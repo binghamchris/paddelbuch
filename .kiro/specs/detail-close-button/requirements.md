@@ -27,7 +27,7 @@ Established by reading the code and the deployed Tinylytics client before writin
 | Tinylytics client storage | reads `localStorage`, not `sessionStorage` | `sessionStorage` is not read by the current client; it is still readable by any same-origin script |
 | Tinylytics event dispatch | attribute-based, fires on a real **click** of an element carrying `data-tinylytics-event` | a plain annotated link needs no beacon dispatch |
 | Tinylytics delivery | `navigator.sendBeacon`, `fetch` fallback (`min.js?events&beacon`) | the event survives the navigation the click triggers |
-| Tinylytics debounce | 500 ms, keyed on `target.id \|\| target.className \|\| target.tagName` | the X must be the click target itself, not an inner SVG |
+| Tinylytics click handling | capture-phase document listener; finds the annotated element with `event.target.closest('[data-tinylytics-event]')`; 500 ms debounce keyed on that element's `id \|\| className \|\| tagName` (re-read 2026-10-21) | a click on the X's icon still records the event; the X's own class is its debounce key |
 | Tinylytics hit filtering | events do not fire when the owner's own hits are ignored (`?ignore` or site setting) | the owner may see nothing while testing; verification must account for it |
 | event naming | `category.action` (e.g. `popup.details`, `navigate.click`) | new event is `detail.close` |
 | details layouts | `_layouts/spot.html`, `waterway.html`, `obstacle.html`, `notice.html` | four layouts get the button; rejected spots use `spot.html` |

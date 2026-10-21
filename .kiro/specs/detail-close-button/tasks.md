@@ -127,10 +127,10 @@ condition is not met after one fix attempt, stop and report rather than retrying
   - Pass condition: docs match the implementation; no other file changed.
   - _Requirements: 4.1, 4.2, 5.2_
 
-- [ ] 7. Full verification on a local build
-  - [ ] 7.1 Run `npm test`, `bundle exec rspec` and `bundle exec rake build:site`, each
+- [x] 7. Full verification on a local build
+  - [x] 7.1 Run `npm test`, `bundle exec rspec` and `bundle exec rake build:site`, each
     gated on its own exit status.
-  - [ ] 7.2 Serve `_site/` on `127.0.0.1` only. Check in a browser, in both locales:
+  - [x] 7.2 Serve `_site/` on `127.0.0.1` only. Check in a browser, in both locales:
     - open a spot via its popup, close it: same centre and zoom;
     - spot, then another spot from the details map, then close: the original home view;
     - open via the header waterway dropdown, then close: the view restored;
@@ -143,14 +143,14 @@ condition is not met after one fix attempt, stop and report rather than retrying
     - mobile width (≤ 991 px): the X sits at the top left of the pane below the map;
     - keyboard: Tab reaches the X, the focus ring is visible, Enter closes and restores;
     - with site data blocked in browser settings: the X still navigates; the default view.
-  - [ ] 7.3 In the browser's network panel, filter requests to `tinylytics.app` during the
+  - [x] 7.3 In the browser's network panel, filter requests to `tinylytics.app` during the
     first check above. Confirm the `detail.close` request's `event_value` is the Page_Type
     and that no request URL or body contains the stored latitude or longitude. Test with
     the owner's own hits **not** ignored, or no event fires.
-  - [ ] 7.4 Re-read the deployed Tinylytics client (fetch it with a browser `User-Agent`
+  - [x] 7.4 Re-read the deployed Tinylytics client (fetch it with a browser `User-Agent`
     and a site `Referer`, or it returns an empty body). Confirm it still does not access
     `sessionStorage`, and record the result below.
-  - [ ] 7.5 Compare a spot, a waterway, an obstacle and a notice page against production at
+  - [x] 7.5 Compare a spot, a waterway, an obstacle and a notice page against production at
     desktop width. Below the new row, nothing differs except the vertical offset.
   - Pass condition: every check passes, and the results are recorded in "Outcomes".
   - _Requirements: 1.8, 2.1, 3.1, 3.2, 3.4, 3.7, 3.8, 4.5, 5.3, 6.4_
@@ -178,5 +178,47 @@ suites after the last revert: Jest 1453 passed, RSpec 1022 examples, 0 failures.
 ## Outcomes
 
 - Baseline (Task 1.1): Jest 1337 tests / 126 suites passed; RSpec 953 examples, 0 failures.
-- Tinylytics client re-check (Task 7.4):
-- Manual verification (Task 7.2–7.5):
+- Tinylytics client re-check (Task 7.4): fetched 2026-10-21 (3931 bytes, sha256 prefix
+  `79ed97cbbcfc77a3`). No `sessionStorage` or `document.cookie` access. `localStorage` is
+  used only for the `tinylytics_ignore` flag. It reads `location.href` (sent as `url`) and
+  `location.search` (for the ignore parameters). Clicks are handled by a capture-phase
+  document listener that finds the annotated element with
+  `event.target.closest('[data-tinylytics-event]')` and keys its 500 ms debounce on that
+  element. That corrects an earlier assumption in this spec: an SVG click inside the X
+  records correctly without `pointer-events: none`. The requirements fact table, the design
+  decision row and the SCSS comment were corrected accordingly.
+- Network check (Task 7.3): done in a real browser (headless Chromium via `playwright-cli`,
+  whose sandbox has to be disabled on this workstation). The real client above was served
+  locally with its collector pointed at the local server, and every other tinylytics.app
+  request was aborted, so no hit was sent. The browser profile was fresh, so own hits were
+  not ignored. Over the whole browser run (4766 requests): 8 `detail.close` events, values
+  only `spot` and `waterway`; no request URL or body contained any saved latitude or
+  longitude; no request reached tinylytics.app. Earlier jsdom run on one page of every type
+  in both locales: exactly one `detail.close=<page type>` per page, same result.
+- Browser checks (Task 7.2), local build on `127.0.0.1:4517`, 28/28 passed:
+  - spot popup, then "Weitere Details": the saved record equals the rounded view; no query
+    or fragment;
+  - details to details (spot, then a header waterway), then X: the original home view;
+    marker removed; home URL clean;
+  - back button to the details page, then X again: the same view; logo after a restore: the
+    default view;
+  - header waterway dropdown from home, then X: restored;
+  - keyboard: Tab reaches the X with a solid `:focus-visible` ring; Enter restores;
+  - Ctrl/Cmd-click: no marker in this tab; the new tab opens the default view; this tab's
+    next home visit is the default view;
+  - direct details URL, then X: the default view;
+  - English: the X links to `/en/` and restores on `/en/`;
+  - mobile 390 px: the X sits at the top left of the pane below the map;
+  - blocked site data (simulated: `sessionStorage` access throws `SecurityError`, which is
+    what browsers do): the X still goes home at the default view, with no page errors.
+  - The default view was measured rather than assumed: Leaflet clamps the configured centre
+    to `maxBounds` for the viewport (lng 8.1498 at 1440 × 900, not 8.226667).
+- Production comparison (Task 7.5): one spot, waterway, obstacle and notice page measured
+  against www.paddelbuch.ch at 1440 × 900. On every page the pane keeps x 960 and width
+  480, and each existing element measured (spot: Navigate button, type label, title;
+  waterway: title, notices section; obstacle and notice: title, details table) keeps its x,
+  width and height exactly. Only y moves, by exactly the new row's 52 px. Screenshots at
+  desktop and mobile width were inspected: the X stands alone in its row, nothing below it
+  changed.
+- Pre-existing, outside this spec: the spot `auswasseringsstelle-kandar-delta-weekendweg`
+  links to `/gewaesser/kander/`, which is a 404 both locally and on production.

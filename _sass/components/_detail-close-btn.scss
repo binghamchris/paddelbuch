@@ -19,9 +19,9 @@
   background-color: transparent;
   text-decoration: none;
 
-  // The link, not the icon, must be the click target: Tinylytics keys its
-  // debounce on the target's id or className, and an SVG's className is an
-  // object rather than a string.
+  // Keep the link itself as the event target. Not needed for Tinylytics, which
+  // finds the annotated link with closest() and keys its debounce on it, but it
+  // keeps the target predictable for any other click listener.
   svg {
     pointer-events: none;
   }

@@ -218,7 +218,7 @@ ignored.
 | event value | Page_Type, static, from Liquid | entity slug: already in the page URL Tinylytics records; the type gives a usable aggregate. Runtime value: opens a path from map state to the event |
 | "restored vs default" split | not recorded | derived from stored map state (Requirement 4.5) |
 | X placement | own row, first in the pane | corner overlay: the free corner is about 16 × 24 px, so a 40 px target would overlap the type label (spot pages) or the title (others) |
-| SVG clicks | `pointer-events: none` | leave it clickable: Tinylytics' debounce key reads `target.id \|\| className \|\| tagName`, and an SVG's `className` is an object, not a string |
+| SVG clicks | `pointer-events: none` | not required: the deployed client finds the annotated link with `event.target.closest('[data-tinylytics-event]')` and keys its debounce on that link (re-read in Task 7.4), so icon clicks record correctly either way. Kept so the link is always the event target for any listener |
 | unknown `page_type` | render nothing | render with a default value: a typo would ship an unlisted event value silently |
 
 ## Error handling
