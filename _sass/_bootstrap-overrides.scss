@@ -5,3 +5,9 @@
 .btn {
   border-radius: 0;
 }
+
+// Override: square corners on the mobile navigation (hamburger) toggle too.
+// Bootstrap draws it with its own --bs-navbar-toggler-border-radius, not .btn's.
+.navbar-toggler {
+  border-radius: 0;
+}
