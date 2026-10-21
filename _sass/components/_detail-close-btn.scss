@@ -1,0 +1,38 @@
+@use "../settings/settings" as *;
+
+// Details pane close button (detail-close-button spec).
+// Its own row at the top of the pane, so no existing pane element changes;
+// the content below simply moves down by this row's height.
+
+.detail-close-row {
+  padding-top: 0.75rem;
+}
+
+.detail-close-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  color: $swisscanoe-blue;
+  background-color: transparent;
+  text-decoration: none;
+
+  // The link, not the icon, must be the click target: Tinylytics keys its
+  // debounce on the target's id or className, and an SVG's className is an
+  // object rather than a string.
+  svg {
+    pointer-events: none;
+  }
+
+  &:hover {
+    color: $swisscanoe-blue;
+    background-color: $secondary-blue-20;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $secondary-blue;
+    outline-offset: 1px;
+  }
+}

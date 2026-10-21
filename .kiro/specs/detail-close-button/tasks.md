@@ -78,19 +78,19 @@ condition is not met after one fix attempt, stop and report rather than retrying
     tests and no previously passing test failing.
   - _Requirements: 2.1, 2.3, 2.4, 3.3, 3.4, 3.5, 3.8, 3.9, 6.3_
 
-- [ ] 3. Close_Button on the four details layouts
-  - [ ] 3.1 Add `back_to_map` under `actions:` in `_i18n/de.yml` ("Zurück zur Karte") and
+- [x] 3. Close_Button on the four details layouts
+  - [x] 3.1 Add `back_to_map` under `actions:` in `_i18n/de.yml` ("Zurück zur Karte") and
     `_i18n/en.yml` ("Back to map").
-  - [ ] 3.2 Create `_includes/detail-close-btn.html` exactly as in the design, including
+  - [x] 3.2 Create `_includes/detail-close-btn.html` exactly as in the design, including
     the Page_Type allow-list.
-  - [ ] 3.3 Create `_sass/components/_detail-close-btn.scss` as in the design, and add
+  - [x] 3.3 Create `_sass/components/_detail-close-btn.scss` as in the design, and add
     `@forward "detail-close-btn";` to `_sass/components/_components.scss` in alphabetical
     position.
-  - [ ] 3.4 Add the include as the first child of the Details_Pane in `_layouts/spot.html`,
+  - [x] 3.4 Add the include as the first child of the Details_Pane in `_layouts/spot.html`,
     `waterway.html`, `obstacle.html` and `notice.html`, with the `page_type` from the
     design's wiring table. In `waterway.html` and `notice.html`, add
     `{% include locale-prefix.html %}` after the `current_locale` assignment.
-  - [ ] 3.5 Create `spec/detail_close_btn_spec.rb` (testing strategy item 6) and
+  - [x] 3.5 Create `spec/detail_close_btn_spec.rb` (testing strategy item 6) and
     `spec/detail_close_btn_wiring_spec.rb` (item 7).
   - Verify: `bundle exec rspec spec/detail_close_btn_spec.rb spec/detail_close_btn_wiring_spec.rb spec/i18n_key_parity_spec.rb`,
     then `bundle exec rspec`, then `bundle exec rake build:site`. In `_site/`, confirm one

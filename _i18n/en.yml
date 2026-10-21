@@ -79,6 +79,7 @@ actions:
   copy_gps: "Copy GPS to clipboard"
   copy_address: "Copy approx. address to clipboard"
   navigate: "Navigate To"
+  back_to_map: "Back to map"
 
 # Obstacles
 obstacles:

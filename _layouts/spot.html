@@ -32,6 +32,8 @@ pageName: spot-details
     
     <!-- Details Panel -->
     <div class="col-xl-4 col-lg-5 col-md-12 col-sm-12 col-12 spot-description">
+      {% include detail-close-btn.html page_type="spot" %}
+
       <!-- Navigate Button (top, matching Gatsby layout) -->
       {% unless is_rejected %}
         {% if spot.location %}

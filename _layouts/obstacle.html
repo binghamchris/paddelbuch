@@ -31,6 +31,8 @@ pageName: obstacle-details
     
     <!-- Details Panel (4 cols on large screens, full width on smaller) -->
     <div class="obstacle-description col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12">
+      {% include detail-close-btn.html page_type="obstacle" %}
+
       <!-- Obstacle Title -->
       <div class="obstacle-title"><h1>{{ obstacle.name | escape }}</h1></div>
 
