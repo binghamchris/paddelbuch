@@ -44,19 +44,19 @@ condition is not met after one fix attempt, stop and report rather than retrying
 
 ---
 
-- [ ] 1. View_Store module
-  - [ ] 1.1 Record the baseline: run `npm test` and `bundle exec rspec` and write the pass
+- [x] 1. View_Store module
+  - [x] 1.1 Record the baseline: run `npm test` and `bundle exec rspec` and write the pass
     counts into the "Outcomes" section at the end of this file.
-  - [ ] 1.2 Create `assets/js/home-view-memory.js` with the constants and every function in
+  - [x] 1.2 Create `assets/js/home-view-memory.js` with the constants and every function in
     the design's View_Store table, the dual export (`window.PaddelbuchHomeViewMemory` plus
     `module.exports`), and the self-wiring of `wireDetailsPage`.
     - Every public function catches its own exceptions.
     - No listener calls `preventDefault()` or `stopPropagation()`.
     - Nothing writes to the console.
-  - [ ] 1.3 Create `_tests/unit/home-view-memory.test.js` (jsdom) covering item 1 of the
+  - [x] 1.3 Create `_tests/unit/home-view-memory.test.js` (jsdom) covering item 1 of the
     design's testing strategy.
-  - [ ] 1.4 Create `_tests/property/home-view-memory.property.test.js` covering item 2.
-  - [ ] 1.5 Create `_tests/unit/home-view-memory-source-guard.test.js` covering item 4.
+  - [x] 1.4 Create `_tests/property/home-view-memory.property.test.js` covering item 2.
+  - [x] 1.5 Create `_tests/unit/home-view-memory-source-guard.test.js` covering item 4.
   - Verify: `npx jest _tests/unit/home-view-memory.test.js _tests/property/home-view-memory.property.test.js _tests/unit/home-view-memory-source-guard.test.js`
   - Pass condition: all three files green; the module is not yet loaded by any page.
   - _Requirements: 2.2, 2.5, 2.6, 3.1, 3.2, 3.3, 3.5, 3.6, 3.7, 5.2, 5.4, 5.5, 5.6, 6.1, 6.2, 6.3_
@@ -164,6 +164,6 @@ condition is not met after one fix attempt, stop and report rather than retrying
 
 ## Outcomes
 
-- Baseline (Task 1.1):
+- Baseline (Task 1.1): Jest 1337 tests / 126 suites passed; RSpec 953 examples, 0 failures.
 - Tinylytics client re-check (Task 7.4):
 - Manual verification (Task 7.2–7.5):

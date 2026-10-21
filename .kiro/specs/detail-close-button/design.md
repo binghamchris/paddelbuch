@@ -320,7 +320,7 @@ it without destroying uncommitted work. It is confirmed red, then reverted, and
 | M2 | View_Store calls `history.replaceState(null, '', '#' + lat + ',' + lng)` after saving | privacy property, source guard |
 | M3 | View_Store also writes the record to `localStorage` | privacy property, source guard |
 | M4 | `wireHomePage` registers in the bubbling phase | capture-phase unit test |
-| M5 | `consumeRestore` removes the marker only when it was set | one-time unit test |
+| M5 | `consumeRestore` removes the marker only when its value is `"1"` | stale-marker unit test, marker property |
 | M6 | `isValidView` skips the bounds check | validation property |
 | M7 | `wireDetailsPage` ignores modifier keys | modifier unit test |
 | M8 | the include drops its allow-list and passes any `page_type` through | `detail_close_btn_spec.rb` |
