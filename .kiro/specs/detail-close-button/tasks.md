@@ -100,8 +100,8 @@ condition is not met after one fix attempt, stop and report rather than retrying
     succeeds; the four sampled pages in each locale are correct.
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.9, 3.1, 4.1, 4.2, 4.3, 4.6, 7.1, 7.2_
 
-- [ ] 4. End-to-end privacy property test
-  - [ ] 4.1 Create `_tests/property/home-view-privacy.property.test.js` covering item 3 of
+- [x] 4. End-to-end privacy property test
+  - [x] 4.1 Create `_tests/property/home-view-privacy.property.test.js` covering item 3 of
     the testing strategy, every assertion listed there included.
   - Verify: `npx jest _tests/property/home-view-privacy.property.test.js` then `npm test`.
   - Pass condition: green across at least 100 fast-check runs; full suite green.
