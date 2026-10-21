@@ -185,10 +185,10 @@ Included conditionally in `_layouts/spot.html` when `page.spot_tip_types` is non
 The `_includes/detail-close-btn.html` partial renders the X at the top right of every details pane (spot, waterway, obstacle and notice layouts). It is a plain link to the locale's home page (`/` or `/en/`), so it works without JavaScript, and it loads `home-view-memory.js`.
 
 - Parameter `page_type`: one of `spot`, `waterway`, `obstacle`, `notice`. Any other value renders nothing.
-- Parameter `inline`: when `true`, renders only the link, without the `.detail-close-row` wrapper. `spot.html` uses it to put the X at the right of the spot type row.
+- Parameter `variant`: `"inline"` renders the bare link (`spot.html` puts it at the right of the spot type row); `"title"` wraps it in a `.detail-close-slot` with Bootstrap's `.h1` class, one title line tall, for the title containers of the other three layouts.
 - Requires the caller to have included `locale-prefix.html` first.
 - Carries `data-tinylytics-event="detail.close"` with the page type as the value, written at build time.
-- Placement: the X sits at the top right of every pane. On spot pages it is in the type row (absolutely positioned, so the icon and label do not move), and the Navigate button is in the title row, which wraps the title beside it. On waterway, obstacle and notice pages it has its own right-aligned row at the top, and the content below moves down by that row.
+- Placement: the X sits at the top right of every pane. On spot pages it is in the type row (absolutely positioned, so the icon and label do not move), and the Navigate button is in the title row, which wraps the title beside it. On waterway, obstacle and notice pages it is at the right of the title row, centred on the title's first line; the title reserves room for it and wraps before reaching it, and the title's underline still spans the full pane width.
 
 ## Colour System
 

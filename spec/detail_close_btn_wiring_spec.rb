@@ -8,11 +8,11 @@ require 'spec_helper'
 # Wiring only: each details layout includes the close button exactly once, with
 # its own page type, after setting locale_prefix. Spot pages place it inline at
 # the right of the spot type row and put the Navigate button in the title row;
-# the other layouts give it its own row as the first element of the pane. What
-# the include renders is covered by detail_close_btn_spec.rb.
+# waterway, obstacle and notice pages place it in their title container, before
+# the h1. What the include renders is covered by detail_close_btn_spec.rb.
 RSpec.describe 'details layouts wire the close button' do
   layouts_dir = File.join(__dir__, '..', '_layouts')
-  include_pattern = /\{%-?\s*include\s+detail-close-btn\.html\s+page_type="([^"]*)"(\s+inline=true)?\s*-?%\}/
+  include_pattern = /\{%-?\s*include\s+detail-close-btn\.html\s+page_type="([^"]*)"(?:\s+variant="([^"]*)")?\s*-?%\}/
 
   def read_layout(dir, name)
     File.read(File.join(dir, name))
@@ -40,6 +40,13 @@ RSpec.describe 'details layouts wire the close button' do
       end
     end
     source[open.begin(0)...pos]
+  end
+
+  def opens_with(source, pane_class, block)
+    pane_open = source.match(/<div\b[^>]*class="[^"]*\b#{Regexp.escape(pane_class)}\b[^"]*"[^>]*>/)
+    return false unless pane_open && block
+
+    source[pane_open.end(0)...source.index(block)].gsub(/<!--.*?-->/m, '').strip.empty?
   end
 
   {
@@ -72,7 +79,7 @@ RSpec.describe 'details layouts wire the close button' do
       expect(type_row).not_to be_nil
       call = type_row.match(include_pattern)
       expect(call).not_to be_nil
-      expect(call[2]).not_to be_nil, 'the spot layout must pass inline=true'
+      expect(call[2]).to eq('inline')
       expect(type_row.index('spot-icon.html')).to be < call.begin(0)
       expect(type_row.index('spot_type_name')).to be < call.begin(0)
     end
@@ -80,7 +87,6 @@ RSpec.describe 'details layouts wire the close button' do
     it 'puts the Navigate button in the title row, after the title' do
       expect(title_row).not_to be_nil
       expect(title_row).to match(/<h1>/)
-      expect(title_row.index('navigate-btn.html')).not_to be_nil
       expect(title_row.index('<h1>')).to be < title_row.index('navigate-btn.html')
     end
 
@@ -89,30 +95,29 @@ RSpec.describe 'details layouts wire the close button' do
     end
 
     it 'opens the pane with the spot type row' do
-      pane_open = source.match(/<div\b[^>]*class="[^"]*\bspot-description\b[^"]*"[^>]*>/)
-      between = source[pane_open.end(0)...source.index(type_row)]
-      expect(between.gsub(/<!--.*?-->/m, '').strip).to be_empty
+      expect(opens_with(source, 'spot-description', type_row)).to be(true)
     end
   end
 
   {
-    'waterway.html' => 'waterway-details',
-    'obstacle.html' => 'obstacle-description',
-    'notice.html' => 'notice-description'
-  }.each do |layout, pane_class|
-    describe "#{layout} close row" do
+    'waterway.html' => ['waterway-details', 'detail-title-row'],
+    'obstacle.html' => ['obstacle-description', 'obstacle-title'],
+    'notice.html' => ['notice-description', 'notice-title']
+  }.each do |layout, (pane_class, title_class)|
+    describe "#{layout} title row" do
       let(:source) { read_layout(layouts_dir, layout) }
+      let(:title_block) { div_block(source, title_class) }
 
-      it 'uses the row variant (no inline=true)' do
-        expect(source.match(include_pattern)[2]).to be_nil
+      it "puts the close button in .#{title_class} with variant=\"title\", before the h1" do
+        expect(title_block).not_to be_nil
+        call = title_block.match(include_pattern)
+        expect(call).not_to be_nil
+        expect(call[2]).to eq('title')
+        expect(call.begin(0)).to be < title_block.index(/<h1\b/)
       end
 
-      it "places the close button first inside the .#{pane_class} pane" do
-        pane_open = source.match(/<div\b[^>]*class="[^"]*\b#{Regexp.escape(pane_class)}\b[^"]*"[^>]*>/)
-        expect(pane_open).not_to be_nil
-
-        between = source[pane_open.end(0)...source.index(include_pattern)]
-        expect(between.gsub(/<!--.*?-->/m, '').strip).to be_empty
+      it "opens the .#{pane_class} pane with the title row" do
+        expect(opens_with(source, pane_class, title_block)).to be(true)
       end
     end
   end

@@ -81,7 +81,7 @@ restore" instead of an error on the page.
 ```liquid
 {% assign dcb_type = include.page_type %}
 {% if dcb_type == "spot" or dcb_type == "waterway" or dcb_type == "obstacle" or dcb_type == "notice" %}
-{% unless include.inline %}<div class="detail-close-row">{% endunless %}
+{% if include.variant == "title" %}<span class="h1 detail-close-slot">{% endif %}
   <a href="{{ locale_prefix | append: '/' }}"
      class="detail-close-btn"
      title="{% t actions.back_to_map %}"
@@ -92,7 +92,7 @@ restore" instead of an error on the page.
       <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
     </svg>
   </a>
-{% unless include.inline %}</div>{% endunless %}
+{% if include.variant == "title" %}</span>{% endif %}
 <script src="{{ '/assets/js/home-view-memory.js' | relative_url }}"></script>
 {% endif %}
 ```
@@ -141,23 +141,37 @@ Forwarded from `_sass/components/_components.scss`. Only existing colour variabl
 
 The `:focus-visible` rule matches the one in `_filter-panel.scss`.
 
-The row variant is right-aligned so the X sits in the same top-right spot on every page type:
+On waterway, obstacle and notice pages the X sits at the right of the title row:
 
 ```scss
-.detail-close-row {
-  display: flex;
-  justify-content: flex-end;
-  padding-top: 0.75rem;
+// Title containers holding the X: no right padding, so the X reaches the pane
+// edge; the h1 reserves room for the X instead, so its text wraps before it.
+.page-waterway-details .waterway-details > .detail-title-row,
+.page-obstacle-details .obstacle-description > .obstacle-title,
+.page-notice-details .notice-description > .notice-title {
+  position: relative;
+  padding-right: 0;
+  > h1 { padding-right: 3.5rem; overflow-wrap: anywhere; }
 }
 
-// Those panes give every direct child div padding-right: 1em; the row opts out
-// so the X reaches the pane's right content edge, as on spot pages.
-.page-waterway-details .waterway-details,
-.page-obstacle-details .obstacle-description,
-.page-notice-details .notice-description {
-  > .detail-close-row { padding-right: 0; }
+// Before the h1 and out of flow, so it starts where the first title line starts.
+// Bootstrap's .h1 class gives it the title's font size, so 1.2em is one line.
+.detail-close-slot {
+  position: absolute;
+  right: 0;
+  display: flex;
+  align-items: center;
+  box-sizing: content-box;
+  height: 1.2em;
+  margin: 0;
 }
+
+// The waterway h1 carries its own top padding.
+.page-waterway-details .detail-close-slot { padding-top: 0.7em; }
 ```
+
+The title's underline (the waterway h1's own border, or the obstacle/notice title div's)
+still spans the full pane width, because only padding, not width, changed.
 
 ### 3a. Spot header rows — `_sass/pages/_spot-details.scss` (changed)
 
@@ -180,13 +194,14 @@ Flexbox was rejected for the type row: measured against production, it moved the
 
 | layout | where | call |
 |---|---|---|
-| `_layouts/spot.html` | inside `.spot-icon-div`, after the type label | `{% include detail-close-btn.html page_type="spot" inline=true %}` |
-| `_layouts/waterway.html` | first child of `.waterway-details` | `{% include detail-close-btn.html page_type="waterway" %}` |
-| `_layouts/obstacle.html` | first child of `.obstacle-description` | `{% include detail-close-btn.html page_type="obstacle" %}` |
-| `_layouts/notice.html` | first child of `.notice-description` | `{% include detail-close-btn.html page_type="notice" %}` |
+| `_layouts/spot.html` | inside `.spot-icon-div`, after the type label | `{% include detail-close-btn.html page_type="spot" variant="inline" %}` |
+| `_layouts/waterway.html` | inside a new `.detail-title-row` wrapping `h1.waterway-title`, before the h1 | `{% include detail-close-btn.html page_type="waterway" variant="title" %}` |
+| `_layouts/obstacle.html` | inside `.obstacle-title`, before the h1 | `{% include detail-close-btn.html page_type="obstacle" variant="title" %}` |
+| `_layouts/notice.html` | inside `.notice-title`, before the h1 | `{% include detail-close-btn.html page_type="notice" variant="title" %}` |
 
-`inline=true` renders the link without the `.detail-close-row` wrapper. In `spot.html` the
-Navigate button include moved from the top of the pane into `.spot-title`, after the `<h1>`.
+`variant="inline"` renders the bare link; `variant="title"` wraps it in the
+`.detail-close-slot`. In `spot.html` the Navigate button include moved from the top of the
+pane into `.spot-title`, after the `<h1>`.
 
 `spot.html` and `obstacle.html` already `{% include locale-prefix.html %}` before the pane.
 `waterway.html` and `notice.html` gain that line after their `current_locale` assignment.
@@ -249,7 +264,8 @@ ignored.
 | validation limits | read from `#map-config` | constants in the View_Store: two sources of truth for bounds and zoom range |
 | event value | Page_Type, static, from Liquid | entity slug: already in the page URL Tinylytics records; the type gives a usable aggregate. Runtime value: opens a path from map state to the event |
 | "restored vs default" split | not recorded | derived from stored map state (Requirement 4.5) |
-| X placement | top right: in the spot type row on spot pages; own right-aligned row on the other three | revised at the owner's request after first implementation (own row, top left). Title row on the other three pages: possible, not requested |
+| X placement | top right: in the spot type row on spot pages; at the right of the title row on the other three | both revised at the owner's request: first an own row at top left, then an own right-aligned row on the other three |
+| X on the title row | absolutely positioned slot with the h1's metrics, h1 reserves its width | flex row: the waterway h1 carries the underline, which would then stop short of the X; float: only lines beside the X would be shortened, but sub-pixel float heights can shorten the second line too |
 | SVG clicks | `pointer-events: none` | not required: the deployed client finds the annotated link with `event.target.closest('[data-tinylytics-event]')` and keys its debounce on that link (re-read in Task 7.4), so icon clicks record correctly either way. Kept so the link is always the event target for any listener |
 | unknown `page_type` | render nothing | render with a default value: a typo would ship an unlisted event value silently |
 
@@ -339,11 +355,11 @@ existing `_tests/unit/` and `_tests/property/` layout. Ruby specs use RSpec and 
    - `locale-prefix.html` is included before it.
 
    For `spot.html`: the include sits inside `.spot-icon-div` after the icon and label, with
-   `inline=true`; the Navigate include sits inside `.spot-title` after the `<h1>`, and nowhere
-   else; the pane opens with the type row. For the other three: no `inline`, and only
-   whitespace and HTML comments sit between the pane's opening tag and the include.
-   `detail_close_btn_spec.rb` also covers the inline variant: no wrapper, same link, event and
-   script.
+   `variant="inline"`; the Navigate include sits inside `.spot-title` after the `<h1>`, and
+   nowhere else; the pane opens with the type row. For the other three: the include sits in
+   the title container before the `<h1>`, with `variant="title"`, and the pane opens with
+   that container. `detail_close_btn_spec.rb` covers both variants: the slot wrapper with the
+   `.h1` class, or the bare link, each with the same link, event and script.
 8. **Existing `spec/i18n_key_parity_spec.rb`** covers Requirement 7.1 without changes.
 
 ### Mutation proofs (Requirement 8.2)

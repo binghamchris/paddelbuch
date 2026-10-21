@@ -76,8 +76,10 @@ can get back to the map without hunting for the logo or the browser's back butto
 2. THE Close_Button SHALL sit at the top right of the Details_Pane, its right edge on the
    pane's right content edge:
    - on spot pages, at the right of the spot type row (icon and type label);
-   - on waterway, obstacle and notice pages, which have no type row, in its own row,
-     right-aligned, as the first element of the pane.
+   - on waterway, obstacle and notice pages, which have no type row, at the right of the
+     title row, centred on the title's first line. THE title SHALL wrap before it reaches
+     the Close_Button, even for a single long word, and SHALL never overlap it. The title's
+     underline SHALL still span the full pane width.
 3. THE Close_Button SHALL be an `<a>` element whose `href` is the home page of the current
    locale (`/` for German, `/en/` for English), with no query string and no fragment, so that
    it works when JavaScript is unavailable.
@@ -90,9 +92,10 @@ can get back to the map without hunting for the logo or the browser's back butto
 7. THE Close_Button's colours SHALL come from `_sass/settings/_paddelbuch_colours.scss`; no new
    colour SHALL be defined outside that file.
 8. On spot pages, the spot icon and type label SHALL keep their exact position in the type
-   row, and the type row its height. On waterway, obstacle and notice pages, every existing
-   pane element SHALL keep its markup, styles, size and horizontal position; existing content
-   moves down by the height of the new row and nothing else changes.
+   row, and the type row its height. On waterway, obstacle and notice pages, the title block
+   SHALL keep its position and width; the content below SHALL keep its x, width and height,
+   and move only by any change in the title's height (a long title can take one more line,
+   because it wraps before the Close_Button).
 9. THE Close_Button SHALL comply with the deployed CSP: no inline script, no inline `style`
    attribute, no external asset.
 10. On spot pages, THE Navigate button SHALL sit in the title row, at its right, beside the

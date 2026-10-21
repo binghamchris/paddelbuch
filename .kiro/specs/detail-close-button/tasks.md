@@ -172,6 +172,20 @@ condition is not met after one fix attempt, stop and report rather than retrying
     `docs/frontend.md`.
   - _Requirements: 1.2, 1.8, 1.10, 1.11_
 
+- [x] 9. Title-row placement on waterway, obstacle and notice pages (requested by the site
+  owner after Task 8; supersedes 8.2)
+  - [x] 9.1 Replace the include's `inline=true` with `variant`: `"inline"` (bare link, spot
+    type row) and `"title"` (link in a `.detail-close-slot` with Bootstrap's `.h1` class).
+    The row variant and `.detail-close-row` are retired.
+  - [x] 9.2 Put the X in the title container before the h1: a new `.detail-title-row`
+    wrapper around `h1.waterway-title`, and the existing `.obstacle-title` and
+    `.notice-title`. The container drops its right padding; the h1 reserves 3.5rem.
+  - [x] 9.3 Update both Ruby specs and the two JS fixtures that mirror the markup;
+    regenerate the SCSS fixture.
+  - [x] 9.4 Verify in a real browser at 1440 and 390 px, with real and stress titles, and
+    against production; re-run the behaviour harness.
+  - _Requirements: 1.2, 1.8_
+
 ---
 
 ## Mutation results
@@ -255,3 +269,13 @@ suites after the last revert: Jest 1453 passed, RSpec 1022 examples, 0 failures.
     6.6 px down against production, so the X is absolutely positioned instead.
   - Behaviour harness re-run on the new layout: 27/27 (the spot production comparison, I1,
     was retired because that layout changed on purpose; layout is covered above).
+- Title-row placement (Task 9), real browser, 131/131 layout checks at 1440 and 390 px
+  (spot checks from Task 8 re-run unchanged, plus):
+  - waterway, obstacle, notice: the X's right edge is on the pane content edge and its
+    centre within 0.01 px of the title's first-line centre. No line of the title text
+    reaches the X, for the real titles and for a stress title with a 52-character word.
+    The title never overflows its box, and its underline still spans the full pane width;
+  - against production at 1440 px: each title block keeps its position and width; content
+    below keeps x, width and height and moves only by the title's own height change. The
+    waterway and obstacle titles are unchanged; the long notice title takes one more line
+    (176 → 210 px), because it now wraps before the X.

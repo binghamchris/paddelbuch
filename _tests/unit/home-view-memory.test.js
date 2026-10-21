@@ -399,8 +399,8 @@ describe('wireHomePage (Req 2.1, 2.3, 2.6)', function() {
 describe('wireDetailsPage (Req 3.1, 3.2)', function() {
   function renderCloseButton() {
     document.body.innerHTML =
-      '<div class="detail-close-row"><a href="/" class="detail-close-btn" data-tinylytics-event="detail.close" data-tinylytics-event-value="spot">' +
-      '<svg aria-hidden="true" focusable="false"><path d="M0 0"/></svg></a></div>';
+      '<div class="obstacle-title"><span class="h1 detail-close-slot"><a href="/" class="detail-close-btn" data-tinylytics-event="detail.close" data-tinylytics-event-value="obstacle">' +
+      '<svg aria-hidden="true" focusable="false"><path d="M0 0"/></svg></a></span><h1>Wehr</h1></div>';
     return document.querySelector('.detail-close-btn');
   }
 

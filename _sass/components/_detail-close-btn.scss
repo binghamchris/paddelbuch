@@ -1,24 +1,41 @@
 @use "../settings/settings" as *;
 
-// Details pane close button (detail-close-button spec).
-// Spot pages place it at the right of the spot type row (see _spot-details.scss).
-// Waterway, obstacle and notice pages have no type row, so it gets its own row
-// at the top, right-aligned, to sit in the same top-right spot on every page.
+// Details pane close button (detail-close-button spec). It sits at the top
+// right of every pane: in the spot type row on spot pages (see
+// _spot-details.scss), and at the right of the title row on waterway, obstacle
+// and notice pages (below).
 
-.detail-close-row {
-  display: flex;
-  justify-content: flex-end;
-  padding-top: 0.75rem;
+// Title containers that hold the X. Their right padding is dropped so the X
+// reaches the pane's right content edge (beating the panes' `> div` padding),
+// and the title reserves room for the X instead, so its text wraps before it.
+.page-waterway-details .waterway-details > .detail-title-row,
+.page-obstacle-details .obstacle-description > .obstacle-title,
+.page-notice-details .notice-description > .notice-title {
+  position: relative;
+  padding-right: 0;
+
+  > h1 {
+    padding-right: 3.5rem;
+    overflow-wrap: anywhere;
+  }
 }
 
-// Those panes give every direct child div `padding-right: 1em`; the close row
-// opts out so the X reaches the pane's right content edge, as on spot pages.
-.page-waterway-details .waterway-details,
-.page-obstacle-details .obstacle-description,
-.page-notice-details .notice-description {
-  > .detail-close-row {
-    padding-right: 0;
-  }
+// The X's slot comes before the h1 and is taken out of flow, so it starts where
+// the title's first line starts. It carries Bootstrap's .h1 class, so 1.2em
+// ($headings-line-height) is exactly one title line, and the X centres on it.
+.detail-close-slot {
+  position: absolute;
+  right: 0;
+  display: flex;
+  align-items: center;
+  box-sizing: content-box;
+  height: 1.2em;
+  margin: 0;
+}
+
+// The waterway h1 carries its own top padding (0.7em of the title size).
+.page-waterway-details .detail-close-slot {
+  padding-top: 0.7em;
 }
 
 .detail-close-btn {

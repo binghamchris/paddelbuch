@@ -38,10 +38,10 @@ RSpec.describe 'detail-close-btn.html' do
     Liquid::Template.instance_variable_set(:@tags, saved_tags)
   end
 
-  def render(page_type, locale_prefix: '', inline: nil)
+  def render(page_type, locale_prefix: '', variant: nil)
     source = File.read(DetailCloseBtnSpec::INCLUDE_PATH)
     params = { 'page_type' => page_type }
-    params['inline'] = inline unless inline.nil?
+    params['variant'] = variant unless variant.nil?
     context = Liquid::Context.new(
       [{ 'include' => params, 'locale_prefix' => locale_prefix }],
       {},
@@ -107,34 +107,46 @@ RSpec.describe 'detail-close-btn.html' do
     end
   end
 
-  describe 'row variant (default)' do
-    it 'wraps the link in a .detail-close-row' do
-      html = render('waterway')
-      expect(html.scan(/<div\b[^>]*class="detail-close-row"/).length).to eq(1)
-      expect(html.index('class="detail-close-row"')).to be < html.index('class="detail-close-btn"')
-    end
-  end
+  describe 'title variant (variant="title"), used by waterway, obstacle and notice titles' do
+    let(:html) { render('waterway', variant: 'title') }
 
-  describe 'inline variant (inline=true), used by the spot type row' do
-    let(:html) { render('spot', inline: true) }
-
-    it 'renders the link without the .detail-close-row wrapper' do
-      expect(html).not_to include('detail-close-row')
-      expect(html).not_to match(/<div\b/)
-      expect(html).not_to include('</div>')
+    it 'wraps the link in a .detail-close-slot that carries the .h1 class' do
+      slots = html.scan(/<span\b[^>]*class="h1 detail-close-slot"[^>]*>/)
+      expect(slots.length).to eq(1)
+      expect(html.index('detail-close-slot')).to be < html.index('class="detail-close-btn"')
+      expect(html.index('</span>')).to be > html.index('</a>')
     end
 
     it 'keeps the same link, event and script' do
       link = close_link(html)
-      expect(attribute(link, 'href')).to eq('/')
       expect(attribute(link, 'data-tinylytics-event')).to eq('detail.close')
-      expect(attribute(link, 'data-tinylytics-event-value')).to eq('spot')
+      expect(attribute(link, 'data-tinylytics-event-value')).to eq('waterway')
       expect(html).to include('src="/assets/js/home-view-memory.js"')
     end
+  end
 
-    it 'still renders nothing for an unknown page type' do
-      expect(render('Spot', inline: true).strip).to be_empty
+  [['inline', 'variant="inline"'], [nil, 'no variant']].each do |variant, label|
+    describe "bare link (#{label})" do
+      let(:html) { render('spot', variant: variant) }
+
+      it 'renders the link with no wrapper element' do
+        expect(html).not_to include('detail-close-slot')
+        expect(html).not_to match(/<(div|span)\b/)
+      end
+
+      it 'keeps the same link, event and script' do
+        link = close_link(html)
+        expect(attribute(link, 'href')).to eq('/')
+        expect(attribute(link, 'data-tinylytics-event')).to eq('detail.close')
+        expect(attribute(link, 'data-tinylytics-event-value')).to eq('spot')
+        expect(html).to include('src="/assets/js/home-view-memory.js"')
+      end
     end
+  end
+
+  it 'still renders nothing for an unknown page type, whatever the variant' do
+    expect(render('Spot', variant: 'title').strip).to be_empty
+    expect(render('Spot', variant: 'inline').strip).to be_empty
   end
 
   ['', 'Spot', 'spot ', ' spot', 'spots', '46.8', 'page', 'home', nil].each do |page_type|

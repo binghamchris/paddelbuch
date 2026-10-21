@@ -96,18 +96,22 @@ function renderHome(scenario) {
     '<a id="details-link" href="' + href + '">Weitere Details</a></button></div>';
 }
 
-// Mirrors the rendered output of _includes/detail-close-btn.html, which
+// Mirrors the rendered spot header: the inline variant of
+// _includes/detail-close-btn.html inside the spot type row, which
 // spec/detail_close_btn_spec.rb pins against the real include.
 function renderDetails(scenario) {
   var prefix = scenario.english ? '/en' : '';
   document.body.innerHTML =
-    '<div class="spot-description"><div class="detail-close-row">' +
+    '<div class="spot-description"><div class="spot-icon-div align-items-center">' +
+    '<img src="/assets/images/icons/entryexit-dark.svg" alt="" class="spot-icon spot-icon-dark" />' +
+    '<span class="ms-2">Ein- und Ausstieg</span>' +
     '<a href="' + prefix + '/" class="detail-close-btn" title="Back to map" aria-label="Back to map" ' +
     'data-tinylytics-event="detail.close" data-tinylytics-event-value="' + scenario.pageType + '">' +
     '<svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 16 16" fill="currentColor">' +
     '<path d="M2 2L14 14"/></svg></a></div>' +
+    '<div class="spot-title"><h1>' + scenario.slug + '</h1>' +
     '<a class="btn navigate-btn" href="https://www.google.com/maps/dir/?api=1&amp;destination=46.9,7.4" ' +
-    'data-tinylytics-event="navigate.click" data-tinylytics-event-value="' + scenario.slug + '">Navigieren zu</a>' +
+    'data-tinylytics-event="navigate.click" data-tinylytics-event-value="' + scenario.slug + '">Navigieren zu</a></div>' +
     '</div>';
 }
 
