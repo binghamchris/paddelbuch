@@ -107,13 +107,13 @@ condition is not met after one fix attempt, stop and report rather than retrying
   - Pass condition: green across at least 100 fast-check runs; full suite green.
   - _Requirements: 4.4, 4.5, 5.1, 5.2, 5.3, 5.4, 5.5, 6.4, 8.1_
 
-- [ ] 5. Mutation proofs
-  - [ ] 5.1 Confirm the tree holds no uncommitted changes to the files under mutation.
-  - [ ] 5.2 For each mutation M1–M9 in the design: apply it, run the named test(s), confirm
+- [x] 5. Mutation proofs
+  - [x] 5.1 Confirm the tree holds no uncommitted changes to the files under mutation.
+  - [x] 5.2 For each mutation M1–M9 in the design: apply it, run the named test(s), confirm
     they turn red, then revert with `git checkout -- <file>`. Record a row in "Mutation
     results" below: id, file, failing test names, and whether the revert left the tree
     clean.
-  - [ ] 5.3 After the last revert, re-run `npm test` and `bundle exec rspec`.
+  - [x] 5.3 After the last revert, re-run `npm test` and `bundle exec rspec`.
   - Pass condition: all nine mutations turn their named tests red; both suites green after
     the reverts; the only file committed is this `tasks.md`.
   - If a mutation stays green, the test it names does not test what it claims. Fix that
@@ -159,8 +159,21 @@ condition is not met after one fix attempt, stop and report rather than retrying
 
 ## Mutation results
 
+Run 2026-10-21 on commit `e12c0ef8`. Every mutation was reverted with `git checkout -- <file>`,
+and `git status --short` afterwards showed only the pre-existing unrelated changes. Full
+suites after the last revert: Jest 1453 passed, RSpec 1022 examples, 0 failures.
+
 | id | file | failing tests | tree clean after revert |
 |---|---|---|---|
+| M1 | `assets/js/home-view-memory.js` | privacy round trip (`event-value=spot` became `=45`); privacy blocked-storage; source guard `tinylytics`, `setAttribute` | yes |
+| M2 | `assets/js/home-view-memory.js` | privacy round trip (`replaceState` called); source guard `replaceState` | yes |
+| M3 | `assets/js/home-view-memory.js` | privacy round trip (`localStorage.length` not 0); privacy blocked-storage; source guard `localStorage` | yes |
+| M4 | `assets/js/home-view-memory.js` | unit: saves the view on a details link click, even when propagation is stopped below the document | yes |
+| M5 | `assets/js/home-view-memory.js` | unit: removes a marker whose value is not "1"; property: an arbitrary restore marker value other than "1" never restores and is always removed | yes |
+| M6 | `assets/js/home-view-memory.js` | unit: rejects latitude north of / longitude west of the bounds; property: a field outside the bounds or zoom range | yes |
+| M7 | `assets/js/home-view-memory.js` | unit: Ctrl-, Meta-, Shift- and Alt-click do not set the marker (4 tests) | yes |
+| M8 | `_includes/detail-close-btn.html` | `detail_close_btn_spec.rb`: renders nothing for all 9 unknown page types | yes |
+| M9 | `assets/js/home-map.js` | unit: without a marker, the map starts at the default view even with a record | yes |
 
 ## Outcomes
 
