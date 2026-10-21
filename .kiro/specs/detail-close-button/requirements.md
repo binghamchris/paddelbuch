@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Add an "X" (close) button to the top left of the details pane on every details page. When a
+Add an "X" (close) button to the top right of the details pane on every details page. When a
 visitor clicks it, they return to the home page with the map centred and zoomed as they had
 it when they left the home page for a details page. The button is instrumented with a
 Tinylytics event so the site owner can see whether the feature is used.
@@ -31,7 +31,7 @@ Established by reading the code and the deployed Tinylytics client before writin
 | Tinylytics hit filtering | events do not fire when the owner's own hits are ignored (`?ignore` or site setting) | the owner may see nothing while testing; verification must account for it |
 | event naming | `category.action` (e.g. `popup.details`, `navigate.click`) | new event is `detail.close` |
 | details layouts | `_layouts/spot.html`, `waterway.html`, `obstacle.html`, `notice.html` | four layouts get the button; rejected spots use `spot.html` |
-| details panes | `.spot-description`, `.waterway-details`, `.obstacle-description`, `.notice-description` | the button is the first child of each |
+| details panes | `.spot-description`, `.waterway-details`, `.obstacle-description`, `.notice-description` | spot pages place the button in the type row; the other three as the first child |
 | top of the panes | spot pages: `.navigate-btn` floats right (`float: right; margin-top: .8em`), type label at left; other pages: the `<h1>` title at left | the free top-left corner is about 16 px tall and 24 px wide |
 | home map config | `_includes/map-init.html`: `maxBounds [[45.0, 4.5], [49.4, 11.8]]`, `minZoom 7`, `maxZoom` from `site.map.max_zoom` (20) | the restored view is validated against the home map's own limits |
 | home map creation | `PaddelbuchMap.init('map')` in `assets/js/home-map.js` reads centre and zoom from `#map-config` | the restored view must be applied at creation |
@@ -50,7 +50,7 @@ Established by reading the code and the deployed Tinylytics client before writin
   `notice.html`.
 - **Details_Pane** — the right-hand (desktop) or lower (mobile) column of a Details_Page
   holding its text content.
-- **Close_Button** — the X link added by this feature to the top left of the Details_Pane.
+- **Close_Button** — the X link added by this feature to the top right of the Details_Pane.
 - **Home_Map** — the Leaflet map on the home page (`/` and `/en/`).
 - **Home_View** — the Home_Map's centre latitude, centre longitude and zoom.
 - **Details_Link** — an `<a>` element on the home page whose same-origin path matches
@@ -73,8 +73,11 @@ can get back to the map without hunting for the logo or the browser's back butto
 
 1. THE SYSTEM SHALL render exactly one Close_Button on every Details_Page, including
    rejected-spot pages.
-2. THE Close_Button SHALL be the first element of the Details_Pane, in its own row, aligned to
-   the left edge of the pane's content.
+2. THE Close_Button SHALL sit at the top right of the Details_Pane, its right edge on the
+   pane's right content edge:
+   - on spot pages, at the right of the spot type row (icon and type label);
+   - on waterway, obstacle and notice pages, which have no type row, in its own row,
+     right-aligned, as the first element of the pane.
 3. THE Close_Button SHALL be an `<a>` element whose `href` is the home page of the current
    locale (`/` for German, `/en/` for English), with no query string and no fragment, so that
    it works when JavaScript is unavailable.
@@ -86,11 +89,18 @@ can get back to the map without hunting for the logo or the browser's back butto
    indicator under `:focus-visible`.
 7. THE Close_Button's colours SHALL come from `_sass/settings/_paddelbuch_colours.scss`; no new
    colour SHALL be defined outside that file.
-8. WHEN the Close_Button row is added THE SYSTEM SHALL NOT change the markup, styles, size or
-   horizontal position of any existing Details_Pane element; existing content moves down by the
-   height of the new row and nothing else changes.
+8. On spot pages, the spot icon and type label SHALL keep their exact position in the type
+   row, and the type row its height. On waterway, obstacle and notice pages, every existing
+   pane element SHALL keep its markup, styles, size and horizontal position; existing content
+   moves down by the height of the new row and nothing else changes.
 9. THE Close_Button SHALL comply with the deployed CSP: no inline script, no inline `style`
    attribute, no external asset.
+10. On spot pages, THE Navigate button SHALL sit in the title row, at its right, beside the
+    title's first line, with its right edge aligned with the Close_Button's. THE title SHALL
+    wrap within the remaining width, even for a single long word, and SHALL never overlap or
+    run under the button. On rejected-spot pages, which have no Navigate button, the title
+    SHALL use the full row.
+11. A long spot type label SHALL never run under the Close_Button.
 
 ---
 

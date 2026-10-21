@@ -157,6 +157,23 @@ condition is not met after one fix attempt, stop and report rather than retrying
 
 ---
 
+- [x] 8. Header layout revision (requested by the site owner after Task 7)
+  - [x] 8.1 Spot pages: move the X into the spot type row, at its right, via a new
+    `inline=true` include parameter; move the Navigate button into the title row, at its
+    right. Title wraps beside the button and never overlaps it.
+  - [x] 8.2 Waterway, obstacle and notice pages: right-align the X's own row so the X sits
+    top right on every page type.
+  - [x] 8.3 Update `detail_close_btn_spec.rb` (inline variant) and
+    `detail_close_btn_wiring_spec.rb` (new spot structure); regenerate the SCSS fixture.
+  - [x] 8.4 Verify in a real browser at 1440 and 390 px: real, longest-real and stress titles,
+    a rejected spot, a long type label, and the other three page types against production.
+    Re-run the behaviour harness.
+  - [x] 8.5 Update `requirements.md` (1.2, 1.8, new 1.10, 1.11), `design.md` and
+    `docs/frontend.md`.
+  - _Requirements: 1.2, 1.8, 1.10, 1.11_
+
+---
+
 ## Mutation results
 
 Run 2026-10-21 on commit `e12c0ef8`. Every mutation was reverted with `git checkout -- <file>`,
@@ -222,3 +239,19 @@ suites after the last revert: Jest 1453 passed, RSpec 1022 examples, 0 failures.
   changed.
 - Pre-existing, outside this spec: the spot `auswasseringsstelle-kandar-delta-weekendweg`
   links to `/gewaesser/kander/`, which is a 404 both locally and on production.
+- Header layout revision (Task 8), real browser, 62/62 layout checks at 1440 and 390 px:
+  - spot type row: the X sits right of the label, centred on the icon, right edge on the pane
+    content edge, above the row's line; the icon and label keep their exact production
+    positions (label 33 px right, −4.4 px from the row top) and the row its 40 px height;
+  - title row: the Navigate button sits right of the title beside its first line, never
+    overlapping it, its right edge level with the X's. This holds for Bönigen, the longest
+    real title (69 characters) and a stress title with a 51-character unbreakable word. The
+    title never overflows its box;
+  - rejected spot: no Navigate button, the title uses the full row;
+  - a long type label never reaches the X;
+  - waterway, obstacle, notice: the X is right-aligned to the pane edge in its own row;
+    content below keeps x, width and height, shifted only by the 52 px row.
+  - Rejected alternative, measured: flexbox in the type row moved the label 5 px left and
+    6.6 px down against production, so the X is absolutely positioned instead.
+  - Behaviour harness re-run on the new layout: 27/27 (the spot production comparison, I1,
+    was retired because that layout changed on purpose; layout is covered above).

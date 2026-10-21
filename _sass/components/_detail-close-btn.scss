@@ -1,11 +1,24 @@
 @use "../settings/settings" as *;
 
 // Details pane close button (detail-close-button spec).
-// Its own row at the top of the pane, so no existing pane element changes;
-// the content below simply moves down by this row's height.
+// Spot pages place it at the right of the spot type row (see _spot-details.scss).
+// Waterway, obstacle and notice pages have no type row, so it gets its own row
+// at the top, right-aligned, to sit in the same top-right spot on every page.
 
 .detail-close-row {
+  display: flex;
+  justify-content: flex-end;
   padding-top: 0.75rem;
+}
+
+// Those panes give every direct child div `padding-right: 1em`; the close row
+// opts out so the X reaches the pane's right content edge, as on spot pages.
+.page-waterway-details .waterway-details,
+.page-obstacle-details .obstacle-description,
+.page-notice-details .notice-description {
+  > .detail-close-row {
+    padding-right: 0;
+  }
 }
 
 .detail-close-btn {

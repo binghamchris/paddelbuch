@@ -38,10 +38,12 @@ RSpec.describe 'detail-close-btn.html' do
     Liquid::Template.instance_variable_set(:@tags, saved_tags)
   end
 
-  def render(page_type, locale_prefix: '')
+  def render(page_type, locale_prefix: '', inline: nil)
     source = File.read(DetailCloseBtnSpec::INCLUDE_PATH)
+    params = { 'page_type' => page_type }
+    params['inline'] = inline unless inline.nil?
     context = Liquid::Context.new(
-      [{ 'include' => { 'page_type' => page_type }, 'locale_prefix' => locale_prefix }],
+      [{ 'include' => params, 'locale_prefix' => locale_prefix }],
       {},
       { site: nil, page: {} }
     )
@@ -102,6 +104,36 @@ RSpec.describe 'detail-close-btn.html' do
           expect(html).to include('src="/assets/js/home-view-memory.js"')
         end
       end
+    end
+  end
+
+  describe 'row variant (default)' do
+    it 'wraps the link in a .detail-close-row' do
+      html = render('waterway')
+      expect(html.scan(/<div\b[^>]*class="detail-close-row"/).length).to eq(1)
+      expect(html.index('class="detail-close-row"')).to be < html.index('class="detail-close-btn"')
+    end
+  end
+
+  describe 'inline variant (inline=true), used by the spot type row' do
+    let(:html) { render('spot', inline: true) }
+
+    it 'renders the link without the .detail-close-row wrapper' do
+      expect(html).not_to include('detail-close-row')
+      expect(html).not_to match(/<div\b/)
+      expect(html).not_to include('</div>')
+    end
+
+    it 'keeps the same link, event and script' do
+      link = close_link(html)
+      expect(attribute(link, 'href')).to eq('/')
+      expect(attribute(link, 'data-tinylytics-event')).to eq('detail.close')
+      expect(attribute(link, 'data-tinylytics-event-value')).to eq('spot')
+      expect(html).to include('src="/assets/js/home-view-memory.js"')
+    end
+
+    it 'still renders nothing for an unknown page type' do
+      expect(render('Spot', inline: true).strip).to be_empty
     end
   end
 

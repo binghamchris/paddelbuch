@@ -182,12 +182,13 @@ Included conditionally in `_layouts/spot.html` when `page.spot_tip_types` is non
 
 ### detail-close-btn.html
 
-The `_includes/detail-close-btn.html` partial renders the X at the top left of every details pane (spot, waterway, obstacle and notice layouts). It is a plain link to the locale's home page (`/` or `/en/`), so it works without JavaScript, and it loads `home-view-memory.js`.
+The `_includes/detail-close-btn.html` partial renders the X at the top right of every details pane (spot, waterway, obstacle and notice layouts). It is a plain link to the locale's home page (`/` or `/en/`), so it works without JavaScript, and it loads `home-view-memory.js`.
 
 - Parameter `page_type`: one of `spot`, `waterway`, `obstacle`, `notice`. Any other value renders nothing.
+- Parameter `inline`: when `true`, renders only the link, without the `.detail-close-row` wrapper. `spot.html` uses it to put the X at the right of the spot type row.
 - Requires the caller to have included `locale-prefix.html` first.
 - Carries `data-tinylytics-event="detail.close"` with the page type as the value, written at build time.
-- Sits in its own `.detail-close-row` at the top of the pane, so no existing pane element changes; the content below moves down by one row.
+- Placement: the X sits at the top right of every pane. On spot pages it is in the type row (absolutely positioned, so the icon and label do not move), and the Navigate button is in the title row, which wraps the title beside it. On waterway, obstacle and notice pages it has its own right-aligned row at the top, and the content below moves down by that row.
 
 ## Colour System
 
@@ -504,7 +505,7 @@ refusal codes (`quota_exceeded`, `rate_limited`, `throttled`) is deferred — se
 
 ## Close button and home view memory
 
-Every details page has an X at the top left of its details pane. Clicking it returns the
+Every details page has an X at the top right of its details pane. Clicking it returns the
 visitor to the homepage with the map centred and zoomed as they left it. Spec:
 `.kiro/specs/detail-close-button/`.
 

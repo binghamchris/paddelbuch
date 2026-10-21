@@ -12,12 +12,15 @@
   Parameters:
   - include.page_type: one of spot, waterway, obstacle, notice (required).
     Any other value renders nothing, so a typo cannot ship an unlisted value.
+  - include.inline: when true, renders only the link (no .detail-close-row
+    wrapper), for a layout that places the X inside an existing row. The spot
+    layout uses this to put the X at the right of the spot type row.
 
   Requires the caller to have set locale_prefix by including locale-prefix.html first.
 {% endcomment %}
 {% assign dcb_type = include.page_type %}
 {% if dcb_type == "spot" or dcb_type == "waterway" or dcb_type == "obstacle" or dcb_type == "notice" %}
-<div class="detail-close-row">
+{% unless include.inline %}<div class="detail-close-row">{% endunless %}
   <a href="{{ locale_prefix | append: '/' }}"
      class="detail-close-btn"
      title="{% t actions.back_to_map %}"
@@ -28,6 +31,6 @@
       <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
     </svg>
   </a>
-</div>
+{% unless include.inline %}</div>{% endunless %}
 <script src="{{ '/assets/js/home-view-memory.js' | relative_url }}"></script>
 {% endif %}

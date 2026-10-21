@@ -32,27 +32,26 @@ pageName: spot-details
     
     <!-- Details Panel -->
     <div class="col-xl-4 col-lg-5 col-md-12 col-sm-12 col-12 spot-description">
-      {% include detail-close-btn.html page_type="spot" %}
-
-      <!-- Navigate Button (top, matching Gatsby layout) -->
-      {% unless is_rejected %}
-        {% if spot.location %}
-          {% assign lat = spot.location.lat | default: spot.location.latitude %}
-          {% assign lon = spot.location.lon | default: spot.location.lng | default: spot.location.longitude %}
-          {% if lat and lon %}
-            {% include navigate-btn.html lat=lat lon=lon size="md" spot_slug=spot.slug %}
-          {% endif %}
-        {% endif %}
-      {% endunless %}
-
-      <!-- Spot Icon and Type -->
+      <!-- Spot Icon and Type, with the close button at the right (detail-close-button spec) -->
       <div class="spot-icon-div align-items-center">
         {% include spot-icon.html type=spot_type_slug rejected=is_rejected variant="dark" size=20 icon_name=page.spot_icon_name icon_alt=page.spot_icon_alt %}
         <span class="ms-2">{{ spot_type_name | escape }}</span>
+        {% include detail-close-btn.html page_type="spot" inline=true %}
       </div>
       
-      <!-- Spot Title -->
-      <div class="spot-title"><h1>{{ spot.name | escape }}</h1></div>
+      <!-- Spot Title, with the Navigate button at the right -->
+      <div class="spot-title">
+        <h1>{{ spot.name | escape }}</h1>
+        {% unless is_rejected %}
+          {% if spot.location %}
+            {% assign lat = spot.location.lat | default: spot.location.latitude %}
+            {% assign lon = spot.location.lon | default: spot.location.lng | default: spot.location.longitude %}
+            {% if lat and lon %}
+              {% include navigate-btn.html lat=lat lon=lon size="md" spot_slug=spot.slug %}
+            {% endif %}
+          {% endif %}
+        {% endunless %}
+      </div>
       
       {% if is_rejected %}
         <!-- Rejected Spot: Show rejection reason (Requirement 3.7) -->
