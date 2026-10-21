@@ -104,6 +104,9 @@ can get back to the map without hunting for the logo or the browser's back butto
     run under the button. On rejected-spot pages, which have no Navigate button, the title
     SHALL use the full row.
 11. A long spot type label SHALL never run under the Close_Button.
+12. On spot pages, THE Navigate button SHALL use the Copy buttons' colours in every state:
+    `$secondary-blue` with white text normally and on keyboard focus, the darkened shade on
+    hover, `$green-1` while pressed. It SHALL never turn transparent.
 
 ---
 

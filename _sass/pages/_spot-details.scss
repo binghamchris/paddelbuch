@@ -274,7 +274,12 @@
   }
 
   // Copy buttons: filled style matching Gatsby
-  .clipboard-btn.copy-btn {
+  // The Copy buttons and the title row's Navigate button share one colour
+  // scheme in every state. The Navigate button needs this selector's weight:
+  // on its own (.navigate-btn) it loses to Bootstrap's .btn:hover and
+  // .btn:focus-visible, which turned it transparent with dark text.
+  .clipboard-btn.copy-btn,
+  .spot-title .navigate-btn {
     background-color: $secondary-blue;
     border-color: $secondary-blue;
     color: white;

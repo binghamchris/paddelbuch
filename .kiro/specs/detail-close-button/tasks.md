@@ -186,6 +186,22 @@ condition is not met after one fix attempt, stop and report rather than retrying
     against production; re-run the behaviour harness.
   - _Requirements: 1.2, 1.8_
 
+- [x] 10. Navigate button colours on spot pages (requested by the site owner)
+  - [x] 10.1 Give `.spot-title .navigate-btn` the Copy buttons' rule in
+    `_sass/pages/_spot-details.scss` (one shared selector list for base, hover and active).
+  - [x] 10.2 Add `_tests/unit/spot-navigate-button-colours.test.js`: compiles the real
+    stylesheet and requires the Navigate selector in the same rule as the Copy selector for
+    base, hover and active.
+  - [x] 10.3 Regenerate the SCSS fixture; verify the states in a real browser.
+  - Outcome: the fault predates this feature: production shows it too. Before the fix, on
+    hover and keyboard focus, the Navigate button went from `rgb(96,101,137)` with white text
+    to transparent with `rgb(33,37,41)` text: `.navigate-btn` alone loses to Bootstrap's
+    `.btn:hover` / `.btn:focus-visible`. After: normal, hover, focus-visible and
+    focus+hover all match the Copy button exactly (background, text colour, outline, focus
+    ring); size unchanged at 125 × 36. Mutation proof: splitting the shared rule again
+    turned all 4 tests red; reverted from a backup.
+  - _Requirements: 1.12_
+
 ---
 
 ## Mutation results
