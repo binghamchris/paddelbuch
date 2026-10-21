@@ -1,0 +1,70 @@
+@use "../settings/settings" as *;
+
+// Details pane close button (detail-close-button spec). It sits at the top
+// right of every pane: in the spot type row on spot pages (see
+// _spot-details.scss), and at the right of the title row on waterway, obstacle
+// and notice pages (below).
+
+// Title containers that hold the X. Their right padding is dropped so the X
+// reaches the pane's right content edge (beating the panes' `> div` padding),
+// and the title reserves room for the X instead, so its text wraps before it.
+.page-waterway-details .waterway-details > .detail-title-row,
+.page-obstacle-details .obstacle-description > .obstacle-title,
+.page-notice-details .notice-description > .notice-title {
+  position: relative;
+  padding-right: 0;
+
+  > h1 {
+    padding-right: 3.5rem;
+    overflow-wrap: anywhere;
+  }
+}
+
+// The X's slot comes before the h1 and is taken out of flow, so it starts where
+// the title's first line starts. It carries Bootstrap's .h1 class, so 1.2em
+// ($headings-line-height) is exactly one title line, and the X centres on it.
+.detail-close-slot {
+  position: absolute;
+  right: 0;
+  display: flex;
+  align-items: center;
+  box-sizing: content-box;
+  height: 1.2em;
+  margin: 0;
+}
+
+// The waterway h1 carries its own top padding (0.7em of the title size).
+.page-waterway-details .detail-close-slot {
+  padding-top: 0.7em;
+}
+
+.detail-close-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  // Square corners, matching the site's buttons (.btn has border-radius: 0 in
+  // _bootstrap-overrides.scss). The focus outline follows this shape too.
+  border-radius: 0;
+  color: $swisscanoe-blue;
+  background-color: transparent;
+  text-decoration: none;
+
+  // Keep the link itself as the event target. Not needed for Tinylytics, which
+  // finds the annotated link with closest() and keys its debounce on it, but it
+  // keeps the target predictable for any other click listener.
+  svg {
+    pointer-events: none;
+  }
+
+  &:hover {
+    color: $swisscanoe-blue;
+    background-color: $secondary-blue-20;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $secondary-blue;
+    outline-offset: 1px;
+  }
+}

@@ -79,6 +79,7 @@ actions:
   copy_gps: "GPS in der Zwischenablage kopieren"
   copy_address: "Ungefähre Adresse in der Zwischenablage kopieren"
   navigate: "Navigieren zu"
+  back_to_map: "Zurück zur Karte"
 
 # Obstacles
 obstacles:

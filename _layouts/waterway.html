@@ -18,6 +18,7 @@ pageName: waterway-details
 
 {% assign current_locale = site.lang | default: 'de' %}
 {% assign waterway = page %}
+{% include locale-prefix.html %}
 
 <div class="container-fluid">
   <div class="row">
@@ -28,8 +29,11 @@ pageName: waterway-details
     
     <!-- Details Panel (4 cols on large screens) -->
     <div class="col-lg-4 waterway-details">
-      <!-- Waterway Title -->
-      <h1 class="waterway-title">{{ waterway.name | escape }}</h1>
+      <!-- Waterway Title, with the close button at the right (detail-close-button spec) -->
+      <div class="detail-title-row">
+        {% include detail-close-btn.html page_type="waterway" variant="title" %}
+        <h1 class="waterway-title">{{ waterway.name | escape }}</h1>
+      </div>
       
       <!-- Event Notices Section (Requirement 4.5, 7.5) -->
       {% include event-list.html waterway_slug=waterway.slug %}

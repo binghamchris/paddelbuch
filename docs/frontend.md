@@ -37,7 +37,8 @@ All modules live in `assets/js/`. They are plain scripts that attach functions t
 
 | Module | Purpose |
 |--------|---------|
-| `paddelbuch-map.js` | Creates the Leaflet map instance, sets Swiss bounds, adds tile layer and locate control |
+| `paddelbuch-map.js` | Creates the Leaflet map instance, sets Swiss bounds, adds tile layer and locate control. Accepts an optional `{ initialView }` that only the homepage passes |
+| `home-view-memory.js` | Remembers the homepage map view in `sessionStorage` while a visitor reads a details page, so the details close button can restore it. See "Close button and home view memory" below |
 | `map-data-init.js` | Orchestrates layer creation, tile-based data loading, filter setup (including `spotTipType` match function), and layer control |
 | `data-loader.js` | Fetches spatial tile JSON files based on the current map viewport |
 | `spatial-utils.js` | GeoJSON geometry utilities (centroid calculation, bounds checking) |
@@ -100,7 +101,7 @@ All modules live in `assets/js/`. They are plain scripts that attach functions t
 
 On the homepage, the map initialisation follows this sequence:
 
-1. `paddelbuch-map.js` creates the Leaflet map with Swiss bounds and the tile layer
+1. `home-map.js` consumes the one-time restore marker via `home-view-memory.js`. If the visitor arrived through a details page's close button and the saved view is valid, `paddelbuch-map.js` creates the Leaflet map at that view; otherwise at the default view. Either way it adds Swiss bounds and the tile layer, and `home-map.js` then wires details links to save the view
 2. `map-data-init.js` reads the `mapDataConfig` JSON (injected by `PrecomputeGenerator`) and:
    - Creates Leaflet layer groups for each data layer (spots by type, obstacles, protected areas, notices)
    - Initialises the `data-loader` with the tile index URL
@@ -178,6 +179,16 @@ The `_includes/spot-tip-banners.html` partial renders advisory tip banners on sp
 - The rich text description (when present)
 
 Included conditionally in `_layouts/spot.html` when `page.spot_tip_types` is non-empty.
+
+### detail-close-btn.html
+
+The `_includes/detail-close-btn.html` partial renders the X at the top right of every details pane (spot, waterway, obstacle and notice layouts). It is a plain link to the locale's home page (`/` or `/en/`), so it works without JavaScript, and it loads `home-view-memory.js`.
+
+- Parameter `page_type`: one of `spot`, `waterway`, `obstacle`, `notice`. Any other value renders nothing.
+- Parameter `variant`: `"inline"` renders the bare link (`spot.html` puts it at the right of the spot type row); `"title"` wraps it in a `.detail-close-slot` with Bootstrap's `.h1` class, one title line tall, for the title containers of the other three layouts.
+- Requires the caller to have included `locale-prefix.html` first.
+- Carries `data-tinylytics-event="detail.close"` with the page type as the value, written at build time.
+- Placement: the X sits at the top right of every pane. On spot pages it is in the type row (absolutely positioned, so the icon and label do not move), and the Navigate button is in the title row, which wraps the title beside it. On waterway, obstacle and notice pages it is at the right of the title row, centred on the title's first line; the title reserves room for it and wraps before reaching it, and the title's underline still spans the full pane width.
 
 ## Colour System
 
@@ -491,3 +502,67 @@ even though the dashboard shows one continuous series across the rename.
 Failed searches are **not** reported: no results were returned, so there is no count. Logging
 refusal codes (`quota_exceeded`, `rate_limited`, `throttled`) is deferred — see
 `.kiro/specs/search-event-analytics/`.
+
+## Close button and home view memory
+
+Every details page has an X at the top right of its details pane. Clicking it returns the
+visitor to the homepage with the map centred and zoomed as they left it. Spec:
+`.kiro/specs/detail-close-button/`.
+
+### How it works
+
+1. **Saving.** On the homepage, a capture-phase listener on the document saves the map's
+   centre and zoom when a link to a details page is clicked or middle-clicked. Popup
+   "More details" links and the header's waterway dropdowns both count.
+2. **Closing.** A plain click on the X (no Ctrl, Meta, Shift or Alt) sets a one-time restore
+   marker. The link is followed normally.
+3. **Restoring.** Every homepage load removes the marker. If it was set and the saved view
+   is valid, the map is *created* at that view, so there is no jump and the first data load
+   targets it.
+
+Only centre and zoom come back. Filters, search, open popups and the locate control's
+tracking state do not. The logo link and the browser's back button behave as before.
+
+### Storage
+
+| key | value |
+|---|---|
+| `pbhomeview:v1:view` | `{"lat":46.80111,"lng":8.22667,"zoom":11}`, coordinates rounded to 5 decimals |
+| `pbhomeview:v1:restore` | `"1"` |
+
+Both live in the tab's `sessionStorage` and disappear when the tab closes. A saved view is
+used only if it has exactly those three keys, finite numbers, and lies within the homepage
+map's `maxBounds`, `minZoom` and `maxZoom`. Those limits are read from `#map-config`, not
+duplicated. Blocked or full storage degrades to "no restore", never to an error.
+
+### Why the view never leaves the browser
+
+The view can be the visitor's own location: the locate control centres the map on it. The
+privacy policy says location data is processed only on the device. So:
+
+- **Never in a URL.** The Tinylytics client sends `window.location.href`, query string and
+  fragment included, with every page view and event. Amplify's access logs record the request
+  URL next to the client IP for two weeks.
+- **Never in a cookie or `localStorage`.** The policy rules out cookies, and `localStorage`
+  would outlive the need.
+- **Never in analytics.** The `detail.close` value is the page type, rendered by Liquid at
+  build time. No script reads or writes `data-tinylytics-*` attributes for this feature.
+
+These guarantees are enforced by `_tests/property/home-view-privacy.property.test.js` and a
+source guard (`_tests/unit/home-view-memory-source-guard.test.js`). Each was proven to fail
+under a deliberate mutation; the results are in the spec's `tasks.md`.
+
+One exposure is accepted: any same-origin script, the Tinylytics client included, can read
+`sessionStorage`. The current client does not, and the live homepage map is already reachable
+by page scripts through the global `window.paddelbuchMap`.
+
+### Reading `detail.close`
+
+```
+detail.close  →  "spot" | "waterway" | "obstacle" | "notice"
+```
+
+The count shows how often the X is used, by page type. It does not distinguish restored from
+default views, on purpose: that would be derived from stored map state. As with search
+analytics, your own ignored hits record no events, and blocked beacons make the count a
+floor.
