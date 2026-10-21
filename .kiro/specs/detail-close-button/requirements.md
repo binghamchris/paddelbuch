@@ -98,8 +98,9 @@ can get back to the map without hunting for the logo or the browser's back butto
    because it wraps before the Close_Button).
 9. THE Close_Button SHALL comply with the deployed CSP: no inline script, no inline `style`
    attribute, no external asset.
-10. On spot pages, THE Navigate button SHALL sit in the title row, at its right, beside the
-    title's first line, with its right edge aligned with the Close_Button's. THE title SHALL
+10. On spot pages, THE Navigate button SHALL sit in the title row, at its right, vertically
+    centred on the title's first line (within 1 px), with its right edge aligned with the
+    Close_Button's. THE title SHALL
     wrap within the remaining width, even for a single long word, and SHALL never overlap or
     run under the button. On rejected-spot pages, which have no Navigate button, the title
     SHALL use the full row.

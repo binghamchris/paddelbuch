@@ -84,10 +84,13 @@ RSpec.describe 'details layouts wire the close button' do
       expect(type_row.index('spot_type_name')).to be < call.begin(0)
     end
 
-    it 'puts the Navigate button in the title row, after the title' do
+    it 'puts the Navigate button in the title row, after the title, inside its one-line slot' do
       expect(title_row).not_to be_nil
       expect(title_row).to match(/<h1>/)
       expect(title_row.index('<h1>')).to be < title_row.index('navigate-btn.html')
+      slot = title_row.match(%r{<span class="h1 spot-title-action">(.*?)</span>}m)
+      expect(slot).not_to be_nil
+      expect(slot[1]).to include('navigate-btn.html')
     end
 
     it 'has no Navigate button outside the title row' do

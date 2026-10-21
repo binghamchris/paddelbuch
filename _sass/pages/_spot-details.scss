@@ -49,20 +49,33 @@
 
   .spot-title {
     display: flex;
-    // Baseline: the button sits beside the title's first line, however many
-    // lines a long name wraps to.
-    align-items: baseline;
+    // The Navigate button's slot starts where the title's first line starts
+    // and is exactly one line tall, so the button centres on that line.
+    align-items: flex-start;
     gap: 1rem;
     padding-top: 0.7em;
     margin-bottom: 1em;
 
+    h1, .h1 {
+      margin-bottom: 0;
+    }
+
     // The title takes the remaining width and wraps inside it, even for a
     // single long word, so it can never run under the button.
-    h1, .h1 {
+    > h1 {
       flex: 1 1 auto;
       min-width: 0;
       overflow-wrap: anywhere;
-      margin-bottom: 0;
+    }
+
+    // Carries the .h1 class, so it gets the title's font size and the site's
+    // h1 top padding; 1.2em ($headings-line-height) is one title line.
+    .spot-title-action {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      box-sizing: content-box;
+      height: 1.2em;
     }
 
     .navigate-btn {

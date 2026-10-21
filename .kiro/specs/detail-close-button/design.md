@@ -184,8 +184,12 @@ Two rows, each with its control at the right:
 - **Title row** (`.spot-title`): a flex row. The `<h1>` takes the remaining width
   (`flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere`), so it wraps beside the button,
   even a single long word. The Navigate button is `flex: 0 0 auto`, its float and margins
-  removed. `align-items: baseline` puts it beside the title's first line. The row's right
-  padding is 0, so the button's right edge lines up with the X's.
+  removed. It sits in a `.spot-title-action` slot carrying Bootstrap's `.h1` class, so the
+  slot gets the title's font size and the site's h1 top padding, and is one title line tall
+  (`height: 1.2em`). The row uses `align-items: flex-start`, so the slot covers exactly the
+  first line and the button centres on it. The row's right padding is 0, so the button's
+  right edge lines up with the X's. Baseline alignment was used first, and it left the
+  button 4.7 px below the first line's centre.
 
 Flexbox was rejected for the type row: measured against production, it moved the type label
 5 px left (the whitespace between icon and label collapses) and 6.6 px down.

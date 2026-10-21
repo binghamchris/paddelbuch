@@ -202,6 +202,20 @@ condition is not met after one fix attempt, stop and report rather than retrying
     turned all 4 tests red; reverted from a backup.
   - _Requirements: 1.12_
 
+- [x] 11. Centre the Navigate button on the title (requested by the site owner)
+  - [x] 11.1 Wrap the Navigate include in `<span class="h1 spot-title-action">` in
+    `_layouts/spot.html`; switch `.spot-title` from `align-items: baseline` to `flex-start`
+    with the slot one title line tall.
+  - [x] 11.2 Pin the slot in `detail_close_btn_wiring_spec.rb`; tighten the browser check to
+    "centred on the first line within 1 px"; regenerate the SCSS fixture.
+  - Outcome, measured at 1920, 1440 and 390 px on a one-line title (Weggis) and a two-line
+    title (Bönigen - Bootsrampe): before, the button's centre was 4.7 px below the first
+    line's centre (4.1 px below the centre of the capital letters). After: 0.0 px from the
+    line centre and 0.6 px above the cap centre, at every width. Layout checks 131/131,
+    button colours still identical to Copy in all four states, size 125 × 36 unchanged,
+    behaviour harness 27/27.
+  - _Requirements: 1.10_
+
 ---
 
 ## Mutation results
