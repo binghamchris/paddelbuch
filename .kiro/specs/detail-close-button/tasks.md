@@ -61,16 +61,16 @@ condition is not met after one fix attempt, stop and report rather than retrying
   - Pass condition: all three files green; the module is not yet loaded by any page.
   - _Requirements: 2.2, 2.5, 2.6, 3.1, 3.2, 3.3, 3.5, 3.6, 3.7, 5.2, 5.4, 5.5, 5.6, 6.1, 6.2, 6.3_
 
-- [ ] 2. Restore at map creation and save on the home page
-  - [ ] 2.1 In `assets/js/paddelbuch-map.js`, change `init(elementId)` to
+- [x] 2. Restore at map creation and save on the home page
+  - [x] 2.1 In `assets/js/paddelbuch-map.js`, change `init(elementId)` to
     `init(elementId, options)`. When `options.initialView` is present, use its `center` and
     `zoom` in `mapOptions`. Change nothing else.
-  - [ ] 2.2 In `_includes/map-init.html`, add
+  - [x] 2.2 In `_includes/map-init.html`, add
     `<script src="{{ '/assets/js/home-view-memory.js' | relative_url }}"></script>`
     immediately before the `home-map.js` script tag.
-  - [ ] 2.3 In `assets/js/home-map.js`, implement steps 1–5 of the design's "Home page"
+  - [x] 2.3 In `assets/js/home-map.js`, implement steps 1–5 of the design's "Home page"
     section, including the fallback when `PaddelbuchHomeViewMemory` is undefined.
-  - [ ] 2.4 Create `_tests/unit/paddelbuch-map-initial-view.test.js` and
+  - [x] 2.4 Create `_tests/unit/paddelbuch-map-initial-view.test.js` and
     `_tests/unit/home-map-restore.test.js` covering item 5 of the testing strategy.
   - Verify: `npx jest _tests/unit/paddelbuch-map-initial-view.test.js _tests/unit/home-map-restore.test.js _tests/unit/home-view-memory.test.js`
     then `npm test`.

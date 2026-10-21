@@ -20,9 +20,13 @@
    * the #map-config JSON script tag.
    *
    * @param {string} elementId - The id of the map container element
+   * @param {Object} [options] - Optional overrides
+   * @param {{center: number[], zoom: number}} [options.initialView] - Start the
+   *   map at this centre and zoom instead of the config's. Used only by the home
+   *   page to restore the view a visitor left from (detail-close-button spec).
    * @returns {L.Map} The initialized Leaflet map instance
    */
-  function init(elementId) {
+  function init(elementId, options) {
     var configEl = document.getElementById('map-config');
     if (!configEl) {
       throw new Error('PaddelbuchMap: #map-config element not found');
@@ -35,6 +39,12 @@
       center: [config.center.lat, config.center.lon],
       zoom: config.zoom
     };
+
+    // Optional: a starting view supplied by the caller replaces the config's
+    if (options && options.initialView) {
+      mapOptions.center = options.initialView.center;
+      mapOptions.zoom = options.initialView.zoom;
+    }
 
     // Optional: maxBounds (home page restricts panning to Switzerland)
     if (config.maxBounds) {
