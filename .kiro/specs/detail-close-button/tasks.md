@@ -120,8 +120,8 @@ condition is not met after one fix attempt, stop and report rather than retrying
     test, commit the fix, and repeat the mutation before going on.
   - _Requirements: 8.2_
 
-- [ ] 6. Documentation
-  - [ ] 6.1 Update `docs/frontend.md` as listed in the design's "Documentation" section.
+- [x] 6. Documentation
+  - [x] 6.1 Update `docs/frontend.md` as listed in the design's "Documentation" section.
   - Verify: re-read the changed sections. Every file path, key name and event name in them
     must match the code.
   - Pass condition: docs match the implementation; no other file changed.
