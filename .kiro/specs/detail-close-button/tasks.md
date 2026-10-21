@@ -216,6 +216,14 @@ condition is not met after one fix attempt, stop and report rather than retrying
     behaviour harness 27/27.
   - _Requirements: 1.10_
 
+- [x] 12. Square hover background on the X (requested by the site owner)
+  - [x] 12.1 `border-radius: 0` on `.detail-close-btn`, matching `.btn` in
+    `_bootstrap-overrides.scss`; regenerate the SCSS fixture.
+  - Outcome: the compiled CSS changed in that one declaration only. In a real browser, on a
+    spot page and an obstacle page, the hover background and the keyboard focus outline are
+    both square (radius 0 px), 40 × 40, colour unchanged.
+  - _Requirements: 1.6, 1.7_
+
 ---
 
 ## Mutation results

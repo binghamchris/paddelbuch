@@ -118,7 +118,7 @@ Forwarded from `_sass/components/_components.scss`. Only existing colour variabl
   justify-content: center;
   width: 2.5rem;
   height: 2.5rem;
-  border-radius: 50%;
+  border-radius: 0; // square, like the site's .btn
   color: $swisscanoe-blue;
   background-color: transparent;
   text-decoration: none;

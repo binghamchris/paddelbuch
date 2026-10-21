@@ -44,7 +44,9 @@
   justify-content: center;
   width: 2.5rem;
   height: 2.5rem;
-  border-radius: 50%;
+  // Square corners, matching the site's buttons (.btn has border-radius: 0 in
+  // _bootstrap-overrides.scss). The focus outline follows this shape too.
+  border-radius: 0;
   color: $swisscanoe-blue;
   background-color: transparent;
   text-decoration: none;
