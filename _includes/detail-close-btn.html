@@ -1,0 +1,40 @@
+{% comment %}
+  Details Close Button Include (detail-close-button spec)
+
+  Renders the X at the top left of a details pane: a plain link to the home
+  page of the current locale, so it works without JavaScript. When clicked,
+  home-view-memory.js sets a one-time marker so the home page restores the map
+  view the visitor left from. The view itself never appears in this markup.
+
+  The Tinylytics event value is the page type, fixed here at build time. No
+  script reads or writes these attributes, so no map data can reach the event.
+
+  Parameters:
+  - include.page_type: one of spot, waterway, obstacle, notice (required).
+    Any other value renders nothing, so a typo cannot ship an unlisted value.
+  - include.variant: where the caller places the X.
+    - "title": the link inside a .detail-close-slot that carries Bootstrap's .h1
+      class, so the slot is exactly one title line tall and the X centres on the
+      title's first line. Used by the waterway, obstacle and notice layouts, which
+      put it inside their title container, before the h1.
+    - anything else, or omitted: the bare link. The spot layout uses
+      variant="inline" to put the X at the right of the spot type row.
+
+  Requires the caller to have set locale_prefix by including locale-prefix.html first.
+{% endcomment %}
+{% assign dcb_type = include.page_type %}
+{% if dcb_type == "spot" or dcb_type == "waterway" or dcb_type == "obstacle" or dcb_type == "notice" %}
+{% if include.variant == "title" %}<span class="h1 detail-close-slot">{% endif %}
+  <a href="{{ locale_prefix | append: '/' }}"
+     class="detail-close-btn"
+     title="{% t actions.back_to_map %}"
+     aria-label="{% t actions.back_to_map %}"
+     data-tinylytics-event="detail.close"
+     data-tinylytics-event-value="{{ dcb_type }}">
+    <svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 16 16" fill="currentColor">
+      <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+    </svg>
+  </a>
+{% if include.variant == "title" %}</span>{% endif %}
+<script src="{{ '/assets/js/home-view-memory.js' | relative_url }}"></script>
+{% endif %}

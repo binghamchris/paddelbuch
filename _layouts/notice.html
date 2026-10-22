@@ -18,6 +18,7 @@ pageName: notice-details
 
 {% assign current_locale = site.lang | default: 'de' %}
 {% assign notice = page %}
+{% include locale-prefix.html %}
 
 <!-- Pre-computed waterway objects from CollectionGenerator (Requirement 7.1, 7.2) -->
 {% assign notice_waterways = page.notice_waterways %}
@@ -31,8 +32,9 @@ pageName: notice-details
     
     <!-- Details Panel -->
     <div class="notice-description col-lg-4 col-md-12 col-sm-12 col-12">
-      <!-- Notice Title -->
+      <!-- Notice Title, with the close button at the right (detail-close-button spec) -->
       <div class="notice-title">
+        {% include detail-close-btn.html page_type="notice" variant="title" %}
         <h1>{{ notice.name | escape }}</h1>
       </div>
       

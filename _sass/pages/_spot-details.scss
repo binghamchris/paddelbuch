@@ -36,16 +36,61 @@
     padding-right: 1em;
   }
 
+  // Header rows (detail-close-button spec): the type row carries the close
+  // button at its right, the title row the Navigate button. Both reach the
+  // pane's right content edge, so the X and the Navigate button line up.
+  .spot-description > .spot-icon-div {
+    padding-right: 3rem;
+  }
+
+  .spot-description > .spot-title {
+    padding-right: 0;
+  }
+
   .spot-title {
+    display: flex;
+    // The Navigate button's slot starts where the title's first line starts
+    // and is exactly one line tall, so the button centres on that line.
+    align-items: flex-start;
+    gap: 1rem;
     padding-top: 0.7em;
     margin-bottom: 1em;
 
     h1, .h1 {
       margin-bottom: 0;
     }
+
+    // The title takes the remaining width and wraps inside it, even for a
+    // single long word, so it can never run under the button.
+    > h1 {
+      flex: 1 1 auto;
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
+    // Carries the .h1 class, so it gets the title's font size and the site's
+    // h1 top padding; 1.2em ($headings-line-height) is one title line.
+    .spot-title-action {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      box-sizing: content-box;
+      height: 1.2em;
+    }
+
+    .navigate-btn {
+      flex: 0 0 auto;
+      float: none;
+      margin: 0;
+      white-space: nowrap;
+    }
   }
 
   .spot-icon-div {
+    // The close button sits at the right of this row without joining its flow,
+    // so the icon and type label render exactly as before. The row's right
+    // padding (set above) keeps a long type label from running under it.
+    position: relative;
     border-bottom: 1px solid $secondary-blue;
     padding-bottom: 1em;
     font-family: $font-brand;
@@ -55,6 +100,13 @@
     margin-top: 1em;
     color: $swisscanoe-blue;
     line-height: 0.8em;
+
+    // Centred on the 20px spot icon at the top of the row.
+    .detail-close-btn {
+      position: absolute;
+      top: calc((20px - 2.5rem) / 2);
+      right: 0;
+    }
   }
 
   .spot-icon {
@@ -235,7 +287,12 @@
   }
 
   // Copy buttons: filled style matching Gatsby
-  .clipboard-btn.copy-btn {
+  // The Copy buttons and the title row's Navigate button share one colour
+  // scheme in every state. The Navigate button needs this selector's weight:
+  // on its own (.navigate-btn) it loses to Bootstrap's .btn:hover and
+  // .btn:focus-visible, which turned it transparent with dark text.
+  .clipboard-btn.copy-btn,
+  .spot-title .navigate-btn {
     background-color: $secondary-blue;
     border-color: $secondary-blue;
     color: white;

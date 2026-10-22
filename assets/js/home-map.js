@@ -10,22 +10,39 @@
  * The home page map has no geometry to render or bounds to fit -- it just needs
  * the map instance stored globally.
  *
+ * Home view memory (detail-close-button spec): when the visitor arrives via a
+ * details page's close button, the map is created at the view they left from
+ * rather than created at the default view and moved. The restore marker is
+ * consumed on every load, and links to details pages save the current view.
+ * If home-view-memory.js is not loaded, the map behaves exactly as before.
+ *
  * Requirements: 2.1
  */
 (function() {
   'use strict';
   document.addEventListener('DOMContentLoaded', function() {
-    var map = PaddelbuchMap.init('map');
+    var configEl = document.getElementById('map-config');
+    var config = configEl ? JSON.parse(configEl.textContent) : null;
+    var memory = window.PaddelbuchHomeViewMemory;
+
+    // Always consume, so a stale restore marker never survives a home load.
+    var initialView = (memory && config)
+      ? memory.consumeRestore(memory.limitsFromConfig(config))
+      : null;
+
+    var map = PaddelbuchMap.init('map', initialView ? { initialView: initialView } : undefined);
     window.paddelbuchMap = map;
 
-    var configEl = document.getElementById('map-config');
-    if (!configEl) return;
+    if (memory) {
+      memory.wireHomePage(document, function() { return window.paddelbuchMap; });
+    }
 
-    var config = JSON.parse(configEl.textContent);
+    if (!config) return;
+
     var defaultZoom = config.zoom || 8;
-    var defaultCenter = [config.center.lat, config.center.lon];
 
-    // Store target zoom for marker-click recentering (default zoom + 3)
+    // Store target zoom for marker-click recentering (default zoom + 3).
+    // Derived from the configured default, not from a restored view.
     window.paddelbuchHomeTargetZoom = defaultZoom + 3;
   });
 })();
