@@ -132,9 +132,13 @@ _tests/
 ├── globalSetup.js                          ← Runs before all tests: ensures vendor assets exist
 ├── date-utils.test.js                      ← Date utility tests (root level, legacy)
 ├── html-utils.test.js                      ← HTML utility tests (root level, legacy)
+├── helpers/
+│   ├── css-cascade.js                      ← Resolves which CSS declaration wins at a given window size
+│   └── detail-page-dom.js                  ← jsdom page built from the real details layouts + includes
 ├── unit/
 │   ├── ascii-compliance.test.js            ← ASCII-only character compliance tests
 │   ├── copy-vendor-assets.test.js          ← Vendor asset copy script tests
+│   ├── css-cascade-helper.test.js          ← Cascade resolver rules (media, specificity, shorthands)
 │   ├── custom-build-image-*.test.js        ← Custom build image consistency tests (6 files)
 │   ├── dashboard-coverage.test.js          ← Coverage dashboard unit tests
 │   ├── dashboard-csp.test.js               ← CSP configuration unit tests
@@ -143,6 +147,7 @@ _tests/
 │   ├── dashboard-map.test.js               ← Dashboard map unit tests
 │   ├── dashboard-switcher.test.js          ← Dashboard switcher unit tests
 │   ├── date-utils.test.js                  ← Date formatting unit tests
+│   ├── detail-pane-scroll.test.js          ← Wide-screen pane scroll rules in the compiled CSS
 │   ├── download-google-fonts.test.js       ← Font download script tests
 │   ├── filter-panel-toggles.test.js        ← Filter panel UI tests
 │   ├── filter-system.test.js               ← Filter engine unit tests
@@ -155,7 +160,9 @@ _tests/
 ├── property/
 │   ├── amplify-no-version-managers.property.test.js  ← Verifies no rvm/nvm in amplify.yml
 │   ├── api-data-sorting.property.test.js             ← API output sorting invariants
+│   ├── css-cascade-helper.property.test.js           ← Cascade resolver metamorphic properties
 │   ├── dashboard-i18n.property.test.js               ← Dashboard translation key completeness
+│   ├── detail-pane-scroll.property.test.js           ← Details pane scrolls on wide screens, stacked layout unchanged
 │   ├── dashboard-switcher-*.property.test.js         ← Dashboard switcher invariants (3 files)
 │   ├── data-loading-idempotence.property.test.js     ← Data loading is idempotent
 │   ├── date-locale-formatting.property.test.js       ← Date format matches locale
@@ -216,6 +223,14 @@ The `_tests/globalSetup.js` file runs before any Jest test. It ensures vendor as
 2. Create `_tests/property/your-module.property.test.js` for property-based tests
 3. Use `jest-environment-jsdom` if the module interacts with the DOM (set `@jest-environment jsdom` at the top of the file)
 4. Run with: `npm test -- --testPathPattern=your-module`
+
+### For a CSS layout behaviour
+
+jsdom has no layout engine and ignores `@media`, so it cannot tell which style wins at a given window width. `_tests/helpers/css-cascade.js` does that for the compiled stylesheet. It handles `@media` conditions, specificity, `!important`, source order, and the common shorthands. `_tests/helpers/detail-page-dom.js` builds a jsdom page from the real layout files, so the tests see the classes and nesting a built page has. `_tests/property/detail-pane-scroll.property.test.js` shows the pattern: resolve properties on real elements across generated window sizes and assert the invariant.
+
+What this cannot check is anything that depends on rendered sizes. For example, the header must not render taller than `$menu-height`, otherwise the details page scrolls by the difference. Check that kind of behaviour in a real browser.
+
+The resolver throws on media features it does not support. If a new kind of `@media` query is added to the stylesheet, extend `featureMatches` and its unit tests.
 
 ### Test naming conventions
 
