@@ -40,7 +40,7 @@ Use descriptive branch names with a prefix:
 
 ```bash
 # Ruby tests (RSpec + Rantly property-based tests)
-source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.9 && bundle exec rspec
+source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-4.0.9 && bundle exec rspec
 
 # JavaScript tests (Jest + fast-check property-based tests)
 npm test
@@ -135,10 +135,10 @@ Before submitting a PR that changes dependencies, run the vulnerability scanner:
 
 ```bash
 # Ruby gems
-source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.9 && bundle exec rake audit
+source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-4.0.9 && bundle exec rake audit
 
 # Both Ruby and npm
-source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.9 && bundle exec rake audit:all
+source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-4.0.9 && bundle exec rake audit:all
 ```
 
 ## Questions?

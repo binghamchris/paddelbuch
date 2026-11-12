@@ -6,7 +6,7 @@ Paddel Buch uses a multi-layered testing strategy with property-based testing as
 
 | Suite | Framework | Location | Language | Command |
 |-------|-----------|----------|----------|---------|
-| Ruby plugin tests | RSpec + Rantly | `spec/` | Ruby | `source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.9 && bundle exec rspec` |
+| Ruby plugin tests | RSpec + Rantly | `spec/` | Ruby | `source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-4.0.9 && bundle exec rspec` |
 | JS unit tests | Jest | `_tests/unit/` | JavaScript | `npm test` |
 | JS property tests | Jest + fast-check | `_tests/property/` | JavaScript | `npm run test:property` |
 | Python tests | pytest | `tests/` | Python | `python3 -m pytest tests/` |
@@ -22,10 +22,10 @@ npm test
 npm run test:property
 
 # All Ruby tests
-source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.9 && bundle exec rspec
+source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-4.0.9 && bundle exec rspec
 
 # A specific Ruby spec file
-source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.9 && bundle exec rspec spec/contentful_mappers_spec.rb
+source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-4.0.9 && bundle exec rspec spec/contentful_mappers_spec.rb
 
 # Python tests
 python3 -m pytest tests/
@@ -42,7 +42,7 @@ Tests run automatically during the Amplify build (`npm test` in the build phase)
 npx playwright install --only-shell chromium
 
 # Build the site, then run the browser tests against _site/
-source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.9 && bundle exec rake build:site
+source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-4.0.9 && bundle exec rake build:site
 npm run test:browser
 ```
 
@@ -161,8 +161,9 @@ _tests/
 ├── date-utils.test.js                      ← Date utility tests (root level, legacy)
 ├── html-utils.test.js                      ← HTML utility tests (root level, legacy)
 ├── browser/                                ← Playwright, local only (npm run test:browser)
+│   ├── dashboard-basemap.browser.spec.js   ← MapLibre 6 dashboard basemap loads under the deployed CSP (needs tiles.openfreemap.org)
 │   ├── detail-pane-scroll.browser.spec.js  ← Details pane scrolls on wide screens, stacked layout unchanged
-│   └── site-from-disk.js                   ← Serves _site/ to the browser, blocks other origins
+│   └── site-from-disk.js                   ← Serves _site/ to the browser, blocks other origins, can send the deployed CSP
 ├── helpers/
 │   ├── css-cascade.js                      ← Resolves which CSS declaration wins at a given window size
 │   └── detail-page-dom.js                  ← jsdom page built from the real details layouts + includes
@@ -183,6 +184,7 @@ _tests/
 │   ├── filter-panel-toggles.test.js        ← Filter panel UI tests
 │   ├── filter-system.test.js               ← Filter engine unit tests
 │   ├── geojson-utils.test.js               ← GeoJSON utility tests
+│   ├── maplibre-loader.test.js             ← MapLibre 6 module, worker and bridge wiring; the only ES module
 │   ├── spatial-utils.test.js               ← Spatial utility tests
 │   ├── spot-popup-utils.test.js            ← Spot popup rendering tests
 │   ├── statistics-chartjs-no-inline-source.test.js ← No inline styles in JS source
@@ -246,7 +248,7 @@ The `_tests/globalSetup.js` file runs before any Jest test. It ensures vendor as
 1. Create `spec/plugins/your_plugin_spec.rb`
 2. Use the existing spec files as templates for mocking `site` and `site.data`
 3. Include property-based tests with Rantly for any logic that processes variable data
-4. Run with: `source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.9 && bundle exec rspec spec/plugins/your_plugin_spec.rb`
+4. Run with: `source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-4.0.9 && bundle exec rspec spec/plugins/your_plugin_spec.rb`
 
 ### For a new JavaScript module
 

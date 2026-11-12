@@ -51,6 +51,16 @@ function setupLeafletMock() {
   };
 }
 
+// Each load of the module that waits for MapLibre registers a ready listener
+// on window. Record them so afterEach can remove them; otherwise a listener
+// from an earlier test fires in a later one.
+var registeredListeners = [];
+var realAddEventListener = window.addEventListener.bind(window);
+window.addEventListener = function(type, listener, options) {
+  registeredListeners.push([type, listener, options]);
+  return realAddEventListener(type, listener, options);
+};
+
 function loadModule() {
   delete window.PaddelbuchDashboardMap;
   jest.isolateModules(function() {
@@ -60,6 +70,10 @@ function loadModule() {
 }
 
 afterEach(() => {
+  registeredListeners.forEach(function(entry) {
+    window.removeEventListener(entry[0], entry[1], entry[2]);
+  });
+  registeredListeners = [];
   document.body.innerHTML = '';
   delete window.PaddelbuchDashboardMap;
   delete global.L;
@@ -133,16 +147,66 @@ describe('PaddelbuchDashboardMap', () => {
     expect(mockMapInstance._options.attributionControl).toBe(false);
   });
 
-  test('adds Positron vector tiles via L.maplibreGL', () => {
-    document.body.innerHTML = '<div id="dashboard-map"></div>';
-    setupLeafletMock();
-
-    loadModule();
-
-    expect(L.maplibreGL).toHaveBeenCalledWith({
-      style: 'https://tiles.openfreemap.org/styles/positron'
+  // MapLibre 6 loads as an ES module after the page is parsed
+  // (assets/js/maplibre-loader.js), so the basemap is added either straight
+  // away, when the loader has already finished, or on its ready event.
+  describe('Positron basemap via L.maplibreGL', () => {
+    afterEach(() => {
+      delete window.PaddelbuchMaplibreReady;
     });
-    expect(mockMaplibreLayer.addTo).toHaveBeenCalledWith(mockMapInstance);
+
+    function expectBasemapAddedOnce() {
+      expect(L.maplibreGL).toHaveBeenCalledTimes(1);
+      expect(L.maplibreGL).toHaveBeenCalledWith({
+        style: 'https://tiles.openfreemap.org/styles/positron'
+      });
+      expect(mockMaplibreLayer.addTo).toHaveBeenCalledTimes(1);
+      expect(mockMaplibreLayer.addTo).toHaveBeenCalledWith(mockMapInstance);
+    }
+
+    test('is added straight away when MapLibre is already loaded', () => {
+      document.body.innerHTML = '<div id="dashboard-map"></div>';
+      setupLeafletMock();
+      window.PaddelbuchMaplibreReady = true;
+
+      loadModule();
+
+      expectBasemapAddedOnce();
+    });
+
+    test('waits for paddelbuch:maplibre-ready when MapLibre is still loading', () => {
+      document.body.innerHTML = '<div id="dashboard-map"></div>';
+      setupLeafletMock();
+
+      var result = loadModule();
+
+      // The Leaflet map exists at once, so dashboards can add their layers.
+      expect(result.getMap()).toBe(mockMapInstance);
+      expect(L.maplibreGL).not.toHaveBeenCalled();
+
+      window.PaddelbuchMaplibreReady = true;
+      window.dispatchEvent(new Event('paddelbuch:maplibre-ready'));
+      expectBasemapAddedOnce();
+
+      // A repeated event never adds a second basemap.
+      window.dispatchEvent(new Event('paddelbuch:maplibre-ready'));
+      expectBasemapAddedOnce();
+    });
+
+    test('waits for the event when the ready flag is set but the bridge is missing', () => {
+      document.body.innerHTML = '<div id="dashboard-map"></div>';
+      setupLeafletMock();
+      window.PaddelbuchMaplibreReady = true;
+      var bridge = L.maplibreGL;
+      delete L.maplibreGL;
+
+      loadModule();
+
+      L.maplibreGL = bridge;
+      expect(L.maplibreGL).not.toHaveBeenCalled();
+      window.dispatchEvent(new Event('paddelbuch:maplibre-ready'));
+      expectBasemapAddedOnce();
+    });
   });
 
   test('adds zoom control at bottom-right', () => {

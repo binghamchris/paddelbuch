@@ -12,7 +12,7 @@
 # while preserving the simplification step.
 #
 # Usage:
-#   source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.9 && \
+#   source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-4.0.9 && \
 #     ruby scripts/restore_geometry_from_full.rb [--dry-run] [--slug SLUG]
 #
 # Options:

@@ -229,7 +229,7 @@ Data-level localisation is handled by the `locale` field on each data row. The `
 The site is deployed to AWS Amplify via CloudFormation (`deploy/frontend-deploy.yaml`). Key aspects:
 
 - Builds are triggered by Git pushes and Contentful webhooks
-- A custom Docker build image (`infrastructure/Dockerfile`) pre-packages Ruby 3.4.9 and Node.js 22 to speed up builds
+- A custom Docker build image (`infrastructure/Dockerfile`) pre-packages Ruby 4.0.9 and Node.js 26 to speed up builds
 - The image is hosted on ECR Public and referenced via the `_CUSTOM_IMAGE` Amplify environment variable
 - Security headers (CSP, HSTS, X-Frame-Options, etc.) are configured in the CloudFormation template's `CustomHeaders` property
 - Cache TTLs vary by content type: HTML (1 day), spatial tiles (7 days), API JSON (1 day), static assets (30 days)

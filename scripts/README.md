@@ -45,7 +45,7 @@ These scripts modify Contentful data via the Content Management API. They all re
 Truncates spot location coordinates (lat/lon) to 6 decimal places (~0.11 m precision). Uses the local build cache (`_data/spots.yml` and `_data/.contentful_sync_cache.yml`) to identify affected spots and resolve entry IDs without any API calls, then batch-fetches only the entries that need updating from the CMA using `sys.id[in]` filtering (up to 1000 per request). Publishes all updated entries via a single bulk publish call. Requires a prior Jekyll build to populate the cache.
 
 ```bash
-source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.9 && \
+source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-4.0.9 && \
   ruby scripts/truncate_spot_location_precision.rb [OPTIONS]
 ```
 
@@ -61,7 +61,7 @@ source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.9 && \
 Simplifies waterway geometry using Douglas-Peucker (25 m tolerance, 6 decimal places). Copies the original geometry to `fullGeometry` before overwriting `geometry` with the simplified version.
 
 ```bash
-source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.9 && \
+source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-4.0.9 && \
   ruby scripts/simplify_waterway_geometry.rb [OPTIONS]
 ```
 
@@ -75,7 +75,7 @@ source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.9 && \
 Restores simplified geometry from `fullGeometry`. Re-applies Douglas-Peucker simplification from the original unclipped source of truth, effectively undoing any clipping that was applied to the `geometry` field.
 
 ```bash
-source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.9 && \
+source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-4.0.9 && \
   ruby scripts/restore_geometry_from_full.rb [OPTIONS]
 ```
 

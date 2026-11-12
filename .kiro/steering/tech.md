@@ -11,13 +11,13 @@ description: Describes the ptechnology stack, dependencies, pipeline, and key re
 |---|---|
 | Static site generator | Jekyll 4.4 |
 | CMS | Contentful (headless, Sync API) |
-| Maps | Leaflet 1.9 + MapLibre GL via `@maplibre/maplibre-gl-leaflet` |
+| Maps | Leaflet 1.9 + MapLibre GL 6 via `@maplibre/maplibre-gl-leaflet` |
 | CSS framework | Bootstrap 5.3 (SCSS, loaded from `node_modules`) |
-| Charts | Chart.js 4.5 |
+| Charts | Chart.js 4.6 |
 | Hosting | AWS Amplify (eu-central-1) |
 | IaC | CloudFormation (`deploy/frontend-deploy.yaml`) |
-| Ruby | 3.4.9 (managed with chruby) |
-| Node.js | Used for tests and build scripts only |
+| Ruby | 4.0.9 (managed with chruby) |
+| Node.js | 26 (tests and build scripts only) |
 
 ## Ruby Dependencies (Gemfile)
 
@@ -46,7 +46,7 @@ Production builds use `bundle exec rake build:site` which runs a three-phase par
 
 All Ruby commands require chruby activation first:
 ```bash
-source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.9
+source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-4.0.9
 ```
 
 | Task | Command |

@@ -18,7 +18,7 @@ beforeAll(() => {
 describe('Version parity checks', () => {
   // Requirement 7.2: Ruby version in Dockerfile matches .ruby-version file
   test('Ruby version in Dockerfile matches .ruby-version file', () => {
-    // .ruby-version contains "ruby-3.4.9" -- extract the numeric version
+    // .ruby-version contains e.g. "ruby-4.0.9" -- extract the numeric version
     const rubyVersion = rubyVersionContent.replace(/^ruby-/, '');
 
     // Dockerfile downloads ruby-<version>.tar.gz
@@ -27,11 +27,19 @@ describe('Version parity checks', () => {
     expect(rubyTarMatch[1]).toBe(rubyVersion);
   });
 
-  // Requirement 7.3: Node.js major version in Dockerfile is 22
-  test('Node.js major version in Dockerfile is 22', () => {
+  // Requirement 7.3: Node.js major version in Dockerfile is 26
+  test('Node.js major version in Dockerfile is 26', () => {
     const nodeMatch = dockerfileContent.match(/node-v(\d+)\.\d+\.\d+-linux-x64/);
     expect(nodeMatch).not.toBeNull();
-    expect(nodeMatch[1]).toBe('22');
+    expect(nodeMatch[1]).toBe('26');
+  });
+
+  // The Ruby archive directory (ruby/<major.minor>/) must match the version,
+  // or the download 404s and the image build fails.
+  test('Ruby download directory matches the Ruby version', () => {
+    const m = dockerfileContent.match(/pub\/ruby\/(\d+\.\d+)\/ruby-(\d+\.\d+)\.\d+\.tar\.gz/);
+    expect(m).not.toBeNull();
+    expect(m[1]).toBe(m[2]);
   });
 
   // Requirement 7.4: Gemfile and Gemfile.lock are copied before bundle install
