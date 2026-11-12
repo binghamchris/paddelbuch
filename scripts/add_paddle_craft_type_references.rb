@@ -18,7 +18,7 @@
 #     only executed when the file is run directly (see the guard at the bottom).
 #
 # Usage (added in task 8.2):
-#   source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.9 && \
+#   source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-4.0.9 && \
 #     ruby scripts/add_paddle_craft_type_references.rb [--dry-run] [--slug SLUG]
 
 # ---------------------------------------------------------------------------

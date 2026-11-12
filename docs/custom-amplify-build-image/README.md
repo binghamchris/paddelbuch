@@ -1,6 +1,6 @@
 # Custom Amplify Build Image
 
-A custom Docker build image for the paddelbuch Amplify app that pre-packages Ruby 3.4.9, Node.js 22, and all project dependencies. This eliminates per-build installation of language runtimes and significantly reduces build times.
+A custom Docker build image for the paddelbuch Amplify app that pre-packages Ruby 4.0.9, Node.js 26, and all project dependencies. This eliminates per-build installation of language runtimes and significantly reduces build times.
 
 The image is hosted on ECR Public (public.ecr.aws) because Amplify's internal CodeBuild runs in an AWS-managed account and cannot pull from private ECR repositories. ECR Public is publicly accessible, so no cross-account IAM permissions are needed.
 
@@ -74,7 +74,7 @@ The script will:
 4. Tag the image with both `latest` and a timestamp (`YYYYMMDDHHmmss`)
 5. Push both tags to ECR Public (public.ecr.aws)
 
-> **Note:** The first build takes several minutes because Ruby 3.4.9 is compiled from source. Subsequent builds are faster due to Docker layer caching.
+> **Note:** The first build takes several minutes because Ruby 4.0.9 is compiled from source. Subsequent builds are faster due to Docker layer caching.
 
 ## 3. Update the Amplify App Stack with the Custom Image
 
