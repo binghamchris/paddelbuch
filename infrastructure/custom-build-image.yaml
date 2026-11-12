@@ -13,7 +13,7 @@ Resources:
     Properties:
       RepositoryName: !Ref RepositoryName
       RepositoryCatalogData:
-        AboutText: Custom Amplify build image for paddelbuch with Ruby 3.4.9 and Node.js 22
+        AboutText: Custom Amplify build image for paddelbuch with Ruby 4.0.9 and Node.js 26
 
 Outputs:
   RepositoryUri:

@@ -28,9 +28,23 @@
     attributionControl: false
   });
 
-  L.maplibreGL({
-    style: 'https://tiles.openfreemap.org/styles/positron'
-  }).addTo(map);
+  // The basemap needs MapLibre, which loads as an ES module after the page is
+  // parsed (assets/js/maplibre-loader.js). The Leaflet map itself is created
+  // straight away so the dashboards can add their layers to it; the basemap
+  // joins when MapLibre is ready. It draws in Leaflet's tile pane, below the
+  // dashboards' overlay and marker panes, so adding it later does not change
+  // the stacking order.
+  function addBasemap() {
+    L.maplibreGL({
+      style: 'https://tiles.openfreemap.org/styles/positron'
+    }).addTo(map);
+  }
+
+  if (global.PaddelbuchMaplibreReady && typeof L.maplibreGL === 'function') {
+    addBasemap();
+  } else {
+    global.addEventListener('paddelbuch:maplibre-ready', addBasemap, { once: true });
+  }
 
   L.control.attribution({ position: 'bottomright' })
     .addAttribution('&copy; <a href="http://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors')

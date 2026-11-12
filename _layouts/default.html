@@ -61,11 +61,9 @@
   <!-- Leaflet JS -->
   <script src="{{ '/assets/js/vendor/leaflet.js' | relative_url }}"></script>
   
-  <!-- MapLibre GL JS -->
-  <script src="{{ '/assets/js/vendor/maplibre-gl.js' | relative_url }}"></script>
-  
-  <!-- Leaflet MapLibre GL Bridge -->
-  <script src="{{ '/assets/js/vendor/leaflet-maplibre-gl.js' | relative_url }}"></script>
+  <!-- MapLibre GL JS 6 (ES module) and the Leaflet MapLibre GL bridge.
+       Runs after parsing; see assets/js/maplibre-loader.js. -->
+  <script type="module" src="{{ '/assets/js/maplibre-loader.js' | relative_url }}"></script>
   
   <!-- Leaflet Locate Control JS -->
   <script src="{{ '/assets/js/vendor/L.Control.Locate.min.js' | relative_url }}"></script>

@@ -1,8 +1,37 @@
 # Custom Amplify Build Image
 
-A custom Docker build image for the paddelbuch Amplify app that pre-packages Ruby 3.4.9, Node.js 22, and all project dependencies. This eliminates per-build installation of language runtimes and significantly reduces build times.
+A custom Docker build image for the paddelbuch Amplify app that pre-packages Ruby 4.0.9, Node.js 26, and all project dependencies. This eliminates per-build installation of language runtimes and significantly reduces build times.
 
 The image is hosted on ECR Public (public.ecr.aws) because Amplify's internal CodeBuild runs in an AWS-managed account and cannot pull from private ECR repositories. ECR Public is publicly accessible, so no cross-account IAM permissions are needed.
+
+## Repositories per environment
+
+Each environment has its own AWS account, its own ECR Public repository and its own Amplify app. Each app pulls only from its own account's repository, so pushing an image or moving a tag in one repository never changes what the other environment builds with.
+
+| Environment | AWS profile (account) | ECR Public repository (us-east-1) | Amplify app (eu-central-1) | CloudFormation stack |
+|---|---|---|---|---|
+| Dev | `paddelbuch-dev` (047303514088) | `public.ecr.aws/c1w4z1s5/paddelbuch-build-image` | `paddelbuch-dev` (`d1yyy5ru04e86p`) | `paddelbuch-dev` |
+| Prod | `paddelbuch-prod` (526214622845) | `public.ecr.aws/r6v0i5j7/paddelbuch-build-image` | `paddelbuch-prod` (`d1k4hpoz081qn2`) | not yet confirmed; look it up before deploying |
+
+Each Amplify app reads the image from its stack's `CustomBuildImageUri` parameter, which sets the app-wide `_CUSTOM_IMAGE` environment variable. Branches do not override it, apart from short-lived test branches.
+
+**Tags.** Every image pushed carries a tag naming its runtimes and the commit its Dockerfile came from, for example `ruby4.0.9-node26.13.1-5080c6ea`. `latest` is moved to an image only after that image has built the site successfully in that environment's Amplify app. Moving `latest` back to the previous image's tag is then the rollback.
+
+**`build-and-push.sh` only targets dev.** It hard-codes `PROFILE=paddelbuch-dev`, and it pushes `latest` together with a timestamp tag. To put an image into the prod repository, push the tested image yourself with `paddelbuch-prod`:
+
+```bash
+# After the image has been verified on dev
+aws ecr-public get-login-password --profile paddelbuch-prod --region us-east-1 \
+  | docker login --username AWS --password-stdin public.ecr.aws
+docker tag <local-image> public.ecr.aws/r6v0i5j7/paddelbuch-build-image:<version-tag>
+docker push public.ecr.aws/r6v0i5j7/paddelbuch-build-image:<version-tag>
+```
+
+Then build prod's Amplify app on that tag (a stack parameter update), and only after that move prod's `latest`.
+
+**Current state (12 Nov 2026):**
+- Dev: `latest` is `ruby4.0.9-node26.13.1-5080c6ea`, and the dev app uses `latest`.
+- Prod: `latest` is still the 15 March 2026 image (Ruby 3.4.9, Node 22.16.0), and the prod app uses `latest`.
 
 ## Prerequisites
 
@@ -74,7 +103,7 @@ The script will:
 4. Tag the image with both `latest` and a timestamp (`YYYYMMDDHHmmss`)
 5. Push both tags to ECR Public (public.ecr.aws)
 
-> **Note:** The first build takes several minutes because Ruby 3.4.9 is compiled from source. Subsequent builds are faster due to Docker layer caching.
+> **Note:** The first build takes several minutes because Ruby 4.0.9 is compiled from source. Subsequent builds are faster due to Docker layer caching.
 
 ## 3. Update the Amplify App Stack with the Custom Image
 

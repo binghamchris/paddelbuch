@@ -8,14 +8,15 @@
     "name": "Chris Bingham"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=26"
   },
   "scripts": {
     "copy-assets": "node scripts/copy-vendor-assets.js",
     "download-fonts": "node scripts/download-google-fonts.js",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:property": "jest --testPathPatterns=property"
+    "test:property": "jest --testPathPatterns=property",
+    "test:browser": "playwright test"
   },
   "keywords": [
     "Swiss Canoe",
@@ -23,18 +24,19 @@
     "Paddle Sports"
   ],
   "dependencies": {
-    "@maplibre/maplibre-gl-leaflet": "0.1.3",
-    "bootstrap": "5.3.8",
-    "chart.js": "4.5.1",
+    "@maplibre/maplibre-gl-leaflet": "0.1.4",
+    "bootstrap": "5.3.9",
+    "chart.js": "4.6.1",
     "leaflet": "1.9.4",
-    "leaflet.locatecontrol": "0.90.0",
-    "maplibre-gl": "5.24.0"
+    "leaflet.locatecontrol": "0.90.1",
+    "maplibre-gl": "6.18.0"
   },
   "devDependencies": {
+    "@playwright/test": "1.65.0",
     "@types/jest": "30.0.0",
-    "fast-check": "4.8.0",
-    "jest": "30.4.2",
-    "jest-environment-jsdom": "30.4.1",
-    "sass": "1.101.0"
+    "fast-check": "4.10.2",
+    "jest": "30.5.2",
+    "jest-environment-jsdom": "30.5.2",
+    "sass": "1.108.2"
   }
 }

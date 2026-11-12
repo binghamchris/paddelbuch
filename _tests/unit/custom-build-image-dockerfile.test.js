@@ -16,9 +16,10 @@ describe('Dockerfile structure', () => {
     expect(dockerfile).toMatch(/^FROM\s+amazonlinux:2023/m);
   });
 
-  // Requirement 2.2: Ruby 3.4.9 compiled from source
-  test('downloads ruby-3.4.9.tar.gz source archive', () => {
-    expect(dockerfile).toMatch(/ruby-3\.4\.9\.tar\.gz/);
+  // Requirement 2.2: Ruby compiled from source (version parity with
+  // .ruby-version is checked in custom-build-image-version-parity.test.js)
+  test('downloads ruby-4.0.9.tar.gz source archive', () => {
+    expect(dockerfile).toMatch(/ruby\/4\.0\/ruby-4\.0\.9\.tar\.gz/);
   });
 
   test('configures Ruby with --disable-install-doc', () => {
@@ -30,9 +31,27 @@ describe('Dockerfile structure', () => {
     expect(dockerfile).toMatch(/make\s+install/);
   });
 
-  // Requirement 2.3: Node.js 22 binary installation
-  test('installs Node.js 22 from official binary archive', () => {
-    expect(dockerfile).toMatch(/node-v22\.\d+\.\d+-linux-x64/);
+  // Requirement 2.3: Node.js 26 binary installation
+  test('installs Node.js 26 from official binary archive', () => {
+    expect(dockerfile).toMatch(/node-v26\.\d+\.\d+-linux-x64/);
+  });
+
+  // Node.js 25+ official Linux binaries need the libatomic runtime; without it
+  // `node` fails to start ("libatomic.so.1: cannot open shared object file").
+  test('installs libatomic for the Node.js binary', () => {
+    expect(dockerfile).toMatch(/dnf install[\s\S]*\blibatomic\b[\s\S]*dnf clean all/);
+  });
+
+  // amplify.yml exports LANG/LC_ALL=en_US.UTF-8; the base image only ships
+  // C.utf8, so without this Ruby's default external encoding is US-ASCII.
+  test('installs the en_US.UTF-8 locale', () => {
+    expect(dockerfile).toMatch(/dnf install[\s\S]*\bglibc-langpack-en\b[\s\S]*dnf clean all/);
+  });
+
+  test('the Node.js major matches package.json engines', () => {
+    const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
+    const major = dockerfile.match(/node-v(\d+)\.\d+\.\d+-linux-x64/)[1];
+    expect(pkg.engines.node).toBe(`>=${major}`);
   });
 
   // Requirement 2.4: COPYs Gemfile and Gemfile.lock

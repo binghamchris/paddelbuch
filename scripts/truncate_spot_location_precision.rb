@@ -8,7 +8,7 @@
 # Uses bulk publish to minimise API calls.
 #
 # Usage:
-#   source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.9 && \
+#   source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-4.0.9 && \
 #     ruby scripts/truncate_spot_location_precision.rb [--dry-run] [--slug SLUG]
 #
 # Options:

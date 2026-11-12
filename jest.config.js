@@ -6,6 +6,8 @@ module.exports = {
     '**/*.test.js',
     '**/*.property.test.js'
   ],
+  // Playwright browser tests run separately and locally only (`npm run test:browser`).
+  testPathIgnorePatterns: ['/node_modules/', '<rootDir>/_tests/browser/'],
   moduleFileExtensions: ['js', 'json'],
   collectCoverageFrom: [
     'assets/js/**/*.js',

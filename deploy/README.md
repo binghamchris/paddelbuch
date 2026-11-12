@@ -221,7 +221,7 @@ The site is built using Jekyll with the following process (defined in `amplify.y
    - Output directory: `_site`
    - All files are deployed to CloudFront
 
-A custom Docker build image (see [docs/custom-amplify-build-image/README.md](../docs/custom-amplify-build-image/README.md)) pre-packages Ruby 3.4.9 and Node.js 22 to speed up builds.
+A custom Docker build image (see [docs/custom-amplify-build-image/README.md](../docs/custom-amplify-build-image/README.md)) pre-packages Ruby 4.0.9 and Node.js 26 to speed up builds.
 
 ## Cache Configuration
 

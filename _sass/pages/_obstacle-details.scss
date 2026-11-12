@@ -20,6 +20,25 @@
     .map {
       height: calc(100svh - $menu-height) !important;
     }
+
+    // Side-by-side layout only: the details pane is no taller than the map
+    // and scrolls on its own, so the page never scrolls and the map stays put.
+    .obstacle-description {
+      // position: relative makes the pane the containing block of absolutely
+      // placed content (e.g. .visually-hidden labels), so the pane clips it
+      // instead of it stretching the page below the map.
+      position: relative;
+      overflow-y: auto;
+      max-height: calc(100svh - $menu-height);
+      // The 2em that `main` no longer adds below, kept inside the pane.
+      padding-bottom: 2em;
+    }
+
+    // The global `main` rule adds a 2em bottom padding with !important, which
+    // would leave a white strip under the map and make the page scroll.
+    main {
+      padding-bottom: 0 !important;
+    }
   }
   @media screen and (max-width: 992px) {
     .map {
