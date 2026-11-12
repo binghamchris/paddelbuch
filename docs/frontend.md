@@ -237,6 +237,16 @@ _sass/
 
 The main entry point is `assets/css/application.scss`, which imports Bootstrap and then the project's settings, utilities, components, and page styles.
 
+### Details page layout on wide screens
+
+From 992px up, every details page (spot, waterway, obstacle, notice) shows the map and the details pane side by side. The map fills the window below the header (`calc(100svh - $menu-height)`), and the details pane is capped at the same height and scrolls on its own, so the page itself never scrolls and the map stays in place. Each page partial does this inside its `min-width: 992px` block with three rules:
+
+- the pane gets `overflow-y: auto`, the same `max-height` as the map, and `padding-bottom: 2em` so the last row is not flush with the window edge;
+- the pane gets `position: relative`, so absolutely placed content inside it (such as `.visually-hidden` labels) is clipped by the pane rather than stretching the page below the map;
+- `main` drops the global `padding-bottom: 2em !important`, which would otherwise leave a white strip under the map.
+
+Below 992px the layout stacks (map above, pane below) and the page scrolls as before; none of these rules apply there. `_tests/unit/detail-pane-scroll.test.js` checks both halves against the compiled CSS.
+
 ## Semantic Search
 
 Free-text search over spots on the home-page map, backed by the separate
