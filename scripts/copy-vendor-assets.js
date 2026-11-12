@@ -36,9 +36,17 @@ const FILE_COPIES = [
     src: 'node_modules/leaflet.locatecontrol/dist/L.Control.Locate.min.css',
     dest: 'assets/css/vendor/L.Control.Locate.min.css',
   },
+  // MapLibre GL JS 6 is published only as ES modules. The copies get a .js
+  // extension so every host serves them with a JavaScript MIME type (module
+  // scripts and module workers refuse anything else); the worker's location
+  // is then set explicitly in assets/js/maplibre-loader.js.
   {
-    src: 'node_modules/maplibre-gl/dist/maplibre-gl.js',
-    dest: 'assets/js/vendor/maplibre-gl.js',
+    src: 'node_modules/maplibre-gl/dist/maplibre-gl.mjs',
+    dest: 'assets/js/vendor/maplibre-gl.esm.js',
+  },
+  {
+    src: 'node_modules/maplibre-gl/dist/maplibre-gl-worker.mjs',
+    dest: 'assets/js/vendor/maplibre-gl-worker.esm.js',
   },
   {
     src: 'node_modules/maplibre-gl/dist/maplibre-gl.css',

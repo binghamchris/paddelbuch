@@ -161,8 +161,9 @@ _tests/
 ├── date-utils.test.js                      ← Date utility tests (root level, legacy)
 ├── html-utils.test.js                      ← HTML utility tests (root level, legacy)
 ├── browser/                                ← Playwright, local only (npm run test:browser)
+│   ├── dashboard-basemap.browser.spec.js   ← MapLibre 6 dashboard basemap loads under the deployed CSP (needs tiles.openfreemap.org)
 │   ├── detail-pane-scroll.browser.spec.js  ← Details pane scrolls on wide screens, stacked layout unchanged
-│   └── site-from-disk.js                   ← Serves _site/ to the browser, blocks other origins
+│   └── site-from-disk.js                   ← Serves _site/ to the browser, blocks other origins, can send the deployed CSP
 ├── helpers/
 │   ├── css-cascade.js                      ← Resolves which CSS declaration wins at a given window size
 │   └── detail-page-dom.js                  ← jsdom page built from the real details layouts + includes
@@ -183,6 +184,7 @@ _tests/
 │   ├── filter-panel-toggles.test.js        ← Filter panel UI tests
 │   ├── filter-system.test.js               ← Filter engine unit tests
 │   ├── geojson-utils.test.js               ← GeoJSON utility tests
+│   ├── maplibre-loader.test.js             ← MapLibre 6 module, worker and bridge wiring; the only ES module
 │   ├── spatial-utils.test.js               ← Spatial utility tests
 │   ├── spot-popup-utils.test.js            ← Spot popup rendering tests
 │   ├── statistics-chartjs-no-inline-source.test.js ← No inline styles in JS source

@@ -10,16 +10,27 @@ Third-party libraries are installed via npm but served locally (no CDN dependenc
 |---------|---------|---------|
 | Bootstrap | 5.3.x | CSS framework and JS components |
 | Leaflet | 1.9.x | Interactive map rendering |
-| Leaflet.locatecontrol | 0.89.x | "Locate me" button on the map |
-| MapLibre GL JS | 4.x | Vector tile rendering for dashboard maps (Positron basemap) |
-| leaflet-maplibre-gl | 0.0.x | Bridge plugin to use MapLibre GL layers inside Leaflet maps |
-| Chart.js | 4.5.x | Canvas-based chart rendering for statistics dashboards |
+| Leaflet.locatecontrol | 0.90.x | "Locate me" button on the map |
+| MapLibre GL JS | 6.x | Vector tile rendering for dashboard maps (Positron basemap). ES module only; see "MapLibre loading" below |
+| @maplibre/maplibre-gl-leaflet | 0.1.x | Bridge plugin to use MapLibre GL layers inside Leaflet maps |
+| Chart.js | 4.6.x | Canvas-based chart rendering for statistics dashboards |
 
 ### Asset Pipeline
 
 Two Node.js scripts manage vendor assets during the build:
 
-- `scripts/copy-vendor-assets.js` — Copies Bootstrap JS, Leaflet JS/CSS/images, and Leaflet.locatecontrol to `assets/js/vendor/` and `assets/css/vendor/`
+- `scripts/copy-vendor-assets.js` — Copies Bootstrap JS, Leaflet JS/CSS/images, Leaflet.locatecontrol, MapLibre GL (module and worker, as `maplibre-gl.esm.js` and `maplibre-gl-worker.esm.js`), the Leaflet MapLibre bridge and Chart.js to `assets/js/vendor/` and `assets/css/vendor/`
+
+### MapLibre loading
+
+MapLibre GL JS 6 is published only as ES modules, while the rest of the frontend, including the Leaflet bridge, uses globals. `assets/js/maplibre-loader.js` is the one ES module in the site's own code and joins the two. The default layout loads it with `<script type="module">`, and it:
+
+1. imports `vendor/maplibre-gl.esm.js` and points MapLibre's worker at `vendor/maplibre-gl-worker.esm.js` (same origin, so `worker-src 'self'` covers it);
+2. sets `window.maplibregl`, which the bridge's wrapper reads once when it loads;
+3. imports the bridge, which adds `L.maplibreGL`;
+4. sets `window.PaddelbuchMaplibreReady` and fires `paddelbuch:maplibre-ready` on `window`.
+
+The vendor copies use a `.js` extension so every host serves them with a JavaScript MIME type; module scripts and module workers refuse anything else. Module scripts run after the page is parsed, so `dashboard-map.js` creates the Leaflet map at once and adds the basemap when MapLibre is ready. The basemap draws in Leaflet's tile pane, below the dashboards' layers, so adding it later does not change what covers what.
 - `scripts/download-google-fonts.js` — Downloads Google Fonts (Fredoka, Quicksand) as self-hosted woff2 files and generates `assets/css/vendor/fonts.css`
 
 Both run during the Amplify preBuild phase (`npm run copy-assets` and `npm run download-fonts`). For local development, run them after `npm install`:
@@ -89,7 +100,8 @@ All modules live in `assets/js/`. They are plain scripts that attach functions t
 | Module | Purpose |
 |--------|---------|
 | `dashboard-data.js` | Parses JSON data blocks embedded in the page for dashboard consumption |
-| `dashboard-map.js` | Creates Leaflet map instances with Positron vector tiles (via MapLibre GL) for dashboard views |
+| `dashboard-map.js` | Creates the shared Leaflet map for dashboard views, adding the Positron vector basemap (via MapLibre GL) once `maplibre-loader.js` is ready |
+| `maplibre-loader.js` | ES module: loads MapLibre GL 6 and the Leaflet bridge, exposes `window.maplibregl`, fires `paddelbuch:maplibre-ready` |
 | `dashboard-switcher.js` | Tab-style switcher that auto-discovers dashboard containers and toggles visibility |
 | `coverage-dashboard.js` | Waterway coverage dashboard: renders covered/uncovered GeoJSON segments on a map |
 | `freshness-dashboard.js` | Waterway freshness dashboard: renders waterways coloured by median spot age |
@@ -416,7 +428,7 @@ is empty the directive simply has no extra source.
   - `raw.githubusercontent.com` and `api.mapbox.com` — image sources for map tiles and markers
   - `tiles.openfreemap.org` — vector tile data fetched by MapLibre GL
   - `tinylytics.app` — lightweight analytics script and beacon endpoint
-- `worker-src 'self' blob:` — required by MapLibre GL JS, which spawns web workers from blob URLs for vector tile parsing.
+- `worker-src 'self' blob:` — MapLibre GL JS 6 parses vector tiles in a module worker loaded from the site's own origin (`'self'`). `blob:` covers its fallback path, which wraps a same-origin import in a blob URL.
 - `font-src 'self' data:` — allows self-hosted font files and data URIs (used by some icon fonts).
 
 ### Implications for Development

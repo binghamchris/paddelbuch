@@ -9,7 +9,9 @@ The frontend is vanilla JavaScript with no build toolchain (no Webpack, no Babel
 
 ## Module Pattern
 
-All modules use the IIFE-to-global pattern. No ES module imports/exports:
+All modules use the IIFE-to-global pattern. No ES module imports/exports.
+
+The single exception is `assets/js/maplibre-loader.js`, loaded with `<script type="module">`, because MapLibre GL JS 6 ships only as an ES module. It exposes MapLibre as `window.maplibregl` for the rest of the code. Do not add other ES modules; `_tests/unit/maplibre-loader.test.js` enforces this.
 
 ```javascript
 /**
