@@ -37,6 +37,11 @@ exclude:
   # both leaks internals into production output and trips
   # tests/test_csp_inline_scripts.py.
   - coverage/
+  # Playwright config and its git-ignored local output (npm run test:browser).
+  # Without these, a local test run would be copied into the built site.
+  - playwright.config.js
+  - test-results/
+  - playwright-report/
   - deploy/
   - docs/
   - scripts/
