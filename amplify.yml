@@ -6,7 +6,7 @@ frontend:
         - export LANG=en_US.UTF-8
         - export LC_ALL=en_US.UTF-8
         # Record which runtimes the build image provided.
-        - ruby -v && bundle -v && node -v && npm -v
+        - ruby -v && echo "Bundler $(bundle -v)" && echo "Node.js $(node -v)" && echo "npm $(npm -v)"
         - npm ci
         - npm run download-fonts
         - npm run copy-assets
