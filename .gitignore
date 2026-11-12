@@ -58,4 +58,8 @@ _site_de/
 _site_en/
 _site_prefetch/
 
+# Playwright browser test output (npm run test:browser)
+test-results/
+playwright-report/
+
 scripts/.cache

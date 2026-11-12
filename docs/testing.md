@@ -10,6 +10,7 @@ Paddel Buch uses a multi-layered testing strategy with property-based testing as
 | JS unit tests | Jest | `_tests/unit/` | JavaScript | `npm test` |
 | JS property tests | Jest + fast-check | `_tests/property/` | JavaScript | `npm run test:property` |
 | Python tests | pytest | `tests/` | Python | `python3 -m pytest tests/` |
+| Browser layout tests (local only) | Playwright | `_tests/browser/` | JavaScript | `npm run test:browser` |
 
 ## Running Tests
 
@@ -31,6 +32,33 @@ python3 -m pytest tests/
 ```
 
 Tests run automatically during the Amplify build (`npm test` in the build phase). Ruby tests and Python tests are run locally or in CI as needed.
+
+## Browser Layout Tests (local only)
+
+`_tests/browser/` holds Playwright tests for behaviour that depends on rendered sizes. jsdom cannot check that kind of behaviour. They are not part of `npm test` or the Amplify build (Jest ignores the directory), so run them yourself before pushing layout or style changes.
+
+```bash
+# Once per Playwright version: download the headless browser (~100 MB, user cache)
+npx playwright install --only-shell chromium
+
+# Build the site, then run the browser tests against _site/
+source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.9 && bundle exec rake build:site
+npm run test:browser
+```
+
+- Pages are served straight from `_site/` by request interception, so no web server runs. Requests to any other origin get an empty response, so a run sends nothing to Tinylytics, the map tile servers or any other site.
+- The tests use the build's real pages: for each details page type and locale, the largest built page, plus long content injected into the pane.
+- Set `PW_NO_SANDBOX=1` only where the sandboxed Chromium cannot start, such as some agent sandboxes. It is not needed in a normal terminal.
+- Output goes to `test-results/`, which git ignores.
+
+`detail-pane-scroll.browser.spec.js` checks the wide-screen details layout and the unchanged stacked layout below 992px. On wide screens:
+
+- the header fits in `$menu-height`;
+- the map ends at the window bottom and the page never scrolls;
+- the pane scrolls by mouse wheel and by keyboard focus while the map stays put;
+- the X and Navigate buttons stay visible and clickable.
+
+Run against the stylesheet from before the pane-scroll change, all 32 wide-screen cases fail and all 24 narrow cases pass.
 
 ## Property-Based Testing
 
@@ -132,6 +160,9 @@ _tests/
 ├── globalSetup.js                          ← Runs before all tests: ensures vendor assets exist
 ├── date-utils.test.js                      ← Date utility tests (root level, legacy)
 ├── html-utils.test.js                      ← HTML utility tests (root level, legacy)
+├── browser/                                ← Playwright, local only (npm run test:browser)
+│   ├── detail-pane-scroll.browser.spec.js  ← Details pane scrolls on wide screens, stacked layout unchanged
+│   └── site-from-disk.js                   ← Serves _site/ to the browser, blocks other origins
 ├── helpers/
 │   ├── css-cascade.js                      ← Resolves which CSS declaration wins at a given window size
 │   └── detail-page-dom.js                  ← jsdom page built from the real details layouts + includes
@@ -228,7 +259,7 @@ The `_tests/globalSetup.js` file runs before any Jest test. It ensures vendor as
 
 jsdom has no layout engine and ignores `@media`, so it cannot tell which style wins at a given window width. `_tests/helpers/css-cascade.js` does that for the compiled stylesheet. It handles `@media` conditions, specificity, `!important`, source order, and the common shorthands. `_tests/helpers/detail-page-dom.js` builds a jsdom page from the real layout files, so the tests see the classes and nesting a built page has. `_tests/property/detail-pane-scroll.property.test.js` shows the pattern: resolve properties on real elements across generated window sizes and assert the invariant.
 
-What this cannot check is anything that depends on rendered sizes. For example, the header must not render taller than `$menu-height`, otherwise the details page scrolls by the difference. Check that kind of behaviour in a real browser.
+What this cannot check is anything that depends on rendered sizes. For example, the header must not render taller than `$menu-height`, otherwise the details page scrolls by the difference. That kind of behaviour belongs in the local Playwright tests (see Browser Layout Tests above).
 
 The resolver throws on media features it does not support. If a new kind of `@media` query is added to the stylesheet, extend `featureMatches` and its unit tests.
 
