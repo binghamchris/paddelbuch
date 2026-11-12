@@ -11,7 +11,7 @@ Each environment has its own AWS account, its own ECR Public repository and its 
 | Environment | AWS profile (account) | ECR Public repository (us-east-1) | Amplify app (eu-central-1) | CloudFormation stack |
 |---|---|---|---|---|
 | Dev | `paddelbuch-dev` (047303514088) | `public.ecr.aws/c1w4z1s5/paddelbuch-build-image` | `paddelbuch-dev` (`d1yyy5ru04e86p`) | `paddelbuch-dev` |
-| Prod | `paddelbuch-prod` (526214622845) | `public.ecr.aws/r6v0i5j7/paddelbuch-build-image` | `paddelbuch-prod` (`d1k4hpoz081qn2`) | not yet confirmed; look it up before deploying |
+| Prod | `paddelbuch-prod` (526214622845) | `public.ecr.aws/r6v0i5j7/paddelbuch-build-image` | `paddelbuch-prod` (`d1k4hpoz081qn2`) | `paddelbuch-prod` |
 
 Each Amplify app reads the image from its stack's `CustomBuildImageUri` parameter, which sets the app-wide `_CUSTOM_IMAGE` environment variable. Branches do not override it, apart from short-lived test branches.
 
@@ -30,8 +30,8 @@ docker push public.ecr.aws/r6v0i5j7/paddelbuch-build-image:<version-tag>
 Then build prod's Amplify app on that tag (a stack parameter update), and only after that move prod's `latest`.
 
 **Current state (12 Nov 2026):**
-- Dev: `latest` is `ruby4.0.9-node26.13.1-5080c6ea`, and the dev app uses `latest`.
-- Prod: `latest` is still the 15 March 2026 image (Ruby 3.4.9, Node 22.16.0), and the prod app uses `latest`.
+- Dev: `latest` is `ruby4.0.9-node26.13.1-5080c6ea`, and the dev app uses `latest`. The previous image (Ruby 3.4.9, Node 22.16.0) is kept as `20260315163156` for rollback.
+- Prod: `latest` is `ruby4.0.9-node26.13.1-5080c6ea` (the same image as dev, digest `sha256:2c1963e3…c9b`), and the prod app uses `latest`. The previous image is kept as `20260315165333` for rollback.
 
 ## Prerequisites
 
