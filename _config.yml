@@ -139,6 +139,8 @@ contentful:
       cda_query:
         locale: "*"
       all_entries: true
+      # NOTE: vestigial. The build does not read this block. The real content type
+      # registry is ContentfulFetcher::CONTENT_TYPES in _plugins/contentful_fetcher.rb.
       content_types:
         spot:
           mapper: SpotMapper

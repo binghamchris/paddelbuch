@@ -387,7 +387,7 @@ added.
 
 ### Tuning
 
-`limit` (default 40) and `minScore` (default 0.25) are sent with every request
+`limit` (default 500) and `minScore` (default 0.25) are sent with every request
 and are configurable via `site.search.*`. The threshold comes from the backend's
 own e2e query set, which treats 0.2 as the relevance floor and 0.3 as the
 expected top-match score.

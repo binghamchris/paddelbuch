@@ -11,7 +11,7 @@ Be respectful and constructive. We're a small community project built around Swi
 1. Fork the repository on GitHub
 2. Clone your fork locally
 3. Follow the [Development Setup](README.md#development-setup) instructions in the README
-4. Create a feature branch from `main`
+4. Create a feature branch from `dev`
 
 ```bash
 git checkout -b feature/your-feature-name
@@ -52,7 +52,7 @@ npm run test:property
 ### Submitting a Pull Request
 
 1. Push your branch to your fork
-2. Open a pull request against `main`
+2. Open a pull request against `dev` (the `dev` branch is promoted to `main` through a separate pull request)
 3. Describe what your changes do and why
 4. Reference any related issues
 5. Ensure all CI checks pass (the Amplify preview build runs automatically)

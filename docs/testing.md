@@ -110,6 +110,8 @@ test('filter engine never loses markers', () => {
 ```
 spec/
 ├── spec_helper.rb                          ← Test configuration and shared helpers
+├── batch_fetcher_spec.rb                   ← BatchFetcher tests
+├── batch_fetcher_properties_spec.rb        ← BatchFetcher property tests
 ├── cache_metadata_spec.rb                  ← CacheMetadata class tests
 ├── collection_generator_spec.rb            ← CollectionGenerator tests
 ├── contentful_fetcher_spec.rb              ← ContentfulFetcher tests
@@ -117,12 +119,21 @@ spec/
 ├── contentful_sync_properties_spec.rb      ← Sync API property tests
 ├── delta_sync_properties_spec.rb           ← Delta sync merge property tests
 ├── data_compatibility_spec.rb              ← Data format compatibility tests
+├── detail_close_btn_spec.rb                ← Detail close button tests
+├── detail_close_btn_wiring_spec.rb         ← Detail close button wiring tests
 ├── env_loader_spec.rb                      ← EnvLoader tests
+├── env_loader_search_spec.rb               ← EnvLoader search settings tests
+├── i18n_key_parity_spec.rb                 ← de/en translation key parity
 ├── integration_spec.rb                     ← Cross-plugin integration tests
+├── map_init_search_gating_spec.rb          ← Search box gating in map-init tests
 ├── notice_page_fixes_spec.rb               ← Notice page regression tests
 ├── notice_preservation_spec.rb             ← Notice rendering preservation tests
 ├── sitemap_generator_spec.rb               ← SitemapGenerator tests
 ├── sync_checker_spec.rb                    ← SyncChecker tests
+├── scripts/
+│   └── add_paddle_craft_type_references_integration_spec.rb ← Paddle craft migration script integration test
+├── support/
+│   └── cma_net_http_stub.rb                ← Contentful Management API Net::HTTP stub
 ├── layouts/
 │   └── default_layout_spec.rb              ← Default layout tests
 └── plugins/
@@ -144,11 +155,13 @@ spec/
     ├── parallel_build_spec.rb               ← Parallel build pipeline tests
     ├── pipeline_version_consistency_spec.rb  ← Version consistency tests
     ├── precompute_generator_spec.rb         ← PrecomputeGenerator tests (includes spotTipType dimension config)
+    ├── script_safe_json_spec.rb             ← ScriptSafeJson escaping tests
     ├── spot_tip_type_mapper_spec.rb         ← Spot tip type mapper property tests
     ├── dashboard_metrics_generator_spec.rb  ← DashboardMetricsGenerator tests
     ├── dashboard_metrics_generator_property_spec.rb ← Dashboard metrics property tests
     ├── statistics_metrics_generator_spec.rb ← StatisticsMetricsGenerator tests
     ├── tile_generator_cache_spec.rb         ← Tile caching tests
+    ├── tile_generator_geo_spec.rb           ← Tile geometry tests
     ├── tile_generator_spatial_spec.rb       ← Spatial tiling correctness tests
     └── waterway_filters_spec.rb             ← WaterwayFilters tests
 ```
@@ -167,9 +180,13 @@ _tests/
 ├── helpers/
 │   ├── css-cascade.js                      ← Resolves which CSS declaration wins at a given window size
 │   └── detail-page-dom.js                  ← jsdom page built from the real details layouts + includes
+├── fixtures/
+│   └── application.baseline.css            ← Baseline stylesheet for CSS tests
 ├── unit/
 │   ├── ascii-compliance.test.js            ← ASCII-only character compliance tests
 │   ├── copy-vendor-assets.test.js          ← Vendor asset copy script tests
+│   ├── craft-icon-assets.test.js           ← Craft icon asset tests
+│   ├── craft-type-display-structure.test.js ← Craft type display structure tests
 │   ├── css-cascade-helper.test.js          ← Cascade resolver rules (media, specificity, shorthands)
 │   ├── custom-build-image-*.test.js        ← Custom build image consistency tests (6 files)
 │   ├── dashboard-coverage.test.js          ← Coverage dashboard unit tests
@@ -181,18 +198,41 @@ _tests/
 │   ├── date-utils.test.js                  ← Date formatting unit tests
 │   ├── detail-pane-scroll.test.js          ← Wide-screen pane scroll rules in the compiled CSS
 │   ├── download-google-fonts.test.js       ← Font download script tests
+│   ├── dual-export.test.js                 ← Browser/CommonJS dual export tests
 │   ├── filter-panel-toggles.test.js        ← Filter panel UI tests
 │   ├── filter-system.test.js               ← Filter engine unit tests
 │   ├── geojson-utils.test.js               ← GeoJSON utility tests
+│   ├── home-map-restore.test.js            ← Home map view restore tests
+│   ├── home-view-memory.test.js            ← Home view memory tests
+│   ├── home-view-memory-source-guard.test.js ← Home view memory source guard
+│   ├── jest-config.test.js                 ← Jest configuration tests
+│   ├── map-data-init-isolation.test.js     ← Map data init isolation tests
 │   ├── maplibre-loader.test.js             ← MapLibre 6 module, worker and bridge wiring; the only ES module
+│   ├── marker-click-event-fix-exploratory.test.js ← Marker click event exploratory test
+│   ├── paddelbuch-map-initial-view.test.js ← Map initial view tests
+│   ├── scss-compile-parity.test.js         ← SCSS compile parity tests
+│   ├── search-box-visibility.test.js       ← Search box visibility tests
+│   ├── search-connector-deferral.test.js   ← Search connector deferral tests
+│   ├── search-event-analytics.test.js      ← Search analytics event tests
+│   ├── search-limit-bound.test.js          ← Search limit bound tests
+│   ├── search-limit-transparency.test.js   ← Search limit transparency tests
+│   ├── search-no-matches.test.js           ← Search no-match state tests
+│   ├── search-resilience.test.js           ← Search error resilience tests
+│   ├── search-unconfigured.test.js         ← Search unconfigured state tests
+│   ├── semantic-search.test.js             ← Semantic search client tests
 │   ├── spatial-utils.test.js               ← Spatial utility tests
+│   ├── spot-navigate-button-colours.test.js ← Spot navigate button colour tests
 │   ├── spot-popup-utils.test.js            ← Spot popup rendering tests
 │   ├── statistics-chartjs-no-inline-source.test.js ← No inline styles in JS source
 │   ├── statistics-chartjs-scss.test.js     ← SCSS component structure tests
-│   └── statistics-chartjs-vendor.test.js   ← Vendor dependency and load order tests
+│   ├── statistics-chartjs-vendor.test.js   ← Vendor dependency and load order tests
+│   ├── tinylytics-beacon.test.js           ← Tinylytics beacon tests
+│   └── tinylytics-event-tracking.test.js   ← Tinylytics event tracking tests
 ├── property/
 │   ├── amplify-no-version-managers.property.test.js  ← Verifies no rvm/nvm in amplify.yml
 │   ├── api-data-sorting.property.test.js             ← API output sorting invariants
+│   ├── coordinate-validity.property.test.js          ← Coordinate validity
+│   ├── craft-*.property.test.js                      ← Craft filter, label, icon and display rules (5 files)
 │   ├── css-cascade-helper.property.test.js           ← Cascade resolver metamorphic properties
 │   ├── dashboard-i18n.property.test.js               ← Dashboard translation key completeness
 │   ├── detail-pane-scroll.property.test.js           ← Details pane scrolls on wide screens, stacked layout unchanged
@@ -203,12 +243,15 @@ _tests/
 │   ├── filter-engine-*.property.test.js              ← Filter logic invariants (4 files)
 │   ├── filter-panel-rendering.property.test.js       ← Filter panel rendering
 │   ├── filter-rejected-spots-exclusion.property.test.js ← Rejected spots excluded
+│   ├── geo-constants-parity.property.test.js         ← Geo constants parity
+│   ├── home-view-*.property.test.js                  ← Home view memory and privacy (2 files)
 │   ├── layer-*.property.test.js                      ← Layer control and styles (3 files)
 │   ├── layout-cdn-free.property.test.js              ← No CDN URLs in layouts
 │   ├── locale-filtering.property.test.js             ← Locale filter correctness
 │   ├── map-layers-*.property.test.js                 ← Map layer invariants (3 files)
 │   ├── marker-registry-*.property.test.js            ← Marker deduplication (2 files)
 │   ├── obstacle-*.property.test.js                   ← Obstacle rendering (4 files)
+│   ├── paddle-craft-migration-rules.property.test.js ← Paddle craft migration rules
 │   ├── protected-area-popup.property.test.js         ← Protected area popups
 │   ├── rejected-spot.property.test.js                ← Rejected spot handling
 │   ├── spot-freshness-*.property.test.js             ← Spot freshness dashboard invariants (8 files)
@@ -217,15 +260,19 @@ _tests/
 │   ├── spot-tip-composite-marker.property.test.js    ← SVG halo Composite_Icon (beads/glyphs, CSP-clean, colour, layout, a11y)
 │   ├── spot-tip-filter-match.property.test.js        ← Spot tip filter match function correctness
 │   ├── spot-tip-modifier-config.property.test.js     ← TIP_MODIFIER_CONFIG shape (glyph + colour, no offsets)
+│   ├── search-payload-robustness.property.test.js    ← Search payload robustness
+│   ├── semantic-search-and-logic.property.test.js    ← Semantic search AND logic
 │   ├── statistics-chartjs-*.property.test.js         ← Statistics Chart.js invariants (8 files)
+│   ├── statistics-dashboard-craft-icons.property.test.js ← Statistics dashboard craft icons
 │   ├── tile-coverage.property.test.js                ← Tile grid covers Switzerland
+│   ├── tinylytics-*.property.test.js                 ← Tinylytics beacon and event tracking (3 files)
 │   ├── url-pattern-generation.property.test.js       ← URL pattern correctness
 │   ├── vendor-css-paths.property.test.js             ← Vendor CSS path correctness
 │   ├── viewport-data-loading.property.test.js        ← Viewport-based loading
 │   ├── waterway-*.property.test.js                   ← Waterway rendering (3 files)
 │   └── zoom-layer-visibility.property.test.js        ← Zoom-based layer visibility
 └── integration/
-    └── .gitkeep
+    └── marker-filtering.integration.test.js  ← Marker filtering integration test
 ```
 
 ## Python Tests (tests/)
