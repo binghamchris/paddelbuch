@@ -261,7 +261,7 @@ Contentful will send a POST request with content change details. Amplify will tr
 | Branch | Environment | URL |
 |--------|-------------|-----|
 | `main` | Production | https://www.paddelbuch.ch |
-| `develop` | Preview | https://develop.paddelbuch.ch |
+| `dev` | Preview | https://develop.paddelbuch.ch |
 | Feature branches | Preview | https://{branch}.paddelbuch.ch |
 
 ## Troubleshooting

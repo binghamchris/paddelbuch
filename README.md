@@ -8,7 +8,7 @@ More information about the technological evolution of the project can be found i
 
 - [Contributing Guide](CONTRIBUTING.md) — How to contribute to the project
 - [Architecture Overview](docs/architecture.md) — Build pipeline, data flow, and system design
-- [Plugin Reference](docs/plugins.md) — All 20 custom Jekyll plugins documented
+- [Plugin Reference](docs/plugins.md) — All 22 custom Jekyll plugins documented
 - [Frontend Guide](docs/frontend.md) — JavaScript modules, SCSS structure, and vendor assets
 - [Content Model](docs/content-model.md) — Contentful content types and how to add new ones
 - [Testing Guide](docs/testing.md) — Test suites, property-based testing, and how to write new tests
@@ -25,7 +25,7 @@ The main goal of this project is to provide a central, nation-wide store of info
 
 ## Technology Stack
 
-- **Static Site Generator**: Jekyll 4.3
+- **Static Site Generator**: Jekyll 4.4
 - **CMS**: Contentful (headless CMS) with Sync API for incremental updates
 - **Maps**: Leaflet.js with OpenStreetMap tiles
 - **Hosting**: AWS Amplify (eu-central-1)

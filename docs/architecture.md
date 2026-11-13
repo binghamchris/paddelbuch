@@ -94,7 +94,7 @@ The `ContentfulFetcher` uses the Contentful Sync API for incremental updates:
 2. On subsequent builds: checks the Sync API with the stored token to detect changes
 3. If no changes: skips the fetch entirely, uses cached `_data/` files
 4. If changes detected and delta items are classifiable: attempts a delta merge
-   - Re-fetches each changed entry individually via the Contentful API
+   - Re-fetches changed entries in batches via `BatchFetcher`: IDs are grouped by content type and requested with `sys.id[in]` filters (300 IDs per request, paged at 1000 entries), falling back to per-entry fetches if a batch fails
    - Maps through `ContentfulMappers.flatten_entry` and upserts rows in the existing YAML data files
    - Looks up deleted entries in the Entry ID Index and removes rows from the corresponding YAML files
    - Falls back to a full fetch if any step fails

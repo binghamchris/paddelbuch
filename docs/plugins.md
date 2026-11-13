@@ -1,6 +1,6 @@
 # Jekyll Plugin Reference
 
-Paddel Buch uses 20 custom Jekyll plugins in `_plugins/`. This document describes each plugin's purpose, configuration, inputs, outputs, and dependencies.
+Paddel Buch uses 22 custom Jekyll plugins in `_plugins/`. This document describes each plugin's purpose, configuration, inputs, outputs, and dependencies.
 
 ## Plugin Execution Order
 
@@ -340,6 +340,14 @@ Skipped entirely in production/CI environments.
 - HTML sanitisation: escapes special characters, validates URI schemes
 - Locale fallback: resolves fields per locale with `de → en` fallback chain
 - Raw serialisation: preserves raw rich text JSON for API output alongside rendered HTML
+
+### ScriptSafeJson
+
+**File:** `script_safe_json.rb`
+**Purpose:** Serialises data for embedding inside `<script type="application/json">` elements. `ScriptSafeJson.generate(object)` behaves like `JSON.generate` but escapes `<`, `>` and `&` (as `\u003c`, `\u003e`, `\u0026`) and U+2028/U+2029, so a CMS-supplied string such as `</script>` cannot close the element early or inject markup.
+
+**Used by:** `PrecomputeGenerator` (`map_data_config`, `layer_control_config`)
+**Tests:** `spec/plugins/script_safe_json_spec.rb`
 
 ### SyncChecker
 
